@@ -32,11 +32,12 @@ Backend for an online, multiplayer, browser-based, poker game using Angular and 
 ## Working on the Project:
 * **DO NOT** work directly on the develop (or master) branch. 
    * Any work you do **MUST** be done on your own branch.
-   * Once you're done your task, submit a pull request and only merge to the develop branch after it's approved.
+   * You should create a new branch for each issue you work on.
+   * Once you're done your task, submit a pull request and only merge the branch you've worked on to the develop branch after it's approved.
 * **DO NOT** merge anything to the develop (or master) branch until you create a pull request and it is approved.
    * If you do not know how to create a pull request, ask someone or google it (it's very simple).
 * You can work on any of the issues found in the "To Do" section of the project board. 
 * If there is something that needs to get done but no issue has been created, then create the issue yourself and add it to the project board.
 * When you start working on something, move the associated issue to the "In Progress" section so that everyone knows the issue is being worked on.
-* Feel free to update issues, add requirements, etc...
-* You should be able to associate your pull requests with an issue and once your requeste is merged, the issue should automatically be moved to the "Done" section. If this doesn't happen for some reason, then move it manually so everyone knows the issue is finished.
+* Feel free to update issues, add requirements, add issues, etc... Just try to keep things organized.
+* You should be able to associate your pull requests with an issue and once your request is merged, the issue should automatically be moved to the "Done" section. If this doesn't happen for some reason, then move it manually so everyone knows the issue is finished.
