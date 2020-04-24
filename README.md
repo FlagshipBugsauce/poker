@@ -20,7 +20,8 @@ Backend for an online, multiplayer, browser-based, poker game using Angular and 
 ## Short-Term Goals
 * I want to get a simplified game up and running. 
 * The "game" I have in mind for the short-term, will simply select a player at random and proclaim them the winner.
-* The point here, is to first focus on all the infrastructure necessary to facilitate a more complex game, such a NL Hold 'em. Once all this infrastructure is in place, the game logic can become the primary focus of development.
+* The point here, is to first focus on all the infrastructure necessary to facilitate a more complex game, such a NL Hold 'em. 
+* Once all this infrastructure is in place, the game logic can become the primary focus of development.
 * This infrastucture consists of things like user registration and login, the ability to create and start games, etc...
 
 ## Long-Term Goals
