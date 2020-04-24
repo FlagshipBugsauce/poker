@@ -25,7 +25,7 @@ Backend for an online, multiplayer, browser-based, poker game using Angular and 
 * This infrastucture consists of things like user registration and login, the ability to create and start games, etc...
 
 ## Long-Term Goals
-* This will be the backend for a multiplayer poker game.
+* This will be the backend for an online multiplayer poker game.
 * We have another project for the frontend, but this backend could be used by multiple clients if anyone wants to create another client.
 * People will be able to create accounts and play poker with their friends using the app.
 * We won't handle money, but will facilitate betting that is enforced by the players (i.e. they can create a $10 tournament, but it's up to them to make sure everyone who plays actually pays).
