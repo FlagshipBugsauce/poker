@@ -23,5 +23,20 @@ Backend for an online, multiplayer, browser-based, poker game using Angular and 
 * The point here, is to first focus on all the infrastructure necessary to facilitate a more complex game, such a NL Hold 'em. Once all this infrastructure is in place, the game logic can become the primary focus of development.
 * This infrastucture consists of things like user registration and login, the ability to create and start games, etc...
 
-## Current TODO:
-Check the "Projects" tab (or check "Issues"). This is where you can find things that need to be done.
+## Long-Term Goals
+* This will be the backend for a multiplayer poker game.
+* We have another project for the frontend, but this backend could be used by multiple clients if anyone wants to create another client.
+* People will be able to create accounts and play poker with their friends using the app.
+* We won't handle money, but will facilitate betting that is enforced by the players (i.e. they can create a $10 tournament, but it's up to them to make sure everyone who plays actually pays).
+
+## Working on the Project:
+* **DO NOT** work directly on the develop (or master) branch. 
+   * Any work you do **MUST** be done on your own branch.
+   * Once you're done your task, submit a pull request and only merge to the develop branch after it's approved.
+* **DO NOT** merge anything to the develop (or master) branch until you create a pull request and it is approved.
+   * If you do not know how to create a pull request, ask someone or google it (it's very simple).
+* You can work on any of the issues found in the "To Do" section of the project board. 
+* If there is something that needs to get done but no issue has been created, then create the issue yourself and add it to the project board.
+* When you start working on something, move the associated issue to the "In Progress" section so that everyone knows the issue is being worked on.
+* Feel free to update issues, add requirements, etc...
+* You should be able to associate your pull requests with an issue and once your requeste is merged, the issue should automatically be moved to the "Done" section. If this doesn't happen for some reason, then move it manually so everyone knows the issue is finished.
