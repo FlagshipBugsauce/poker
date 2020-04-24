@@ -11,6 +11,7 @@ Backend for an online, multiplayer, browser-based, poker game using Angular and 
 2. Install Postman to help with testing endpoints.
 3. Recommended to use Intellij for server development. 
     * You can get the full version for free with a student license.
+    * Obtaining a student lisence is simple and fast, just use your university email and you will be approved almost instantly.
     * Link: https://www.jetbrains.com/community/education/#students
 4. Clone the repo. 
     * Recommended to create a directory for both the frontend and backend and clone both projects into this directory.
