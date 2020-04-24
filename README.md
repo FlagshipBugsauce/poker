@@ -1,7 +1,7 @@
 # Poker Backend
 Backend for an online, multiplayer, browser-based, poker game using Angular and Spring Boot.
 
-## Basic Setup:
+## Basic Setup for Local Development:
 1. Download and install MongoDB Server.
     * The community edition of Mongo should be fine.
     * Link: https://www.mongodb.com/download-center/community
