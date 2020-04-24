@@ -3,16 +3,17 @@ Backend for an online, multiplayer, browser-based, poker game using Angular and 
 
 ## Basic Setup:
 1. Download and install MongoDB Server.
-   * The community edition of Mongo should be fine.
-   * Link: https://www.mongodb.com/download-center/community
-   * Recommended to install as a "service" - it will ask you if you want to do this during the installation.
-   * Recommended to install Mongo Compass as well. It is not necessary and there are other tools that do the same thing, but it's a useful tool to have if you've got nothing else and it is lightweight and easy to use.
-   * Link: https://www.mongodb.com/download-center/compass
+    * The community edition of Mongo should be fine.
+    * Link: https://www.mongodb.com/download-center/community
+    * Recommended to install as a "service" - it will ask you if you want to do this during the installation.
+    * Recommended to install Mongo Compass as well. It is not necessary and there are other tools that do the same thing, but it's a useful tool to have if you've got nothing else and it is lightweight and easy to use.
+    * Link: https://www.mongodb.com/download-center/compass
 2. Install Postman to help with testing endpoints.
 3. Recommended to use Intellij for server development. 
-   * You can get the full version for free with a student license.
-   * Link: https://www.jetbrains.com/community/education/#students
-4. Clone the repo. Recommended to create a directory for both the frontend and backend and clone both projects into this directory.
+    * You can get the full version for free with a student license.
+    * Link: https://www.jetbrains.com/community/education/#students
+4. Clone the repo. 
+    * Recommended to create a directory for both the frontend and backend and clone both projects into this directory.
 
 ## Short-Term Goals
 * I want to get a simplified game up and running. 
