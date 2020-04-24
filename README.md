@@ -13,4 +13,4 @@ Backend for an online, multiplayer, browser-based, poker game using Angular and 
 * This infrastucture consists of things like user registration and login, the ability to create and start games, etc...
 
 ### Current TODO:
-See open issues and also check the "Projects". This is where you can find things that need to be done.
+Check the "Projects" tab (or check "Issues"). This is where you can find things that need to be done.
