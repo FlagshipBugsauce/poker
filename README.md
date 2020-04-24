@@ -12,5 +12,5 @@ Backend for an online, multiplayer, browser-based, poker game using Angular and 
 * The point here, is to first focus on all the infrastructure necessary to facilitate a more complex game, such a NL Hold 'em. Once all this infrastructure is in place, the game logic can become the primary focus of development.
 * This infrastucture consists of things like user registration and login, the ability to create and start games, etc...
 
-### Current TODO:
+## Current TODO:
 Check the "Projects" tab (or check "Issues"). This is where you can find things that need to be done.
