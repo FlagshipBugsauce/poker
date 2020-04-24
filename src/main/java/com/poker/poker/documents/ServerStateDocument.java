@@ -1,6 +1,5 @@
 package com.poker.poker.documents;
 
-import com.poker.poker.models.enums.UserGroup;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,11 +11,9 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Document(collection = "users")
-public class UserDocument {
+@Document(collection = "server-state")
+public class ServerStateDocument {
     @Id
     private UUID id;
-    private String email;
-    private String password;
-    private UserGroup group;
+    private boolean initialized;
 }

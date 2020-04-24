@@ -1,6 +1,10 @@
 package com.poker.poker.services;
 
+import com.poker.poker.config.constants.AppConstants;
+import com.poker.poker.documents.UserDocument;
+import com.poker.poker.repositories.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -8,17 +12,22 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 
 @AllArgsConstructor
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
+    private UserRepository userRepository;
+    private AppConstants appConstants;
 
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
-        // TODO: Change this to retrieve username and password hash from database
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        return new User("jon.gourley@caseware.com", passwordEncoder.encode("jonathan"), new ArrayList<>());
+        UserDocument user = userRepository.findUserDocumentByEmail(s);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, appConstants.getInvalidCredentials());
+        }
+        return new User(user.getEmail(), user.getPassword(), new ArrayList<>());
     }
 }
