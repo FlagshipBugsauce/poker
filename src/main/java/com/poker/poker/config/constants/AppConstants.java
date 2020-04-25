@@ -21,7 +21,9 @@ public class AppConstants {
     private final String defaultAdminPassword = "admin!@#";
 
     // AUTHORIZATION CONSTANTS
-    private final String invalidCredentials = "Invalid username or password.";
+    private final String invalidCredentialsErrorType = "Bad Request";
+    private final String invalidCredentialsDescription =
+            "The email or password entered is invalid. Please try again.";
 
     // JWT CONSTANTS
     private final long tokenDurationInMillis = 1000 * 60 * 60 * 24 * 14;    // 14 days
