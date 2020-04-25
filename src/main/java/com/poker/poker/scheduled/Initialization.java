@@ -7,12 +7,14 @@ import com.poker.poker.models.enums.UserGroup;
 import com.poker.poker.repositories.ServerStateRepository;
 import com.poker.poker.repositories.UserRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+@Slf4j
 @AllArgsConstructor
 @Component
 public class Initialization {
@@ -38,9 +40,8 @@ public class Initialization {
             return;
         }
 
-        // Let's initialize the server
-        // TODO: Replace this with proper logging.
-        System.out.println(appConstants.getRunningInitializationMessage());
+        // Initialize the server
+        log.info(appConstants.getRunningInitializationMessage());
 
         // First thing we need to do is create an admin user
         userRepository.save(new UserDocument(
