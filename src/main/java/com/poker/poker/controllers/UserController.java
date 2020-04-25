@@ -1,5 +1,6 @@
 package com.poker.poker.controllers;
 
+import com.poker.poker.models.ApiError;
 import com.poker.poker.models.AuthRequestModel;
 import com.poker.poker.models.AuthResponseModel;
 import com.poker.poker.services.UserService;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @AllArgsConstructor
 @RestController
@@ -41,8 +41,13 @@ public class UserController {
                     ),
                     @ApiResponse(
                             responseCode = "400",
-                            description = "Invalid credentials provided.",
-                            content = @Content(schema = @Schema(implementation = ResponseStatusException.class))
+                            description = "Invalid credentials were provided.",
+                            content = @Content(schema = @Schema(implementation = ApiError.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Invalid credentials were provided.",
+                            content = @Content(schema = @Schema(implementation = ApiError.class))
                     )
             }
     )

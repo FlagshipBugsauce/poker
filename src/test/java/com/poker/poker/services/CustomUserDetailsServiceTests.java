@@ -3,6 +3,7 @@ package com.poker.poker.services;
 import com.poker.poker.common.TestBaseClass;
 import com.poker.poker.config.constants.AppConstants;
 import com.poker.poker.repositories.UserRepository;
+import com.poker.poker.validation.exceptions.BadRequestException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,12 +54,9 @@ public class CustomUserDetailsServiceTests extends TestBaseClass {
     @Test
     public void testLoadUserByUsernameWithUsernameThatDoesntExist() {
         // Given
-        Mockito.when(appConstants.getInvalidCredentials()).thenReturn("Invalid Credentials");
+        Mockito.when(appConstants.getInvalidCredentialsDescription()).thenReturn("Invalid Credentials");
 
         // Then
-        Assertions.assertThrows(
-                ResponseStatusException.class,
-                () -> customUserDetailsService.loadUserByUsername("bad"),
-                "403 FORBIDDEN \"Invalid Credentials\"");
+        Assertions.assertThrows(BadRequestException.class, () -> customUserDetailsService.loadUserByUsername("bad"));
     }
 }
