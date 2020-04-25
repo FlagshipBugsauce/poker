@@ -1,5 +1,6 @@
 package com.poker.poker.services;
 
+import com.poker.poker.config.constants.AppConstants;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.AuthRequestModel;
 import com.poker.poker.models.AuthResponseModel;
@@ -20,6 +21,7 @@ public class UserService {
     private AuthenticationManager authenticationManager;
     private JwtService jwtService;
     private CustomUserDetailsService customUserDetailsService;
+    private AppConstants appConstants;
 
     public AuthResponseModel authenticate(AuthRequestModel authRequestModel) {
         try {
@@ -28,14 +30,12 @@ public class UserService {
                     authRequestModel.getPassword()
             ));
         } catch (BadCredentialsException e) {
-            // TODO: Replace this string literal with something from a constants file
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Incorrect username or password");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, appConstants.getInvalidCredentials());
         }
 
         final UserDetails userDetails = customUserDetailsService.loadUserByUsername(authRequestModel.getEmail());
         final String jwt = jwtService.generateToken(userDetails);
 
-        // TODO: Return the actual user document once database is implemented.
         return new AuthResponseModel(jwt);
     }
 }
