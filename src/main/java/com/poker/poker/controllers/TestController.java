@@ -18,5 +18,8 @@ public class TestController {
         return ResponseEntity.ok("Success!");
     }
 
-
+    @RequestMapping(value = "get", method = RequestMethod.GET)
+    public ResponseEntity<?> test002() {
+        return ResponseEntity.ok("GOT!");
+    }
 }
