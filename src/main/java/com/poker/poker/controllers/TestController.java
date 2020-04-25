@@ -17,4 +17,9 @@ public class TestController {
     public ResponseEntity<?> test001(@RequestBody AuthRequestModel authRequestModel) {
         return ResponseEntity.ok("Success!");
     }
+
+    @RequestMapping(value = "get", method = RequestMethod.GET)
+    public ResponseEntity<?> test002() {
+        return ResponseEntity.ok("GOT!");
+    }
 }
