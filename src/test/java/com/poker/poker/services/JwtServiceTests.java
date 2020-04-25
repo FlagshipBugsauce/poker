@@ -53,8 +53,8 @@ public class JwtServiceTests extends TestBaseClass {
         );
         // Assuming that this process shouldn't take longer than 1 second.
         Assertions.assertTrue(
-                new Date(System.currentTimeMillis() + getTokenExpirationInMillis() + 1000)
-                        .after(jwtService.extractExpiration(token))
+                new Date(System.currentTimeMillis() + getTokenExpirationInMillis() - 1000)
+                        .before(jwtService.extractExpiration(token))
         );
     }
 }
