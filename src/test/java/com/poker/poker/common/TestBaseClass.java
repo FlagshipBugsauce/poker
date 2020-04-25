@@ -35,7 +35,7 @@ public class TestBaseClass {
             sampleEmail,
             samplePassword,
             sampleUserGroup
-            );
+    );
 
     public MockHttpServletResponse mockAuthResponse(
             final MockMvc mockMvc,
