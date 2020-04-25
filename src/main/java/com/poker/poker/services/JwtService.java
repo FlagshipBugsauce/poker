@@ -39,6 +39,13 @@ public class JwtService {
         return extractClaim(cleanToken(token), Claims::getExpiration);
     }
 
+    /**
+     * Extracts a "claim" that was baked into a JWT, if possible.
+     * @param token JWT.
+     * @param claimsResolver Function that will resolve the claim.
+     * @param <T> Data type of the claim being extracted (usually a string).
+     * @return The extracted claim.
+     */
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(cleanToken(token));
         return claimsResolver.apply(claims);

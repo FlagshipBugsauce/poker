@@ -2,7 +2,6 @@ package com.poker.poker.config;
 
 import com.poker.poker.filters.JwtRequestFilter;
 import com.poker.poker.services.CustomUserDetailsService;
-import com.poker.poker.services.JwtService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,10 +36,6 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
         web.ignoring().antMatchers("/v3/api-docs",
                 "/swagger-ui/**",
                 "/v3/**",
-//                "/configuration/ui",
-//                "/swagger-resources/**",
-//                "/configuration/security",
-//                "/swagger-ui.html",
                 "/webjars/**");
     }
 
