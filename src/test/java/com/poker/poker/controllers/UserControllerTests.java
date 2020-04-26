@@ -35,9 +35,10 @@ public class UserControllerTests extends TestBaseClass {
     @Test
     public void testAuthEndpointReturnsJwt() throws Exception {
         // Given
-        final String inputJson = getObjectMapper().writeValueAsString(getAuthRequestModel());
+        final String inputJson = getObjectMapper().writeValueAsString(getSampleAuthRequestModel());
         final String uri = baseMapping + "/auth";
-        Mockito.when(userService.authenticate(Mockito.any(AuthRequestModel.class))).thenReturn(getAuthResponseModel());
+        Mockito.when(userService.authenticate(Mockito.any(AuthRequestModel.class)))
+                .thenReturn(getSampleAuthResponseModel());
 
         // When
         final MockHttpServletResponse response = mockAuthResponse(mockMvc, uri, inputJson);
@@ -45,7 +46,25 @@ public class UserControllerTests extends TestBaseClass {
         // Then
         Assertions.assertEquals(HttpStatus.OK.value(), response.getStatus());
         Assertions.assertEquals(
-                getObjectMapper().writeValueAsString(getAuthResponseModel()),
+                getObjectMapper().writeValueAsString(getSampleAuthResponseModel()),
+                response.getContentAsString()
+        );
+    }
+
+    @Test
+    public void testRegistrationEndpointReturnsSuccess() throws Exception {
+        // Given
+        final String inputJson = getObjectMapper().writeValueAsString(getSampleNewAccountModel());
+        final String uri = baseMapping + "/register";
+        Mockito.when(userService.register(getSampleNewAccountModel())).thenReturn(getSampleRegisterSuccessModel());
+
+        // When
+        final MockHttpServletResponse response = mockPostResponse(mockMvc, uri, inputJson);
+
+        // Then
+        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatus());
+        Assertions.assertEquals(
+                getObjectMapper().writeValueAsString(getSampleRegisterSuccessModel()),
                 response.getContentAsString()
         );
     }

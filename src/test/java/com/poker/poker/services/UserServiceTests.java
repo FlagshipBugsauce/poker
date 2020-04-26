@@ -2,13 +2,11 @@ package com.poker.poker.services;
 
 import com.poker.poker.common.TestBaseClass;
 import com.poker.poker.config.constants.AppConstants;
-import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.AuthResponseModel;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -58,10 +56,10 @@ public class UserServiceTests extends TestBaseClass {
         Mockito.when(jwtService.generateToken(Mockito.any(UserDetails.class))).thenReturn(getSampleJwt());
 
         // When
-        AuthResponseModel response = userService.authenticate(getAuthRequestModel());
+        AuthResponseModel response = userService.authenticate(getSampleAuthRequestModel());
 
         // Then
-        Assertions.assertEquals(response, getAuthResponseModel());
+        Assertions.assertEquals(response, getSampleAuthResponseModel());
     }
 
     @Test
@@ -72,7 +70,7 @@ public class UserServiceTests extends TestBaseClass {
                 .thenThrow(new BadCredentialsException("Invalid Credentials"));
 
         // When/Then
-        Assertions.assertThrows(BadRequestException.class, () -> userService.authenticate(getAuthRequestModel()));
+        Assertions.assertThrows(BadRequestException.class, () -> userService.authenticate(getSampleAuthRequestModel()));
     }
 
     @Test
