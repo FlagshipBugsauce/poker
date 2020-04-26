@@ -74,6 +74,7 @@ public class UserService {
 
         // Make sure that the email doesn't already exist:
         if (userRepository.findUserDocumentByEmail(newAccountModel.getEmail()) != null) {
+            log.error(appConstants.getRegistrationFailed(), newAccountModel.getEmail());
             throw new BadRequestException(
                     appConstants.getRegistrationErrorType(),
                     appConstants.getRegistrationErrorDescription()
