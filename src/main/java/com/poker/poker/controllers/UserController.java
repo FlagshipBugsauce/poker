@@ -1,8 +1,6 @@
 package com.poker.poker.controllers;
 
-import com.poker.poker.models.ApiError;
-import com.poker.poker.models.AuthRequestModel;
-import com.poker.poker.models.AuthResponseModel;
+import com.poker.poker.models.*;
 import com.poker.poker.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -42,17 +40,42 @@ public class UserController {
                     @ApiResponse(
                             responseCode = "400",
                             description = "Invalid credentials were provided.",
-                            content = @Content(schema = @Schema(implementation = ApiError.class))
+                            content = @Content(schema = @Schema(implementation = ApiErrorModel.class))
                     ),
                     @ApiResponse(
                             responseCode = "403",
                             description = "Invalid credentials were provided.",
-                            content = @Content(schema = @Schema(implementation = ApiError.class))
+                            content = @Content(schema = @Schema(implementation = ApiErrorModel.class))
                     )
             }
     )
     @RequestMapping(value = "/auth", method = RequestMethod.POST)
     public ResponseEntity<AuthResponseModel> authorize(@RequestBody AuthRequestModel authRequestModel) {
         return ResponseEntity.ok(userService.authenticate(authRequestModel));
+    }
+
+    @Operation(summary = "Register", description = "Create an account.", tags = "register")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Account creation was successful.",
+                            content = @Content(schema = @Schema(implementation = ApiSuccessModel.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Account creation failed.",
+                            content = @Content(schema = @Schema(implementation = ApiErrorModel.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Account creation failed.",
+                            content = @Content(schema = @Schema(implementation = ApiErrorModel.class))
+                    )
+            }
+    )
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    public ResponseEntity<ApiSuccessModel> register(@RequestBody NewAccountModel newAccountModel) {
+        return ResponseEntity.ok(userService.register(newAccountModel));
     }
 }

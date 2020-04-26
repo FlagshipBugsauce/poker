@@ -19,4 +19,6 @@ public class UserDocument {
     private String email;
     private String password;
     private UserGroup group;
+    private String firstName;
+    private String lastName;
 }

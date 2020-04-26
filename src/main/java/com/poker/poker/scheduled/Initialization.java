@@ -48,7 +48,9 @@ public class Initialization {
                 new UUID(0, 0),     // 0-UUID for admin
                 appConstants.getDefaultAdminEmail(),
                 passwordEncoder.encode(appConstants.getDefaultAdminPassword()),
-                UserGroup.Administrator
+                UserGroup.Administrator,
+                appConstants.getDefaultAdminFirstName(),
+                appConstants.getDefaultAdminLastName()
         ));
 
         serverStateRepository.save(new ServerStateDocument(
