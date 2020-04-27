@@ -1,7 +1,6 @@
 package com.poker.poker.controllers;
 
 import com.poker.poker.models.*;
-import com.poker.poker.models.enums.UserGroup;
 import com.poker.poker.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

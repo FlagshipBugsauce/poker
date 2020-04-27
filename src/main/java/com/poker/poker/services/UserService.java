@@ -7,6 +7,7 @@ import com.poker.poker.models.enums.UserGroup;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import com.poker.poker.validation.exceptions.ForbiddenException;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,9 +18,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 /**
  * This service handles all "user" related actions, such as authentication, account creation,
  * modification of user details, etc...
@@ -80,7 +78,7 @@ public class UserService {
       throw new BadRequestException(
           appConstants.getRegistrationErrorType(), appConstants.getRegistrationErrorDescription());
     }
-    
+
     // Create a user with random UUID, in the "User" user group, with the data provided in the
     // NewAccountModel.
     userRepository.save(
@@ -95,22 +93,24 @@ public class UserService {
     log.info(appConstants.getRegistrationSuccessfulLog(), newAccountModel.getEmail());
     return new ApiSuccessModel(appConstants.getRegistrationSuccessful());
   }
-      /**
-     * Validates the user to check if the group they are in is correct based on their JWT.
-     * @param jwt A string that contains the Authentication information of a user.
-     * @param userGroup a list of user groups desired to validate a user against.
-     */
-    public void validate (String jwt, List<UserGroup> userGroup) throws ForbiddenException{
-        String jwtEmail = jwtService.extractEmail(jwt);
-        UserDocument userDoc = userRepository.findUserDocumentByEmail(jwtEmail);
-        //User is not in the correct group.
-        if (userGroup.contains(userDoc.getGroup())) {
-            log.error(appConstants.getValidateFailedLog(), userDoc.getId(), userGroup);
-            throw new ForbiddenException(appConstants.getValidateErrorType(), appConstants.getValidateErrorDescription());
-        }
-        //User is in the correct group.
-        else {
-            log.info(appConstants.getValidateSuccessLog(), userDoc.getId(), userGroup);
-        }
+  /**
+   * Validates the user to check if the group they are in is correct based on their JWT.
+   *
+   * @param jwt A string that contains the Authentication information of a user.
+   * @param userGroup a list of user groups desired to validate a user against.
+   */
+  public void validate(String jwt, List<UserGroup> userGroup) throws ForbiddenException {
+    String jwtEmail = jwtService.extractEmail(jwt);
+    UserDocument userDoc = userRepository.findUserDocumentByEmail(jwtEmail);
+    // User is not in the correct group.
+    if (userGroup.contains(userDoc.getGroup())) {
+      log.error(appConstants.getValidateFailedLog(), userDoc.getId(), userGroup);
+      throw new ForbiddenException(
+          appConstants.getValidateErrorType(), appConstants.getValidateErrorDescription());
     }
+    // User is in the correct group.
+    else {
+      log.info(appConstants.getValidateSuccessLog(), userDoc.getId(), userGroup);
+    }
+  }
 }
