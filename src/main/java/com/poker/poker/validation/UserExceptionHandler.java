@@ -1,7 +1,7 @@
 package com.poker.poker.validation;
 
 import com.poker.poker.controllers.UserController;
-import com.poker.poker.models.ApiError;
+import com.poker.poker.models.ApiErrorModel;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import com.poker.poker.validation.exceptions.ForbiddenException;
 import org.springframework.core.Ordered;
@@ -24,8 +24,8 @@ public class UserExceptionHandler {
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(BadRequestException.class)
-    protected ResponseEntity<ApiError> handleBadRequestExceptions(final BadRequestException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getApiError());
+    protected ResponseEntity<ApiErrorModel> handleBadRequestExceptions(final BadRequestException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getApiErrorModel());
     }
 
     /**
@@ -35,7 +35,7 @@ public class UserExceptionHandler {
      */
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(ForbiddenException.class)
-    protected ResponseEntity<ApiError> handleForbiddenExceptions(final ForbiddenException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getApiError());
+    protected ResponseEntity<ApiErrorModel> handleForbiddenExceptions(final ForbiddenException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getApiErrorModel());
     }
 }

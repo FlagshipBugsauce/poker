@@ -1,13 +1,13 @@
 package com.poker.poker.validation.exceptions;
 
-import com.poker.poker.models.ApiError;
+import com.poker.poker.models.ApiErrorModel;
 import lombok.Getter;
 
 import java.util.Date;
 
 public class BadRequestException extends RuntimeException {
     @Getter
-    private final ApiError apiError;
+    private final ApiErrorModel apiErrorModel;
 
     /**
      * Creates an BadRequestException with an error object.
@@ -15,6 +15,6 @@ public class BadRequestException extends RuntimeException {
      * @param description Description of the error;
      */
     public BadRequestException(final String errorType, final String description) {
-        apiError = new ApiError(errorType, description, new Date());
+        apiErrorModel = new ApiErrorModel(errorType, description, new Date());
     }
 }

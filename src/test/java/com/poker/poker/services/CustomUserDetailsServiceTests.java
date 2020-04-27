@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -23,7 +24,7 @@ public class CustomUserDetailsServiceTests extends TestBaseClass {
     @Mock
     private UserRepository userRepository;
 
-    @Mock
+    @Spy
     private AppConstants appConstants;
 
     @InjectMocks
@@ -53,10 +54,7 @@ public class CustomUserDetailsServiceTests extends TestBaseClass {
 
     @Test
     public void testLoadUserByUsernameWithUsernameThatDoesntExist() {
-        // Given
-        Mockito.when(appConstants.getInvalidCredentialsDescription()).thenReturn("Invalid Credentials");
-
-        // Then
+        // When/Then
         Assertions.assertThrows(BadRequestException.class, () -> customUserDetailsService.loadUserByUsername("bad"));
     }
 }

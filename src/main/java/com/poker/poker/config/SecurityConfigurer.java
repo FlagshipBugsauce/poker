@@ -1,5 +1,6 @@
 package com.poker.poker.config;
 
+import com.poker.poker.config.constants.AppConstants;
 import com.poker.poker.filters.JwtRequestFilter;
 import com.poker.poker.services.CustomUserDetailsService;
 import lombok.AllArgsConstructor;
@@ -25,6 +26,7 @@ import java.util.Arrays;
 public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
     private CustomUserDetailsService customUserDetailsService;
     private JwtRequestFilter jwtRequestFilter;
+    private AppConstants appConstants;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -32,19 +34,11 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/v3/api-docs",
-                "/swagger-ui/**",
-                "/v3/**",
-                "/webjars/**");
-    }
-
-    @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf()
                 .disable()
                 .authorizeRequests()
-                .antMatchers("/user/auth")
+                .antMatchers(appConstants.getSecurityExceptions())
                 .permitAll()
                 .anyRequest()
                 .authenticated()
