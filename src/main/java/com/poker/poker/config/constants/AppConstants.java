@@ -1,14 +1,12 @@
 package com.poker.poker.config.constants;
 
 import io.swagger.v3.oas.models.security.SecurityRequirement;
+import java.util.Collections;
+import java.util.List;
 import lombok.Data;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 @Data
 @Component

@@ -16,45 +16,44 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class CustomUserDetailsServiceTests extends TestBaseClass {
-    @Mock
-    private UserRepository userRepository;
+  @Mock private UserRepository userRepository;
 
-    @Spy
-    private AppConstants appConstants;
+  @Spy private AppConstants appConstants;
 
-    @InjectMocks
-    private CustomUserDetailsService customUserDetailsService;
+  @InjectMocks private CustomUserDetailsService customUserDetailsService;
 
-    @BeforeEach
-    public void setup() {
-        /*
-            If the user repository tries to find a user with any email other than the sample
-            email provided in TestBaseClass, then it will return null. If the sample email is
-            provided, then the appropriate UserDocument will be returned, which allows us to
-            test whether the CustomUserDetailsService is behaving as expected.
-         */
-        Mockito.when(userRepository.findUserDocumentByEmail(Mockito.anyString())).thenReturn(null);
-        Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail())).thenReturn(getUserDocument());
-    }
+  @BeforeEach
+  public void setup() {
+    /*
+       If the user repository tries to find a user with any email other than the sample
+       email provided in TestBaseClass, then it will return null. If the sample email is
+       provided, then the appropriate UserDocument will be returned, which allows us to
+       test whether the CustomUserDetailsService is behaving as expected.
+    */
+    Mockito.when(userRepository.findUserDocumentByEmail(Mockito.anyString())).thenReturn(null);
+    Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail()))
+        .thenReturn(getUserDocument());
+  }
 
-    @Test
-    public void testLoadUserByUsernameWithUsernameThatExists() {
-        // When
-        Assertions.assertDoesNotThrow(() -> customUserDetailsService.loadUserByUsername(getSampleEmail()));
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(getSampleEmail());
+  @Test
+  public void testLoadUserByUsernameWithUsernameThatExists() {
+    // When
+    Assertions.assertDoesNotThrow(
+        () -> customUserDetailsService.loadUserByUsername(getSampleEmail()));
+    UserDetails userDetails = customUserDetailsService.loadUserByUsername(getSampleEmail());
 
-        // Then
-        Assertions.assertEquals(getUserDetails(), userDetails);
-    }
+    // Then
+    Assertions.assertEquals(getUserDetails(), userDetails);
+  }
 
-    @Test
-    public void testLoadUserByUsernameWithUsernameThatDoesntExist() {
-        // When/Then
-        Assertions.assertThrows(BadRequestException.class, () -> customUserDetailsService.loadUserByUsername("bad"));
-    }
+  @Test
+  public void testLoadUserByUsernameWithUsernameThatDoesntExist() {
+    // When/Then
+    Assertions.assertThrows(
+        BadRequestException.class, () -> customUserDetailsService.loadUserByUsername("bad"));
+  }
 }

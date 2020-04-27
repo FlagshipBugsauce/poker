@@ -13,21 +13,23 @@ import org.springframework.context.annotation.Configuration;
 @AllArgsConstructor
 public class OpenApiConfig {
 
-    private AppConstants appConstants;
+  private AppConstants appConstants;
 
-    @Bean
-    public OpenAPI customConfiguration() {
-        return new OpenAPI()
-                .components(
-                        new Components().addSecuritySchemes(
-                                appConstants.getSecurityScheme(),
-                                new SecurityScheme()
-                                        .type(SecurityScheme.Type.HTTP)
-                                        .scheme(appConstants.getSecurityScheme())
-                                        .bearerFormat(appConstants.getBearerFormat())))
-                .info(new Info()
-                        .title(appConstants.getSwaggerTitle())
-                        .description(appConstants.getSwaggerDescription()))
-                .security(appConstants.getSecurityRequirements());
-    }
+  @Bean
+  public OpenAPI customConfiguration() {
+    return new OpenAPI()
+        .components(
+            new Components()
+                .addSecuritySchemes(
+                    appConstants.getSecurityScheme(),
+                    new SecurityScheme()
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme(appConstants.getSecurityScheme())
+                        .bearerFormat(appConstants.getBearerFormat())))
+        .info(
+            new Info()
+                .title(appConstants.getSwaggerTitle())
+                .description(appConstants.getSwaggerDescription()))
+        .security(appConstants.getSecurityRequirements());
+  }
 }

@@ -8,8 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 public class PokerApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(PokerApplication.class, args);
-	}
-
+  public static void main(String[] args) {
+    SpringApplication.run(PokerApplication.class, args);
+  }
 }

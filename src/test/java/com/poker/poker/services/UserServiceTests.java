@@ -25,81 +25,75 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class UserServiceTests extends TestBaseClass {
-    @Mock
-    private AuthenticationManager authenticationManager;
+  @Mock private AuthenticationManager authenticationManager;
 
-    @Mock
-    private JwtService jwtService;
+  @Mock private JwtService jwtService;
 
-    @Mock
-    private CustomUserDetailsService customUserDetailsService;
+  @Mock private CustomUserDetailsService customUserDetailsService;
 
-    @Spy
-    private AppConstants appConstants;
+  @Spy private AppConstants appConstants;
 
-    @Mock
-    private UserRepository userRepository;
+  @Mock private UserRepository userRepository;
 
-    @Spy
-    private PasswordEncoder passwordEncoder;
+  @Spy private PasswordEncoder passwordEncoder;
 
-    @InjectMocks
-    private UserService userService;
+  @InjectMocks private UserService userService;
 
-    @Test
-    public void testAuthenticationWithValidCredentials() {
-        // Given
-        Mockito.when(authenticationManager.authenticate(Mockito.any(Authentication.class))).thenReturn(null);
-        Mockito
-                .when(customUserDetailsService.loadUserByUsername(Mockito.any(String.class)))
-                .thenReturn(getUserDetails());
-        Mockito.when(jwtService.generateToken(Mockito.any(UserDetails.class))).thenReturn(getSampleJwt());
+  @Test
+  public void testAuthenticationWithValidCredentials() {
+    // Given
+    Mockito.when(authenticationManager.authenticate(Mockito.any(Authentication.class)))
+        .thenReturn(null);
+    Mockito.when(customUserDetailsService.loadUserByUsername(Mockito.any(String.class)))
+        .thenReturn(getUserDetails());
+    Mockito.when(jwtService.generateToken(Mockito.any(UserDetails.class)))
+        .thenReturn(getSampleJwt());
 
-        // When
-        AuthResponseModel response = userService.authenticate(getSampleAuthRequestModel());
+    // When
+    AuthResponseModel response = userService.authenticate(getSampleAuthRequestModel());
 
-        // Then
-        Assertions.assertEquals(response, getSampleAuthResponseModel());
-    }
+    // Then
+    Assertions.assertEquals(response, getSampleAuthResponseModel());
+  }
 
-    @Test
-    public void testAuthenticationWithInvalidUsername() {
-        // Given
-        Mockito
-                .when(authenticationManager.authenticate(Mockito.any(Authentication.class)))
-                .thenThrow(new BadCredentialsException("Invalid Credentials"));
+  @Test
+  public void testAuthenticationWithInvalidUsername() {
+    // Given
+    Mockito.when(authenticationManager.authenticate(Mockito.any(Authentication.class)))
+        .thenThrow(new BadCredentialsException("Invalid Credentials"));
 
-        // When/Then
-        Assertions.assertThrows(BadRequestException.class, () -> userService.authenticate(getSampleAuthRequestModel()));
-    }
+    // When/Then
+    Assertions.assertThrows(
+        BadRequestException.class, () -> userService.authenticate(getSampleAuthRequestModel()));
+  }
 
-    @Test
-    public void testRegistrationWithUniqueEmail() {
-        // Given
-        Mockito.when(userRepository.findUserDocumentByEmail(Mockito.anyString())).thenReturn(getUserDocument());
-        Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail())).thenReturn(null);
-        Mockito.when(userRepository.save(getUserDocument())).thenReturn(null);
-        Mockito.when(appConstants.getRegistrationSuccessful()).thenReturn("Success.");
+  @Test
+  public void testRegistrationWithUniqueEmail() {
+    // Given
+    Mockito.when(userRepository.findUserDocumentByEmail(Mockito.anyString()))
+        .thenReturn(getUserDocument());
+    Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail())).thenReturn(null);
+    Mockito.when(userRepository.save(getUserDocument())).thenReturn(null);
+    Mockito.when(appConstants.getRegistrationSuccessful()).thenReturn("Success.");
 
-        // When
-        ApiSuccessModel apiSuccessModel = userService.register(getSampleNewAccountModel());
+    // When
+    ApiSuccessModel apiSuccessModel = userService.register(getSampleNewAccountModel());
 
-        // Then
-        Assertions.assertEquals("Success.", apiSuccessModel.getMessage());
-    }
+    // Then
+    Assertions.assertEquals("Success.", apiSuccessModel.getMessage());
+  }
 
-    @Test
-    public void testRegistrationWithEmailThatAlreadyExists() {
-        // Given
-        Mockito.when(userRepository.findUserDocumentByEmail(Mockito.anyString())).thenReturn(null);
-        Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail())).thenReturn(getUserDocument());
-        Mockito.when(userRepository.save(getUserDocument())).thenReturn(null);
-        Mockito.when(appConstants.getRegistrationSuccessful()).thenReturn("Success.");
+  @Test
+  public void testRegistrationWithEmailThatAlreadyExists() {
+    // Given
+    Mockito.when(userRepository.findUserDocumentByEmail(Mockito.anyString())).thenReturn(null);
+    Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail()))
+        .thenReturn(getUserDocument());
+    Mockito.when(userRepository.save(getUserDocument())).thenReturn(null);
+    Mockito.when(appConstants.getRegistrationSuccessful()).thenReturn("Success.");
 
-        // When/Then
-        Assertions.assertThrows(
-                BadRequestException.class,
-                () -> userService.register(getSampleNewAccountModel())
-        );
-    }
+    // When/Then
+    Assertions.assertThrows(
+        BadRequestException.class, () -> userService.register(getSampleNewAccountModel()));
+  }
 }
