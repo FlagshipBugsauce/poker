@@ -18,54 +18,51 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @ExtendWith(MockitoExtension.class)
 public class UserControllerTests extends TestBaseClass {
-    private MockMvc mockMvc;
-    private final String baseMapping = "/user";
+  private MockMvc mockMvc;
+  private final String baseMapping = "/user";
 
-    @Mock
-    private UserService userService;
+  @Mock private UserService userService;
 
-    @InjectMocks
-    private UserController userController;
+  @InjectMocks private UserController userController;
 
-    @BeforeEach
-    public void setup() {
-        this.mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
-    }
+  @BeforeEach
+  public void setup() {
+    this.mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
+  }
 
-    @Test
-    public void testAuthEndpointReturnsJwt() throws Exception {
-        // Given
-        final String inputJson = getObjectMapper().writeValueAsString(getSampleAuthRequestModel());
-        final String uri = baseMapping + "/auth";
-        Mockito.when(userService.authenticate(Mockito.any(AuthRequestModel.class)))
-                .thenReturn(getSampleAuthResponseModel());
+  @Test
+  public void testAuthEndpointReturnsJwt() throws Exception {
+    // Given
+    final String inputJson = getObjectMapper().writeValueAsString(getSampleAuthRequestModel());
+    final String uri = baseMapping + "/auth";
+    Mockito.when(userService.authenticate(Mockito.any(AuthRequestModel.class)))
+        .thenReturn(getSampleAuthResponseModel());
 
-        // When
-        final MockHttpServletResponse response = mockAuthResponse(mockMvc, uri, inputJson);
+    // When
+    final MockHttpServletResponse response = mockAuthResponse(mockMvc, uri, inputJson);
 
-        // Then
-        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatus());
-        Assertions.assertEquals(
-                getObjectMapper().writeValueAsString(getSampleAuthResponseModel()),
-                response.getContentAsString()
-        );
-    }
+    // Then
+    Assertions.assertEquals(HttpStatus.OK.value(), response.getStatus());
+    Assertions.assertEquals(
+        getObjectMapper().writeValueAsString(getSampleAuthResponseModel()),
+        response.getContentAsString());
+  }
 
-    @Test
-    public void testRegistrationEndpointReturnsSuccess() throws Exception {
-        // Given
-        final String inputJson = getObjectMapper().writeValueAsString(getSampleNewAccountModel());
-        final String uri = baseMapping + "/register";
-        Mockito.when(userService.register(getSampleNewAccountModel())).thenReturn(getSampleRegisterSuccessModel());
+  @Test
+  public void testRegistrationEndpointReturnsSuccess() throws Exception {
+    // Given
+    final String inputJson = getObjectMapper().writeValueAsString(getSampleNewAccountModel());
+    final String uri = baseMapping + "/register";
+    Mockito.when(userService.register(getSampleNewAccountModel()))
+        .thenReturn(getSampleRegisterSuccessModel());
 
-        // When
-        final MockHttpServletResponse response = mockPostResponse(mockMvc, uri, inputJson);
+    // When
+    final MockHttpServletResponse response = mockPostResponse(mockMvc, uri, inputJson);
 
-        // Then
-        Assertions.assertEquals(HttpStatus.OK.value(), response.getStatus());
-        Assertions.assertEquals(
-                getObjectMapper().writeValueAsString(getSampleRegisterSuccessModel()),
-                response.getContentAsString()
-        );
-    }
+    // Then
+    Assertions.assertEquals(HttpStatus.OK.value(), response.getStatus());
+    Assertions.assertEquals(
+        getObjectMapper().writeValueAsString(getSampleRegisterSuccessModel()),
+        response.getContentAsString());
+  }
 }

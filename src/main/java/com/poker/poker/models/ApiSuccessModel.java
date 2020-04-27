@@ -5,6 +5,8 @@ import lombok.Data;
 
 @Data
 public class ApiSuccessModel {
-    @Schema(description = "Returned to indicate API call was successful", example = "Account created successfully.")
-    private final String message;
+  @Schema(
+      description = "Returned to indicate API call was successful",
+      example = "Account created successfully.")
+  private final String message;
 }
