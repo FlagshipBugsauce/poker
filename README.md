@@ -14,7 +14,12 @@ Backend for an online, multiplayer, browser-based, poker game using Angular and 
     * Obtaining a student lisence is simple and fast, just use your university email and you will be approved almost instantly.
     * Once you have your student lisence, download the ultimate version of Intellij and after you install you can login with the account you created.
     * Link: https://www.jetbrains.com/community/education/#students
-4. Clone the repo. 
+4. This project will auto format any code you submit using Google Java Format in order to keep the code style as consistent as possible. 
+    * The code style used by Google Java Format is different than the default code style used by Intellij. 
+    * It is recommended that you install the "Google Java Format Intellij plugin" and also use the "Intellij Java Google Style file" so the IDE will use the correct tab size, and the "Reformat Code" feature will work correctly.
+    * Instructions for installing the plugin, a download link to the style file and instructions for importing it can all be found at the Google Java Format repository.
+    * Link: https://github.com/google/google-java-format
+5. Clone the repo. 
     * Recommended to create a directory for both the frontend and backend and clone both projects into this directory.
 
 ## Short-Term Goals
