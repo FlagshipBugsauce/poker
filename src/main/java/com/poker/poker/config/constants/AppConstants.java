@@ -60,4 +60,8 @@ public class AppConstants {
     private final String registrationSuccessfulLog = "Account created successfully for email: {}.";
     private final String registrationErrorType = "Invalid Email";
     private final String registrationErrorDescription = "An account with the email provided already exists.";
+    private final String validateFailedLog = "User {} tried to access an endpoint with user group {} and failed";
+    private final String validateSuccessLog = "User {} accessed an ednpoint with user group {} sucessfuly";
+    private final String validateErrorType = "Invalid Group";
+    private final String validateErrorDescription = "The user group does not allow access to destination";
 }
