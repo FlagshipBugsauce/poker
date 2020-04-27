@@ -2,13 +2,12 @@ package com.poker.poker.services;
 
 import com.poker.poker.config.constants.AppConstants;
 import com.poker.poker.documents.UserDocument;
-import com.poker.poker.models.ApiSuccessModel;
-import com.poker.poker.models.AuthRequestModel;
-import com.poker.poker.models.AuthResponseModel;
-import com.poker.poker.models.NewAccountModel;
+import com.poker.poker.models.*;
 import com.poker.poker.models.enums.UserGroup;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.validation.exceptions.BadRequestException;
+import com.poker.poker.validation.exceptions.ForbiddenException;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -93,5 +92,25 @@ public class UserService {
 
     log.info(appConstants.getRegistrationSuccessfulLog(), newAccountModel.getEmail());
     return new ApiSuccessModel(appConstants.getRegistrationSuccessful());
+  }
+  /**
+   * Validates the user to check if the group they are in is correct based on their JWT.
+   *
+   * @param jwt A string that contains the Authentication information of a user.
+   * @param userGroup a list of user groups desired to validate a user against.
+   */
+  public void validate(String jwt, List<UserGroup> userGroup) throws ForbiddenException {
+    String jwtEmail = jwtService.extractEmail(jwt);
+    UserDocument userDoc = userRepository.findUserDocumentByEmail(jwtEmail);
+    // User is not in the correct group.
+    if (userGroup.contains(userDoc.getGroup())) {
+      log.error(appConstants.getValidateFailedLog(), userDoc.getId(), userGroup);
+      throw new ForbiddenException(
+          appConstants.getValidateErrorType(), appConstants.getValidateErrorDescription());
+    }
+    // User is in the correct group.
+    else {
+      log.info(appConstants.getValidateSuccessLog(), userDoc.getId(), userGroup);
+    }
   }
 }
