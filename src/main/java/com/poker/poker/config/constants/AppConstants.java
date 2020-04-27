@@ -23,7 +23,13 @@ public class AppConstants {
     private final String defaultAdminLastName = "admin";
 
     // SECURITY CONSTANTS
-    private final String[] securityExceptions = { "/user/auth", "/swagger-ui/**", "/v3/**", "/user/register" };
+    private final String[] securityExceptions = {
+            "/user/auth",
+            "/swagger-ui/**",
+            "/v3/**",
+            "/user/register",
+            "/test/sse/**"
+    };
 
     // AUTHORIZATION CONSTANTS
     private final String invalidCredentialsErrorType = "Bad Request";
