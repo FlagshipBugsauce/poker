@@ -105,14 +105,8 @@ public class UserService {
         UserDocument userDoc = userRepository.findUserDocumentByEmail(jwtEmail);
         //User is not in the correct group.
         if (userGroup.contains(userDoc.getGroup())) {
-            ApiErrorModel apiErrorModel = new ApiErrorModel
-                    (
-                        appConstants.getValidateErrorType(),
-                        appConstants.getValidateErrorDescription(),
-                        new Date()
-                    );
             log.error(appConstants.getValidateFailedLog(), userDoc.getId(), userGroup);
-            throw new ForbiddenException(apiErrorModel);
+            throw new ForbiddenException(appConstants.getValidateErrorType(), appConstants.getValidateErrorDescription());
         }
         //User is in the correct group.
         else {
