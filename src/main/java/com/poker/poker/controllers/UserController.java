@@ -29,8 +29,8 @@ public class UserController {
   @Operation(
       summary = "Authenticate",
       description =
-          "The client must call this endpoint in order to obtain a JWT, which must be passed in the "
-              + "header of most requests.",
+          "The client must call this endpoint in order to obtain a JWT, which must be passed in "
+              + "the header of most requests.",
       tags = "users")
   @ApiResponses(
       value = {
@@ -39,15 +39,10 @@ public class UserController {
             description =
                 "Authorization was successful. A JWT should be returned, which can be used "
                     + "to access secured endpoints.",
-            content = @Content(schema = @Schema(implementation = AuthResponseModel.class))),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Invalid credentials were provided.",
-            content = @Content(schema = @Schema(implementation = ApiErrorModel.class))),
-        @ApiResponse(
-            responseCode = "403",
-            description = "Invalid credentials were provided.",
-            content = @Content(schema = @Schema(implementation = ApiErrorModel.class)))
+            content =
+                @Content(
+                    schema = @Schema(implementation = AuthResponseModel.class),
+                    mediaType = "application/json"))
       })
   @RequestMapping(value = "/auth", method = RequestMethod.POST)
   public ResponseEntity<AuthResponseModel> authorize(
@@ -61,15 +56,10 @@ public class UserController {
         @ApiResponse(
             responseCode = "200",
             description = "Account creation was successful.",
-            content = @Content(schema = @Schema(implementation = ApiSuccessModel.class))),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Account creation failed.",
-            content = @Content(schema = @Schema(implementation = ApiErrorModel.class))),
-        @ApiResponse(
-            responseCode = "403",
-            description = "Account creation failed.",
-            content = @Content(schema = @Schema(implementation = ApiErrorModel.class)))
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiSuccessModel.class),
+                    mediaType = "application/json"))
       })
   @RequestMapping(value = "/register", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> register(@RequestBody NewAccountModel newAccountModel) {

@@ -1,6 +1,16 @@
 package com.poker.poker.controllers;
 
+import com.poker.poker.models.ApiSuccessModel;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 import java.io.IOException;
 import java.util.Map;
 import lombok.AllArgsConstructor;
@@ -21,19 +31,37 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class TestController {
 
   /**
-   * Basic test endpoint. Returns a string.
-   *
-   * @param testModel Test model.
-   * @return
+   * Basic test endpoint. Returns an ApiSuccessModel.
+   * @return 200 status with an ApiSuccessModel.
    */
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "200",
+        content =
+            @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiSuccessModel.class)))
+  })
   @RequestMapping(value = "test", method = RequestMethod.POST)
-  public ResponseEntity<?> test001(@RequestBody TestModel testModel) {
-    return ResponseEntity.ok("Success!");
+  public ResponseEntity<?> test001() {
+    return ResponseEntity.ok(new ApiSuccessModel("Success!"));
   }
 
+  /**
+   * Another test, this one takes in a model.
+   * @return 200 status with an ApiSuccessModel.
+   */
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "200",
+        content =
+            @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiSuccessModel.class)))
+  })
   @RequestMapping(value = "get", method = RequestMethod.GET)
   public ResponseEntity<?> test002() {
-    return ResponseEntity.ok("GOT!");
+    return ResponseEntity.ok(new ApiSuccessModel("TESTING"));
   }
 
   /*
@@ -59,8 +87,13 @@ public class TestController {
    * Note: Security is currently disabled for these endpoints.
    */
 
+  /** HashMap of SseEmitters */
   private Map<String, SseEmitter> emitters;
 
+  /**
+   * Testing SseEmitters
+   * @return An SseEmitter that can send the client information.
+   */
   @GetMapping("/sse/test01/{x}")
   public SseEmitter test003(@PathVariable String x) {
     SseEmitter emitter = emitters.get(x);
@@ -80,6 +113,11 @@ public class TestController {
     return emitter;
   }
 
+  /**
+   * Send a TestModel containing the string y, to user associated to emitter with ID = x.
+   * @param x ID of an emitter.
+   * @param y Message to send to user.
+   */
   @GetMapping("/sse/test02/{x}/{y}")
   public void test004(@PathVariable String x, @PathVariable String y) {
     SseEmitter emitter = emitters.get(x);
