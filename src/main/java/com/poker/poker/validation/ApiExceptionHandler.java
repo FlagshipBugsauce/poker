@@ -3,7 +3,6 @@ package com.poker.poker.validation;
 import com.poker.poker.controllers.TestController;
 import com.poker.poker.controllers.UserController;
 import com.poker.poker.models.ApiErrorModel;
-import com.poker.poker.models.AuthResponseModel;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import com.poker.poker.validation.exceptions.ForbiddenException;
 import io.swagger.v3.oas.annotations.media.Content;
