@@ -1,16 +1,10 @@
 package com.poker.poker.controllers;
 
 import com.poker.poker.models.ApiSuccessModel;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
-import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 import java.io.IOException;
 import java.util.Map;
 import lombok.AllArgsConstructor;
@@ -32,6 +26,7 @@ public class TestController {
 
   /**
    * Basic test endpoint. Returns an ApiSuccessModel.
+   *
    * @return 200 status with an ApiSuccessModel.
    */
   @ApiResponses({
@@ -49,6 +44,7 @@ public class TestController {
 
   /**
    * Another test, this one takes in a model.
+   *
    * @return 200 status with an ApiSuccessModel.
    */
   @ApiResponses({
@@ -92,6 +88,7 @@ public class TestController {
 
   /**
    * Testing SseEmitters
+   *
    * @return An SseEmitter that can send the client information.
    */
   @GetMapping("/sse/test01/{x}")
@@ -115,6 +112,7 @@ public class TestController {
 
   /**
    * Send a TestModel containing the string y, to user associated to emitter with ID = x.
+   *
    * @param x ID of an emitter.
    * @param y Message to send to user.
    */
