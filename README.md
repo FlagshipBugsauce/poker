@@ -2,6 +2,16 @@
 
 Frontend for an online, multiplayer, browser-based, poker game using Angular and Spring Boot.
 
+## Note
+* It is recommended that you clone this repo and get it running even if you're not planning to do client work.
+* The client will allow you to test your changes to the backend much more easily than using Postman or Swagger in many cases.
+
+## Basic Setup
+* In order to run the client, you will need Node.js. Get the latest version.
+    * Link: https://nodejs.org/en/
+* Once node is installed, it is recommended you install the Angular CLI.
+    * Install using the terminal command `npm install -g @angular/cli`
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.0.7.
 
 ## Development server
