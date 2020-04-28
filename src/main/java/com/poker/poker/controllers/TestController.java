@@ -30,6 +30,7 @@ public class TestController {
 
   /**
    * Basic test endpoint. Returns an ApiSuccessModel.
+   *
    * @return 200 status with an ApiSuccessModel.
    */
   @ApiResponses({
@@ -47,6 +48,7 @@ public class TestController {
 
   /**
    * Another test, this one takes in a model.
+   *
    * @return 200 status with an ApiSuccessModel.
    */
   @ApiResponses({
@@ -90,6 +92,7 @@ public class TestController {
 
   /**
    * Testing SseEmitters
+   *
    * @return An SseEmitter that can send the client information.
    */
   @GetMapping("/sse/test01/{x}")
@@ -113,6 +116,7 @@ public class TestController {
 
   /**
    * Send a TestModel containing the string y, to user associated to emitter with ID = x.
+   *
    * @param x ID of an emitter.
    * @param y Message to send to user.
    */

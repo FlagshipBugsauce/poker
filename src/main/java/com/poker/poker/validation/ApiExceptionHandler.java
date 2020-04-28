@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * response.
  */
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@ControllerAdvice(assignableTypes = { UserController.class, TestController.class })
+@ControllerAdvice(assignableTypes = {UserController.class, TestController.class})
 public class ApiExceptionHandler {
 
   /**
@@ -33,13 +33,13 @@ public class ApiExceptionHandler {
    */
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "400",
-              description = "Bad request.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = ApiErrorModel.class),
-                  mediaType = "application/json"))
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiErrorModel.class),
+                    mediaType = "application/json"))
       })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ExceptionHandler(BadRequestException.class)
@@ -55,13 +55,13 @@ public class ApiExceptionHandler {
    */
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "403",
-              description = "Forbidden.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = ApiErrorModel.class),
-                  mediaType = "application/json"))
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiErrorModel.class),
+                    mediaType = "application/json"))
       })
   @ResponseStatus(HttpStatus.FORBIDDEN)
   @ExceptionHandler(ForbiddenException.class)
