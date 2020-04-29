@@ -86,7 +86,7 @@ public class UserService {
             UUID.randomUUID(),
             newAccountModel.getEmail(),
             passwordEncoder.encode(newAccountModel.getPassword()),
-            UserGroup.User,
+            UserGroup.Client,
             newAccountModel.getFirstName(),
             newAccountModel.getLastName()));
 

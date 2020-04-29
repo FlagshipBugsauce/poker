@@ -29,7 +29,7 @@ public class TestBaseClass {
   private final String sampleHashedPassword = passwordEncoder.encode(samplePassword);
   private final String sampleFirstName = "admin";
   private final String sampleLastName = "admin";
-  private final UserGroup sampleUserGroup = UserGroup.User;
+  private final UserGroup sampleUserGroup = UserGroup.Client;
   private final UserGroup sampleAdminUserGroup = UserGroup.Administrator;
   private final UUID zeroUUID = new UUID(0, 0);
   private final long tokenExpirationInMillis = 1000 * 60 * 60 * 24 * 14;

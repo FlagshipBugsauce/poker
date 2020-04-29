@@ -94,6 +94,11 @@ public class TestController {
       log.error("Attempted to send data to client with ID: {}, but this client doesn't exist.", x);
     }
   }
+
+  @GetMapping("sse/test03/{userID}")
+  public ResponseEntity<?> test005(@PathVariable String userID) {
+    return ResponseEntity.ok(userID);
+  }
 }
 
 /** Test model for test controllers. */
