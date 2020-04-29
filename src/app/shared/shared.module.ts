@@ -1,12 +1,14 @@
 import { NgModule, Provider, forwardRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ApiInterceptor } from '../api-interceptor.service';
 import { MainComponent } from './main/main.component';
 import { HeaderComponent } from './header/header.component';
 import { FooterComponent } from './footer/footer.component';
 import { RouterModule } from '@angular/router';
+import { UsersService } from '../api/services';
+import { ApiModule } from '../api/api.module';
 
 export const API_INTERCEPTOR_PROVIDER: Provider = {
   provide: HTTP_INTERCEPTORS,
@@ -15,13 +17,20 @@ export const API_INTERCEPTOR_PROVIDER: Provider = {
 }
 
 @NgModule({
-  declarations: [MainComponent, HeaderComponent, FooterComponent],
+  declarations: [
+    MainComponent, 
+    HeaderComponent, 
+    FooterComponent
+  ],
   imports: [
     CommonModule,
     NgbModule,
-    RouterModule
+    ApiModule,
+    RouterModule,
+    HttpClientModule
   ],
   providers: [
+    UsersService,
     ApiInterceptor,
     API_INTERCEPTOR_PROVIDER
   ],
