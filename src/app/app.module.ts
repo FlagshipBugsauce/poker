@@ -7,7 +7,6 @@ import { AppRoutingModule } from './app-routing.module';
 /* Components */
 import { MainComponent } from './shared/main/main.component';
 import { HomeModule } from './home/home.module';
-// import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 /* Pipes */
 /* Services */
@@ -20,10 +19,9 @@ import { HomeModule } from './home/home.module';
     AppRoutingModule,
     SharedModule,
     HomeModule
-    // NgbModule
   ],
   exports: [
-    // NgbModule
+    SharedModule
   ],
   providers: [
   ],
