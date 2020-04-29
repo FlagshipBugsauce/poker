@@ -1,1 +1,18 @@
-<p>home works!</p>
+<div class="card m-3 bg-success text-white">
+    <h3 class="card-header">
+        Welcome
+    </h3>
+    <div class="card-body bg-light text-dark">
+        Welcome to the best poker app in history
+    </div>
+</div>
+
+<span class="align-middle">
+    <ngb-carousel *ngIf="images" class="m-3" style="outline: none;">
+        <ng-template ngbSlide *ngFor="let image of images">
+            <div class="picsum-img-wrapper rounded" style="outline: none;">
+                <img [src]="image" alt="Random first slide" class="img-fluid rounded-lg">
+            </div>
+        </ng-template>
+    </ngb-carousel>
+</span>

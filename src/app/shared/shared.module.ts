@@ -26,7 +26,6 @@ export const API_INTERCEPTOR_PROVIDER: Provider = {
     API_INTERCEPTOR_PROVIDER
   ],
   exports: [
-    NgbModule
   ]
 })
 export class SharedModule { }
