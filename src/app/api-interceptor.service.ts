@@ -5,13 +5,14 @@ import { tap } from 'rxjs/operators';
 
 @Injectable()
 export class ApiInterceptor implements HttpInterceptor {
-    jwt: string = "Bearer ";
+    bearer: string = "Bearer ";
+    jwt: string = "";
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         // Apply the headers
         req = req.clone({
             setHeaders: {
-            'Authorization': this.jwt
+            'Authorization': this.bearer + this.jwt
             }
         });
 
