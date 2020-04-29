@@ -1,30 +1,29 @@
 package com.poker.poker.documents;
 
-import com.poker.poker.models.game.GameActionModel;
 import com.poker.poker.models.enums.GameState;
+import com.poker.poker.models.game.GameActionModel;
+import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
-import java.util.UUID;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "games")
 public class GameDocument {
-    @Id private UUID id;
-    private UUID gameCreator;
-    private String gameName;
-    private List<UUID> userIDs;
-    private List<GameActionModel> gameActions;
-    private GameState currentGameState;
+  @Id private UUID id;
+  private UUID gameCreator;
+  private String gameName;
+  private List<UUID> userIDs;
+  private List<GameActionModel> gameActions;
+  private GameState currentGameState;
 }
 
-//TODO
+// TODO
 /*
     -- endpoints --
     create game

@@ -2,7 +2,6 @@ package com.poker.poker.config.constants;
 
 import com.poker.poker.models.enums.UserGroup;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -74,19 +73,11 @@ public class AppConstants {
   private final String gameCreation = "User {} created a game";
 
   // UserGroup CONSTANTS
-  private final List<UserGroup> adminGroup = new ArrayList<UserGroup>(Arrays.asList
-          (
-                  UserGroup.Administrator
-          ));
-  private final List<UserGroup> clientGroup = new ArrayList<UserGroup>(Arrays.asList
-          (
-                  UserGroup.Administrator,
-                  UserGroup.Client
-          ));
-  private final List<UserGroup> allUsers = new ArrayList<UserGroup>(Arrays.asList
-          (
-                  UserGroup.Administrator,
-                  UserGroup.Client,
-                  UserGroup.Guest
-          ));
+  private final List<UserGroup> adminGroup =
+      new ArrayList<UserGroup>(Arrays.asList(UserGroup.Administrator));
+  private final List<UserGroup> clientGroup =
+      new ArrayList<UserGroup>(Arrays.asList(UserGroup.Administrator, UserGroup.Client));
+  private final List<UserGroup> allUsers =
+      new ArrayList<UserGroup>(
+          Arrays.asList(UserGroup.Administrator, UserGroup.Client, UserGroup.Guest));
 }
