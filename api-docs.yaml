@@ -1,0 +1,261 @@
+openapi: 3.0.1
+info:
+  title: Poker Backend
+  description: Documentation for online, multi-player, poker application.
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+security:
+- bearer: []
+tags:
+- name: users
+  description: Users API handles all user account related requests, such as authentication,
+    registration, etc...
+paths:
+  /test/sse/test01/{x}:
+    get:
+      tags:
+      - test-controller
+      operationId: test003
+      parameters:
+      - name: x
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: default response
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/SseEmitter'
+  /test/get:
+    get:
+      tags:
+      - test-controller
+      operationId: test002
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
+  /test/test:
+    post:
+      tags:
+      - test-controller
+      operationId: test001
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: default response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
+  /test/sse/test02/{x}/{y}:
+    get:
+      tags:
+      - test-controller
+      operationId: test004
+      parameters:
+      - name: x
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: "y"
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: default response
+  /user/register:
+    post:
+      tags:
+      - users
+      summary: Register
+      description: Create an account.
+      operationId: register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewAccountModel'
+        required: true
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Account creation was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
+  /user/auth:
+    post:
+      tags:
+      - users
+      summary: Authenticate
+      description: The client must call this endpoint in order to obtain a JWT, which
+        must be passed in the header of most requests.
+      operationId: authorize
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequestModel'
+        required: true
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Authorization was successful. A JWT should be returned, which
+            can be used to access secured endpoints.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponseModel'
+components:
+  schemas:
+    ApiErrorModel:
+      type: object
+      properties:
+        errorType:
+          type: string
+          description: The type of the error.
+          example: Bad Request
+        description:
+          type: string
+          description: A description of the error.
+          example: The credentials provided are invalid.
+        timestamp:
+          type: string
+          description: The time the error occurred.
+          format: date-time
+    SseEmitter:
+      type: object
+      properties:
+        timeout:
+          type: integer
+          format: int64
+    ApiSuccessModel:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Returned to indicate API call was successful
+          example: Account created successfully.
+    NewAccountModel:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Email address associated with a user account.
+          example: email@domain.com
+        password:
+          type: string
+          description: Password to the account associated with the email provided.
+          example: password123
+        firstName:
+          type: string
+          description: Users first name.
+          example: Fred
+        lastName:
+          type: string
+          description: Users last name.
+          example: Flintstone
+    AuthRequestModel:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Email address associated with a user account.
+          example: email@domain.com
+        password:
+          type: string
+          description: Password to the account associated with the email provided.
+          example: password123
+    AuthResponseModel:
+      type: object
+      properties:
+        jwt:
+          type: string
+          description: JSON Web Token that can be used to access secured endpoints.
+          example: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBkb21haW4uY29tIiwiZXhwIjoxNTg4OTAzODg5LCJpYXQiOjE1ODc2OTQyODl9.u9Uo7Al_a6vu_Rydt1zkhOYWFsIDPR5BgMxJjWRty9w
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
