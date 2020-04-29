@@ -12,8 +12,6 @@ Frontend for an online, multiplayer, browser-based, poker game using Angular and
 * Once node is installed, it is recommended you install the Angular CLI.
     * Install using the terminal command `npm install -g @angular/cli`
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.0.7.
-
 ## Working on the Project:
 * **DO NOT** work directly on the develop (or master) branch. 
    * Any work you do **MUST** be done on your own branch.
@@ -26,7 +24,6 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 * When you start working on something, move the associated issue to the "In Progress" section so that everyone knows the issue is being worked on.
 * Feel free to update issues, add requirements, add issues, etc... Just try to keep things organized.
 * You should be able to associate your pull requests with an issue and once your request is merged, the issue should automatically be moved to the "Done" section. If this doesn't happen for some reason, then move it manually so everyone knows the issue is finished.
-
 
 ## Development server
 
