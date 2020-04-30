@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ApiInterceptor } from '../api-interceptor.service';
 import { UsersService } from '../api/services';
 import { AuthRequestModel, AuthResponseModel } from '../api/models';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ export class AuthService {
 
   private loggedIn: boolean = false;
 
-  constructor(private apiInterceptor: ApiInterceptor, private usersService: UsersService) { }
+  constructor(private apiInterceptor: ApiInterceptor, private usersService: UsersService, private router: Router) { }
 
   /**
    * Authorizes the user and stores the authorization token in the apiInterceptor, which will
@@ -24,8 +25,9 @@ export class AuthService {
         (data: AuthResponseModel) => {
           this.apiInterceptor.jwt = data.jwt;
           this.loggedIn = true;
+          this.router.navigate(["/home"]);
         },
-        (error: any) => console.log(error)
+        (error: any) => console.log(error.error)
       );
   }
 

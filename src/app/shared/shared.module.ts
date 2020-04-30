@@ -9,6 +9,8 @@ import { FooterComponent } from './footer/footer.component';
 import { RouterModule } from '@angular/router';
 import { UsersService } from '../api/services';
 import { ApiModule } from '../api/api.module';
+import { LoginComponent } from './login/login.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 export const API_INTERCEPTOR_PROVIDER: Provider = {
   provide: HTTP_INTERCEPTORS,
@@ -20,14 +22,16 @@ export const API_INTERCEPTOR_PROVIDER: Provider = {
   declarations: [
     MainComponent, 
     HeaderComponent, 
-    FooterComponent
+    FooterComponent, LoginComponent
   ],
   imports: [
     CommonModule,
     NgbModule,
     ApiModule,
     RouterModule,
-    HttpClientModule
+    HttpClientModule,
+    FormsModule,
+    ReactiveFormsModule
   ],
   providers: [
     UsersService,

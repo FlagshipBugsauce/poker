@@ -7,7 +7,6 @@ import { AppRoutingModule } from './app-routing.module';
 /* Components */
 import { MainComponent } from './shared/main/main.component';
 import { HomeModule } from './home/home.module';
-import { ApiModule } from './api/api.module';
 
 /* Pipes */
 /* Services */

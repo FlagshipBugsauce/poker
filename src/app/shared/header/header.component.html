@@ -32,7 +32,7 @@
                     }" role="button" ngbDropdownToggle>Account</a>
                     <div ngbDropdownMenu class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a ngbDropdownItem [ngClass]="{ 'dropdown-item': true }" routerLink="/login" *ngIf="true">Register</a>
-                        <a ngbDropdownItem [ngClass]="{ 'dropdown-item': true }" routerLink="/login" *ngIf="true">Login</a>
+                        <a ngbDropdownItem [ngClass]="{ 'dropdown-item': true, 'active': router.url == '/login' }" routerLink="/login" *ngIf="true">Login</a>
                         <a ngbDropdownItem [ngClass]="{ 'dropdown-item': true }" routerLink="/login" *ngIf="true">Edit Profile</a>
                         <a ngbDropdownItem [ngClass]="{ 'dropdown-item': true }" routerLink="/login" *ngIf="true">View Statistics</a>
                     </div>
