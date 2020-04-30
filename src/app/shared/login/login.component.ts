@@ -28,6 +28,10 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  /**
+   * Calls the auth service to attempt authentication.
+   * @param formValues The values of the login form.
+   */
   public authorize(formValues: any): void {
     this.authService.authorize(formValues.email, formValues.password);
   }

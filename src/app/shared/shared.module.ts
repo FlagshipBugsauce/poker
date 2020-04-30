@@ -11,6 +11,7 @@ import { UsersService } from '../api/services';
 import { ApiModule } from '../api/api.module';
 import { LoginComponent } from './login/login.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RegisterComponent } from './register/register.component';
 
 export const API_INTERCEPTOR_PROVIDER: Provider = {
   provide: HTTP_INTERCEPTORS,
@@ -22,7 +23,9 @@ export const API_INTERCEPTOR_PROVIDER: Provider = {
   declarations: [
     MainComponent, 
     HeaderComponent, 
-    FooterComponent, LoginComponent
+    FooterComponent, 
+    LoginComponent, 
+    RegisterComponent
   ],
   imports: [
     CommonModule,
