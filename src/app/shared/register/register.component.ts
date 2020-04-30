@@ -10,7 +10,7 @@ import { NewAccountModel, ApiSuccessModel } from 'src/app/api/models';
   styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent implements OnInit {
-
+  /** Registration form. */
   public registrationForm: FormGroup;
 
   constructor(private router: Router, private formBuilder: FormBuilder, private usersService: UsersService) { }
@@ -25,12 +25,20 @@ export class RegisterComponent implements OnInit {
     }, { validator: this.checkPasswords });
   }
 
+  /**
+   * Custom validator to ensure that the password and confirm password fields match.
+   * @param group FormGroup that is being validated.
+   */
   public checkPasswords(group: FormGroup) {
     let password = group.controls.password.value;
     let confirmPassword = group.controls.confirmPassword.value;
     return password === confirmPassword ? null : { notSame: true };
   }
 
+  /**
+   * Registers a new account. This should only be callable if the form is valid.
+   * @param values Values from the registration form.
+   */
   public register(values: any): void {
     this.usersService.register({ body: <NewAccountModel>{
       email: values.email,

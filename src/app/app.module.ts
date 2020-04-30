@@ -8,9 +8,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { MainComponent } from './shared/main/main.component';
 import { HomeModule } from './home/home.module';
 
-/* Pipes */
-/* Services */
-
 @NgModule({
   declarations: [
   ],
