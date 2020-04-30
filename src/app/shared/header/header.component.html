@@ -8,7 +8,7 @@
             <li [ngClass]="{ 'nav-item': true, 'active': router.url == '/home'}" *ngIf="true">
                 <a class="nav-link" routerLink="/home">Home</a>
             </li>
-            <li class="nav-item dropdown">
+            <li class="nav-item dropdown" *ngIf="authService.authenticated">
                 <div ngbDropdown class="d-inline-block">
                     <a [ngClass]="{ 
                     'nav-link': true, 
@@ -17,8 +17,8 @@
                     'active': router.url == '/create-account' || router.url == '/manage-staff'
                     }" id="navbarDropdown" role="button" ngbDropdownToggle>Game</a>
                     <div ngbDropdownMenu class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a ngbDropdownItem [ngClass]="{ 'dropdown-item': true }" routerLink="/login" *ngIf="true">Create</a>
-                    <a ngbDropdownItem [ngClass]="{ 'dropdown-item': true }" routerLink="/login" *ngIf="true">Join</a>
+                    <a ngbDropdownItem [ngClass]="{ 'dropdown-item': true }" routerLink="/login" *ngIf="authService.authenticated">Create</a>
+                    <a ngbDropdownItem [ngClass]="{ 'dropdown-item': true }" routerLink="/login" *ngIf="authService.authenticated">Join</a>
                     </div>
                 </div>
             </li>
@@ -31,10 +31,27 @@
                     'active': router.url == '/create-account' || router.url == '/manage-staff'
                     }" role="button" ngbDropdownToggle>Account</a>
                     <div ngbDropdownMenu class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a ngbDropdownItem [ngClass]="{ 'dropdown-item': true }" routerLink="/login" *ngIf="true">Register</a>
-                        <a ngbDropdownItem [ngClass]="{ 'dropdown-item': true, 'active': router.url == '/login' }" routerLink="/login" *ngIf="true">Login</a>
-                        <a ngbDropdownItem [ngClass]="{ 'dropdown-item': true }" routerLink="/login" *ngIf="true">Edit Profile</a>
-                        <a ngbDropdownItem [ngClass]="{ 'dropdown-item': true }" routerLink="/login" *ngIf="true">View Statistics</a>
+                        <a 
+                            ngbDropdownItem [ngClass]="{ 'dropdown-item': true, 'active': router.url == '/register' }" 
+                            routerLink="/register" 
+                            *ngIf="!authService.authenticated">Register</a>
+                        <a 
+                            ngbDropdownItem [ngClass]="{ 'dropdown-item': true, 'active': router.url == '/login' }" 
+                            routerLink="/login" 
+                            *ngIf="!authService.authenticated">Login</a>
+                        <a 
+                            ngbDropdownItem [ngClass]="{ 'dropdown-item': true }" 
+                            routerLink="/login" 
+                            (click)="authService.logout()" 
+                            *ngIf="authService.authenticated">Logout</a>
+                        <a 
+                            ngbDropdownItem [ngClass]="{ 'dropdown-item': true }" 
+                            routerLink="/login" 
+                            *ngIf="authService.authenticated">Edit Profile</a>
+                        <a 
+                            ngbDropdownItem [ngClass]="{ 'dropdown-item': true }" 
+                            routerLink="/login" 
+                            *ngIf="authService.authenticated">View Statistics</a>
                     </div>
                 </div>
             </li>           
