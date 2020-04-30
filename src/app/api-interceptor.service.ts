@@ -5,7 +5,7 @@ import { tap } from 'rxjs/operators';
 
 @Injectable()
 export class ApiInterceptor implements HttpInterceptor {
-    bearer: string = "Bearer ";
+    private bearer: string = "Bearer ";
     jwt: string = "";
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
