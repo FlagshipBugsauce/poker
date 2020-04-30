@@ -1,5 +1,6 @@
 package com.poker.poker.validation;
 
+import com.poker.poker.controllers.GameController;
 import com.poker.poker.controllers.TestController;
 import com.poker.poker.controllers.UserController;
 import com.poker.poker.models.ApiErrorModel;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * response.
  */
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@ControllerAdvice(assignableTypes = {UserController.class, TestController.class})
+@ControllerAdvice(assignableTypes = {UserController.class, TestController.class, GameController.class})
 public class ApiExceptionHandler {
 
   /**

@@ -103,7 +103,7 @@ public class UserService {
     String jwtEmail = jwtService.extractEmail(jwt);
     UserDocument userDoc = userRepository.findUserDocumentByEmail(jwtEmail);
     // User is not in the correct group.
-    if (userGroup.contains(userDoc.getGroup())) {
+    if (!userGroup.contains(userDoc.getGroup())) {
       log.error(appConstants.getValidateFailedLog(), userDoc.getId(), userGroup);
       throw new ForbiddenException(
           appConstants.getValidateErrorType(), appConstants.getValidateErrorDescription());
