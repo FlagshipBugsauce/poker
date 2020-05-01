@@ -19,16 +19,13 @@ export class AuthService {
    * @param email The email being used to authenticate.
    * @param password The password being used to authenticate.
    */
-  public authorize(email: string, password: string): void {
-    this.usersService.authorize({ body: <AuthRequestModel> { email: email, password: password }})
-      .subscribe(
-        (data: AuthResponseModel) => {
-          this.apiInterceptor.jwt = data.jwt;
-          this.loggedIn = true;
-          this.router.navigate(["/home"]);
-        },
-        (error: any) => console.log(error.error)
-      );
+  public async authorize(email: string, password: string): Promise<boolean> {
+    await this.usersService.authorize({ body: <AuthRequestModel> { email: email, password: password }})
+      .toPromise().then((data: AuthResponseModel) => {
+        this.apiInterceptor.jwt = data.jwt;
+        this.loggedIn = true;
+      }, (error: any) => console.log(error.error));
+    return this.loggedIn;
   }
 
   /**

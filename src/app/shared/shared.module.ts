@@ -12,6 +12,8 @@ import { ApiModule } from '../api/api.module';
 import { LoginComponent } from './login/login.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RegisterComponent } from './register/register.component';
+import { PopupComponent } from './popup/popup.component';
+import { ToastContainerComponent } from './toast-container/toast-container.component';
 
 export const API_INTERCEPTOR_PROVIDER: Provider = {
   provide: HTTP_INTERCEPTORS,
@@ -25,7 +27,7 @@ export const API_INTERCEPTOR_PROVIDER: Provider = {
     HeaderComponent, 
     FooterComponent, 
     LoginComponent, 
-    RegisterComponent
+    RegisterComponent, PopupComponent, ToastContainerComponent
   ],
   imports: [
     CommonModule,

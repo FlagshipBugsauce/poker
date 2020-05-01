@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UsersService } from 'src/app/api/services';
 import { NewAccountModel, ApiSuccessModel } from 'src/app/api/models';
+import { ToastService } from '../toast.service';
 
 @Component({
   selector: 'pkr-register',
@@ -12,8 +13,13 @@ import { NewAccountModel, ApiSuccessModel } from 'src/app/api/models';
 export class RegisterComponent implements OnInit {
   /** Registration form. */
   public registrationForm: FormGroup;
+  public showFailAlert: boolean = false;
 
-  constructor(private router: Router, private formBuilder: FormBuilder, private usersService: UsersService) { }
+  constructor(
+    private router: Router, 
+    private formBuilder: FormBuilder, 
+    private usersService: UsersService,
+    private toastService: ToastService) { }
 
   ngOnInit(): void {
     this.registrationForm = this.formBuilder.group({
@@ -46,10 +52,18 @@ export class RegisterComponent implements OnInit {
       firstName: values.firstName,
       lastName: values.lastName
     }}).subscribe((response: ApiSuccessModel) => {
-      console.log(response);
+      this.toastService.show("Registration Successful!", { classname: 'bg-light toast-md', delay: 5000 });
       this.router.navigate(['/login']);
     }, (error: any) => {
       console.log(error);
+      this.showFailAlert = true;
     })
+  }
+
+  /**
+   * Hides the alert that is produced when a login attempt fails.
+   */
+  public hideFailAlert(): void {
+    this.showFailAlert = false;
   }
 }
