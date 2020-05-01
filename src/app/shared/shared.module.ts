@@ -27,7 +27,9 @@ export const API_INTERCEPTOR_PROVIDER: Provider = {
     HeaderComponent, 
     FooterComponent, 
     LoginComponent, 
-    RegisterComponent, PopupComponent, ToastContainerComponent
+    RegisterComponent, 
+    PopupComponent, 
+    ToastContainerComponent
   ],
   imports: [
     CommonModule,
