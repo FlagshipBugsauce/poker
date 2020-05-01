@@ -2,3 +2,11 @@
 @import "~bootstrap/scss/bootstrap";
 /* Importing Bootstrap SCSS file. */
 @import '~bootstrap/scss/bootstrap';
+
+$button-width: 130px;
+$toast-md: 200px;
+
+.toast-md {
+    width: $toast-md;
+    text-align: center;
+}

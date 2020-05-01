@@ -49,6 +49,13 @@
                         <button type="submit" class="btn btn-success button ml-3" [disabled]="!registrationForm.valid">Register</button>
                     </div>
                 </div>
+                <div class="row mt-3" *ngIf="showFailAlert">
+                    <div class="col-sm-12">
+                        <ngb-alert type="danger" (close)="hideFailAlert()">
+                            Registration was unsuccessful. Please try again.
+                        </ngb-alert>
+                    </div>
+                </div>
             </form>
         </div>
     </div>

@@ -3,6 +3,7 @@ import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthRequestModel } from 'src/app/api/models';
+import { ToastService } from '../toast.service';
 
 @Component({
   selector: 'pkr-login',
@@ -12,6 +13,7 @@ import { AuthRequestModel } from 'src/app/api/models';
 export class LoginComponent implements OnInit {
 
   public loginForm: FormGroup;
+  public showFailAlert: boolean = false;
 
   // TODO: Only for development! Remove later!
   private quickCredentials: AuthRequestModel = <AuthRequestModel> {
@@ -19,7 +21,11 @@ export class LoginComponent implements OnInit {
     password: "admin!@#"
   }
 
-  constructor(private authService: AuthService, private router: Router, private formBuilder: FormBuilder) { }
+  constructor(
+    private authService: AuthService, 
+    private router: Router, 
+    private formBuilder: FormBuilder,
+    public toastService: ToastService) { }
 
   public ngOnInit(): void {
     this.loginForm = this.formBuilder.group({
@@ -32,7 +38,19 @@ export class LoginComponent implements OnInit {
    * Calls the auth service to attempt authentication.
    * @param formValues The values of the login form.
    */
-  public authorize(formValues: any): void {
-    this.authService.authorize(formValues.email, formValues.password);
+  public async authorize(formValues: any): Promise<void> {
+    if (await this.authService.authorize(formValues.email, formValues.password)) {
+      this.toastService.show("Login Successful!", { classname: 'bg-light toast-md', delay: 5000 });
+      this.router.navigate(["/home"]);
+    } else {
+      this.showFailAlert = true;
+    }
+  }
+
+  /**
+   * Hides the alert that is produced when a login attempt fails.
+   */
+  public hideFailAlert(): void {
+    this.showFailAlert = false;
   }
 }
