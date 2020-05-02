@@ -34,6 +34,10 @@ export class JoinComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  /**
+   * Shows the confirmation popup that will take a player to the game they clicked on.
+   * @param game GetGameModel with based information about the game.
+   */
   public showConfirmationPopup(game: any): void {
     this.popupContent[0].body = `Attempting to join game "${game.name}".`;
     this.popupOkCloseProcedure = () => {
