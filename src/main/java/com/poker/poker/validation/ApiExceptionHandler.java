@@ -23,7 +23,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * response.
  */
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@ControllerAdvice(assignableTypes = {UserController.class, TestController.class, GameController.class})
+@ControllerAdvice(
+    assignableTypes = {UserController.class, TestController.class, GameController.class})
 public class ApiExceptionHandler {
 
   /**
