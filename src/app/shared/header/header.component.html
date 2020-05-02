@@ -22,8 +22,9 @@
                             routerLink="/create" 
                             *ngIf="authService.authenticated">Create</a>
                         <a 
-                            ngbDropdownItem [ngClass]="{ 'dropdown-item': true }" 
-                            routerLink="/login" 
+                            ngbDropdownItem 
+                            [ngClass]="{ 'dropdown-item': true, 'active': router.url == '/join' }" 
+                            routerLink="/join" 
                             *ngIf="authService.authenticated">Join</a>
                         </div>
                     </div>

@@ -3,10 +3,12 @@ import { CommonModule } from '@angular/common';
 import { SharedModule } from '../shared/shared.module';
 import { CreateComponent } from './create/create.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { JoinComponent } from './join/join.component';
 
 @NgModule({
   declarations: [
-    CreateComponent
+    CreateComponent,
+    JoinComponent
   ],
   imports: [
     CommonModule,
