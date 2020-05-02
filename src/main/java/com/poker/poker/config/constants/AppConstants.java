@@ -71,6 +71,9 @@ public class AppConstants {
 
   // GameService CONSTANTS
   private final String gameCreation = "User {} created a game";
+  private final String joinGameSuccess = "Sending updated gameDocument to cliet with ID: {}";
+  private final String joinGameFail = "Attempted to send updated gameDocument to client with ID: {}, but this client doesn't exist.";
+  private final String joinWorking = "joined worked successfully";
 
   // UserGroup CONSTANTS
   private final List<UserGroup> adminGroup =
