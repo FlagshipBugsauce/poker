@@ -32,6 +32,11 @@ export class LoginComponent implements OnInit {
       email: [this.quickCredentials.email, [Validators.required, Validators.email]],
       password: [this.quickCredentials.password, [Validators.required]]
     });
+
+    // DEV HELPER: AUTOMATICALLY AUTHORIZES AND NAVIGATES TO PAGE BEING WORKED ON
+    this.authService.authorize(this.quickCredentials.email, this.quickCredentials.password).then((success: boolean) => {
+      if (success) this.router.navigate(['/create']);
+    });
   }
 
   /**

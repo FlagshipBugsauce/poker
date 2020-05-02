@@ -7,6 +7,7 @@ import { AppRoutingModule } from './app-routing.module';
 /* Components */
 import { MainComponent } from './shared/main/main.component';
 import { HomeModule } from './home/home.module';
+import { GameModule } from './game/game.module';
 
 @NgModule({
   declarations: [
@@ -15,7 +16,8 @@ import { HomeModule } from './home/home.module';
     BrowserModule,
     AppRoutingModule,
     SharedModule,
-    HomeModule
+    HomeModule,
+    GameModule
   ],
   exports: [
     SharedModule
