@@ -35,7 +35,7 @@ export class LoginComponent implements OnInit {
 
     // DEV HELPER: AUTOMATICALLY AUTHORIZES AND NAVIGATES TO PAGE BEING WORKED ON
     this.authService.authorize(this.quickCredentials.email, this.quickCredentials.password).then((success: boolean) => {
-      if (success) this.router.navigate(['/create']);
+      if (success) this.router.navigate(['/join']);
     });
   }
 
