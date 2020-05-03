@@ -55,7 +55,7 @@ public class GameService {
    * Creates a new game document based on attributes given in createGameModel.
    *
    * @param createGameModel A model containing: name, maximum players, and buy in.
-   * @param userId          the UUID of the client.
+   * @param userId the UUID of the client.
    * @return a UUID, the unique id for the game document created in this method.
    */
   public ApiSuccessModel createGame(CreateGameModel createGameModel, UUID userId) {

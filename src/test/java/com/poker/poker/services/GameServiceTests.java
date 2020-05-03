@@ -33,58 +33,49 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class GameServiceTests extends TestBaseClass {
 
-  @Mock
-  private Map<UUID, GameDocument> activeGames;
+  @Mock private Map<UUID, GameDocument> activeGames;
   private Map<UUID, GameDocument> activeGamesReal;
 
-  @Mock
-  private Map<UUID, SseEmitter> gameEmitters;
+  @Mock private Map<UUID, SseEmitter> gameEmitters;
   private Map<UUID, SseEmitter> gameEmittersReal;
 
-  @Mock
-  private Set<UUID> playersInGames;
+  @Mock private Set<UUID> playersInGames;
   private Set<UUID> playersInGamesReal;
 
-  @Spy
-  private AppConstants appConstants;
+  @Spy private AppConstants appConstants;
 
-  @Mock
-  private UuidService uuidService;
+  @Mock private UuidService uuidService;
 
-  @InjectMocks
-  private GameService gameService;
+  @InjectMocks private GameService gameService;
 
   /*
-      For some bizarre reason, @Spy is not working on HashMaps and sets, so I've had to mock them
-      manually. No idea why this is happening.
+     For some bizarre reason, @Spy is not working on HashMaps and sets, so I've had to mock them
+     manually. No idea why this is happening.
 
-      TODO: Investigate WTF is going on with @Spy-ing maps and sets.
-   */
+     TODO: Investigate WTF is going on with @Spy-ing maps and sets.
+  */
   @BeforeEach
   public void setupUuidServiceMock() {
-    gameService = new GameService(
-        activeGames,
-        gameEmitters,
-        playersInGames,
-        appConstants,
-        uuidService);
+    gameService =
+        new GameService(activeGames, gameEmitters, playersInGames, appConstants, uuidService);
     Mockito.when(uuidService.isValidUuidString(Mockito.anyString())).thenCallRealMethod();
     Mockito.doAnswer(
-        (invocation) -> {
-          if (!uuidService.isValidUuidString(invocation.getArgument(0))) {
-            throw new BadRequestException("Invalid UUID", "Invalid UUID");
-          }
-          return null;
-        })
+            (invocation) -> {
+              if (!uuidService.isValidUuidString(invocation.getArgument(0))) {
+                throw new BadRequestException("Invalid UUID", "Invalid UUID");
+              }
+              return null;
+            })
         .when(uuidService)
         .checkIfValidAndThrowBadRequest(Mockito.anyString());
 
     // Mock activeGames map
     activeGamesReal = new HashMap<>();
-    Mockito.when(activeGames.put(Mockito.any(UUID.class), Mockito.any(GameDocument.class))).then(
-        (invocation) -> {
-          return activeGamesReal.put(invocation.getArgument(0), invocation.getArgument(1));
-        });
+    Mockito.when(activeGames.put(Mockito.any(UUID.class), Mockito.any(GameDocument.class)))
+        .then(
+            (invocation) -> {
+              return activeGamesReal.put(invocation.getArgument(0), invocation.getArgument(1));
+            });
     Mockito.when(activeGames.get(Mockito.any(UUID.class)))
         .then((invocation) -> activeGamesReal.get(invocation.getArgument(0)));
     Mockito.when(activeGames.size()).then((invocation) -> activeGamesReal.size());
@@ -92,27 +83,30 @@ public class GameServiceTests extends TestBaseClass {
 
     // Mock playersInGames set
     playersInGamesReal = new HashSet<>();
-    Mockito.when(playersInGames.add(Mockito.any(UUID.class))).then((invocation) -> {
-      return playersInGamesReal.add(invocation.getArgument(0));
-    });
-    Mockito.when(playersInGames.contains(Mockito.any(UUID.class))).then((invocation) -> {
-      return playersInGamesReal.contains(invocation.getArgument(0));
-    });
+    Mockito.when(playersInGames.add(Mockito.any(UUID.class)))
+        .then(
+            (invocation) -> {
+              return playersInGamesReal.add(invocation.getArgument(0));
+            });
+    Mockito.when(playersInGames.contains(Mockito.any(UUID.class)))
+        .then(
+            (invocation) -> {
+              return playersInGamesReal.contains(invocation.getArgument(0));
+            });
 
     // Mock gameEmitters map
     gameEmittersReal = new HashMap<>();
-    Mockito.when(gameEmitters.put(Mockito.any(UUID.class), Mockito.any(SseEmitter.class))).then(
-        (invocation) -> {
-          return gameEmittersReal.put(invocation.getArgument(0), invocation.getArgument(1));
-        });
+    Mockito.when(gameEmitters.put(Mockito.any(UUID.class), Mockito.any(SseEmitter.class)))
+        .then(
+            (invocation) -> {
+              return gameEmittersReal.put(invocation.getArgument(0), invocation.getArgument(1));
+            });
     Mockito.when(gameEmitters.get(Mockito.any(UUID.class)))
         .then((invocation) -> gameEmittersReal.get(invocation.getArgument(0)));
     Mockito.when(gameEmitters.size()).then((invocation) -> gameEmittersReal.size());
   }
 
-  /**
-   * Test to ensure that a user cannot create a game when they are already in a game.
-   */
+  /** Test to ensure that a user cannot create a game when they are already in a game. */
   @Test
   public void testCreateGame_whenUserAlreadyInAGame() {
     // Given
@@ -127,9 +121,7 @@ public class GameServiceTests extends TestBaseClass {
         });
   }
 
-  /**
-   * Test to ensure that games are being created successfully.
-   */
+  /** Test to ensure that games are being created successfully. */
   @Test
   public void testCreateGame_validInput() {
     // Given
@@ -165,15 +157,16 @@ public class GameServiceTests extends TestBaseClass {
     // Given
     activeGamesReal.put(getSampleGameDocument().getId(), getSampleGameDocument());
     final UUID uuid = UUID.randomUUID();
-    GameDocument secondGameDocument = new GameDocument(
-        UUID.randomUUID(),
-        uuid,
-        getSampleGameName(),
-        getSampleMaxPlayers(),
-        getSampleBuyIn(),
-        Arrays.asList(uuid),
-        new ArrayList<>(),
-        GameState.Game);
+    GameDocument secondGameDocument =
+        new GameDocument(
+            UUID.randomUUID(),
+            uuid,
+            getSampleGameName(),
+            getSampleMaxPlayers(),
+            getSampleBuyIn(),
+            Arrays.asList(uuid),
+            new ArrayList<>(),
+            GameState.Game);
     secondGameDocument.setCurrentGameState(GameState.Game);
     activeGamesReal.put(secondGameDocument.getId(), secondGameDocument);
 

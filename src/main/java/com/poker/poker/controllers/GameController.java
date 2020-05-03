@@ -54,13 +54,13 @@ public class GameController {
       tags = "game")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Creation of game was successful.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = ApiSuccessModel.class),
-                  mediaType = "application/json"))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Creation of game was successful.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiSuccessModel.class),
+                    mediaType = "application/json"))
       })
   @RequestMapping(value = "/create", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> createGame(
