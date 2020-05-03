@@ -90,7 +90,7 @@ public class UserController {
   @GetMapping("/getUserInfo/{userId}")
   public ResponseEntity<UserModel> getUserInfo(
       @RequestHeader("Authorization") String jwt, @PathVariable String userId) {
-    //    userService.validate(jwt, appConstants.get); TODO: Add validation after Justin merges
+    userService.validate(jwt, appConstants.getAllUsers());
     return ResponseEntity.ok(userService.getUserInfo(userId));
   }
 }

@@ -11,13 +11,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GameActionModel {
-  @Schema(
-      description = "The unique id of the client",
-      example = "0a7d95ef-94ba-47bc-b591-febb365bc543")
+  @Schema(description = "The ID of the client.", example = "0a7d95ef-94ba-47bc-b591-febb365bc543")
   private UUID userID;
 
-  @Schema(
-      description = "An action that pertains to a poker game",
-      example = "Fold")
+  @Schema(description = "The action that occurred.", example = "Fold")
   private GameAction gameAction;
 }

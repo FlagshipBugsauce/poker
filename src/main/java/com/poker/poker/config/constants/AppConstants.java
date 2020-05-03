@@ -1,6 +1,7 @@
 package com.poker.poker.config.constants;
 
 import com.poker.poker.models.enums.UserGroup;
+import com.poker.poker.validation.exceptions.BadRequestException;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,9 +49,11 @@ public class AppConstants {
   private final String swaggerDescription =
       "Documentation for online, multi-player, poker application.";
 
-  // UuidService CONSTANTS
+  // General Purpose UUID related CONSTANTS
   private final String invalidUuidErrorType = "Invalid UUID";
   private final String invalidUuidErrorDescription = "UUID provided is invalid.";
+  private final BadRequestException invalidUuidException =
+      new BadRequestException(invalidUuidErrorType, invalidUuidErrorDescription);
 
   // UserService CONSTANTS
   private final String authenticationCommencing = "Attempting to authenticate user {}.";
@@ -66,27 +69,30 @@ public class AppConstants {
   private final String registrationErrorDescription =
       "An account with the email provided already exists.";
   private final String validateFailedLog =
-      "User {} tried to access an endpoint with user group {} and failed";
+      "User: {}, was denied access. Groups allowed: {}. User's group: {}.";
   private final String validateSuccessLog =
-      "User {} accessed an ednpoint with user group {} sucessfuly";
+      "User: {} attempted to validate and was successful. Groups allowed: {}.";
   private final String validateErrorType = "Invalid Group";
   private final String validateErrorDescription =
-      "The user group does not allow access to destination";
+      "User does not have permission to access this resource.";
 
   // GameService CONSTANTS
-  private final String gameCreation = "User {} created a game";
-  private final String joinGameSuccess = "Sending updated gameDocument to cliet with ID: {}";
-  private final String joinGameFail = "Attempted to send updated gameDocument to client with ID: {}, but this client doesn't exist.";
-  private final String joinWorking = "joined worked successfully";
+  private final String gameCreation = "User: {} created a game.";
+  private final String joinGameSendingUpdate =
+      "Sending updated gameDocument to client with ID: {}.";
+  private final String joinGameSendingUpdateFailed =
+      "Failed to send updated GameDocument to client with ID: {}.";
+  private final String joinGameJoinSuccessful = "User joined the game successfully.";
+  private final BadRequestException joinGamePlayerAlreadyJoinedException = new BadRequestException(
+      "Failed to Join", "Cannot join more than one game at a time.");
 
   // UserGroup CONSTANTS
-  private final List<UserGroup> adminGroup =
-      new ArrayList<UserGroup>(Arrays.asList(UserGroup.Administrator));
-  private final List<UserGroup> clientGroup =
-      new ArrayList<UserGroup>(Arrays.asList(UserGroup.Administrator, UserGroup.Client));
+  private final List<UserGroup> adminGroups =
+      new ArrayList<>(Collections.singletonList(UserGroup.Administrator));
+  private final List<UserGroup> clientGroups =
+      new ArrayList<>(Arrays.asList(UserGroup.Administrator, UserGroup.Client));
   private final List<UserGroup> allUsers =
-      new ArrayList<UserGroup>(
-          Arrays.asList(UserGroup.Administrator, UserGroup.Client, UserGroup.Guest));
+      new ArrayList<>(Arrays.asList(UserGroup.Administrator, UserGroup.Client, UserGroup.Guest));
   private final String getUserInfoUserNotFoundErrorType = "User Not Found";
   private final String getUserInfoUserNotFoundErrorDescription =
       "No user with ID provided could be found.";

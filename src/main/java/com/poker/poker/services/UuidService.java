@@ -32,8 +32,7 @@ public class UuidService {
 
   public void checkIfValidAndThrowBadRequest(String uuid) {
     if (!isValidUuidString(uuid)) {
-      throw new BadRequestException(
-          appConstants.getInvalidUuidErrorType(), appConstants.getInvalidUuidErrorDescription());
+      throw appConstants.getInvalidUuidException();
     }
   }
 }
