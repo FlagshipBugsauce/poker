@@ -75,14 +75,14 @@ public class GameService {
     for (GameDocument gd : activeGames.values()) {
       // Games are only join-able in the PreGame game state
       if (gd.getCurrentGameState() == GameState.PreGame) {
-        activeGameModels.add(new GetGameModel(
-            gd.getId(),
-            gd.getName(),
-            gd.getHost(),
-            gd.getPlayerIds().size(),
-            gd.getMaxPlayers(),
-            gd.getBuyIn())
-        );
+        activeGameModels.add(
+            new GetGameModel(
+                gd.getId(),
+                gd.getName(),
+                gd.getHost(),
+                gd.getPlayerIds().size(),
+                gd.getMaxPlayers(),
+                gd.getBuyIn()));
       }
     }
     return activeGameModels;
@@ -95,7 +95,7 @@ public class GameService {
    * @param gameId The UUID of the game the client wishes to join.
    * @param userId The UUID of the client.
    * @return An ApiSuccessModel containing a message which indicates the attempt to join was
-   * successful.
+   *     successful.
    */
   public ApiSuccessModel joinGame(String gameId, UUID userId) {
     // Make sure the game ID is a valid UUID.

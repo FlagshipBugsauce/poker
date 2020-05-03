@@ -41,10 +41,11 @@ public class GameController {
 
   /**
    * Creates a game.
+   *
    * @param jwt Authorization token.
    * @param createGameModel Model containing the information necessary to create a game.
    * @return An ApiSuccessModel containing the game's UUID in the message field if the request was
-   * successful, otherwise returns a 400 or 403.
+   *     successful, otherwise returns a 400 or 403.
    */
   @Operation(
       summary = "Create a new game",
@@ -64,15 +65,18 @@ public class GameController {
   public ResponseEntity<ApiSuccessModel> createGame(
       @RequestHeader("Authorization") String jwt, @RequestBody CreateGameModel createGameModel) {
     userService.validate(jwt, appConstants.getClientGroups());
-    return ResponseEntity.ok(gameService.createGame(createGameModel,
-        userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId()));
+    return ResponseEntity.ok(
+        gameService.createGame(
+            createGameModel,
+            userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId()));
   }
 
   /**
    * Retrieves a list of games which are not full and have not yet started.
+   *
    * @param jwt Authorization token.
    * @return A list of games which are not full and have not yet started, provided the request is
-   * successful. Otherwise, will return a 400 or 403.
+   *     successful. Otherwise, will return a 400 or 403.
    */
   @Operation(
       summary = "Get game list",
@@ -98,10 +102,11 @@ public class GameController {
 
   /**
    * Endpoint which allows players to join games.
+   *
    * @param jwt Authorization token.
    * @param gameId The ID of the game the player wishes to join.
    * @return An ApiSuccessModel indicating the attempt to join was successful, otherwise returns a
-   * BAD REQUEST status.
+   *     BAD REQUEST status.
    */
   @Operation(
       summary = "Joins a game",

@@ -19,7 +19,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "games")
 public class GameDocument {
   @Schema(description = "Game's ID.", example = "0a7d95ef-94ba-47bc-b591-febb365bc543")
-  @Id private UUID id;
+  @Id
+  private UUID id;
 
   @Schema(description = "Host's ID.", example = "0a7d95ef-94ba-47bc-b591-febb365bc543")
   private UUID host;

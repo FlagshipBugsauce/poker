@@ -83,8 +83,8 @@ public class AppConstants {
   private final String joinGameSendingUpdateFailed =
       "Failed to send updated GameDocument to client with ID: {}.";
   private final String joinGameJoinSuccessful = "User joined the game successfully.";
-  private final BadRequestException joinGamePlayerAlreadyJoinedException = new BadRequestException(
-      "Failed to Join", "Cannot join more than one game at a time.");
+  private final BadRequestException joinGamePlayerAlreadyJoinedException =
+      new BadRequestException("Failed to Join", "Cannot join more than one game at a time.");
 
   // UserGroup CONSTANTS
   private final List<UserGroup> adminGroups =
