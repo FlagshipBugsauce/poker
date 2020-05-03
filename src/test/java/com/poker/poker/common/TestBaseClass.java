@@ -7,7 +7,7 @@ import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.AuthRequestModel;
 import com.poker.poker.models.AuthResponseModel;
-import com.poker.poker.models.NewAccountModel;
+import com.poker.poker.models.user.NewAccountModel;
 import com.poker.poker.models.enums.UserGroup;
 import java.util.ArrayList;
 import java.util.UUID;

@@ -1,6 +1,9 @@
 package com.poker.poker.controllers;
 
+import com.poker.poker.config.constants.AppConstants;
 import com.poker.poker.models.*;
+import com.poker.poker.models.user.NewAccountModel;
+import com.poker.poker.models.user.UserModel;
 import com.poker.poker.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -8,9 +11,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
             + "registration, etc...")
 public class UserController {
   private UserService userService;
+  private AppConstants appConstants;
 
   @Operation(
       summary = "Authenticate",
@@ -64,5 +73,26 @@ public class UserController {
   @RequestMapping(value = "/register", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> register(@RequestBody NewAccountModel newAccountModel) {
     return ResponseEntity.ok(userService.register(newAccountModel));
+  }
+
+  @Operation(
+      summary = "Get User Info",
+      description = "Retrieve user information for user with provided ID.",
+      tags = "getUserInfo")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "User information retrieved successfully.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = UserModel.class),
+                    mediaType = "application/json"))
+      })
+  @GetMapping("/getUserInfo/{userId}")
+  public ResponseEntity<UserModel> getUserInfo(
+      @RequestHeader("Authorization") String jwt, @PathVariable String userId) {
+    //    userService.validate(jwt, appConstants.get); TODO: Add validation after Justin merges
+    return ResponseEntity.ok(userService.getUserInfo(userId));
   }
 }

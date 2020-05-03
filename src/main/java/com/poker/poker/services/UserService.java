@@ -4,6 +4,8 @@ import com.poker.poker.config.constants.AppConstants;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.*;
 import com.poker.poker.models.enums.UserGroup;
+import com.poker.poker.models.user.NewAccountModel;
+import com.poker.poker.models.user.UserModel;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import com.poker.poker.validation.exceptions.ForbiddenException;
@@ -32,6 +34,7 @@ public class UserService {
   private AppConstants appConstants;
   private UserRepository userRepository;
   private PasswordEncoder passwordEncoder;
+  private UuidService uuidService;
 
   /**
    * Authenticates the user if the email and password provided in the AuthRequestModel is valid.
@@ -112,5 +115,31 @@ public class UserService {
     else {
       log.info(appConstants.getValidateSuccessLog(), userDoc.getId(), userGroup);
     }
+  }
+
+  /**
+   * Generates a UserModel from a user id.
+   *
+   * @param userId The UUID of the user.
+   * @return A UserModel associated to the ID provided.
+   */
+  public UserModel getUserInfo(String userId) {
+    // Check if the string provided is a valid UUID.
+    uuidService.checkIfValidAndThrowBadRequest(userId);
+    // We know the UUID is valid.
+    UUID id = UUID.fromString(userId);
+    UserDocument userDocument = userRepository.findUserDocumentById(id);
+    if (userDocument == null) {
+      log.error(appConstants.getGetUserInfoUserNotFoundErrorLog(), userId);
+      throw new BadRequestException(
+          appConstants.getGetUserInfoUserNotFoundErrorType(),
+          appConstants.getGetUserInfoUserNotFoundErrorDescription());
+    }
+    return new UserModel(
+        id,
+        userDocument.getEmail(),
+        userDocument.getGroup(),
+        userDocument.getFirstName(),
+        userDocument.getLastName());
   }
 }
