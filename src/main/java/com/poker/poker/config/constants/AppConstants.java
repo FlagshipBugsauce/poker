@@ -45,6 +45,10 @@ public class AppConstants {
   private final String swaggerDescription =
       "Documentation for online, multi-player, poker application.";
 
+  // UuidService CONSTANTS
+  private final String invalidUuidErrorType = "Invalid UUID";
+  private final String invalidUuidErrorDescription = "UUID provided is invalid.";
+
   // UserService CONSTANTS
   private final String authenticationCommencing = "Attempting to authenticate user {}.";
   private final String authenticationFailed =
@@ -65,4 +69,8 @@ public class AppConstants {
   private final String validateErrorType = "Invalid Group";
   private final String validateErrorDescription =
       "The user group does not allow access to destination";
+  private final String getUserInfoUserNotFoundErrorType = "User Not Found";
+  private final String getUserInfoUserNotFoundErrorDescription =
+      "No user with ID provided could be found.";
+  private final String getUserInfoUserNotFoundErrorLog = "Could not find user with ID of {}.";
 }
