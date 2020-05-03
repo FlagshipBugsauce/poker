@@ -92,9 +92,7 @@ public class GameService {
       }
     }
     //Add self to list of players in game
-    List<UUID> tempList = game.getPlayerIds();
-    tempList.add(myid);
-    game.setPlayerIds(tempList);
+    game.getPlayerIds().add(myid);
     //Update all players copy of gameDocument who are in the game via SSE
     for (UUID id : game.getPlayerIds()) {
       SseEmitter emitter = gameEmitters.get(id);
