@@ -27,8 +27,14 @@ public class AppConstants {
 
   // SECURITY CONSTANTS
   private final String[] securityExceptions = {
-    "/user/auth", "/swagger-ui/**", "/v3/**", "/user/register", "/test/sse/**"
+      "/user/auth", "/swagger-ui/**", "/v3/**", "/user/register", "/test/sse/**"
   };
+
+  // GENERAL GAME CONSTANTS
+  private final int minNumberOfPlayers = 2;
+  private final int maxNumberOfPlayers = 10;
+
+  // EXCEPTION HANDLER CONSTANTS
 
   // AUTHORIZATION CONSTANTS
   private final String invalidCredentialsErrorType = "Bad Request";

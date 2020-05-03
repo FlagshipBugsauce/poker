@@ -35,7 +35,7 @@ public class GameDocument {
   private BigDecimal buyIn;
 
   @ArraySchema(schema = @Schema(implementation = UUID.class))
-  private List<UUID> playerIds;
+  private List<UUID> players;
 
   @ArraySchema(schema = @Schema(implementation = GameActionModel.class))
   private List<GameActionModel> gameActions;

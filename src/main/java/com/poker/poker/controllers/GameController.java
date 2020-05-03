@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,17 +54,18 @@ public class GameController {
       tags = "game")
   @ApiResponses(
       value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Creation of game was successful.",
-            content =
-                @Content(
-                    schema = @Schema(implementation = ApiSuccessModel.class),
-                    mediaType = "application/json"))
+          @ApiResponse(
+              responseCode = "200",
+              description = "Creation of game was successful.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = ApiSuccessModel.class),
+                  mediaType = "application/json"))
       })
   @RequestMapping(value = "/create", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> createGame(
-      @RequestHeader("Authorization") String jwt, @RequestBody CreateGameModel createGameModel) {
+      @RequestHeader("Authorization") String jwt,
+      @Valid @RequestBody CreateGameModel createGameModel) {
     userService.validate(jwt, appConstants.getClientGroups());
     return ResponseEntity.ok(
         gameService.createGame(

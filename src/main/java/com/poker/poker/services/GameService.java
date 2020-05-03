@@ -41,14 +41,25 @@ public class GameService {
   private UuidService uuidService;
 
   /**
+   * Throws a BadRequestException if there is a user with the user ID provided currently in a game.
+   *
+   * @param userId User ID that is checked.
+   */
+  private void checkIfUserIsInGameAndThrow(UUID userId) {
+    if (playersInGames.contains(userId)) {
+      throw appConstants.getJoinGamePlayerAlreadyJoinedException();
+    }
+  }
+
+  /**
    * Creates a new game document based on attributes given in createGameModel.
    *
    * @param createGameModel A model containing: name, maximum players, and buy in.
-   * @param userId the UUID of the client.
+   * @param userId          the UUID of the client.
    * @return a UUID, the unique id for the game document created in this method.
    */
   public ApiSuccessModel createGame(CreateGameModel createGameModel, UUID userId) {
-    // TODO: Make sure a user can't create a game if they are already in a game.
+    checkIfUserIsInGameAndThrow(userId);
     GameDocument gameDocument =
         new GameDocument(
             UUID.randomUUID(),
@@ -80,7 +91,7 @@ public class GameService {
                 gd.getId(),
                 gd.getName(),
                 gd.getHost(),
-                gd.getPlayerIds().size(),
+                gd.getPlayers().size(),
                 gd.getMaxPlayers(),
                 gd.getBuyIn()));
       }
@@ -101,10 +112,7 @@ public class GameService {
     // Make sure the game ID is a valid UUID.
     uuidService.checkIfValidAndThrowBadRequest(gameId);
 
-    // Make sure player is not already in a game.
-    if (playersInGames.contains(userId)) {
-      throw appConstants.getJoinGamePlayerAlreadyJoinedException();
-    }
+    checkIfUserIsInGameAndThrow(userId);
 
     // Find the active game you wish to join
     GameDocument gameDocument = activeGames.get(UUID.fromString(gameId));
@@ -115,7 +123,7 @@ public class GameService {
     }
 
     // Update all players copy of gameDocument who are in the game via SSE
-    for (UUID id : gameDocument.getPlayerIds()) {
+    for (UUID id : gameDocument.getPlayers()) {
       SseEmitter emitter = gameEmitters.get(id);
       try {
         log.info(appConstants.getJoinGameSendingUpdate(), id);
@@ -126,7 +134,7 @@ public class GameService {
     }
 
     // Add new player to list of players in currently in the game.
-    gameDocument.getPlayerIds().add(userId);
+    gameDocument.getPlayers().add(userId);
     playersInGames.add(userId);
     return new ApiSuccessModel(appConstants.getJoinGameJoinSuccessful());
   }
