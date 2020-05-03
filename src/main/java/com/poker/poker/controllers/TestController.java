@@ -1,5 +1,6 @@
 package com.poker.poker.controllers;
 
+import com.poker.poker.documents.GameDocument;
 import com.poker.poker.models.ApiSuccessModel;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -133,6 +134,16 @@ public class TestController {
     } else {
       log.error("Attempted to send data to client with ID: {}, but this client doesn't exist.", x);
     }
+  }
+
+  @GetMapping("sse/test03/{userID}")
+  public ResponseEntity<?> test005(@PathVariable String userID) {
+    return ResponseEntity.ok(userID);
+  }
+
+  @GetMapping("/test/gameDoc")
+  public ResponseEntity<GameDocument> test006() {
+    return ResponseEntity.ok(new GameDocument());
   }
 }
 

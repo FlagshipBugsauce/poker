@@ -2,7 +2,9 @@ package com.poker.poker.services;
 
 import com.poker.poker.config.constants.AppConstants;
 import com.poker.poker.documents.UserDocument;
-import com.poker.poker.models.*;
+import com.poker.poker.models.ApiSuccessModel;
+import com.poker.poker.models.AuthRequestModel;
+import com.poker.poker.models.AuthResponseModel;
 import com.poker.poker.models.enums.UserGroup;
 import com.poker.poker.models.user.NewAccountModel;
 import com.poker.poker.models.user.UserModel;
@@ -89,7 +91,7 @@ public class UserService {
             UUID.randomUUID(),
             newAccountModel.getEmail(),
             passwordEncoder.encode(newAccountModel.getPassword()),
-            UserGroup.User,
+            UserGroup.Client,
             newAccountModel.getFirstName(),
             newAccountModel.getLastName()));
 
@@ -100,20 +102,24 @@ public class UserService {
    * Validates the user to check if the group they are in is correct based on their JWT.
    *
    * @param jwt A string that contains the Authentication information of a user.
-   * @param userGroup a list of user groups desired to validate a user against.
+   * @param groupsAllowed a list of user groups desired to validate a user against.
    */
-  public void validate(String jwt, List<UserGroup> userGroup) throws ForbiddenException {
-    String jwtEmail = jwtService.extractEmail(jwt);
-    UserDocument userDoc = userRepository.findUserDocumentByEmail(jwtEmail);
+  public void validate(String jwt, List<UserGroup> groupsAllowed) throws ForbiddenException {
+    UserDocument userDocument =
+        userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt));
     // User is not in the correct group.
-    if (userGroup.contains(userDoc.getGroup())) {
-      log.error(appConstants.getValidateFailedLog(), userDoc.getId(), userGroup);
+    if (!groupsAllowed.contains(userDocument.getGroup())) {
+      log.error(
+          appConstants.getValidateFailedLog(),
+          userDocument.getId(),
+          groupsAllowed,
+          userDocument.getGroup());
       throw new ForbiddenException(
           appConstants.getValidateErrorType(), appConstants.getValidateErrorDescription());
     }
     // User is in the correct group.
     else {
-      log.info(appConstants.getValidateSuccessLog(), userDoc.getId(), userGroup);
+      log.debug(appConstants.getValidateSuccessLog(), userDocument.getId(), groupsAllowed);
     }
   }
 

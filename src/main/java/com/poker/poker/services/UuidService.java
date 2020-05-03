@@ -1,7 +1,6 @@
 package com.poker.poker.services;
 
 import com.poker.poker.config.constants.AppConstants;
-import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -32,8 +31,7 @@ public class UuidService {
 
   public void checkIfValidAndThrowBadRequest(String uuid) {
     if (!isValidUuidString(uuid)) {
-      throw new BadRequestException(
-          appConstants.getInvalidUuidErrorType(), appConstants.getInvalidUuidErrorDescription());
+      throw appConstants.getInvalidUuidException();
     }
   }
 }

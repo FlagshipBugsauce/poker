@@ -1,5 +1,6 @@
 package com.poker.poker.validation;
 
+import com.poker.poker.controllers.GameController;
 import com.poker.poker.controllers.TestController;
 import com.poker.poker.controllers.UserController;
 import com.poker.poker.models.ApiErrorModel;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.AllArgsConstructor;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -21,8 +23,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * Handles exceptions thrown when a controller is called and will return the appropriate HTTP
  * response.
  */
+@AllArgsConstructor
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@ControllerAdvice(assignableTypes = {UserController.class, TestController.class})
+@ControllerAdvice(
+    assignableTypes = {UserController.class, TestController.class, GameController.class})
 public class ApiExceptionHandler {
 
   /**
