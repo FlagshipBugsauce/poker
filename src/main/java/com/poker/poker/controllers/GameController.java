@@ -141,18 +141,17 @@ public class GameController {
       tags = "game")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Emitter was created successfully.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = SseEmitter.class),
-                  mediaType = MediaType.TEXT_EVENT_STREAM_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Emitter was created successfully.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = SseEmitter.class),
+                    mediaType = MediaType.TEXT_EVENT_STREAM_VALUE))
       })
   @RequestMapping(value = "/emitter/{gameId}", method = RequestMethod.GET)
   public SseEmitter getGameEmitter(
-      @RequestHeader("Authorization") String jwt,
-      @PathVariable String gameId) {
+      @RequestHeader("Authorization") String jwt, @PathVariable String gameId) {
     return gameService.getGameEmitter(
         userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId(), gameId);
   }
