@@ -91,6 +91,13 @@ public class AppConstants {
   private final String joinGameJoinSuccessful = "User joined the game successfully.";
   private final BadRequestException joinGamePlayerAlreadyJoinedException =
       new BadRequestException("Failed to Join", "Cannot join more than one game at a time.");
+  private final String getGameEmitterPlayerNotInGameErrorType = "Player Not In Game";
+  private final String getGameEmitterPlayerNotInGameErrorDescription =
+      "Emitters will only be given to players who are in the game specified in the request.";
+  private final BadRequestException getGameEmitterPlayerNotInGameException =
+      new BadRequestException(
+          getGameEmitterPlayerNotInGameErrorType, getGetUserInfoUserNotFoundErrorDescription());
+  private final long gameEmitterDuration = 1000 * 60 * 60 * 24;
 
   // UserGroup CONSTANTS
   private final List<UserGroup> adminGroups =

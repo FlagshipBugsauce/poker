@@ -51,6 +51,23 @@ public class GameService {
     }
   }
 
+  public SseEmitter getGameEmitter(UUID userId, String gameId) {
+    uuidService.checkIfValidAndThrowBadRequest(gameId);
+
+    // Check that user is actually in the game before giving them an emitter.
+    GameDocument gameDocument = activeGames.get(UUID.fromString(gameId));
+    if (gameDocument == null) {
+      throw appConstants.getInvalidUuidException();
+    }
+    if (!gameDocument.getPlayers().contains(userId)) {
+      throw appConstants.getGetGameEmitterPlayerNotInGameException();
+    }
+
+    SseEmitter sseEmitter = new SseEmitter(appConstants.getGameEmitterDuration());
+    gameEmitters.put(userId, sseEmitter);
+    return sseEmitter;
+  }
+
   /**
    * Creates a new game document based on attributes given in createGameModel.
    *
