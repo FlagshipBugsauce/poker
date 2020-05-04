@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @AllArgsConstructor
 @RestController
@@ -131,5 +133,27 @@ public class GameController {
     return ResponseEntity.ok(
         gameService.joinGame(
             gameId, userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId()));
+  }
+
+  @Operation(
+      summary = "Request SSE Emitter",
+      description = "Request an SSE emitter to be sent updates regarding the game state..",
+      tags = "game")
+  @ApiResponses(
+      value = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Emitter was created successfully.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = SseEmitter.class),
+                  mediaType = MediaType.TEXT_EVENT_STREAM_VALUE))
+      })
+  @RequestMapping(value = "/emitter/{gameId}", method = RequestMethod.GET)
+  public SseEmitter getGameEmitter(
+      @RequestHeader("Authorization") String jwt,
+      @PathVariable String gameId) {
+    return gameService.getGameEmitter(
+        userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId(), gameId);
   }
 }
