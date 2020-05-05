@@ -27,7 +27,7 @@ public class AppConstants {
 
   // SECURITY CONSTANTS
   private final String[] securityExceptions = {
-    "/user/auth", "/swagger-ui/**", "/v3/**", "/user/register", "/test/sse/**"
+    "/user/auth", "/swagger-ui/**", "/v3/**", "/user/register", "/test/sse/**", "/game/emitter/**"
   };
 
   // GENERAL GAME CONSTANTS
@@ -98,6 +98,20 @@ public class AppConstants {
       new BadRequestException(
           getGameEmitterPlayerNotInGameErrorType, getGetUserInfoUserNotFoundErrorDescription());
   private final long gameEmitterDuration = 1000 * 60 * 60 * 24;
+  private final String emitterFailToSendExceptionErrorType = "Failed to Send Update";
+  private final BadRequestException emitterFailToSendException = new BadRequestException(
+      emitterFailToSendExceptionErrorType, "Sending update to client failed.");
+  private final BadRequestException userNotInGameException = new BadRequestException(
+      "Emitter Not Sent", "Player must be in a game in order to receive an emitter.");
+  private final String updatedGameDocumentSentSuccessfully =
+      "Updated game document was sent successfully.";
+  private final String getGameDocumentErrorLog =
+      "Failed to send updated game document to user: {}.";
+  private final String joinGamePlayerAlreadyInGameResponse = "Player is already in the game.";
+  private final String playerReadySuccessful = "Player status set to ready.";
+  private final String playerReadySuccessfulLog = "Player status set to ready (ID: {}).";
+  private final String playerReadyUnsuccessfulLog =
+      "Failed to set player's status to ready (user ID: {}).";
 
   // UserGroup CONSTANTS
   private final List<UserGroup> adminGroups =

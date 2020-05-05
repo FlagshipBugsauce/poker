@@ -2,6 +2,7 @@ package com.poker.poker.documents;
 
 import com.poker.poker.models.enums.GameState;
 import com.poker.poker.models.game.GameActionModel;
+import com.poker.poker.models.game.PlayerModel;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
@@ -34,8 +35,8 @@ public class GameDocument {
   @Schema(description = "Buy-in required to play in the game.", example = "$25")
   private BigDecimal buyIn;
 
-  @ArraySchema(schema = @Schema(implementation = UUID.class))
-  private List<UUID> players;
+  @ArraySchema(schema = @Schema(implementation = PlayerModel.class))
+  private List<PlayerModel> players;
 
   @ArraySchema(schema = @Schema(implementation = GameActionModel.class))
   private List<GameActionModel> gameActions;

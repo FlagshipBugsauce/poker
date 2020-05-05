@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,7 +50,7 @@ public class UserController {
             content =
                 @Content(
                     schema = @Schema(implementation = AuthResponseModel.class),
-                    mediaType = "application/json"))
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/auth", method = RequestMethod.POST)
   public ResponseEntity<AuthResponseModel> authorize(
@@ -66,7 +67,7 @@ public class UserController {
             content =
                 @Content(
                     schema = @Schema(implementation = ApiSuccessModel.class),
-                    mediaType = "application/json"))
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/register", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> register(@RequestBody NewAccountModel newAccountModel) {
@@ -85,7 +86,7 @@ public class UserController {
             content =
                 @Content(
                     schema = @Schema(implementation = UserModel.class),
-                    mediaType = "application/json"))
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @GetMapping("/getUserInfo/{userId}")
   public ResponseEntity<UserModel> getUserInfo(
