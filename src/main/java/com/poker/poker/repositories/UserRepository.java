@@ -7,8 +7,8 @@ import org.springframework.data.mongodb.repository.Query;
 
 public interface UserRepository extends MongoRepository<UserDocument, UUID> {
   @Query("{ _id: ?0 }")
-  public UserDocument findUserDocumentById(UUID id);
+  UserDocument findUserDocumentById(UUID id);
 
   @Query("{ email: ?0 }")
-  public UserDocument findUserDocumentByEmail(String email);
+  UserDocument findUserDocumentByEmail(String email);
 }

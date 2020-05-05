@@ -11,6 +11,7 @@ import com.poker.poker.models.AuthResponseModel;
 import com.poker.poker.models.enums.GameState;
 import com.poker.poker.models.enums.UserGroup;
 import com.poker.poker.models.game.CreateGameModel;
+import com.poker.poker.models.game.PlayerModel;
 import com.poker.poker.models.user.NewAccountModel;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ public class TestBaseClass {
           sampleGameName,
           sampleMaxPlayers,
           sampleBuyIn,
-          Arrays.asList(zeroUUID),
+          Arrays.asList(new PlayerModel()), // TODO: Fix this properly
           new ArrayList<>(),
           GameState.PreGame);
 
