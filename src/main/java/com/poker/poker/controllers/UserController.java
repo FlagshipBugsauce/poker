@@ -1,7 +1,9 @@
 package com.poker.poker.controllers;
 
 import com.poker.poker.config.constants.AppConstants;
-import com.poker.poker.models.*;
+import com.poker.poker.models.ApiSuccessModel;
+import com.poker.poker.models.AuthRequestModel;
+import com.poker.poker.models.AuthResponseModel;
 import com.poker.poker.models.user.NewAccountModel;
 import com.poker.poker.models.user.UserModel;
 import com.poker.poker.services.UserService;

@@ -34,9 +34,9 @@ public class GameService {
   private Map<UUID, SseEmitter> gameEmitters;
 
   /**
-   * A map of game UUID's, keyed by user UUID's, to identify which game a user is currently in,
-   * and also to identify whether a user is currently in a game, in order to impose a one game
-   * limit at any given time.
+   * A map of game UUID's, keyed by user UUID's, to identify which game a user is currently in, and
+   * also to identify whether a user is currently in a game, in order to impose a one game limit at
+   * any given time.
    */
   private Map<UUID, UUID> userIdToGameIdMap;
 
@@ -74,6 +74,7 @@ public class GameService {
   /**
    * Updates the game document associated with the game a player is in, to indicate that the player
    * is ready for the game to start.
+   *
    * @param user The user who is ready.
    * @return ApiSuccessModel indicating the request was successful.
    */
@@ -107,11 +108,12 @@ public class GameService {
    * @return SseEmitter which will send updated game documents.
    */
   public SseEmitter getGameEmitter(UUID userId) {
-//    try { // Need to pause for a short time, was getting exception otherwise.
-//      Thread.sleep(10); // TODO: See if exception still happens after changing router redirect to occur after join response is received.
-//    } catch (InterruptedException e) {
-//      e.printStackTrace();
-//    }
+    //    try { // Need to pause for a short time, was getting exception otherwise.
+    //      Thread.sleep(10); // TODO: See if exception still happens after changing router redirect
+    // to occur after join response is received.
+    //    } catch (InterruptedException e) {
+    //      e.printStackTrace();
+    //    }
     // Check that user is actually in a game before giving them an emitter.
     if (userIdToGameIdMap.get(userId) == null) {
       throw appConstants.getUserNotInGameException();
@@ -183,15 +185,16 @@ public class GameService {
             createGameModel.getName(),
             createGameModel.getMaxPlayers(),
             createGameModel.getBuyIn(),
-            new ArrayList<>(Arrays.asList(new PlayerModel(
-                user.getId(),
-                user.getEmail(),
-                user.getGroup(),
-                user.getFirstName(),
-                user.getLastName(),
-                false,
-                true
-            ))),
+            new ArrayList<>(
+                Arrays.asList(
+                    new PlayerModel(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getGroup(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        false,
+                        true))),
             new ArrayList<>(),
             GameState.PreGame);
     log.info(appConstants.getGameCreation(), user.getId());
@@ -237,8 +240,8 @@ public class GameService {
     uuidService.checkIfValidAndThrowBadRequest(gameId);
 
     // Check if user is already in the current game.
-    if (userIdToGameIdMap.get(user.getId()) != null &&
-        userIdToGameIdMap.get(user.getId()).equals(UUID.fromString(gameId))) {
+    if (userIdToGameIdMap.get(user.getId()) != null
+        && userIdToGameIdMap.get(user.getId()).equals(UUID.fromString(gameId))) {
       return new ApiSuccessModel(appConstants.getJoinGamePlayerAlreadyInGameResponse());
     }
     // If user isn't in the game with ID = gameId, then throw.
@@ -253,15 +256,17 @@ public class GameService {
     }
 
     // Add new player to list of players in currently in the game.
-    gameDocument.getPlayers().add(new PlayerModel(
-        user.getId(),
-        user.getEmail(),
-        user.getGroup(),
-        user.getFirstName(),
-        user.getLastName(),
-        false,
-        false
-    ));
+    gameDocument
+        .getPlayers()
+        .add(
+            new PlayerModel(
+                user.getId(),
+                user.getEmail(),
+                user.getGroup(),
+                user.getFirstName(),
+                user.getLastName(),
+                false,
+                false));
     userIdToGameIdMap.put(user.getId(), gameDocument.getId());
 
     // Update all players copy of gameDocument who are in the game via SSE

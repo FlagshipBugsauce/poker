@@ -29,6 +29,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequestMapping("/test")
 public class TestController {
 
+  /** HashMap of SseEmitters */
+  private Map<String, SseEmitter> emitters;
+
   /**
    * Basic test endpoint. Returns an ApiSuccessModel.
    *
@@ -45,24 +48,6 @@ public class TestController {
   @RequestMapping(value = "test", method = RequestMethod.POST)
   public ResponseEntity<?> test001() {
     return ResponseEntity.ok(new ApiSuccessModel("Success!"));
-  }
-
-  /**
-   * Another test, this one takes in a model.
-   *
-   * @return 200 status with an ApiSuccessModel.
-   */
-  @ApiResponses({
-    @ApiResponse(
-        responseCode = "200",
-        content =
-            @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ApiSuccessModel.class)))
-  })
-  @RequestMapping(value = "get", method = RequestMethod.GET)
-  public ResponseEntity<?> test002() {
-    return ResponseEntity.ok(new ApiSuccessModel("TESTING"));
   }
 
   /*
@@ -88,8 +73,23 @@ public class TestController {
    * Note: Security is currently disabled for these endpoints.
    */
 
-  /** HashMap of SseEmitters */
-  private Map<String, SseEmitter> emitters;
+  /**
+   * Another test, this one takes in a model.
+   *
+   * @return 200 status with an ApiSuccessModel.
+   */
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "200",
+        content =
+            @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiSuccessModel.class)))
+  })
+  @RequestMapping(value = "get", method = RequestMethod.GET)
+  public ResponseEntity<?> test002() {
+    return ResponseEntity.ok(new ApiSuccessModel("TESTING"));
+  }
 
   /**
    * Testing SseEmitters

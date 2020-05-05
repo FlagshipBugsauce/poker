@@ -94,15 +94,14 @@ public class AppConstants {
   private final String getGameEmitterPlayerNotInGameErrorType = "Player Not In Game";
   private final String getGameEmitterPlayerNotInGameErrorDescription =
       "Emitters will only be given to players who are in the game specified in the request.";
-  private final BadRequestException getGameEmitterPlayerNotInGameException =
-      new BadRequestException(
-          getGameEmitterPlayerNotInGameErrorType, getGetUserInfoUserNotFoundErrorDescription());
   private final long gameEmitterDuration = 1000 * 60 * 60 * 24;
   private final String emitterFailToSendExceptionErrorType = "Failed to Send Update";
-  private final BadRequestException emitterFailToSendException = new BadRequestException(
-      emitterFailToSendExceptionErrorType, "Sending update to client failed.");
-  private final BadRequestException userNotInGameException = new BadRequestException(
-      "Emitter Not Sent", "Player must be in a game in order to receive an emitter.");
+  private final BadRequestException emitterFailToSendException =
+      new BadRequestException(
+          emitterFailToSendExceptionErrorType, "Sending update to client failed.");
+  private final BadRequestException userNotInGameException =
+      new BadRequestException(
+          "Emitter Not Sent", "Player must be in a game in order to receive an emitter.");
   private final String updatedGameDocumentSentSuccessfully =
       "Updated game document was sent successfully.";
   private final String getGameDocumentErrorLog =
@@ -112,7 +111,6 @@ public class AppConstants {
   private final String playerReadySuccessfulLog = "Player status set to ready (ID: {}).";
   private final String playerReadyUnsuccessfulLog =
       "Failed to set player's status to ready (user ID: {}).";
-
   // UserGroup CONSTANTS
   private final List<UserGroup> adminGroups =
       new ArrayList<>(Collections.singletonList(UserGroup.Administrator));
@@ -123,5 +121,8 @@ public class AppConstants {
   private final String getUserInfoUserNotFoundErrorType = "User Not Found";
   private final String getUserInfoUserNotFoundErrorDescription =
       "No user with ID provided could be found.";
+  private final BadRequestException getGameEmitterPlayerNotInGameException =
+      new BadRequestException(
+          getGameEmitterPlayerNotInGameErrorType, getGetUserInfoUserNotFoundErrorDescription());
   private final String getUserInfoUserNotFoundErrorLog = "Could not find user with ID of {}.";
 }

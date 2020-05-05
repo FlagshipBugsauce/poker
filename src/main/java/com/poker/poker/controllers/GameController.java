@@ -71,8 +71,7 @@ public class GameController {
     userService.validate(jwt, appConstants.getClientGroups());
     return ResponseEntity.ok(
         gameService.createGame(
-            createGameModel,
-            userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
+            createGameModel, userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
   }
 
   /**
@@ -150,8 +149,7 @@ public class GameController {
                     mediaType = MediaType.TEXT_EVENT_STREAM_VALUE))
       })
   @RequestMapping(value = "/emitter/{jwt}", method = RequestMethod.GET)
-  public SseEmitter getGameEmitter(
-      @PathVariable String jwt) {
+  public SseEmitter getGameEmitter(@PathVariable String jwt) {
     return gameService.getGameEmitter(
         userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId());
   }
@@ -162,13 +160,13 @@ public class GameController {
       tags = "game")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Request handled successfully.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = ApiSuccessModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Request handled successfully.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiSuccessModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/refresh-game-doc", method = RequestMethod.GET)
   public ResponseEntity<ApiSuccessModel> getGameDocumentUpdate(
@@ -184,17 +182,16 @@ public class GameController {
       tags = "game")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Request handled successfully.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = ApiSuccessModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Request handled successfully.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiSuccessModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/ready", method = RequestMethod.GET) // TODO: Change to POST
-  public ResponseEntity<ApiSuccessModel> ready(
-      @RequestHeader("Authorization") String jwt) {
+  public ResponseEntity<ApiSuccessModel> ready(@RequestHeader("Authorization") String jwt) {
     return ResponseEntity.ok(
         gameService.ready(userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
   }
