@@ -173,7 +173,7 @@ public class GameService {
    * Creates a new game document based on attributes given in createGameModel.
    *
    * @param createGameModel A model containing: name, maximum players, and buy in.
-   * @param user the UUID of the client.
+   * @param user the user document of the player creating the game.
    * @return a UUID, the unique id for the game document created in this method.
    */
   public ApiSuccessModel createGame(CreateGameModel createGameModel, UserDocument user) {
@@ -185,16 +185,15 @@ public class GameService {
             createGameModel.getName(),
             createGameModel.getMaxPlayers(),
             createGameModel.getBuyIn(),
-            new ArrayList<>(
-                Arrays.asList(
-                    new PlayerModel(
-                        user.getId(),
-                        user.getEmail(),
-                        user.getGroup(),
-                        user.getFirstName(),
-                        user.getLastName(),
-                        false,
-                        true))),
+            Arrays.asList(
+                new PlayerModel(
+                    user.getId(),
+                    user.getEmail(),
+                    user.getGroup(),
+                    user.getFirstName(),
+                    user.getLastName(),
+                    false,
+                    true)),
             new ArrayList<>(),
             GameState.PreGame);
     log.info(appConstants.getGameCreation(), user.getId());
