@@ -23,18 +23,10 @@
                 </thead>
                 <tbody>
                     <tr *ngFor="let game of games" (click)="showConfirmationPopup(game)">
-                        <td>
-                            {{ game.name }}
-                        </td>
-                        <td class="text-center">
-                            {{ game.host }}
-                        </td>
-                        <td class="text-center">
-                            {{ game.currentPlayers }}/{{ game.maxPlayers }}
-                        </td>
-                        <td class="text-center">
-                            {{ game.buyIn | currency }}
-                        </td>
+                        <td>{{ game.name }}</td>
+                        <td class="text-center">{{ game.host }}</td>
+                        <td class="text-center">{{ game.currentPlayers }}/{{ game.maxPlayers }}</td>
+                        <td class="text-center">{{ game.buyIn | currency }}</td>
                     </tr>
                 </tbody>
             </table>

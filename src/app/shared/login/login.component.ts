@@ -16,10 +16,18 @@ export class LoginComponent implements OnInit {
   public showFailAlert: boolean = false;
 
   // TODO: Only for development! Remove later!
+  // private quickCredentials: AuthRequestModel = <AuthRequestModel> {
+  //   email: "admin@domain.com",
+  //   password: "admin!@#"
+  // }
   private quickCredentials: AuthRequestModel = <AuthRequestModel> {
-    email: "admin@domain.com",
+    email: "test.account@domain.com",
     password: "admin!@#"
   }
+  // private quickCredentials: AuthRequestModel = <AuthRequestModel> {
+  //   email: "test.account2@domain.com",
+  //   password: "admin!@#"
+  // }
 
   constructor(
     private authService: AuthService, 
@@ -35,6 +43,7 @@ export class LoginComponent implements OnInit {
 
     // DEV HELPER: AUTOMATICALLY AUTHORIZES AND NAVIGATES TO PAGE BEING WORKED ON
     this.authService.authorize(this.quickCredentials.email, this.quickCredentials.password).then((success: boolean) => {
+      // if (success) this.router.navigate(['/game/0a7d95ef-94ba-47bc-b591-febb365bc543']);
       if (success) this.router.navigate(['/join']);
     });
   }

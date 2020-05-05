@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastService } from 'src/app/shared/toast.service';
+import { GameService } from 'src/app/api/services';
+import { GetGameModel, CreateGameModel, ApiSuccessModel } from 'src/app/api/models';
 
 @Component({
   selector: 'pkr-create',
@@ -15,7 +17,8 @@ export class CreateComponent implements OnInit {
   constructor(
     private router: Router, 
     private formBuilder: FormBuilder, 
-    public toastService: ToastService) { }
+    public toastService: ToastService,
+    private gameService: GameService) { }
 
   public ngOnInit(): void {
     this.createGameForm = this.formBuilder.group({
@@ -34,6 +37,15 @@ export class CreateComponent implements OnInit {
   }
 
   public createGame(values: any): void {
-
+    this.gameService.createGame({
+      Authorization: null,
+      body: <CreateGameModel> {
+        buyIn: values.buyIn,
+        maxPlayers: values.maxPlayers,
+        name: values.name
+      }
+    }).subscribe((response: ApiSuccessModel) => {
+      this.router.navigate([`/game/${response.message}`]);
+    });
   }
 }

@@ -1,5 +1,8 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { PopupComponent, PopupContentModel } from 'src/app/shared/popup/popup.component';
+import { Router } from '@angular/router';
+import { GameService } from 'src/app/api/services';
+import { GetGameModel, ApiSuccessModel } from 'src/app/api/models';
 
 @Component({
   selector: 'pkr-join',
@@ -8,7 +11,8 @@ import { PopupComponent, PopupContentModel } from 'src/app/shared/popup/popup.co
 })
 export class JoinComponent implements OnInit {
   // TODO: Remove when backend can return games.
-  private _games = sampleGames;
+  // private _games = sampleGames;
+  private _games: GetGameModel[] = [];
 
   // Pagination fields:
   public page: number = 1;
@@ -24,14 +28,20 @@ export class JoinComponent implements OnInit {
 
   /** Returns a slice of the list of games for pagination. */
   public get games(): any[] {
-    return sampleGames
+    return this._games
       .map((game: any) => ({...game}))
       .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize);
   }
 
-  constructor() { }
+  constructor(private router: Router,
+    private gameService: GameService) { }
 
-  ngOnInit(): void {
+  ngOnInit(): void {   
+    // Get initial list of games...
+    this.gameService.getGameList(null).subscribe((gameModels: GetGameModel[]) => {
+      console.log(gameModels);
+      this._games = gameModels;
+    })
   }
 
   /**
@@ -41,8 +51,11 @@ export class JoinComponent implements OnInit {
   public showConfirmationPopup(game: any): void {
     this.popupContent[0].body = `Attempting to join game "${game.name}".`;
     this.popupOkCloseProcedure = () => {
-      // TODO: Join game lobby.
-      console.log(game);
+      // Join the lobby.
+      this.gameService.joinGame({ gameId: game.id, Authorization: null }).subscribe((response: ApiSuccessModel) => {
+        this.router.navigate([`/game/${game.id}`]);
+      });
+      
     }
     this.confirmationPopup.open();
   }

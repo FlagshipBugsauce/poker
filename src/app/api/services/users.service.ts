@@ -12,6 +12,7 @@ import { ApiSuccessModel } from '../models/api-success-model';
 import { AuthRequestModel } from '../models/auth-request-model';
 import { AuthResponseModel } from '../models/auth-response-model';
 import { NewAccountModel } from '../models/new-account-model';
+import { UserModel } from '../models/user-model';
 
 
 /**
@@ -80,6 +81,66 @@ export class UsersService extends BaseService {
 
     return this.register$Response(params).pipe(
       map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
+    );
+  }
+
+  /**
+   * Path part for operation getUserInfo
+   */
+  static readonly GetUserInfoPath = '/user/getUserInfo/{userId}';
+
+  /**
+   * Get User Info.
+   *
+   * Retrieve user information for user with provided ID.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `getUserInfo()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getUserInfo$Response(params: {
+    Authorization: string;
+    userId: string;
+
+  }): Observable<StrictHttpResponse<UserModel>> {
+
+    const rb = new RequestBuilder(this.rootUrl, UsersService.GetUserInfoPath, 'get');
+    if (params) {
+
+      rb.header('Authorization', params.Authorization);
+      rb.path('userId', params.userId);
+
+    }
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<UserModel>;
+      })
+    );
+  }
+
+  /**
+   * Get User Info.
+   *
+   * Retrieve user information for user with provided ID.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `getUserInfo$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getUserInfo(params: {
+    Authorization: string;
+    userId: string;
+
+  }): Observable<UserModel> {
+
+    return this.getUserInfo$Response(params).pipe(
+      map((r: StrictHttpResponse<UserModel>) => r.body as UserModel)
     );
   }
 

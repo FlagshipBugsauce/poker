@@ -1,0 +1,3 @@
+<!-- TODO: Once we have backend models update, need to change 0 to proper enum value. -->
+<!-- If the state is "pre-game", then we want to display the game lobby -->
+<pkr-lobby *ngIf="gameModel.currentGameState == 'PreGame'" [gameModel]="gameModel"></pkr-lobby>
