@@ -2,7 +2,7 @@
 export interface NewAccountModel {
 
   /**
-   * Email address associated with a user account.
+   * User's email address.
    */
   email?: string;
 
@@ -17,7 +17,7 @@ export interface NewAccountModel {
   lastName?: string;
 
   /**
-   * Password to the account associated with the email provided.
+   * User's account password.
    */
   password?: string;
 }

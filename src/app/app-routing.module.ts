@@ -6,6 +6,7 @@ import { AuthGuardService } from './shared/auth-guard.service';
 import { RegisterComponent } from './shared/register/register.component';
 import { CreateComponent } from './game/create/create.component';
 import { JoinComponent } from './game/join/join.component';
+import { GameComponent } from './game/game/game.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -13,6 +14,7 @@ const routes: Routes = [
   { path: 'home', component: HomeComponent },
   { path: 'create', component: CreateComponent, canActivate: [AuthGuardService] },
   { path: 'join', component: JoinComponent, canActivate: [AuthGuardService] },
+  { path: 'game/:gameId', component: GameComponent, canActivate: [AuthGuardService] },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];
 

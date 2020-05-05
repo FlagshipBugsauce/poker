@@ -2,6 +2,11 @@
     height: 66px;
 }
 
+.image {
+    height: 40px;
+    width: 40px;
+}
+
 @media (min-width: 0) {
     .navbar-nav {
         flex-direction: row;

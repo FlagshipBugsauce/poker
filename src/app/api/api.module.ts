@@ -3,6 +3,7 @@ import { NgModule, ModuleWithProviders, SkipSelf, Optional } from '@angular/core
 import { HttpClient } from '@angular/common/http';
 import { ApiConfiguration, ApiConfigurationParams } from './api-configuration';
 
+import { GameService } from './services/game.service';
 import { TestControllerService } from './services/test-controller.service';
 import { UsersService } from './services/users.service';
 
@@ -14,6 +15,7 @@ import { UsersService } from './services/users.service';
   exports: [],
   declarations: [],
   providers: [
+    GameService,
     TestControllerService,
     UsersService,
     ApiConfiguration
