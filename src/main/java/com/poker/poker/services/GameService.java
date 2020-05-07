@@ -28,9 +28,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class GameService {
 
-  /**
-   * A map of active games, keyed by the games ID.
-   */
+  /** A map of active games, keyed by the games ID. */
   private Map<UUID, GameDocument> activeGames;
 
   /**
@@ -56,8 +54,7 @@ public class GameService {
   private AppConstants appConstants;
   private UuidService uuidService;
 
-  private void cleanUpEmitters() {
-  }
+  private void cleanUpEmitters() {}
 
   /**
    * Throws a BadRequestException if there is a user with the user ID provided currently in a game.
@@ -83,8 +80,8 @@ public class GameService {
         log.debug(appConstants.getJoinGameSendingUpdate(), player.getId());
       } catch (IOException e) {
         log.error(appConstants.getJoinGameSendingUpdateFailed(), player.getId());
-        log.error("Removing game emitter for player with ID: {}.",
-            player.getId()); // TODO: make constant
+        log.error(
+            "Removing game emitter for player with ID: {}.", player.getId()); // TODO: make constant
         gameEmitters.remove(player.getId());
       } catch (NullPointerException e) {
         log.info("There is no game emitter for user with ID: {}.", player.getId());
@@ -153,20 +150,23 @@ public class GameService {
     }
 
     SseEmitter sseEmitter = new SseEmitter(appConstants.getGameEmitterDuration());
-    sseEmitter.onCompletion(() -> {
-      log.debug("Game emitter for user {} is complete.", userId);
-      gameEmitters.remove(userId);
-    });
-    sseEmitter.onTimeout(() -> {
-      log.debug("Game emitter for user {} is timed out.", userId);
-      gameEmitters.remove(userId);
-      sseEmitter.complete();
-    });
-    sseEmitter.onError((ex) -> {
-      log.debug("Game emitter for user {} encountered an error.", userId);
-      activeGames.remove(userId);
-      ex.printStackTrace();
-    });
+    sseEmitter.onCompletion(
+        () -> {
+          log.debug("Game emitter for user {} is complete.", userId);
+          gameEmitters.remove(userId);
+        });
+    sseEmitter.onTimeout(
+        () -> {
+          log.debug("Game emitter for user {} is timed out.", userId);
+          gameEmitters.remove(userId);
+          sseEmitter.complete();
+        });
+    sseEmitter.onError(
+        (ex) -> {
+          log.debug("Game emitter for user {} encountered an error.", userId);
+          activeGames.remove(userId);
+          ex.printStackTrace();
+        });
 
     gameEmitters.put(userId, sseEmitter);
 
@@ -220,7 +220,7 @@ public class GameService {
    * Creates a new game document based on attributes given in createGameModel.
    *
    * @param createGameModel A model containing: name, maximum players, and buy in.
-   * @param user            the user document of the player creating the game.
+   * @param user the user document of the player creating the game.
    * @return a UUID, the unique id for the game document created in this method.
    */
   public ApiSuccessModel createGame(CreateGameModel createGameModel, UserDocument user) {
@@ -232,15 +232,16 @@ public class GameService {
             createGameModel.getName(),
             createGameModel.getMaxPlayers(),
             createGameModel.getBuyIn(),
-            new ArrayList<>(Arrays.asList(
-                new PlayerModel(
-                    user.getId(),
-                    user.getEmail(),
-                    user.getGroup(),
-                    user.getFirstName(),
-                    user.getLastName(),
-                    false,
-                    true))),
+            new ArrayList<>(
+                Arrays.asList(
+                    new PlayerModel(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getGroup(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        false,
+                        true))),
             new ArrayList<>(),
             GameState.PreGame);
     log.info(appConstants.getGameCreation(), user.getId());
@@ -364,7 +365,8 @@ public class GameService {
     if (game.getPlayers().size() > 0) {
       // Select another host.
       game.setHost(game.getPlayers().get(0).getId());
-      log.debug("Changing host from: {}, to: {}.", user.getId(), game.getHost()); // TODO: Make constant
+      log.debug(
+          "Changing host from: {}, to: {}.", user.getId(), game.getHost()); // TODO: Make constant
     } else {
       // The game is empty, so remove it.
       activeGames.remove(game.getId());
@@ -373,15 +375,19 @@ public class GameService {
 
     // Remove user from mapping of user ID to game ID.
     userIdToGameIdMap.remove(user.getId());
-    log.debug("Player with ID: {}, has left game with ID: {}.", user.getId(), game.getId()); // TODO: Make constant
-
+    log.debug(
+        "Player with ID: {}, has left game with ID: {}.",
+        user.getId(),
+        game.getId()); // TODO: Make constant
 
     // Destroy the emitter sending this user updates.
     try {
       gameEmitters.remove(user.getId()).complete();
     } catch (Exception e) {
-      log.error("Issue removing the game emitter when player with ID: {}, left game (player may"
-          + " not have had an emitter for some reason).", user.getId());
+      log.error(
+          "Issue removing the game emitter when player with ID: {}, left game (player may"
+              + " not have had an emitter for some reason).",
+          user.getId());
     }
 
     // Update the players in the game, and players who are on the join game page.
@@ -401,20 +407,23 @@ public class GameService {
   public SseEmitter getJoinGameEmitter(UUID userId) {
     // TODO: Maybe add a check to ensure there isn't already an emitter for this user.
     SseEmitter sseEmitter = new SseEmitter(appConstants.getJoinGameEmitterDuration());
-    sseEmitter.onCompletion(() -> {
-      log.debug("Join game emitter for {} is complete.", userId);
-      joinGameEmitters.remove(userId);
-    });
-    sseEmitter.onTimeout(() -> {
-      log.debug("Join game emitter for {} timed out.", userId);
-      joinGameEmitters.remove(userId);
-      sseEmitter.complete();
-    });
-    sseEmitter.onError((ex) -> {
-      log.debug("Join game emitter for {} encountered an error. Should be removed.", userId);
-      joinGameEmitters.remove(userId);
-      sseEmitter.complete();
-    });
+    sseEmitter.onCompletion(
+        () -> {
+          log.debug("Join game emitter for {} is complete.", userId);
+          joinGameEmitters.remove(userId);
+        });
+    sseEmitter.onTimeout(
+        () -> {
+          log.debug("Join game emitter for {} timed out.", userId);
+          joinGameEmitters.remove(userId);
+          sseEmitter.complete();
+        });
+    sseEmitter.onError(
+        (ex) -> {
+          log.debug("Join game emitter for {} encountered an error. Should be removed.", userId);
+          joinGameEmitters.remove(userId);
+          sseEmitter.complete();
+        });
 
     joinGameEmitters.put(userId, sseEmitter);
     log.debug("Giving join game emitter to user with ID: {}.", userId);
@@ -442,7 +451,7 @@ public class GameService {
     }
     // .complete() should remove the emitter from the map.
     joinGameEmitters.get(userId).complete();
-    log.debug("Removing join game emitter for user with ID: {}.", userId);    // TODO: ADD CONSTANTS
+    log.debug("Removing join game emitter for user with ID: {}.", userId); // TODO: ADD CONSTANTS
     log.debug("Current join game emitters: {}.", joinGameEmitters);
     return new ApiSuccessModel(appConstants.getEmitterCompleteSuccess());
   }

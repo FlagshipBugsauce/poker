@@ -114,13 +114,14 @@ public class AppConstants {
       "Failed to set player's status to ready (user ID: {}).";
   private final String failedToSendGameListLog = "Failed to send game list update.";
   private final String playerHasLeftMessage = "Player has left the game.";
-  private final BadRequestException leaveGameException = new BadRequestException(
-      "Cannot Leave Game", "Game does not exist, or player is not in a game.");
+  private final BadRequestException leaveGameException =
+      new BadRequestException(
+          "Cannot Leave Game", "Game does not exist, or player is not in a game.");
   private final String noEmitterForIdProvided =
       "There is no emitter associated with the ID provided.";
   private final String noEmitterForIdErrorType = "No Emitter Found";
-  private final BadRequestException noEmitterForIdException = new BadRequestException(
-      noEmitterForIdErrorType, noEmitterForIdProvided);
+  private final BadRequestException noEmitterForIdException =
+      new BadRequestException(noEmitterForIdErrorType, noEmitterForIdProvided);
   private final String emitterCompleteSuccess = "Emitter was destroyed successfully.";
 
   // UserGroup CONSTANTS
