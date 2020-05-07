@@ -1,8 +1,11 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, HostListener } from '@angular/core';
 import { PopupComponent, PopupContentModel } from 'src/app/shared/popup/popup.component';
 import { Router } from '@angular/router';
 import { GameService } from 'src/app/api/services';
 import { GetGameModel, ApiSuccessModel } from 'src/app/api/models';
+import { SseService } from 'src/app/shared/sse.service';
+import { ApiInterceptor } from 'src/app/api-interceptor.service';
+import { ApiConfiguration } from 'src/app/api/api-configuration';
 
 @Component({
   selector: 'pkr-join',
@@ -33,15 +36,37 @@ export class JoinComponent implements OnInit {
       .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize);
   }
 
-  constructor(private router: Router,
-    private gameService: GameService) { }
+  constructor(
+    private apiConfiguration: ApiConfiguration,
+    private router: Router,
+    private gameService: GameService,
+    private sseService: SseService,
+    private apiInterceptor: ApiInterceptor) { }
 
-  ngOnInit(): void {   
-    // Get initial list of games...
-    this.gameService.getGameList(null).subscribe((gameModels: GetGameModel[]) => {
-      console.log(gameModels);
-      this._games = gameModels;
-    })
+  ngOnInit(): void {
+    this.sseService
+      .getServerSentEvent(`${this.apiConfiguration.rootUrl}/game/emitter/join/${this.apiInterceptor.jwt}`, "joinGame")
+      .subscribe((event: any) => {
+        // Using try catch to avoid a bunch of red text in the console. The error is worthless since it's due to JSON.parse.
+        try {
+          this._games = JSON.parse(event);
+        } catch(err) {
+          console.log("Something went wrong with the join game emitter.");
+        }
+      });
+    
+    this.refreshGameList();
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  public userLeftPage($event: any): void {
+    this.sseService.closeEvent("joinGame");
+    this.gameService.destroyJoinGameEmitter({ Authorization: null }).subscribe(() => { });
+  }
+
+  private async refreshGameList(): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    this.gameService.refreshGameList({ Authorization: null }).subscribe((response: ApiSuccessModel) => { });
   }
 
   /**

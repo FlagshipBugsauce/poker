@@ -1,7 +1,9 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { ActivatedRoute, ParamMap } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { GameDocument, UserModel, PlayerModel, ApiSuccessModel } from 'src/app/api/models';
 import { GameService } from 'src/app/api/services';
+import { SseService } from 'src/app/shared/sse.service';
+import { AuthService } from 'src/app/shared/auth.service';
 
 @Component({
   selector: 'pkr-lobby',
@@ -11,6 +13,7 @@ import { GameService } from 'src/app/api/services';
 export class LobbyComponent implements OnInit {
   // TODO: replace typep with proper game model type once backend models are generated.
   @Input('gameModel') public gameModel: GameDocument;
+  @Input('canStart') public canStart: boolean;
   public ready: boolean = false;
 
   public get hostModel(): PlayerModel {
@@ -41,7 +44,12 @@ export class LobbyComponent implements OnInit {
   // TODO: need to implement an endpoint to get current users info
   public clientUserId = "6f5924ca-5c79-418f-89bf-5a3e2bc248cc";
 
-  constructor(private activatedRoute: ActivatedRoute, private gameService: GameService) { }
+  constructor(
+    private activatedRoute: ActivatedRoute, 
+    private gameService: GameService,
+    private router: Router,
+    private sseService: SseService,
+    public authService: AuthService) { }
 
   ngOnInit(): void {
     console.log(this.gameModel);
@@ -53,6 +61,13 @@ export class LobbyComponent implements OnInit {
   public sendReadyRequest(): void {
     this.gameService.ready({ Authorization: null }).subscribe((result: ApiSuccessModel) => {
       this.ready = true;
+    });
+  }
+
+  public leaveGame(): void {
+    this.sseService.closeEvent("game");
+    this.gameService.leaveLobby({ Authorization: null }).subscribe((result: ApiSuccessModel) => {
+      this.router.navigate(['/join']);
     });
   }
 }

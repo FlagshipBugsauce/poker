@@ -1,4 +1,8 @@
 /* tslint:disable */
+
+/**
+ * The user's information.
+ */
 export interface UserModel {
 
   /**

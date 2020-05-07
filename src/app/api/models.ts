@@ -1,7 +1,7 @@
 export { ApiErrorModel } from './models/api-error-model';
 export { ApiSuccessModel } from './models/api-success-model';
-export { GetGameModel } from './models/get-game-model';
 export { CreateGameModel } from './models/create-game-model';
+export { GetGameModel } from './models/get-game-model';
 export { SseEmitter } from './models/sse-emitter';
 export { GameActionModel } from './models/game-action-model';
 export { GameDocument } from './models/game-document';

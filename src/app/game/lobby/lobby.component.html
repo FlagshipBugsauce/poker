@@ -79,6 +79,7 @@
                     <button 
                         type="reset" 
                         ngbTooltip="Leave the game"
+                        (click)="leaveGame()"
                         class="btn btn-danger button mt-3">Leave</button>
                     <button 
                         type="submit" 
@@ -90,8 +91,8 @@
                         type="submit" 
                         class="btn btn-warning button ml-3 text-light mt-3" 
                         ngbTooltip="Start the game!"
-                        *ngIf="clientUserId == hostId"
-                        [disabled]="false">Start</button>
+                        *ngIf="authService.userModel.id == gameModel.host"
+                        [disabled]="!canStart || gameModel.players.length < 2">Start</button>
                 </div>
             </div>
         </div>
