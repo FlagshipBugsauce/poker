@@ -23,8 +23,9 @@ public class GameActionModel {
   private GameAction gameAction;
 
   @Schema(
-      description = "Message that will be displayed somewhere in the client when this action "
-          + "occurs. Could be null.",
+      description =
+          "Message that will be displayed somewhere in the client when this action "
+              + "occurs. Could be null.",
       example = "Player 'FudgeNuts' has left the game.",
       implementation = String.class)
   private String clientMessage;

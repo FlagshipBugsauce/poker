@@ -35,6 +35,7 @@ public class PlayerModel {
 
   /**
    * Constructor that takes in a UserDocument and fill in the fields the two classes have in common.
+   *
    * @param userDocument UserDocument representing a player.
    */
   public PlayerModel(UserDocument userDocument) {
@@ -48,6 +49,7 @@ public class PlayerModel {
   /**
    * Constructor that takes in a UserDocument as well as the ready status and whether this player is
    * currently the host of game.
+   *
    * @param userDocument UserDocument representing a player.
    */
   public PlayerModel(UserDocument userDocument, boolean ready, boolean host) {

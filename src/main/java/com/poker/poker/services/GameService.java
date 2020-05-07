@@ -110,11 +110,10 @@ public class GameService {
     GameDocument gameDocument = activeGames.get(userIdToGameIdMap.get(user.getId()));
 
     // Find the playerModel, throw if not found, otherwise, remove player from game.
-    final Optional<PlayerModel> player = gameDocument
-        .getPlayers()
-        .stream()
-        .filter(playerModel -> playerModel.getId().equals(user.getId()))
-        .findFirst();
+    final Optional<PlayerModel> player =
+        gameDocument.getPlayers().stream()
+            .filter(playerModel -> playerModel.getId().equals(user.getId()))
+            .findFirst();
     if (!player.isPresent()) {
       log.error(appConstants.getPlayerReadyUnsuccessfulLog(), user.getId().toString());
       throw appConstants.getUserNotInGameException();
@@ -124,11 +123,14 @@ public class GameService {
     player.get().setReady(true);
 
     // Add the appropriate game action model.
-    gameDocument.getGameActions().add(new GameActionModel(
-        player.get(),
-        GameAction.Ready,
-        String.format("%s %s is ready.", player.get().getFirstName(), player.get().getLastName())
-    ));
+    gameDocument
+        .getGameActions()
+        .add(
+            new GameActionModel(
+                player.get(),
+                GameAction.Ready,
+                String.format(
+                    "%s %s is ready.", player.get().getFirstName(), player.get().getLastName())));
 
     log.debug(appConstants.getPlayerReadySuccessfulLog(), user.getId().toString());
 
@@ -282,8 +284,7 @@ public class GameService {
             new GetGameModel(
                 gd.getId(),
                 gd.getName(),
-                gd.getPlayers()
-                    .stream()
+                gd.getPlayers().stream()
                     .filter(p -> p.getId().equals(gd.getHost()))
                     .findFirst()
                     .get(),
@@ -329,14 +330,15 @@ public class GameService {
     gameDocument.getPlayers().add(playerModel);
 
     // Add the appropriate game action model.
-    gameDocument.getGameActions().add(new GameActionModel(
-        playerModel,
-        GameAction.Join,
-        String.format(
-            "%s %s has joined the game.",
-            playerModel.getFirstName(),
-            playerModel.getLastName())
-    ));
+    gameDocument
+        .getGameActions()
+        .add(
+            new GameActionModel(
+                playerModel,
+                GameAction.Join,
+                String.format(
+                    "%s %s has joined the game.",
+                    playerModel.getFirstName(), playerModel.getLastName())));
     userIdToGameIdMap.put(user.getId(), gameDocument.getId());
 
     // Update all players copy of gameDocument who are in the game via SSE
@@ -379,11 +381,10 @@ public class GameService {
     }
 
     // Find the playerModel, throw if not found, otherwise, remove player from game.
-    final Optional<PlayerModel> player = game
-        .getPlayers()
-        .stream()
-        .filter(playerModel -> playerModel.getId().equals(user.getId()))
-        .findFirst();
+    final Optional<PlayerModel> player =
+        game.getPlayers().stream()
+            .filter(playerModel -> playerModel.getId().equals(user.getId()))
+            .findFirst();
     if (!player.isPresent()) {
       throw appConstants.getLeaveGameException();
     }
@@ -418,13 +419,14 @@ public class GameService {
     }
 
     // Add GameActionModel with the appropriate action.
-    game.getGameActions().add(new GameActionModel(
-        player.get(),
-        GameAction.Leave,
-        String.format(
-            "%s %s has left the game.",
-            player.get().getFirstName(),
-            player.get().getLastName())));
+    game.getGameActions()
+        .add(
+            new GameActionModel(
+                player.get(),
+                GameAction.Leave,
+                String.format(
+                    "%s %s has left the game.",
+                    player.get().getFirstName(), player.get().getLastName())));
 
     // Update the players in the game, and players who are on the join game page.
     sendGameDocumentToAllPlayers(game);
@@ -487,15 +489,15 @@ public class GameService {
     }
     // .complete() should remove the emitter from the map.
     joinGameEmitters.get(userId).complete();
-    log.debug("Removing join game emitter for user with ID: {}.", userId);    // TODO: ADD CONSTANTS
+    log.debug("Removing join game emitter for user with ID: {}.", userId); // TODO: ADD CONSTANTS
 
     /*
-          TODO: It seems like the .complete() is running on a different thread, and thus, the
-           emitter is not being removed from the hash map before this log which outputs all the
-           emitters in the hash map, is outputted. The emitter is being removed, it's just
-           occurring AFTER the log. Should investigate some way of ensuring the emitter is removed
-           before logging. Probably can use a semaphore or some kind of loop with a thread.sleep.
-     */
+         TODO: It seems like the .complete() is running on a different thread, and thus, the
+          emitter is not being removed from the hash map before this log which outputs all the
+          emitters in the hash map, is outputted. The emitter is being removed, it's just
+          occurring AFTER the log. Should investigate some way of ensuring the emitter is removed
+          before logging. Probably can use a semaphore or some kind of loop with a thread.sleep.
+    */
     log.debug("Current join game emitters: {}.", joinGameEmitters);
     return new ApiSuccessModel(appConstants.getEmitterCompleteSuccess());
   }

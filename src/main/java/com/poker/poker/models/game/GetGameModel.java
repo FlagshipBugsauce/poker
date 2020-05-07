@@ -18,8 +18,7 @@ public class GetGameModel {
   @Schema(
       description = "The ID of the host.",
       example = "0a7d95ef-94ba-47bc-b591-febb365bc543",
-      implementation = PlayerModel.class
-  )
+      implementation = PlayerModel.class)
   private PlayerModel host;
 
   @Schema(description = "The current number of players in the game", example = "4")
