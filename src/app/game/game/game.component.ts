@@ -3,11 +3,12 @@ import { ActivatedRoute, ParamMap } from '@angular/router';
 import { GameService, UsersService } from 'src/app/api/services';
 import { SseService } from 'src/app/shared/sse.service';
 import { ApiInterceptor } from 'src/app/api-interceptor.service';
-import { GameDocument, ApiSuccessModel, PlayerModel } from 'src/app/api/models';
-import { samplePlayers } from '../lobby/lobby.component';
+import { GameDocument, ApiSuccessModel, PlayerModel, GameActionModel } from 'src/app/api/models';
+import { samplePlayers, LobbyComponent } from '../lobby/lobby.component';
 import { ApiConfiguration } from 'src/app/api/api-configuration';
 import { LeaveGameGuardService } from './leave-game-guard.service';
 import { PopupComponent, PopupContentModel } from 'src/app/shared/popup/popup.component';
+import { ToastService } from 'src/app/shared/toast.service';
 
 @Component({
   selector: 'pkr-game',
@@ -15,6 +16,7 @@ import { PopupComponent, PopupContentModel } from 'src/app/shared/popup/popup.co
   styleUrls: ['./game.component.scss']
 })
 export class GameComponent implements OnInit, AfterViewInit {
+  @ViewChild(LobbyComponent) lobbyComponent: LobbyComponent;
   private gameId: string;
 
   // TODO: replcae type with proper type.
@@ -27,8 +29,8 @@ export class GameComponent implements OnInit, AfterViewInit {
    */
   @ViewChild('popup') public confirmationPopup: PopupComponent;
   public popupContent: PopupContentModel[] = <PopupContentModel[]> [
-    <PopupContentModel> { body: "" },
-    <PopupContentModel> { body: "You will be removed from the game if you leave this page. Click Ok to continue." }
+    <PopupContentModel> { body: "You will be removed from the game if you leave this page." },
+    <PopupContentModel> { body: "Click Ok to continue." }
   ];
   public confirmLeavePageProcedure: Function = () => true;
   
@@ -38,7 +40,9 @@ export class GameComponent implements OnInit, AfterViewInit {
     private activatedRoute: ActivatedRoute, 
     private gameService: GameService, 
     private sseService: SseService,
-    private apiInterceptor: ApiInterceptor) { }
+    private apiInterceptor: ApiInterceptor,
+    private toastService: ToastService) { }
+
   ngAfterViewInit(): void {
     this.leaveGameGuardService.confirmationPopup = this.confirmationPopup;
   }
@@ -46,8 +50,6 @@ export class GameComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.leaveGameGuardService.canLeave = false;  // Need to set this to false.
     
-    this.sseService.closeEvent("joinGame");
-    this.gameService.destroyJoinGameEmitter({ Authorization: null }).subscribe(() => { });
     this.activatedRoute.paramMap.subscribe((paramMap: ParamMap) => {
       this.gameId = paramMap.get("gameId");
     });
@@ -60,11 +62,31 @@ export class GameComponent implements OnInit, AfterViewInit {
         } catch(err) {
           console.log("Something went wrong with the emitter.");
         }
-
-        this.canStart = this.gameModel.players.find((player: PlayerModel) => player.ready == false) == undefined;
-        console.log(this.canStart);
+        
+        this.checkIfGameCanStart();
+        
+        // Display a toast if appropriate:
+        this.displayToast();
       });
     this.refreshGameModel();
+  }
+
+  private checkIfGameCanStart() {
+    let canStart = this.canStart;
+    this.canStart = this.gameModel.players.find((player: PlayerModel) => player.ready == false) == undefined;
+    if (!canStart && this.canStart && this.lobbyComponent != null) {
+      this.lobbyComponent.displayCanStartAlert = true;
+    }
+  }
+
+  private displayToast(): void {
+    let lastAction: GameActionModel = this.gameModel.gameActions[this.gameModel.gameActions.length - 1];
+    if (lastAction != undefined &&
+      (lastAction.gameAction == 'Join' || lastAction.gameAction == 'Leave' || lastAction.gameAction == 'Ready')) {
+      this.toastService.show(lastAction.clientMessage, { classname: 'bg-light toast-md', delay: 5000 });
+    }
+    // console.log(lastAction);
+    // this.toastService.show(lastAction.clientMessage, { classname: 'bg-light toast-lg', delay: 5000 });
   }
 
   /** 

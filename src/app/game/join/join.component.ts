@@ -13,8 +13,6 @@ import { ApiConfiguration } from 'src/app/api/api-configuration';
   styleUrls: ['./join.component.scss']
 })
 export class JoinComponent implements OnInit {
-  // TODO: Remove when backend can return games.
-  // private _games = sampleGames;
   private _games: GetGameModel[] = [];
 
   // Pagination fields:
@@ -22,12 +20,14 @@ export class JoinComponent implements OnInit {
   public pageSize: number = 5;
   public totalGames: number = this._games.length;
 
+  /** Popup to confirm player wishes to join the game they clicked on. */
   @ViewChild('popup') public confirmationPopup: PopupComponent;
+  /** Content that will appear on the confirmation popup. */
   public popupContent: PopupContentModel[] = <PopupContentModel[]> [
     <PopupContentModel> { body: "" },
     <PopupContentModel> { body: "Click cancel if you do not wish to proceed." }
   ];
-  public popupOkCloseProcedure: Function = () => { };
+  public popupOkCloseProcedure: Function;
 
   /** Returns a slice of the list of games for pagination. */
   public get games(): any[] {
@@ -58,12 +58,20 @@ export class JoinComponent implements OnInit {
     this.refreshGameList();
   }
 
+  /**
+   * Destroys the emitter that provides updated lists of games before leaving the page to avoid errors on the backend.
+   * @param $event Before unload event.
+   */
   @HostListener('window:beforeunload', ['$event'])
   public userLeftPage($event: any): void {
     this.sseService.closeEvent("joinGame");
     this.gameService.destroyJoinGameEmitter({ Authorization: null }).subscribe(() => { });
   }
 
+  /**
+   * Requests an updated list of games. This is requested when the client first lands on this page. May also add a button
+   * which explicitly calls this function at some point.
+   */
   private async refreshGameList(): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, 100));
     this.gameService.refreshGameList({ Authorization: null }).subscribe((response: ApiSuccessModel) => { });
@@ -85,167 +93,3 @@ export class JoinComponent implements OnInit {
     this.confirmationPopup.open();
   }
 }
-
-// Sample data for table.
-export const sampleGames: any[] = [
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "Jimmy's Friday Night Fun Time",
-    host: "Jimmy McGillicutty",
-    currentPlayers: 7,
-    maxPlayers: 10,
-    buyIn: 420
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "Poker with Randy McGee",
-    host: "Randy McGee",
-    currentPlayers: 2,
-    maxPlayers: 6,
-    buyIn: 69
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "Justin's Summer Sunday Smokefest",
-    host: "Justin Stephenson",
-    currentPlayers: 6,
-    maxPlayers: 9,
-    buyIn: 420
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "big shots poker",
-    host: "Billy Bob McGraw",
-    currentPlayers: 7,
-    maxPlayers: 10,
-    buyIn: 25
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "YorkU Poker Tournament",
-    host: "Prof. Jeff Edmonds",
-    currentPlayers: 1,
-    maxPlayers: 10,
-    buyIn: 420
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "Thinking Inductively with A. Mirzaian",
-    host: "Andranik Mirzaian",
-    currentPlayers: 5,
-    maxPlayers: 6,
-    buyIn: 69
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "design by contract",
-    host: "Jackie Wang DPhil, Oxon",
-    currentPlayers: 6,
-    maxPlayers: 9,
-    buyIn: 420
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "Jimmy's Friday Night Fun Time",
-    host: "Jimmy McGillicutty",
-    currentPlayers: 7,
-    maxPlayers: 10,
-    buyIn: 25
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "Jimmy's Friday Night Fun Time",
-    host: "Jimmy McGillicutty",
-    currentPlayers: 7,
-    maxPlayers: 10,
-    buyIn: 25
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "Jimmy's Friday Night Fun Time",
-    host: "Jimmy McGillicutty",
-    currentPlayers: 7,
-    maxPlayers: 10,
-    buyIn: 25
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "Jimmy's Friday Night Fun Time",
-    host: "Jimmy McGillicutty",
-    currentPlayers: 7,
-    maxPlayers: 10,
-    buyIn: 420
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "Poker with Randy McGee",
-    host: "Randy McGee",
-    currentPlayers: 2,
-    maxPlayers: 6,
-    buyIn: 69
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "Justin's Summer Sunday Smokefest",
-    host: "Justin Stephenson",
-    currentPlayers: 6,
-    maxPlayers: 9,
-    buyIn: 420
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "big shots poker",
-    host: "Billy Bob McGraw",
-    currentPlayers: 7,
-    maxPlayers: 10,
-    buyIn: 25
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "YorkU Poker Tournament",
-    host: "Prof. Jeff Edmonds",
-    currentPlayers: 1,
-    maxPlayers: 10,
-    buyIn: 420
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "Thinking Inductively with A. Mirzaian",
-    host: "Andranik Mirzaian",
-    currentPlayers: 5,
-    maxPlayers: 6,
-    buyIn: 69
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "design by contract",
-    host: "Jackie Wang DPhil, Oxon",
-    currentPlayers: 6,
-    maxPlayers: 9,
-    buyIn: 420
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "Jimmy's Friday Night Fun Time",
-    host: "Jimmy McGillicutty",
-    currentPlayers: 7,
-    maxPlayers: 10,
-    buyIn: 25
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "Jimmy's Friday Night Fun Time",
-    host: "Jimmy McGillicutty",
-    currentPlayers: 7,
-    maxPlayers: 10,
-    buyIn: 25
-  },
-  {
-    id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-    name: "Jimmy's Friday Night Fun Time",
-    host: "Jimmy McGillicutty",
-    currentPlayers: 7,
-    maxPlayers: 10,
-    buyIn: 25
-  }
-]

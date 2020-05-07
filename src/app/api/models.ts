@@ -1,11 +1,11 @@
 export { ApiErrorModel } from './models/api-error-model';
 export { ApiSuccessModel } from './models/api-success-model';
 export { CreateGameModel } from './models/create-game-model';
-export { GetGameModel } from './models/get-game-model';
 export { SseEmitter } from './models/sse-emitter';
+export { GetGameModel } from './models/get-game-model';
+export { PlayerModel } from './models/player-model';
 export { GameActionModel } from './models/game-action-model';
 export { GameDocument } from './models/game-document';
-export { PlayerModel } from './models/player-model';
 export { NewAccountModel } from './models/new-account-model';
 export { UserModel } from './models/user-model';
 export { AuthRequestModel } from './models/auth-request-model';

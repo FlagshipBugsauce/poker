@@ -23,7 +23,7 @@ export class CreateComponent implements OnInit {
   public ngOnInit(): void {
     this.createGameForm = this.formBuilder.group({
       name: ['', [Validators.required]],
-      maxPlayers: ['', [Validators.required]],
+      maxPlayers: [2, [Validators.required]],
       buyIn: ['', [Validators.required]],
       // roundTime: ['', [Validators.required]],
     });

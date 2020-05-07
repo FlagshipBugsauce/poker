@@ -4,6 +4,7 @@ import { GameDocument, UserModel, PlayerModel, ApiSuccessModel } from 'src/app/a
 import { GameService } from 'src/app/api/services';
 import { SseService } from 'src/app/shared/sse.service';
 import { AuthService } from 'src/app/shared/auth.service';
+import { ToastService } from 'src/app/shared/toast.service';
 
 @Component({
   selector: 'pkr-lobby',
@@ -15,6 +16,8 @@ export class LobbyComponent implements OnInit {
   @Input('gameModel') public gameModel: GameDocument;
   @Input('canStart') public canStart: boolean;
   public ready: boolean = false;
+  public displayLeaveWarning: boolean = true;
+  public displayCanStartAlert: boolean = true;
 
   public get hostModel(): PlayerModel {
     if (this.gameModel == null || this.gameModel.players == null) {
@@ -49,10 +52,10 @@ export class LobbyComponent implements OnInit {
     private gameService: GameService,
     private router: Router,
     private sseService: SseService,
-    public authService: AuthService) { }
+    public authService: AuthService,
+    private toastService: ToastService) { }
 
   ngOnInit(): void {
-    console.log(this.gameModel);
   }
 
   /**
@@ -64,11 +67,12 @@ export class LobbyComponent implements OnInit {
     });
   }
 
+  /**
+   * Leaves the game by attempting to navigate away from the current page.
+   */
   public leaveGame(): void {
-    this.sseService.closeEvent("game");
-    this.gameService.leaveLobby({ Authorization: null }).subscribe((result: ApiSuccessModel) => {
-      this.router.navigate(['/join']);
-    });
+    // Only need to leave the page, the leave game guard will handle making the leave game call.
+    this.router.navigate(['/join']);
   }
 }
 

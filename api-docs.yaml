@@ -47,70 +47,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessModel'
-  /game/leave-lobby:
-    post:
-      tags:
-      - game
-      summary: Leave Game Lobby
-      description: Request sent when a player leaves a game lobby.
-      operationId: leaveLobby
-      parameters:
-      - name: Authorization
-        in: header
-        required: true
-        schema:
-          type: string
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: Request handled successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessModel'
-  /game/refresh-game-list:
-    post:
-      tags:
-      - game
-      summary: Refresh Game List
-      description: Requests updated list of games.
-      operationId: refreshGameList
-      parameters:
-      - name: Authorization
-        in: header
-        required: true
-        schema:
-          type: string
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: Request handled successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessModel'
   /game/create:
     post:
       tags:
@@ -145,6 +81,171 @@ paths:
                 $ref: '#/components/schemas/ApiErrorModel'
         "200":
           description: Creation of game was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
+  /game/join/{gameId}:
+    post:
+      tags:
+      - game
+      summary: Joins a game
+      description: Joins the game with the provided UUID, provided such a game exists.
+      operationId: joinGame
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: gameId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Game was joined successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
+  /game/leave-lobby:
+    post:
+      tags:
+      - game
+      summary: Leave Game Lobby
+      description: Request sent when a player leaves a game lobby.
+      operationId: leaveLobby
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Request handled successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
+  /game/emitter/join/{jwt}:
+    get:
+      tags:
+      - game
+      summary: Request SSE Emitter
+      description: Request an SSE emitter to be sent updates to the list of games.
+      operationId: getJoinGameEmitter
+      parameters:
+      - name: jwt
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Emitter was created successfully.
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/SseEmitter'
+  /game/emitter/game/{jwt}:
+    get:
+      tags:
+      - game
+      summary: Request SSE Emitter
+      description: Request an SSE emitter to be sent updates regarding the game state.
+      operationId: getGameEmitter
+      parameters:
+      - name: jwt
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Emitter was created successfully.
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/SseEmitter'
+  /game/refresh-game-list:
+    post:
+      tags:
+      - game
+      summary: Refresh Game List
+      description: Requests updated list of games.
+      operationId: refreshGameList
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Request handled successfully.
           content:
             application/json:
               schema:
@@ -184,139 +285,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/GetGameModel'
-  /game/join/{gameId}:
-    post:
-      tags:
-      - game
-      summary: Joins a game
-      description: Joins the game with the provided UUID, provided such a game exists.
-      operationId: joinGame
-      parameters:
-      - name: Authorization
-        in: header
-        required: true
-        schema:
-          type: string
-      - name: gameId
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: Game was joined successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessModel'
-  /game/emitter/game/{jwt}:
-    get:
-      tags:
-      - game
-      summary: Request SSE Emitter
-      description: Request an SSE emitter to be sent updates regarding the game state.
-      operationId: getGameEmitter
-      parameters:
-      - name: jwt
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: Emitter was created successfully.
-          content:
-            text/event-stream:
-              schema:
-                $ref: '#/components/schemas/SseEmitter'
-  /game/emitter/join/{jwt}:
-    get:
-      tags:
-      - game
-      summary: Request SSE Emitter
-      description: Request an SSE emitter to be sent updates to the list of games.
-      operationId: getJoinGameEmitter
-      parameters:
-      - name: jwt
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: Emitter was created successfully.
-          content:
-            text/event-stream:
-              schema:
-                $ref: '#/components/schemas/SseEmitter'
-  /game/destroy-join-game-emitter:
-    post:
-      tags:
-      - game
-      summary: Destroy Join Game Emitter
-      description: Destroy the emitter that is sending updated game lists.
-      operationId: destroyJoinGameEmitter
-      parameters:
-      - name: Authorization
-        in: header
-        required: true
-        schema:
-          type: string
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: Request handled successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessModel'
   /game/refresh-game-doc:
     get:
       tags:
@@ -349,11 +317,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessModel'
-  /test/test:
+  /game/destroy-join-game-emitter:
     post:
       tags:
+      - game
+      summary: Destroy Join Game Emitter
+      description: Destroy the emitter that is sending updated game lists.
+      operationId: destroyJoinGameEmitter
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Request handled successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
+  /test/get:
+    get:
+      tags:
       - test-controller
-      operationId: test001
+      operationId: test002
       responses:
         "400":
           description: Bad request.
@@ -373,96 +373,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessModel'
-  /test/sse/test03/{userID}:
-    get:
+  /test/test:
+    post:
       tags:
       - test-controller
-      operationId: test005
-      parameters:
-      - name: userID
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: default response
-          content:
-            '*/*':
-              schema:
-                type: object
-  /test/sse/test02/{x}/{y}:
-    get:
-      tags:
-      - test-controller
-      operationId: test004
-      parameters:
-      - name: x
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: "y"
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: default response
-  /test/test/gameDoc:
-    get:
-      tags:
-      - test-controller
-      operationId: test006
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: default response
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/GameDocument'
-  /test/get:
-    get:
-      tags:
-      - test-controller
-      operationId: test002
+      operationId: test001
       responses:
         "400":
           description: Bad request.
@@ -512,6 +427,91 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/SseEmitter'
+  /test/sse/test02/{x}/{y}:
+    get:
+      tags:
+      - test-controller
+      operationId: test004
+      parameters:
+      - name: x
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: "y"
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: default response
+  /test/sse/test03/{userID}:
+    get:
+      tags:
+      - test-controller
+      operationId: test005
+      parameters:
+      - name: userID
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: default response
+          content:
+            '*/*':
+              schema:
+                type: object
+  /test/test/gameDoc:
+    get:
+      tags:
+      - test-controller
+      operationId: test006
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: default response
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/GameDocument'
   /user/register:
     post:
       tags:
@@ -661,6 +661,12 @@ components:
           minimum: 0
           type: number
           description: Buy-in required to play in the game.
+    SseEmitter:
+      type: object
+      properties:
+        timeout:
+          type: integer
+          format: int64
     GetGameModel:
       type: object
       properties:
@@ -674,10 +680,7 @@ components:
           description: The name of the game.
           example: Friends Night Out Poker
         host:
-          type: string
-          description: The ID of the host.
-          format: uuid
-          example: 0a7d95ef-94ba-47bc-b591-febb365bc543
+          $ref: '#/components/schemas/PlayerModel'
         currentPlayers:
           type: integer
           description: The current number of players in the game
@@ -692,20 +695,49 @@ components:
           type: number
           description: The buy-in required to play.
           example: 400.0
-    SseEmitter:
+    PlayerModel:
       type: object
       properties:
-        timeout:
-          type: integer
-          format: int64
+        id:
+          type: string
+          description: User's ID.
+          format: uuid
+          example: 0a7d95ef-94ba-47bc-b591-febb365bc543
+        email:
+          type: string
+          description: User's email address.
+          example: user@domain.com
+        group:
+          type: string
+          description: User's user group.
+          example: Administrator
+          enum:
+          - Administrator
+          - Client
+          - Guest
+        firstName:
+          type: string
+          description: User's first name.
+          example: Fred
+        lastName:
+          type: string
+          description: User's last name.
+          example: Flintstone
+        ready:
+          type: boolean
+          description: Specifies whether a player is ready to start the game.
+          example: true
+        host:
+          type: boolean
+          description: Specifies whether the player created the game.
+          example: false
+      description: The ID of the host.
+      example: 0a7d95ef-94ba-47bc-b591-febb365bc543
     GameActionModel:
       type: object
       properties:
-        userID:
-          type: string
-          description: The ID of the client.
-          format: uuid
-          example: 0a7d95ef-94ba-47bc-b591-febb365bc543
+        player:
+          $ref: '#/components/schemas/PlayerModel'
         gameAction:
           type: string
           description: The action that occurred.
@@ -717,6 +749,15 @@ components:
           - Call
           - Bet
           - ReRaise
+          - Ready
+          - Join
+          - Leave
+          - Start
+        clientMessage:
+          type: string
+          description: Message that will be displayed somewhere in the client when
+            this action occurs. Could be null.
+          example: Player 'FudgeNuts' has left the game.
     GameDocument:
       type: object
       properties:
@@ -758,42 +799,6 @@ components:
           - PreGame
           - Game
           - PostGame
-    PlayerModel:
-      type: object
-      properties:
-        id:
-          type: string
-          description: User's ID.
-          format: uuid
-          example: 0a7d95ef-94ba-47bc-b591-febb365bc543
-        email:
-          type: string
-          description: User's email address.
-          example: user@domain.com
-        group:
-          type: string
-          description: User's user group.
-          example: Administrator
-          enum:
-          - Administrator
-          - Client
-          - Guest
-        firstName:
-          type: string
-          description: User's first name.
-          example: Fred
-        lastName:
-          type: string
-          description: User's last name.
-          example: Flintstone
-        ready:
-          type: boolean
-          description: Specifies whether a player is ready to start the game.
-          example: true
-        host:
-          type: boolean
-          description: Specifies whether the player created the game.
-          example: false
     NewAccountModel:
       type: object
       properties:
