@@ -48,6 +48,8 @@ public class UserServiceTests extends TestBaseClass {
         .thenReturn(getUserDetails());
     Mockito.when(jwtService.generateToken(Mockito.any(UserDetails.class)))
         .thenReturn(getSampleJwt());
+    Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail()))
+        .thenReturn(getUserDocument());
 
     // When
     AuthResponseModel response = userService.authenticate(getSampleAuthRequestModel());
