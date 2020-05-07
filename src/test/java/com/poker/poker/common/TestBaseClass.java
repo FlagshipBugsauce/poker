@@ -52,15 +52,10 @@ public class TestBaseClass {
           sampleUserGroup,
           sampleFirstName,
           sampleLastName);
-  private final UserModel sampleUserModel = new UserModel(
-      zeroUUID,
-      sampleEmail,
-      sampleUserGroup,
-      sampleFirstName,
-      sampleLastName);
-  private final AuthResponseModel sampleAuthResponseModel = new AuthResponseModel(
-      sampleJwt,
-      sampleUserModel);
+  private final UserModel sampleUserModel =
+      new UserModel(zeroUUID, sampleEmail, sampleUserGroup, sampleFirstName, sampleLastName);
+  private final AuthResponseModel sampleAuthResponseModel =
+      new AuthResponseModel(sampleJwt, sampleUserModel);
   private final NewAccountModel sampleNewAccountModel =
       new NewAccountModel(sampleEmail, samplePassword, sampleFirstName, sampleLastName);
   private final ApiSuccessModel sampleRegisterSuccessModel = new ApiSuccessModel("Success.");

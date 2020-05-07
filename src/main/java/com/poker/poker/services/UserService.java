@@ -71,8 +71,7 @@ public class UserService {
             userDocument.getEmail(),
             userDocument.getGroup(),
             userDocument.getFirstName(),
-            userDocument.getLastName()
-        ));
+            userDocument.getLastName()));
   }
 
   /**
