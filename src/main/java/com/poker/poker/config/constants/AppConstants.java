@@ -85,7 +85,7 @@ public class AppConstants {
   // GameService CONSTANTS
   private final String gameCreation = "User: {} created a game.";
   private final String joinGameSendingUpdate =
-      "Sending updated gameDocument to client with ID: {}.";
+      "Attempting to send updated gameDocument to client with ID: {}.";
   private final String joinGameSendingUpdateFailed =
       "Failed to send updated GameDocument to client with ID: {}.";
   private final String joinGameJoinSuccessful = "User joined the game successfully.";
@@ -95,6 +95,7 @@ public class AppConstants {
   private final String getGameEmitterPlayerNotInGameErrorDescription =
       "Emitters will only be given to players who are in the game specified in the request.";
   private final long gameEmitterDuration = 1000 * 60 * 60 * 24;
+  private final long joinGameEmitterDuration = 1000 * 60 * 10;
   private final String emitterFailToSendExceptionErrorType = "Failed to Send Update";
   private final BadRequestException emitterFailToSendException =
       new BadRequestException(
@@ -111,6 +112,17 @@ public class AppConstants {
   private final String playerReadySuccessfulLog = "Player status set to ready (ID: {}).";
   private final String playerReadyUnsuccessfulLog =
       "Failed to set player's status to ready (user ID: {}).";
+  private final String failedToSendGameListLog = "Failed to send game list update.";
+  private final String playerHasLeftMessage = "Player has left the game.";
+  private final BadRequestException leaveGameException = new BadRequestException(
+      "Cannot Leave Game", "Game does not exist, or player is not in a game.");
+  private final String noEmitterForIdProvided =
+      "There is no emitter associated with the ID provided.";
+  private final String noEmitterForIdErrorType = "No Emitter Found";
+  private final BadRequestException noEmitterForIdException = new BadRequestException(
+      noEmitterForIdErrorType, noEmitterForIdProvided);
+  private final String emitterCompleteSuccess = "Emitter was destroyed successfully.";
+
   // UserGroup CONSTANTS
   private final List<UserGroup> adminGroups =
       new ArrayList<>(Collections.singletonList(UserGroup.Administrator));

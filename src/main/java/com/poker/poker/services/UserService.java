@@ -62,7 +62,17 @@ public class UserService {
         customUserDetailsService.loadUserByUsername(authRequestModel.getEmail());
     final String jwt = jwtService.generateToken(userDetails);
 
-    return new AuthResponseModel(jwt);
+    UserDocument userDocument = userRepository.findUserDocumentByEmail(authRequestModel.getEmail());
+
+    return new AuthResponseModel(
+        jwt,
+        new UserModel(
+            userDocument.getId(),
+            userDocument.getEmail(),
+            userDocument.getGroup(),
+            userDocument.getFirstName(),
+            userDocument.getLastName()
+        ));
   }
 
   /**

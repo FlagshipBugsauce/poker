@@ -140,16 +140,17 @@ public class GameController {
       tags = "game")
   @ApiResponses(
       value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Emitter was created successfully.",
-            content =
-                @Content(
-                    schema = @Schema(implementation = SseEmitter.class),
-                    mediaType = MediaType.TEXT_EVENT_STREAM_VALUE))
+          @ApiResponse(
+              responseCode = "200",
+              description = "Emitter was created successfully.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = SseEmitter.class),
+                  mediaType = MediaType.TEXT_EVENT_STREAM_VALUE))
       })
-  @RequestMapping(value = "/emitter/{jwt}", method = RequestMethod.GET)
+  @RequestMapping(value = "/emitter/game/{jwt}", method = RequestMethod.GET)
   public SseEmitter getGameEmitter(@PathVariable String jwt) {
+    // TODO: Add faux-security here, i.e. validate the JWT manually since security is disabled.
     return gameService.getGameEmitter(
         userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId());
   }
@@ -182,17 +183,103 @@ public class GameController {
       tags = "game")
   @ApiResponses(
       value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Request handled successfully.",
-            content =
-                @Content(
-                    schema = @Schema(implementation = ApiSuccessModel.class),
-                    mediaType = MediaType.APPLICATION_JSON_VALUE))
+          @ApiResponse(
+              responseCode = "200",
+              description = "Request handled successfully.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = ApiSuccessModel.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
-  @RequestMapping(value = "/ready", method = RequestMethod.GET) // TODO: Change to POST
+  @RequestMapping(value = "/ready", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> ready(@RequestHeader("Authorization") String jwt) {
     return ResponseEntity.ok(
         gameService.ready(userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
+  }
+
+  @Operation(
+      summary = "Request SSE Emitter",
+      description = "Request an SSE emitter to be sent updates to the list of games.",
+      tags = "game")
+  @ApiResponses(
+      value = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Emitter was created successfully.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = SseEmitter.class),
+                  mediaType = MediaType.TEXT_EVENT_STREAM_VALUE))
+      })
+  @RequestMapping(value = "/emitter/join/{jwt}", method = RequestMethod.GET)
+  public SseEmitter getJoinGameEmitter(@PathVariable String jwt) {
+    // TODO: Add faux-security here, i.e. validate the JWT manually since security is disabled.
+    return gameService.getJoinGameEmitter(
+        userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId());
+  }
+
+  @Operation(
+      summary = "Leave Game Lobby",
+      description = "Request sent when a player leaves a game lobby.",
+      tags = "game")
+  @ApiResponses(
+      value = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Request handled successfully.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = ApiSuccessModel.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+      })
+  @RequestMapping(value = "/leave-lobby", method = RequestMethod.POST)
+  public ResponseEntity<ApiSuccessModel> leaveLobby(@RequestHeader("Authorization") String jwt) {
+    return ResponseEntity.ok(
+        gameService.removePlayerFromGame(
+            userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
+  }
+
+  @Operation(
+      summary = "Destroy Join Game Emitter",
+      description = "Destroy the emitter that is sending updated game lists.",
+      tags = "game")
+  @ApiResponses(
+      value = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Request handled successfully.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = ApiSuccessModel.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+      })
+  @RequestMapping(value = "/destroy-join-game-emitter", method = RequestMethod.POST)
+  public ResponseEntity<ApiSuccessModel> destroyJoinGameEmitter(
+      @RequestHeader("Authorization") String jwt) {
+    return ResponseEntity.ok(
+        gameService.completeJoinGameEmitter(
+            userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId()));
+  }
+
+  @Operation(
+      summary = "Refresh Game List",
+      description = "Requests updated list of games.",
+      tags = "game")
+  @ApiResponses(
+      value = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Request handled successfully.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = ApiSuccessModel.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+      })
+  @RequestMapping(value = "/refresh-game-list", method = RequestMethod.POST)
+  public ResponseEntity<ApiSuccessModel> refreshGameList(
+      @RequestHeader("Authorization") String jwt) {
+    return ResponseEntity.ok(
+        gameService.getGameListUpdate(
+            userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId()));
   }
 }
