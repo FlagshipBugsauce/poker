@@ -4,8 +4,10 @@ import com.poker.poker.config.constants.AppConstants;
 import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.ApiSuccessModel;
+import com.poker.poker.models.enums.GameAction;
 import com.poker.poker.models.enums.GameState;
 import com.poker.poker.models.game.CreateGameModel;
+import com.poker.poker.models.game.GameActionModel;
 import com.poker.poker.models.game.GetGameModel;
 import com.poker.poker.models.game.PlayerModel;
 import com.poker.poker.validation.exceptions.BadRequestException;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -106,19 +109,33 @@ public class GameService {
       throw appConstants.getUserNotInGameException();
     }
 
-    boolean found = false;
-    for (PlayerModel player : activeGames.get(userIdToGameIdMap.get(user.getId())).getPlayers()) {
-      if (player.getId().equals(user.getId())) {
-        player.setReady(true);
-        found = true;
-      }
-    }
-    if (!found) {
+    // Get the game document for the game now that we're sure it exists.
+    GameDocument gameDocument = activeGames.get(userIdToGameIdMap.get(user.getId()));
+
+    // Find the playerModel, throw if not found, otherwise, remove player from game.
+    final Optional<PlayerModel> player = gameDocument
+        .getPlayers()
+        .stream()
+        .filter(playerModel -> playerModel.getId().equals(user.getId()))
+        .findFirst();
+    if (!player.isPresent()) {
       log.error(appConstants.getPlayerReadyUnsuccessfulLog(), user.getId().toString());
       throw appConstants.getUserNotInGameException();
     }
+
+    // Set players status to ready.
+    player.get().setReady(true);
+
+    // Add the appropriate game action model.
+    gameDocument.getGameActions().add(new GameActionModel(
+        player.get(),
+        GameAction.Ready,
+        String.format("%s %s is ready.", player.get().getFirstName(), player.get().getLastName())
+    ));
+
     log.debug(appConstants.getPlayerReadySuccessfulLog(), user.getId().toString());
-    sendGameDocumentToAllPlayers(activeGames.get(userIdToGameIdMap.get(user.getId())));
+
+    sendGameDocumentToAllPlayers(gameDocument);
     return new ApiSuccessModel(appConstants.getPlayerReadySuccessful());
   }
 
@@ -264,7 +281,11 @@ public class GameService {
             new GetGameModel(
                 gd.getId(),
                 gd.getName(),
-                gd.getHost(),
+                gd.getPlayers()
+                    .stream()
+                    .filter(p -> p.getId().equals(gd.getHost()))
+                    .findFirst()
+                    .get(),
                 gd.getPlayers().size(),
                 gd.getMaxPlayers(),
                 gd.getBuyIn()));
@@ -303,17 +324,18 @@ public class GameService {
     }
 
     // Add new player to list of players in currently in the game.
-    gameDocument
-        .getPlayers()
-        .add(
-            new PlayerModel(
-                user.getId(),
-                user.getEmail(),
-                user.getGroup(),
-                user.getFirstName(),
-                user.getLastName(),
-                false,
-                false));
+    final PlayerModel playerModel = new PlayerModel(user, false, false);
+    gameDocument.getPlayers().add(playerModel);
+
+    // Add the appropriate game action model.
+    gameDocument.getGameActions().add(new GameActionModel(
+        playerModel,
+        GameAction.Join,
+        String.format(
+            "%s %s has joined the game.",
+            playerModel.getFirstName(),
+            playerModel.getLastName())
+    ));
     userIdToGameIdMap.put(user.getId(), gameDocument.getId());
 
     // Update all players copy of gameDocument who are in the game via SSE
@@ -355,11 +377,16 @@ public class GameService {
       throw appConstants.getLeaveGameException();
     }
 
-    final int numPlayers = game.getPlayers().size();
-    game.getPlayers().removeIf(playerModel -> playerModel.getId().equals(user.getId()));
-    if (numPlayers != game.getPlayers().size() + 1) {
+    // Find the playerModel, throw if not found, otherwise, remove player from game.
+    final Optional<PlayerModel> player = game
+        .getPlayers()
+        .stream()
+        .filter(playerModel -> playerModel.getId().equals(user.getId()))
+        .findFirst();
+    if (!player.isPresent()) {
       throw appConstants.getLeaveGameException();
     }
+    game.getPlayers().removeIf(playerModel -> playerModel.getId().equals(user.getId()));
 
     if (game.getPlayers().size() > 0) {
       // Select another host.
@@ -383,6 +410,15 @@ public class GameService {
       log.error("Issue removing the game emitter when player with ID: {}, left game (player may"
           + " not have had an emitter for some reason).", user.getId());
     }
+
+    // Add GameActionModel with the appropriate action.
+    game.getGameActions().add(new GameActionModel(
+        player.get(),
+        GameAction.Leave,
+        String.format(
+            "%s %s has left the game.",
+            player.get().getFirstName(),
+            player.get().getLastName())));
 
     // Update the players in the game, and players who are on the join game page.
     sendGameDocumentToAllPlayers(game);
@@ -443,6 +479,14 @@ public class GameService {
     // .complete() should remove the emitter from the map.
     joinGameEmitters.get(userId).complete();
     log.debug("Removing join game emitter for user with ID: {}.", userId);    // TODO: ADD CONSTANTS
+
+    /*
+          TODO: It seems like the .complete() is running on a different thread, and thus, the
+           emitter is not being removed from the hash map before this log which outputs all the
+           emitters in the hash map, is outputted. The emitter is being removed, it's just
+           occurring AFTER the log. Should investigate some way of ensuring the emitter is removed
+           before logging. Probably can use a semaphore or some kind of loop with a thread.sleep.
+     */
     log.debug("Current join game emitters: {}.", joinGameEmitters);
     return new ApiSuccessModel(appConstants.getEmitterCompleteSuccess());
   }
