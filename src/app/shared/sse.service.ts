@@ -19,6 +19,7 @@ export class SseService {
     return Observable.create(observer => {
       const eventSource = this.getEventSource(url);
 
+      // TODO: Need a more elegant solution for this. Possibly an enum...
       if (type == "joinGame") this.eventSources.joinGame = eventSource;
       if (type == "game") this.eventSources.game = eventSource;
 

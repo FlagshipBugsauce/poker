@@ -13,6 +13,7 @@ import { ApiConfiguration } from 'src/app/api/api-configuration';
   styleUrls: ['./join.component.scss']
 })
 export class JoinComponent implements OnInit {
+  /** List of games. */
   private _games: GetGameModel[] = [];
 
   // Pagination fields:
