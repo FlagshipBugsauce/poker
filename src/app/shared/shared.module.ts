@@ -49,7 +49,8 @@ export const API_INTERCEPTOR_PROVIDER: Provider = {
     NgbModule,
     ReactiveFormsModule,
     FormsModule,
-    PopupComponent
+    PopupComponent,
+    RouterModule
   ]
 })
 export class SharedModule { }

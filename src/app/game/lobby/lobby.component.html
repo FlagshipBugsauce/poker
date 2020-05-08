@@ -14,6 +14,11 @@
             </div>
         </div>
     </div>
+    <div class="container-fluid" *ngIf="displayLeaveWarning">
+        <ngb-alert [type]="'warning'" (close)="displayLeaveWarning = false">
+            Note: If you leave this page, you will removed from the game.
+        </ngb-alert>
+    </div>
     <div class="row mx-0">
         <div class="col-sm-6 pl-3 pr-2">
             <div class="card">
@@ -79,6 +84,7 @@
                     <button 
                         type="reset" 
                         ngbTooltip="Leave the game"
+                        (click)="leaveGame()"
                         class="btn btn-danger button mt-3">Leave</button>
                     <button 
                         type="submit" 
@@ -90,10 +96,17 @@
                         type="submit" 
                         class="btn btn-warning button ml-3 text-light mt-3" 
                         ngbTooltip="Start the game!"
-                        *ngIf="clientUserId == hostId"
-                        [disabled]="false">Start</button>
+                        *ngIf="authService.userModel.id == gameModel.host"
+                        [disabled]="!canStart || gameModel.players.length < 2">Start</button>
                 </div>
             </div>
         </div>
+    </div>
+    <div 
+        class="container-fluid mt-3" 
+        *ngIf="displayCanStartAlert && canStart && authService.userModel.id == hostModel.id && gameModel.players.length > 1">
+        <ngb-alert [type]="'success'" (close)="displayCanStartAlert = false">
+            Note: All players are ready, you can start the game.
+        </ngb-alert>
     </div>
 </div>
