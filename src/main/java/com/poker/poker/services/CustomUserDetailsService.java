@@ -3,7 +3,6 @@ package com.poker.poker.services;
 import com.poker.poker.config.constants.AppConstants;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.repositories.UserRepository;
-import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,9 +24,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     UserDocument user = userRepository.findUserDocumentByEmail(s);
     if (user == null) {
       log.error(appConstants.getEmailCouldNotBeFound(), s);
-      throw new BadRequestException(
-          appConstants.getInvalidCredentialsErrorType(),
-          appConstants.getInvalidCredentialsDescription());
+      throw appConstants.getBadPasswordException();
     }
     return new User(user.getEmail(), user.getPassword(), new ArrayList<>());
   }

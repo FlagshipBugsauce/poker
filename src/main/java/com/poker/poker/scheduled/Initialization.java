@@ -40,7 +40,7 @@ public class Initialization {
     }
 
     // Initialize the server
-    log.info(appConstants.getRunningInitializationMessage());
+    log.info("RUNNING INITIALIZATION");
 
     // First thing we need to do is create an admin user
     userRepository.save(
