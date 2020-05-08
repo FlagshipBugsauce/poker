@@ -25,9 +25,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     UserDocument user = userRepository.findUserDocumentByEmail(s);
     if (user == null) {
       log.error(appConstants.getEmailCouldNotBeFound(), s);
-      throw new BadRequestException(
-          appConstants.getInvalidCredentialsErrorType(),
-          appConstants.getInvalidCredentialsDescription());
+      throw appConstants.getBadPasswordException();
     }
     return new User(user.getEmail(), user.getPassword(), new ArrayList<>());
   }

@@ -46,18 +46,17 @@ public class UserService {
    */
   public AuthResponseModel authenticate(AuthRequestModel authRequestModel) {
     try {
-      log.info(appConstants.getAuthenticationCommencing(), authRequestModel.getEmail());
+      log.debug("Attempting to authenticate user with email: {}.", authRequestModel.getEmail());
       authenticationManager.authenticate(
           new UsernamePasswordAuthenticationToken(
               authRequestModel.getEmail(), authRequestModel.getPassword()));
     } catch (BadCredentialsException e) {
-      log.error(appConstants.getAuthenticationFailed(), authRequestModel.getEmail());
-      throw new BadRequestException(
-          appConstants.getInvalidCredentialsErrorType(),
-          appConstants.getInvalidCredentialsDescription());
+      log.error("Authentication of user {} failed because the password provided is invalid.",
+          authRequestModel.getEmail());
+      throw appConstants.getBadPasswordException();
     }
 
-    log.info(appConstants.getAuthenticationSuccessful(), authRequestModel.getEmail());
+    log.debug("Authentication of user {} was successful.", authRequestModel.getEmail());
     final UserDetails userDetails =
         customUserDetailsService.loadUserByUsername(authRequestModel.getEmail());
     final String jwt = jwtService.generateToken(userDetails);
@@ -84,17 +83,15 @@ public class UserService {
    */
   public ApiSuccessModel register(NewAccountModel newAccountModel) throws BadRequestException {
     // Log
-    log.info(appConstants.getRegistrationCommencing(), newAccountModel.getEmail());
+    log.debug("Attempting to create account for user with email: {}.", newAccountModel.getEmail());
 
     // Make sure that the email doesn't already exist:
     if (userRepository.findUserDocumentByEmail(newAccountModel.getEmail()) != null) {
-      log.error(appConstants.getRegistrationFailed(), newAccountModel.getEmail());
-      throw new BadRequestException(
-          appConstants.getRegistrationErrorType(), appConstants.getRegistrationErrorDescription());
+      log.error("Failed to create account for with email: {}.", newAccountModel.getEmail());
+      throw appConstants.getRegistrationFailedException();
     }
 
-    // Create a user with random UUID, in the "User" user group, with the data provided in the
-    // NewAccountModel.
+    // Create a user with random UUID, in the "Client" user group.
     userRepository.save(
         new UserDocument(
             UUID.randomUUID(),
@@ -104,9 +101,10 @@ public class UserService {
             newAccountModel.getFirstName(),
             newAccountModel.getLastName()));
 
-    log.info(appConstants.getRegistrationSuccessfulLog(), newAccountModel.getEmail());
-    return new ApiSuccessModel(appConstants.getRegistrationSuccessful());
+    log.info("Account created successfully for email: {}.", newAccountModel.getEmail());
+    return new ApiSuccessModel("Account created successfully.");
   }
+
   /**
    * Validates the user to check if the group they are in is correct based on their JWT.
    *
@@ -119,16 +117,16 @@ public class UserService {
     // User is not in the correct group.
     if (!groupsAllowed.contains(userDocument.getGroup())) {
       log.error(
-          appConstants.getValidateFailedLog(),
+          "User: {}, was denied access. Groups allowed: {}. User's group: {}.",
           userDocument.getId(),
           groupsAllowed,
           userDocument.getGroup());
-      throw new ForbiddenException(
-          appConstants.getValidateErrorType(), appConstants.getValidateErrorDescription());
+      throw appConstants.getInvalidGroupException();
     }
     // User is in the correct group.
     else {
-      log.debug(appConstants.getValidateSuccessLog(), userDocument.getId(), groupsAllowed);
+      log.debug("User: {} attempted to validate and was successful. Groups allowed: {}.",
+          userDocument.getId(), groupsAllowed);
     }
   }
 
@@ -145,10 +143,8 @@ public class UserService {
     UUID id = UUID.fromString(userId);
     UserDocument userDocument = userRepository.findUserDocumentById(id);
     if (userDocument == null) {
-      log.error(appConstants.getGetUserInfoUserNotFoundErrorLog(), userId);
-      throw new BadRequestException(
-          appConstants.getGetUserInfoUserNotFoundErrorType(),
-          appConstants.getGetUserInfoUserNotFoundErrorDescription());
+      log.error("Could not find user with ID of {}.", userId);
+      throw appConstants.getUserInfoNotFoundException();
     }
     return new UserModel(
         id,

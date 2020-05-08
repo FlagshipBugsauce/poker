@@ -101,4 +101,31 @@ public class TestBaseClass {
         .andReturn()
         .getResponse();
   }
+
+  /**
+   * Generates a random string of n letters.
+   * @param n The desired length of the string.
+   * @return A string of n random letters.
+   */
+  protected String randomLetterString(int n) {
+    StringBuilder sb = new StringBuilder(n);
+    for (int i = 0; i < n; i++) {
+      sb.append((char) (Math.random() * 26 + (Math.random() < 0.5 ? 'a' : 'A')));
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Generates a random UserDocument.
+   * @return A random UserDocument.
+   */
+  protected UserDocument randomUserDocument() {
+    return new UserDocument(
+        UUID.randomUUID(),
+        "test_email_" + randomLetterString(10) + "@" + randomLetterString(7) + ".com",
+        randomLetterString(50),
+        UserGroup.Client,
+        randomLetterString(15),
+        randomLetterString(15));
+  }
 }

@@ -76,13 +76,9 @@ public class UserServiceTests extends TestBaseClass {
         .thenReturn(getUserDocument());
     Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail())).thenReturn(null);
     Mockito.when(userRepository.save(getUserDocument())).thenReturn(null);
-    Mockito.when(appConstants.getRegistrationSuccessful()).thenReturn("Success.");
 
-    // When
-    ApiSuccessModel apiSuccessModel = userService.register(getSampleNewAccountModel());
-
-    // Then
-    Assertions.assertEquals("Success.", apiSuccessModel.getMessage());
+    // When/Then
+    Assertions.assertNotNull(userService.register(getSampleNewAccountModel()));
   }
 
   @Test
@@ -92,7 +88,6 @@ public class UserServiceTests extends TestBaseClass {
     Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail()))
         .thenReturn(getUserDocument());
     Mockito.when(userRepository.save(getUserDocument())).thenReturn(null);
-    Mockito.when(appConstants.getRegistrationSuccessful()).thenReturn("Success.");
 
     // When/Then
     Assertions.assertThrows(
