@@ -2,7 +2,6 @@ package com.poker.poker.services;
 
 import com.poker.poker.common.TestBaseClass;
 import com.poker.poker.config.constants.AppConstants;
-import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.AuthResponseModel;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.validation.exceptions.BadRequestException;
@@ -48,6 +47,8 @@ public class UserServiceTests extends TestBaseClass {
         .thenReturn(getUserDetails());
     Mockito.when(jwtService.generateToken(Mockito.any(UserDetails.class)))
         .thenReturn(getSampleJwt());
+    Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail()))
+        .thenReturn(getUserDocument());
 
     // When
     AuthResponseModel response = userService.authenticate(getSampleAuthRequestModel());
@@ -74,13 +75,9 @@ public class UserServiceTests extends TestBaseClass {
         .thenReturn(getUserDocument());
     Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail())).thenReturn(null);
     Mockito.when(userRepository.save(getUserDocument())).thenReturn(null);
-    Mockito.when(appConstants.getRegistrationSuccessful()).thenReturn("Success.");
 
-    // When
-    ApiSuccessModel apiSuccessModel = userService.register(getSampleNewAccountModel());
-
-    // Then
-    Assertions.assertEquals("Success.", apiSuccessModel.getMessage());
+    // When/Then
+    Assertions.assertNotNull(userService.register(getSampleNewAccountModel()));
   }
 
   @Test
@@ -90,7 +87,6 @@ public class UserServiceTests extends TestBaseClass {
     Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail()))
         .thenReturn(getUserDocument());
     Mockito.when(userRepository.save(getUserDocument())).thenReturn(null);
-    Mockito.when(appConstants.getRegistrationSuccessful()).thenReturn("Success.");
 
     // When/Then
     Assertions.assertThrows(

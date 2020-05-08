@@ -6,5 +6,9 @@ public enum GameAction {
   Raise,
   Call,
   Bet,
-  ReRaise
+  ReRaise,
+  Ready,
+  Join,
+  Leave,
+  Start
 }

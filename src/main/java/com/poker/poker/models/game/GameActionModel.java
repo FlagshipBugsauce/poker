@@ -2,7 +2,6 @@ package com.poker.poker.models.game;
 
 import com.poker.poker.models.enums.GameAction;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,9 +10,23 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GameActionModel {
-  @Schema(description = "The ID of the client.", example = "0a7d95ef-94ba-47bc-b591-febb365bc543")
-  private UUID userID;
 
-  @Schema(description = "The action that occurred.", example = "Fold")
+  @Schema(
+      description = "Player model representing the player that performed the action.",
+      implementation = PlayerModel.class)
+  private PlayerModel player;
+
+  @Schema(
+      description = "The action that occurred.",
+      example = "Fold",
+      implementation = GameAction.class)
   private GameAction gameAction;
+
+  @Schema(
+      description =
+          "Message that will be displayed somewhere in the client when this action "
+              + "occurs. Could be null.",
+      example = "Player 'FudgeNuts' has left the game.",
+      implementation = String.class)
+  private String clientMessage;
 }

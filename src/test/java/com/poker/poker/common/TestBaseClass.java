@@ -13,6 +13,7 @@ import com.poker.poker.models.enums.UserGroup;
 import com.poker.poker.models.game.CreateGameModel;
 import com.poker.poker.models.game.PlayerModel;
 import com.poker.poker.models.user.NewAccountModel;
+import com.poker.poker.models.user.UserModel;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +43,6 @@ public class TestBaseClass {
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final AuthRequestModel sampleAuthRequestModel =
       new AuthRequestModel(sampleEmail, samplePassword);
-  private final AuthResponseModel sampleAuthResponseModel = new AuthResponseModel(sampleJwt);
   private final UserDetails userDetails = new User(sampleEmail, samplePassword, new ArrayList<>());
   private final UserDocument userDocument =
       new UserDocument(
@@ -52,6 +52,10 @@ public class TestBaseClass {
           sampleUserGroup,
           sampleFirstName,
           sampleLastName);
+  private final UserModel sampleUserModel =
+      new UserModel(zeroUUID, sampleEmail, sampleUserGroup, sampleFirstName, sampleLastName);
+  private final AuthResponseModel sampleAuthResponseModel =
+      new AuthResponseModel(sampleJwt, sampleUserModel);
   private final NewAccountModel sampleNewAccountModel =
       new NewAccountModel(sampleEmail, samplePassword, sampleFirstName, sampleLastName);
   private final ApiSuccessModel sampleRegisterSuccessModel = new ApiSuccessModel("Success.");
@@ -96,5 +100,34 @@ public class TestBaseClass {
                 .content(inputJson))
         .andReturn()
         .getResponse();
+  }
+
+  /**
+   * Generates a random string of n letters.
+   *
+   * @param n The desired length of the string.
+   * @return A string of n random letters.
+   */
+  protected String randomLetterString(int n) {
+    StringBuilder sb = new StringBuilder(n);
+    for (int i = 0; i < n; i++) {
+      sb.append((char) (Math.random() * 26 + (Math.random() < 0.5 ? 'a' : 'A')));
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Generates a random UserDocument.
+   *
+   * @return A random UserDocument.
+   */
+  protected UserDocument randomUserDocument() {
+    return new UserDocument(
+        UUID.randomUUID(),
+        "test_email_" + randomLetterString(10) + "@" + randomLetterString(7) + ".com",
+        randomLetterString(50),
+        UserGroup.Client,
+        randomLetterString(15),
+        randomLetterString(15));
   }
 }

@@ -1,19 +1,21 @@
 package com.poker.poker.services;
 
-import com.poker.poker.config.constants.AppConstants;
+import com.poker.poker.config.constants.GameConstants;
 import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.ApiSuccessModel;
+import com.poker.poker.models.enums.GameAction;
 import com.poker.poker.models.enums.GameState;
 import com.poker.poker.models.game.CreateGameModel;
+import com.poker.poker.models.game.GameActionModel;
 import com.poker.poker.models.game.GetGameModel;
 import com.poker.poker.models.game.PlayerModel;
-import com.poker.poker.validation.exceptions.BadRequestException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,10 +29,15 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @AllArgsConstructor
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class GameService {
+
   /** A map of active games, keyed by the games ID. */
   private Map<UUID, GameDocument> activeGames;
 
-  /** A map of SSE emitter's, keyed by the ID of the user associated with the emitter. */
+  /**
+   * A map of SSE emitters, keyed by the ID of the user associated with the emitter. These emitters
+   * are used to send an updated GameDocument to players in a game, whenever something occurs in the
+   * game.
+   */
   private Map<UUID, SseEmitter> gameEmitters;
 
   /**
@@ -40,8 +47,16 @@ public class GameService {
    */
   private Map<UUID, UUID> userIdToGameIdMap;
 
-  private AppConstants appConstants;
+  /**
+   * A map of SSE emitters, keyed by user UUID's. These emitters are used to send an updated list of
+   * GetGameModels whenever a player joins/leaves a game.
+   */
+  private Map<UUID, SseEmitter> joinGameEmitters;
+
+  private GameConstants gameConstants;
   private UuidService uuidService;
+
+  private void cleanUpEmitters() {}
 
   /**
    * Throws a BadRequestException if there is a user with the user ID provided currently in a game.
@@ -50,7 +65,7 @@ public class GameService {
    */
   private void checkIfUserIsInGameAndThrow(UUID userId) {
     if (userIdToGameIdMap.get(userId) != null) {
-      throw appConstants.getJoinGamePlayerAlreadyJoinedException();
+      throw gameConstants.getJoinGamePlayerAlreadyJoinedException();
     }
   }
 
@@ -64,9 +79,14 @@ public class GameService {
     for (PlayerModel player : gameDocument.getPlayers()) {
       try {
         gameEmitters.get(player.getId()).send(gameDocument);
-        log.debug(appConstants.getJoinGameSendingUpdate(), player);
-      } catch (IOException | NullPointerException e) {
-        log.error(appConstants.getJoinGameSendingUpdateFailed(), player);
+        log.debug("Attempting to send updated gameDocument to client with ID: {}.", player.getId());
+      } catch (IOException e) {
+        log.error("Failed to send updated GameDocument to client with ID: {}.", player.getId());
+        log.error(
+            "Removing game emitter for player with ID: {}.", player.getId()); // TODO: make constant
+        gameEmitters.remove(player.getId());
+      } catch (NullPointerException e) {
+        log.info("There is no game emitter for user with ID: {}.", player.getId());
       }
     }
   }
@@ -81,24 +101,40 @@ public class GameService {
   public ApiSuccessModel ready(UserDocument user) {
     if (userIdToGameIdMap.get(user.getId()) == null
         || activeGames.get(userIdToGameIdMap.get(user.getId())) == null) {
-      log.error(appConstants.getPlayerReadyUnsuccessfulLog(), user.getId().toString());
-      throw appConstants.getUserNotInGameException();
+      log.error("Failed to set player's status to ready (user ID: {}).", user.getId().toString());
+      throw gameConstants.getReadyStatusUpdateFailException();
     }
 
-    boolean found = false;
-    for (PlayerModel player : activeGames.get(userIdToGameIdMap.get(user.getId())).getPlayers()) {
-      if (player.getId().equals(user.getId())) {
-        player.setReady(true);
-        found = true;
-      }
+    // Get the game document for the game now that we're sure it exists.
+    GameDocument gameDocument = activeGames.get(userIdToGameIdMap.get(user.getId()));
+
+    // Find the playerModel, throw if not found, otherwise, remove player from game.
+    final Optional<PlayerModel> player =
+        gameDocument.getPlayers().stream()
+            .filter(playerModel -> playerModel.getId().equals(user.getId()))
+            .findFirst();
+    if (!player.isPresent()) {
+      log.error("Failed to set player's status to ready (user ID: {}).", user.getId().toString());
+      throw gameConstants.getReadyStatusUpdateFailException();
     }
-    if (!found) {
-      log.error(appConstants.getPlayerReadyUnsuccessfulLog(), user.getId().toString());
-      throw appConstants.getUserNotInGameException();
-    }
-    log.debug(appConstants.getPlayerReadySuccessfulLog(), user.getId().toString());
-    sendGameDocumentToAllPlayers(activeGames.get(userIdToGameIdMap.get(user.getId())));
-    return new ApiSuccessModel(appConstants.getPlayerReadySuccessful());
+
+    // Set players status to ready.
+    player.get().setReady(true);
+
+    // Add the appropriate game action model.
+    gameDocument
+        .getGameActions()
+        .add(
+            new GameActionModel(
+                player.get(),
+                GameAction.Ready,
+                String.format(
+                    "%s %s is ready.", player.get().getFirstName(), player.get().getLastName())));
+
+    log.debug("Player status set to ready (ID: {}).", user.getId().toString());
+
+    sendGameDocumentToAllPlayers(gameDocument);
+    return new ApiSuccessModel("Player status set to ready.");
   }
 
   /**
@@ -108,36 +144,45 @@ public class GameService {
    * @return SseEmitter which will send updated game documents.
    */
   public SseEmitter getGameEmitter(UUID userId) {
-    //    try { // Need to pause for a short time, was getting exception otherwise.
-    //      Thread.sleep(10); // TODO: See if exception still happens after changing router redirect
-    // to occur after join response is received.
-    //    } catch (InterruptedException e) {
-    //      e.printStackTrace();
-    //    }
-    // Check that user is actually in a game before giving them an emitter.
+    // Check that the user is in a game.
     if (userIdToGameIdMap.get(userId) == null) {
-      throw appConstants.getUserNotInGameException();
+      throw gameConstants.getUserNotInGameException();
     }
 
     // Check the game document to make sure they are considered a player.
     GameDocument gameDocument = activeGames.get(userIdToGameIdMap.get(userId));
     if (gameDocument == null) {
-      log.error("");
-      throw appConstants.getInvalidUuidException();
+      log.error("There is no game associated with user with ID: {}.", userId);
+      throw gameConstants.getInvalidUuidException();
+    }
+    if (gameDocument.getPlayers().stream().noneMatch(p -> p.getId().equals(userId))) {
+      log.error(
+          "The game with ID: {}, associated with user with ID: {}, does not list the user as "
+              + "a current player.",
+          gameDocument.getId(),
+          userId);
+      throw gameConstants.getUserNotInGameException();
     }
 
-    boolean found = false;
-    for (PlayerModel player : gameDocument.getPlayers()) {
-      if (player.getId().equals(userId)) {
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      throw appConstants.getGetGameEmitterPlayerNotInGameException();
-    }
+    SseEmitter sseEmitter = new SseEmitter(gameConstants.getGameEmitterDuration());
+    sseEmitter.onCompletion(
+        () -> {
+          log.debug("Game emitter for user {} is complete.", userId);
+          gameEmitters.remove(userId);
+        });
+    sseEmitter.onTimeout(
+        () -> {
+          log.debug("Game emitter for user {} is timed out.", userId);
+          gameEmitters.remove(userId);
+          sseEmitter.complete();
+        });
+    sseEmitter.onError(
+        (ex) -> {
+          log.debug("Game emitter for user {} encountered an error.", userId);
+          activeGames.remove(userId);
+          ex.printStackTrace();
+        });
 
-    SseEmitter sseEmitter = new SseEmitter(appConstants.getGameEmitterDuration());
     gameEmitters.put(userId, sseEmitter);
 
     return sseEmitter;
@@ -154,19 +199,38 @@ public class GameService {
     SseEmitter emitter = gameEmitters.get(userId);
     GameDocument gameDocument = activeGames.get(userIdToGameIdMap.get(userId));
     if (emitter == null || gameDocument == null) {
-      log.error(appConstants.getGetGameDocumentErrorLog(), userId.toString());
-      throw appConstants.getEmitterFailToSendException();
+      log.error("Failed to send updated game document to user: {}.", userId.toString());
+      throw gameConstants.getEmitterFailToSendException();
     }
     try {
       emitter.send(gameDocument);
     } catch (IOException e) {
-      e.printStackTrace();
-      log.error(appConstants.getGetGameDocumentErrorLog(), userId.toString());
-      throw new BadRequestException(
-          appConstants.getEmitterFailToSendExceptionErrorType(),
-          Arrays.toString(e.getStackTrace()));
+      log.error("Failed to send updated game document to user: {}.", userId.toString());
+      throw gameConstants.getEmitterFailToSendException();
     }
-    return new ApiSuccessModel(appConstants.getUpdatedGameDocumentSentSuccessfully());
+    return new ApiSuccessModel("Updated game document was sent successfully.");
+  }
+
+  /**
+   * Manually request an updated list of games to be sent out to the user specified.
+   *
+   * @param userId ID of the user requesting an updated list of games.
+   * @return ApiSuccessModel indicating the request was carried out successfully.
+   */
+  public ApiSuccessModel getGameListUpdate(UUID userId) {
+    SseEmitter emitter = joinGameEmitters.get(userId);
+    if (emitter == null) {
+      throw gameConstants.getEmitterFailToSendException();
+    }
+    try {
+      emitter.send(getGameList());
+    } catch (IOException e) {
+      log.error("Failed to send game list update.");
+      log.error("Removing emitter for player with ID: {}.", userId);
+      joinGameEmitters.remove(userId);
+      throw gameConstants.getEmitterFailToSendException();
+    }
+    return new ApiSuccessModel("Updated game lists sent successfully");
   }
 
   /**
@@ -185,20 +249,22 @@ public class GameService {
             createGameModel.getName(),
             createGameModel.getMaxPlayers(),
             createGameModel.getBuyIn(),
-            Arrays.asList(
-                new PlayerModel(
-                    user.getId(),
-                    user.getEmail(),
-                    user.getGroup(),
-                    user.getFirstName(),
-                    user.getLastName(),
-                    false,
-                    true)),
+            new ArrayList<>(
+                Arrays.asList(
+                    new PlayerModel(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getGroup(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        false,
+                        true))),
             new ArrayList<>(),
             GameState.PreGame);
-    log.info(appConstants.getGameCreation(), user.getId());
+    log.info("User: {} created a game.", user.getId());
     activeGames.put(gameDocument.getId(), gameDocument);
     userIdToGameIdMap.put(user.getId(), gameDocument.getId());
+    sendUpdatedGetGameLists();
     return new ApiSuccessModel(gameDocument.getId().toString());
   }
 
@@ -216,7 +282,10 @@ public class GameService {
             new GetGameModel(
                 gd.getId(),
                 gd.getName(),
-                gd.getHost(),
+                gd.getPlayers().stream()
+                    .filter(p -> p.getId().equals(gd.getHost()))
+                    .findFirst()
+                    .get(),
                 gd.getPlayers().size(),
                 gd.getMaxPlayers(),
                 gd.getBuyIn()));
@@ -241,7 +310,7 @@ public class GameService {
     // Check if user is already in the current game.
     if (userIdToGameIdMap.get(user.getId()) != null
         && userIdToGameIdMap.get(user.getId()).equals(UUID.fromString(gameId))) {
-      return new ApiSuccessModel(appConstants.getJoinGamePlayerAlreadyInGameResponse());
+      return new ApiSuccessModel("Player is already in the game.");
     }
     // If user isn't in the game with ID = gameId, then throw.
     checkIfUserIsInGameAndThrow(user.getId());
@@ -251,21 +320,23 @@ public class GameService {
 
     // Return a bad request status if there is no game with ID provided.
     if (gameDocument == null) {
-      throw appConstants.getInvalidUuidException();
+      throw gameConstants.getInvalidUuidException();
     }
 
     // Add new player to list of players in currently in the game.
+    final PlayerModel playerModel = new PlayerModel(user, false, false);
+    gameDocument.getPlayers().add(playerModel);
+
+    // Add the appropriate game action model.
     gameDocument
-        .getPlayers()
+        .getGameActions()
         .add(
-            new PlayerModel(
-                user.getId(),
-                user.getEmail(),
-                user.getGroup(),
-                user.getFirstName(),
-                user.getLastName(),
-                false,
-                false));
+            new GameActionModel(
+                playerModel,
+                GameAction.Join,
+                String.format(
+                    "%s %s has joined the game.",
+                    playerModel.getFirstName(), playerModel.getLastName())));
     userIdToGameIdMap.put(user.getId(), gameDocument.getId());
 
     // Update all players copy of gameDocument who are in the game via SSE
@@ -273,14 +344,184 @@ public class GameService {
       if (!player.getId().equals(user.getId())) {
         SseEmitter emitter = gameEmitters.get(player.getId());
         try {
-          log.debug(appConstants.getJoinGameSendingUpdate(), player);
+          log.debug(
+              "Attempting to send updated gameDocument to client with ID: {}.", player.getId());
           emitter.send(gameDocument);
-        } catch (IOException | NullPointerException e) {
-          log.error(appConstants.getJoinGameSendingUpdateFailed(), player);
+        } catch (IOException e) {
+          log.error("Failed to send updated GameDocument to client with ID: {}.", player.getId());
+          log.error("Removing game emitter for player with ID: {}.", player.getId());
+          gameEmitters.remove(player.getId());
+        } catch (NullPointerException e) {
+          log.info("There is no game emitter for user with ID: {}.", player.getId());
         }
       }
     }
 
-    return new ApiSuccessModel(appConstants.getJoinGameJoinSuccessful());
+    sendUpdatedGetGameLists();
+    return new ApiSuccessModel("User joined the game successfully.");
+  }
+
+  /**
+   * Removes a player from a game. This will be called when a player leaves, or when the host kicks
+   * a player from the game.
+   *
+   * @param user The user to be removed.
+   * @return ApiSuccessModel indicating that the request was completed successfully.
+   */
+  public ApiSuccessModel removePlayerFromGame(UserDocument user) {
+    UUID gameId = userIdToGameIdMap.get(user.getId());
+    if (gameId == null) {
+      throw gameConstants.getLeaveGameException();
+    }
+
+    GameDocument game = activeGames.get(gameId);
+    if (game == null) {
+      throw gameConstants.getLeaveGameException();
+    }
+
+    // Find the playerModel, throw if not found, otherwise, remove player from game.
+    final Optional<PlayerModel> player =
+        game.getPlayers().stream()
+            .filter(playerModel -> playerModel.getId().equals(user.getId()))
+            .findFirst();
+    if (!player.isPresent()) {
+      throw gameConstants.getLeaveGameException();
+    }
+    game.getPlayers().removeIf(playerModel -> playerModel.getId().equals(user.getId()));
+
+    if (game.getPlayers().size() > 0) {
+      // Select another host.
+      game.setHost(game.getPlayers().get(0).getId());
+      log.debug("Changing host from: {}, to: {}.", user.getId(), game.getHost());
+    } else {
+      // The game is empty, so remove it.
+      activeGames.remove(game.getId());
+      log.debug("No players left in game: {}, removing game.", game.getId());
+    }
+
+    // Remove user from mapping of user ID to game ID.
+    userIdToGameIdMap.remove(user.getId());
+    log.debug("Player with ID: {}, has left game with ID: {}.", user.getId(), game.getId());
+
+    // Destroy the emitter sending this user updates.
+    try {
+      completeGameEmitterHelper(user.getId());
+    } catch (Exception e) {
+      log.error("Issue removing the game emitter when player with ID: {}.", user.getId());
+    }
+
+    // Add GameActionModel with the appropriate action.
+    game.getGameActions()
+        .add(
+            new GameActionModel(
+                player.get(),
+                GameAction.Leave,
+                String.format(
+                    "%s %s has left the game.",
+                    player.get().getFirstName(), player.get().getLastName())));
+
+    // Update the players in the game, and players who are on the join game page.
+    sendGameDocumentToAllPlayers(game);
+    sendUpdatedGetGameLists();
+
+    return new ApiSuccessModel("Player has left the game.");
+  }
+
+  private void completeGameEmitterHelper(UUID userId) {
+    // Check if there is an emitter associated with the userId, throw if not.
+    if (gameEmitters.get(userId) == null) {
+      throw gameConstants.getNoEmitterForIdException();
+    }
+    gameEmitters.remove(userId).complete();
+  }
+
+  /**
+   * Requests for the game emitter to be "completed", which involves removing it from the hash map
+   * which stores game emitters.
+   *
+   * @param userId The user ID associated with the emitter being completed.
+   * @return ApiSuccessModel to indicate to the caller that the request was successful.
+   */
+  public ApiSuccessModel completeGameEmitter(UUID userId) {
+    completeGameEmitterHelper(userId);
+    return new ApiSuccessModel("Emitter was destroyed successfully.");
+  }
+
+  /**
+   * Creates and returns an SSE emitter which will send the client updated lists of games for the
+   * join game page.
+   *
+   * @param userId The ID of the user the emitter is being sent to.
+   * @return SseEmitter used to send client an updated list of games.
+   */
+  public SseEmitter getJoinGameEmitter(UUID userId) {
+    // TODO: Maybe add a check to ensure there isn't already an emitter for this user.
+    SseEmitter sseEmitter = new SseEmitter(gameConstants.getJoinGameEmitterDuration());
+    sseEmitter.onCompletion(
+        () -> {
+          log.debug("Join game emitter for {} is complete.", userId);
+          joinGameEmitters.remove(userId);
+        });
+    sseEmitter.onTimeout(
+        () -> {
+          log.debug("Join game emitter for {} timed out.", userId);
+          joinGameEmitters.remove(userId);
+          sseEmitter.complete();
+        });
+    sseEmitter.onError(
+        (ex) -> {
+          log.debug("Join game emitter for {} encountered an error. Should be removed.", userId);
+          joinGameEmitters.remove(userId);
+          sseEmitter.complete();
+        });
+
+    joinGameEmitters.put(userId, sseEmitter);
+    log.debug("Giving join game emitter to user with ID: {}.", userId);
+    return sseEmitter;
+  }
+
+  /**
+   * When a player leaves the join game page, we don't want to maintain the emitter. This method
+   * will destroy it by calling the complete method.
+   *
+   * @param userId User ID of the player whose emitter will be destroyed.
+   * @return
+   */
+  public ApiSuccessModel completeJoinGameEmitter(UUID userId) {
+    if (joinGameEmitters.get(userId) == null) {
+      throw gameConstants.getNoEmitterForIdException();
+    }
+    // .complete() should remove the emitter from the map.
+    joinGameEmitters.get(userId).complete();
+    log.debug("Removing join game emitter for user with ID: {}.", userId); // TODO: ADD CONSTANTS
+
+    /*
+         TODO: It seems like the .complete() is running on a different thread, and thus, the
+          emitter is not being removed from the hash map before this log which outputs all the
+          emitters in the hash map, is outputted. The emitter is being removed, it's just
+          occurring AFTER the log. Should investigate some way of ensuring the emitter is removed
+          before logging. Probably can use a semaphore or some kind of loop with a thread.sleep.
+    */
+    log.debug("Current join game emitters: {}.", joinGameEmitters);
+    return new ApiSuccessModel("Emitter was destroyed successfully.");
+  }
+
+  /**
+   * Helper method that sends updated game lists to clients viewing the join game page, whenever a a
+   * player joins, leaves, or is kicked from, a game.
+   */
+  private void sendUpdatedGetGameLists() {
+    for (UUID id : joinGameEmitters.keySet()) {
+      try {
+        SseEmitter emitter = joinGameEmitters.get(id);
+        emitter.send(getGameList());
+      } catch (IOException e) {
+        log.error(
+            "Failed to send updated game list to player with ID: {}. Removing this players "
+                + "emitter from the collection. Client must request another to receive updates.",
+            id);
+        joinGameEmitters.remove(id);
+      }
+    }
   }
 }

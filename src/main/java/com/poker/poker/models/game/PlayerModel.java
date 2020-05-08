@@ -1,5 +1,6 @@
 package com.poker.poker.models.game;
 
+import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.enums.UserGroup;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
@@ -31,4 +32,29 @@ public class PlayerModel {
 
   @Schema(description = "Specifies whether the player created the game.", example = "false")
   private boolean host;
+
+  /**
+   * Constructor that takes in a UserDocument and fill in the fields the two classes have in common.
+   *
+   * @param userDocument UserDocument representing a player.
+   */
+  public PlayerModel(UserDocument userDocument) {
+    id = userDocument.getId();
+    email = userDocument.getEmail();
+    group = userDocument.getGroup();
+    firstName = userDocument.getFirstName();
+    lastName = userDocument.getLastName();
+  }
+
+  /**
+   * Constructor that takes in a UserDocument as well as the ready status and whether this player is
+   * currently the host of game.
+   *
+   * @param userDocument UserDocument representing a player.
+   */
+  public PlayerModel(UserDocument userDocument, boolean ready, boolean host) {
+    this(userDocument);
+    this.ready = ready;
+    this.host = host;
+  }
 }
