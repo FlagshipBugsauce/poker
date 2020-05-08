@@ -4,7 +4,7 @@ import { GameService, UsersService } from 'src/app/api/services';
 import { SseService } from 'src/app/shared/sse.service';
 import { ApiInterceptor } from 'src/app/api-interceptor.service';
 import { GameDocument, ApiSuccessModel, PlayerModel, GameActionModel } from 'src/app/api/models';
-import { samplePlayers, LobbyComponent } from '../lobby/lobby.component';
+import { LobbyComponent } from '../lobby/lobby.component';
 import { ApiConfiguration } from 'src/app/api/api-configuration';
 import { LeaveGameGuardService } from './leave-game-guard.service';
 import { PopupComponent, PopupContentModel } from 'src/app/shared/popup/popup.component';
@@ -109,22 +109,4 @@ export class GameComponent implements OnInit, AfterViewInit {
 
     });
   }
-}
-
-export const sampleGameModel = <GameDocument> {
-  id: "0a7d95ef-94ba-47bc-b591-febb365bc543",
-  currentGameState: "PreGame",
-  host: "Jimmy McGillicutty",
-  players: [
-    "6f5924ca-5c79-418f-89bf-5a3e2bc248cc",
-    "9a2b7bc1-2a56-4bb1-b2bb-936b30c60771",    
-    "5386f8a3-45d5-4b07-83ea-62579edfa831",    
-    "039c41e8-15e0-4423-8b25-b7b804736592",    
-    "3df981c2-dd7a-43ea-854e-a34e53b61cd1",    
-    "1e6fece1-ad09-477e-b63e-4e71f376ee53",
-  ],
-  gameActions: null,
-  maxPlayers: 10,
-  buyIn: 420,
-  name: "Justin's Summer Sunday Smokeout For Smokers"
 }
