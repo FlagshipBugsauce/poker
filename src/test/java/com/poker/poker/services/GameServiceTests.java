@@ -34,87 +34,82 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class GameServiceTests extends TestBaseClass {
 
-  @Spy
-  private Map<UUID, GameDocument> activeGames;
-  @Spy
-  private Map<UUID, SseEmitter> gameEmitters;
-  @Spy
-  private Map<UUID, UUID> userIdToGameIdMap;
-  @Spy
-  private Map<UUID, SseEmitter> joinGameEmitters;
-  @Spy
-  private GameConstants gameConstants;
-  @Mock
-  private UuidService uuidService;
+  @Spy private Map<UUID, GameDocument> activeGames;
+  @Spy private Map<UUID, SseEmitter> gameEmitters;
+  @Spy private Map<UUID, UUID> userIdToGameIdMap;
+  @Spy private Map<UUID, SseEmitter> joinGameEmitters;
+  @Spy private GameConstants gameConstants;
+  @Mock private UuidService uuidService;
 
   private GameService gameService;
 
   /**
    * Helper which will create a game with a random name and arbitrary host. It will then add the
    * specified number of players to the game. The players will be generated randomly.
+   *
    * @param actions Lambda function that will be executed after the game is set up.
    * @param numPlayers The desired number of players which should be added to the game.
    */
   private void withRandomGameWithPlayers(Consumer<List<Object>> actions, int numPlayers) {
-    withRandomGame((args) -> {
-      for (int i = 0; i < numPlayers; i++) {
-        UserDocument newPlayer = randomUserDocument();
-        gameService.joinGame(args.get(2).toString(), newPlayer);
-        if (args.get(3) instanceof List) {
-          ((List<UserDocument>) args.get(3)).add(newPlayer);
-        }
-      }
-      actions.accept(args);
-    });
+    withRandomGame(
+        (args) -> {
+          for (int i = 0; i < numPlayers; i++) {
+            UserDocument newPlayer = randomUserDocument();
+            gameService.joinGame(args.get(2).toString(), newPlayer);
+            if (args.get(3) instanceof List) {
+              ((List<UserDocument>) args.get(3)).add(newPlayer);
+            }
+          }
+          actions.accept(args);
+        });
   }
 
   /**
    * Helper which will create a game with a random name and arbitrary host.
+   *
    * @param actions Lambda function that will be executed after the game is created.
    */
   private void withRandomGame(Consumer<List<Object>> actions) {
-    final CreateGameModel newGame = new CreateGameModel(
-        "TestGame_" + randomLetterString(25),
-        gameConstants.getMaxNumberOfPlayers(),
-        new BigDecimal(420));
+    final CreateGameModel newGame =
+        new CreateGameModel(
+            "TestGame_" + randomLetterString(25),
+            gameConstants.getMaxNumberOfPlayers(),
+            new BigDecimal(420));
     withSpecifiedGame(actions, newGame);
   }
 
   /**
    * Helper which will create a game with a specific game model and arbitrary host.
    *
-   * The arguments of the lambda will be:
+   * <p>The arguments of the lambda will be:
    *
-   * 0->CreateGameModel, 1->Host, 2->GameId, 3->List of UserDocuments
+   * <p>0->CreateGameModel, 1->Host, 2->GameId, 3->List of UserDocuments
    *
    * @param actions Lambda function that will be executed after the game is created.
    * @param newGame CreateGameModel used when creating the game.
    */
   private void withSpecifiedGame(Consumer<List<Object>> actions, CreateGameModel newGame) {
-    UserDocument host = new UserDocument(
-        UUID.randomUUID(),
-        "host@most.com",
-        null,
-        UserGroup.Administrator,
-        "Billy",
-        "Bob");
+    UserDocument host =
+        new UserDocument(
+            UUID.randomUUID(), "host@most.com", null, UserGroup.Administrator, "Billy", "Bob");
     withSpecifiedGameAndHost(actions, newGame, host);
   }
 
   /**
    * Helper which will create a game with a specific CreateGameModel and specific host.
+   *
    * @param actions Lambda function that will be executed after the game is created.
    * @param newGame CreateGameModel used when creating the game.
    * @param host The model for the host of the game.
    */
-  private void withSpecifiedGameAndHost(Consumer<List<Object>> actions,
-      CreateGameModel newGame,
-      UserDocument host) {
-    List<Object> arguments = Arrays.asList(
-        newGame,
-        host,
-        UUID.fromString(gameService.createGame(newGame, host).getMessage()),
-        new ArrayList<>(Arrays.asList(host)));
+  private void withSpecifiedGameAndHost(
+      Consumer<List<Object>> actions, CreateGameModel newGame, UserDocument host) {
+    List<Object> arguments =
+        Arrays.asList(
+            newGame,
+            host,
+            UUID.fromString(gameService.createGame(newGame, host).getMessage()),
+            new ArrayList<>(Arrays.asList(host)));
     actions.accept(arguments);
   }
 
@@ -126,22 +121,23 @@ public class GameServiceTests extends TestBaseClass {
     userIdToGameIdMap = new HashMap<>();
     joinGameEmitters = new HashMap<>();
 
-    gameService = new GameService(
-        activeGames,
-        gameEmitters,
-        userIdToGameIdMap,
-        joinGameEmitters,
-        gameConstants,
-        uuidService);
+    gameService =
+        new GameService(
+            activeGames,
+            gameEmitters,
+            userIdToGameIdMap,
+            joinGameEmitters,
+            gameConstants,
+            uuidService);
 
     Mockito.when(uuidService.isValidUuidString(Mockito.anyString())).thenCallRealMethod();
     Mockito.doAnswer(
-        (invocation) -> {
-          if (!uuidService.isValidUuidString(invocation.getArgument(0))) {
-            throw new BadRequestException("Invalid UUID", "Invalid UUID");
-          }
-          return null;
-        })
+            (invocation) -> {
+              if (!uuidService.isValidUuidString(invocation.getArgument(0))) {
+                throw new BadRequestException("Invalid UUID", "Invalid UUID");
+              }
+              return null;
+            })
         .when(uuidService)
         .checkIfValidAndThrowBadRequest(Mockito.anyString());
   }
@@ -245,9 +241,9 @@ public class GameServiceTests extends TestBaseClass {
   public void testJoinGame_succeeds_whenArgumentsValid() {
     // Assuming that createGame function works correctly here.
     // Given
-    final UUID gameId = UUID.fromString(gameService
-        .createGame(getSampleCreateGameModel(), getUserDocument())
-        .getMessage());
+    final UUID gameId =
+        UUID.fromString(
+            gameService.createGame(getSampleCreateGameModel(), getUserDocument()).getMessage());
     final UserDocument user = new UserDocument();
     user.setId(UUID.randomUUID());
 
@@ -271,9 +267,9 @@ public class GameServiceTests extends TestBaseClass {
     // Given
     final String gameId1 = "abc";
     final String gameId2 = UUID.randomUUID().toString();
-    final UUID realGameId = UUID.fromString(gameService
-        .createGame(getSampleCreateGameModel(), getUserDocument())
-        .getMessage());
+    final UUID realGameId =
+        UUID.fromString(
+            gameService.createGame(getSampleCreateGameModel(), getUserDocument()).getMessage());
     final UserDocument user = new UserDocument();
     user.setId(UUID.randomUUID());
 
@@ -283,33 +279,40 @@ public class GameServiceTests extends TestBaseClass {
     Assertions.assertThrows(BadRequestException.class, () -> gameService.joinGame(gameId2, user));
     // Check that only the user that created the game is in a game.
     userIdToGameIdMap
-        .keySet().forEach(id -> Assertions.assertEquals(getUserDocument().getId(), id));
+        .keySet()
+        .forEach(id -> Assertions.assertEquals(getUserDocument().getId(), id));
     Assertions.assertEquals(1, activeGames.get(realGameId).getPlayers().size());
   }
 
   @Test
   public void testReady_succeeds_whenPlayerIsInGame() {
-    withRandomGameWithPlayers((args) -> {
-      gameService.ready((UserDocument) args.get(1));
-      Assertions.assertTrue(activeGames.get(args.get(2)).getPlayers().get(0).isReady());
-    }, 2);
+    withRandomGameWithPlayers(
+        (args) -> {
+          gameService.ready((UserDocument) args.get(1));
+          Assertions.assertTrue(activeGames.get(args.get(2)).getPlayers().get(0).isReady());
+        },
+        2);
   }
 
   @Test
   public void testReady_fails_whenPlayerIsNotInGame() {
-    withRandomGameWithPlayers((args) -> Assertions.assertThrows(BadRequestException.class,
-        () -> gameService.ready(randomUserDocument())), 2);
+    withRandomGameWithPlayers(
+        (args) ->
+            Assertions.assertThrows(
+                BadRequestException.class, () -> gameService.ready(randomUserDocument())),
+        2);
   }
 
   @Test
   public void testReady_fails_whenPlayerNotInPlayerList() {
-    withRandomGameWithPlayers((args) -> {
-      GameDocument game = activeGames.get(args.get(2));
-      List<UserDocument> users = (List<UserDocument>) args.get(3);
-      UserDocument user = users.get(1);
-      game.getPlayers().removeIf(player -> player.getId().equals(user.getId()));
-      Assertions.assertThrows(BadRequestException.class,
-          () -> gameService.ready(user));
-    }, 2);
+    withRandomGameWithPlayers(
+        (args) -> {
+          GameDocument game = activeGames.get(args.get(2));
+          List<UserDocument> users = (List<UserDocument>) args.get(3);
+          UserDocument user = users.get(1);
+          game.getPlayers().removeIf(player -> player.getId().equals(user.getId()));
+          Assertions.assertThrows(BadRequestException.class, () -> gameService.ready(user));
+        },
+        2);
   }
 }

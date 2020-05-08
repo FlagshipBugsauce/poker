@@ -51,7 +51,8 @@ public class UserService {
           new UsernamePasswordAuthenticationToken(
               authRequestModel.getEmail(), authRequestModel.getPassword()));
     } catch (BadCredentialsException e) {
-      log.error("Authentication of user {} failed because the password provided is invalid.",
+      log.error(
+          "Authentication of user {} failed because the password provided is invalid.",
           authRequestModel.getEmail());
       throw appConstants.getBadPasswordException();
     }
@@ -125,8 +126,10 @@ public class UserService {
     }
     // User is in the correct group.
     else {
-      log.debug("User: {} attempted to validate and was successful. Groups allowed: {}.",
-          userDocument.getId(), groupsAllowed);
+      log.debug(
+          "User: {} attempted to validate and was successful. Groups allowed: {}.",
+          userDocument.getId(),
+          groupsAllowed);
     }
   }
 

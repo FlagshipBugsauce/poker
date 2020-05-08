@@ -10,7 +10,6 @@ import com.poker.poker.models.game.CreateGameModel;
 import com.poker.poker.models.game.GameActionModel;
 import com.poker.poker.models.game.GetGameModel;
 import com.poker.poker.models.game.PlayerModel;
-import com.poker.poker.validation.exceptions.BadRequestException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -157,8 +156,11 @@ public class GameService {
       throw gameConstants.getInvalidUuidException();
     }
     if (gameDocument.getPlayers().stream().noneMatch(p -> p.getId().equals(userId))) {
-      log.error("The game with ID: {}, associated with user with ID: {}, does not list the user as "
-          + "a current player.", gameDocument.getId(), userId);
+      log.error(
+          "The game with ID: {}, associated with user with ID: {}, does not list the user as "
+              + "a current player.",
+          gameDocument.getId(),
+          userId);
       throw gameConstants.getUserNotInGameException();
     }
 
@@ -211,6 +213,7 @@ public class GameService {
 
   /**
    * Manually request an updated list of games to be sent out to the user specified.
+   *
    * @param userId ID of the user requesting an updated list of games.
    * @return ApiSuccessModel indicating the request was carried out successfully.
    */
@@ -389,8 +392,7 @@ public class GameService {
     if (game.getPlayers().size() > 0) {
       // Select another host.
       game.setHost(game.getPlayers().get(0).getId());
-      log.debug(
-          "Changing host from: {}, to: {}.", user.getId(), game.getHost());
+      log.debug("Changing host from: {}, to: {}.", user.getId(), game.getHost());
     } else {
       // The game is empty, so remove it.
       activeGames.remove(game.getId());
@@ -399,10 +401,7 @@ public class GameService {
 
     // Remove user from mapping of user ID to game ID.
     userIdToGameIdMap.remove(user.getId());
-    log.debug(
-        "Player with ID: {}, has left game with ID: {}.",
-        user.getId(),
-        game.getId());
+    log.debug("Player with ID: {}, has left game with ID: {}.", user.getId(), game.getId());
 
     // Destroy the emitter sending this user updates.
     try {
@@ -439,6 +438,7 @@ public class GameService {
   /**
    * Requests for the game emitter to be "completed", which involves removing it from the hash map
    * which stores game emitters.
+   *
    * @param userId The user ID associated with the emitter being completed.
    * @return ApiSuccessModel to indicate to the caller that the request was successful.
    */
@@ -516,8 +516,10 @@ public class GameService {
         SseEmitter emitter = joinGameEmitters.get(id);
         emitter.send(getGameList());
       } catch (IOException e) {
-        log.error("Failed to send updated game list to player with ID: {}. Removing this players "
-            + "emitter from the collection. Client must request another to receive updates.", id);
+        log.error(
+            "Failed to send updated game list to player with ID: {}. Removing this players "
+                + "emitter from the collection. Client must request another to receive updates.",
+            id);
         joinGameEmitters.remove(id);
       }
     }

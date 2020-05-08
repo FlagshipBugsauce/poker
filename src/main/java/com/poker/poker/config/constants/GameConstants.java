@@ -20,8 +20,7 @@ public class GameConstants extends AppConstants {
       new BadRequestException("Failed to Join", "Cannot join more than one game at a time.");
 
   private final BadRequestException emitterFailToSendException =
-      new BadRequestException(
-          "Failed to Send Update", "Sending update to client failed.");
+      new BadRequestException("Failed to Send Update", "Sending update to client failed.");
 
   private final BadRequestException readyStatusUpdateFailException =
       new BadRequestException(
@@ -32,8 +31,8 @@ public class GameConstants extends AppConstants {
           "Emitter Not Sent", "Player must be in a game in order to receive a game emitter.");
 
   private final BadRequestException noEmitterForIdException =
-      new BadRequestException("No Emitter Found",
-          "There is no emitter associated with the ID provided.");
+      new BadRequestException(
+          "No Emitter Found", "There is no emitter associated with the ID provided.");
 
   private final BadRequestException leaveGameException =
       new BadRequestException(

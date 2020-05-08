@@ -49,18 +49,21 @@ public class AppConstants {
       new BadRequestException("Invalid UUID", "UUID provided is invalid.");
 
   // UserService CONSTANTS
-  private final BadRequestException badPasswordException = new BadRequestException(
-      "Authentication Failed", "The email or password entered is invalid. Please try again.");
+  private final BadRequestException badPasswordException =
+      new BadRequestException(
+          "Authentication Failed", "The email or password entered is invalid. Please try again.");
 
-  private final BadRequestException registrationFailedException = new BadRequestException(
-      "Invalid Email", "An account with the email provided already exists.");
+  private final BadRequestException registrationFailedException =
+      new BadRequestException(
+          "Invalid Email", "An account with the email provided already exists.");
 
-  private final ForbiddenException invalidGroupException = new ForbiddenException(
-      "Insufficient Permissions",
-      "User is not a member of a group which has permission to access this resource.");
+  private final ForbiddenException invalidGroupException =
+      new ForbiddenException(
+          "Insufficient Permissions",
+          "User is not a member of a group which has permission to access this resource.");
 
-  private final BadRequestException userInfoNotFoundException = new BadRequestException(
-      "User Not Found", "No user with the ID provided could be found.");
+  private final BadRequestException userInfoNotFoundException =
+      new BadRequestException("User Not Found", "No user with the ID provided could be found.");
 
   // UserGroup CONSTANTS
   private final List<UserGroup> adminGroups =

@@ -104,6 +104,7 @@ public class TestBaseClass {
 
   /**
    * Generates a random string of n letters.
+   *
    * @param n The desired length of the string.
    * @return A string of n random letters.
    */
@@ -117,6 +118,7 @@ public class TestBaseClass {
 
   /**
    * Generates a random UserDocument.
+   *
    * @return A random UserDocument.
    */
   protected UserDocument randomUserDocument() {

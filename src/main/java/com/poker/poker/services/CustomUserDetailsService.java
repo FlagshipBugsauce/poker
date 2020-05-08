@@ -3,7 +3,6 @@ package com.poker.poker.services;
 import com.poker.poker.config.constants.AppConstants;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.repositories.UserRepository;
-import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

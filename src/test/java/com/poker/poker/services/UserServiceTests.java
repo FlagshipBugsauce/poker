@@ -2,7 +2,6 @@ package com.poker.poker.services;
 
 import com.poker.poker.common.TestBaseClass;
 import com.poker.poker.config.constants.AppConstants;
-import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.AuthResponseModel;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.validation.exceptions.BadRequestException;
