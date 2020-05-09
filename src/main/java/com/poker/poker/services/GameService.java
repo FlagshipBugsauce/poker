@@ -30,6 +30,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class GameService {
 
+  private SseService sseService;
+
   /** A map of active games, keyed by the games ID. */
   private Map<UUID, GameDocument> activeGames;
 

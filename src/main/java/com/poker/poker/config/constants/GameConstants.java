@@ -16,6 +16,9 @@ public class GameConstants extends AppConstants {
   private final int maxNumberOfPlayers = 10;
 
   // Exceptions
+  private final BadRequestException invalidEmitterTypeException =
+      new BadRequestException("Invalid Emitter Type", "The emitter type specified is invalid.");
+
   private final BadRequestException joinGamePlayerAlreadyJoinedException =
       new BadRequestException("Failed to Join", "Cannot join more than one game at a time.");
 

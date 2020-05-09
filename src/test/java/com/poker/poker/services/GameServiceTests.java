@@ -34,6 +34,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class GameServiceTests extends TestBaseClass {
 
+  @Mock private SseService sseService;
   @Spy private Map<UUID, GameDocument> activeGames;
   @Spy private Map<UUID, SseEmitter> gameEmitters;
   @Spy private Map<UUID, UUID> userIdToGameIdMap;
@@ -123,6 +124,7 @@ public class GameServiceTests extends TestBaseClass {
 
     gameService =
         new GameService(
+            sseService,
             activeGames,
             gameEmitters,
             userIdToGameIdMap,
