@@ -37,6 +37,10 @@ public class GameConstants extends AppConstants {
       new BadRequestException(
           "No Emitter Found", "There is no emitter associated with the ID provided.");
 
+  private final BadRequestException noEmitterModelForIdException =
+      new BadRequestException(
+          "No Emitter Model Found", "There is no emitter model associated with the ID provided.");
+
   private final BadRequestException leaveGameException =
       new BadRequestException(
           "Error Leaving Game", "Game does not exist, or player is not in a game.");

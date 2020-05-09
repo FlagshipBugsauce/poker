@@ -4,6 +4,7 @@ import com.poker.poker.config.constants.GameConstants;
 import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.ApiSuccessModel;
+import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.enums.GameAction;
 import com.poker.poker.models.enums.GameState;
 import com.poker.poker.models.game.CreateGameModel;
@@ -53,7 +54,7 @@ public class GameService {
    * A map of SSE emitters, keyed by user UUID's. These emitters are used to send an updated list of
    * GetGameModels whenever a player joins/leaves a game.
    */
-  private Map<UUID, SseEmitter> joinGameEmitters;
+//  private Map<UUID, SseEmitter> joinGameEmitters;
 
   private GameConstants gameConstants;
   private UuidService uuidService;
@@ -220,18 +221,7 @@ public class GameService {
    * @return ApiSuccessModel indicating the request was carried out successfully.
    */
   public ApiSuccessModel getGameListUpdate(UUID userId) {
-    SseEmitter emitter = joinGameEmitters.get(userId);
-    if (emitter == null) {
-      throw gameConstants.getEmitterFailToSendException();
-    }
-    try {
-      emitter.send(getGameList());
-    } catch (IOException e) {
-      log.error("Failed to send game list update.");
-      log.error("Removing emitter for player with ID: {}.", userId);
-      joinGameEmitters.remove(userId);
-      throw gameConstants.getEmitterFailToSendException();
-    }
+    sseService.sendUpdate(EmitterType.GameList, userId, getGameList());
     return new ApiSuccessModel("Updated game lists sent successfully");
   }
 
@@ -266,7 +256,8 @@ public class GameService {
     log.info("User: {} created a game.", user.getId());
     activeGames.put(gameDocument.getId(), gameDocument);
     userIdToGameIdMap.put(user.getId(), gameDocument.getId());
-    sendUpdatedGetGameLists();
+
+    sseService.sendToAll(EmitterType.GameList, getGameList());
     return new ApiSuccessModel(gameDocument.getId().toString());
   }
 
@@ -359,7 +350,7 @@ public class GameService {
       }
     }
 
-    sendUpdatedGetGameLists();
+    sseService.sendToAll(EmitterType.GameList, getGameList());
     return new ApiSuccessModel("User joined the game successfully.");
   }
 
@@ -424,8 +415,8 @@ public class GameService {
 
     // Update the players in the game, and players who are on the join game page.
     sendGameDocumentToAllPlayers(game);
-    sendUpdatedGetGameLists();
 
+    sseService.sendToAll(EmitterType.GameList, getGameList());
     return new ApiSuccessModel("Player has left the game.");
   }
 
@@ -458,28 +449,7 @@ public class GameService {
    */
   public SseEmitter getJoinGameEmitter(UUID userId) {
     // TODO: Maybe add a check to ensure there isn't already an emitter for this user.
-    SseEmitter sseEmitter = new SseEmitter(gameConstants.getJoinGameEmitterDuration());
-    sseEmitter.onCompletion(
-        () -> {
-          log.debug("Join game emitter for {} is complete.", userId);
-          joinGameEmitters.remove(userId);
-        });
-    sseEmitter.onTimeout(
-        () -> {
-          log.debug("Join game emitter for {} timed out.", userId);
-          joinGameEmitters.remove(userId);
-          sseEmitter.complete();
-        });
-    sseEmitter.onError(
-        (ex) -> {
-          log.debug("Join game emitter for {} encountered an error. Should be removed.", userId);
-          joinGameEmitters.remove(userId);
-          sseEmitter.complete();
-        });
-
-    joinGameEmitters.put(userId, sseEmitter);
-    log.debug("Giving join game emitter to user with ID: {}.", userId);
-    return sseEmitter;
+    return sseService.createEmitter(EmitterType.GameList, userId, () -> {});
   }
 
   /**
@@ -490,40 +460,7 @@ public class GameService {
    * @return
    */
   public ApiSuccessModel completeJoinGameEmitter(UUID userId) {
-    if (joinGameEmitters.get(userId) == null) {
-      throw gameConstants.getNoEmitterForIdException();
-    }
-    // .complete() should remove the emitter from the map.
-    joinGameEmitters.get(userId).complete();
-    log.debug("Removing join game emitter for user with ID: {}.", userId); // TODO: ADD CONSTANTS
-
-    /*
-         TODO: It seems like the .complete() is running on a different thread, and thus, the
-          emitter is not being removed from the hash map before this log which outputs all the
-          emitters in the hash map, is outputted. The emitter is being removed, it's just
-          occurring AFTER the log. Should investigate some way of ensuring the emitter is removed
-          before logging. Probably can use a semaphore or some kind of loop with a thread.sleep.
-    */
-    log.debug("Current join game emitters: {}.", joinGameEmitters);
+    sseService.completeEmitter(EmitterType.GameList, userId);
     return new ApiSuccessModel("Emitter was destroyed successfully.");
-  }
-
-  /**
-   * Helper method that sends updated game lists to clients viewing the join game page, whenever a a
-   * player joins, leaves, or is kicked from, a game.
-   */
-  private void sendUpdatedGetGameLists() {
-    for (UUID id : joinGameEmitters.keySet()) {
-      try {
-        SseEmitter emitter = joinGameEmitters.get(id);
-        emitter.send(getGameList());
-      } catch (IOException e) {
-        log.error(
-            "Failed to send updated game list to player with ID: {}. Removing this players "
-                + "emitter from the collection. Client must request another to receive updates.",
-            id);
-        joinGameEmitters.remove(id);
-      }
-    }
   }
 }

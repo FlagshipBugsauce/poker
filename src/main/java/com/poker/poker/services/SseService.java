@@ -1,6 +1,7 @@
 package com.poker.poker.services;
 
 import com.poker.poker.config.constants.GameConstants;
+import com.poker.poker.models.EmitterModel;
 import com.poker.poker.models.enums.EmitterType;
 import java.io.IOException;
 import java.util.Arrays;
@@ -8,8 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -17,15 +20,22 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class SseService {
+  /*
+       TODO: It seems like the .complete() is running on a different thread, and thus, the
+        emitter is not being removed from the hash map before this log which outputs all the
+        emitters in the hash map, is outputted. The emitter is being removed, it's just
+        occurring AFTER the log. Should investigate some way of ensuring the emitter is removed
+        before logging. Probably can use a semaphore or some kind of loop with a thread.sleep.
+  */
 
   private final GameConstants gameConstants;
 
   /**
-   * A map of emitter maps, keyed by the emitter type. Each emitter map is keyed by UUID's which
-   * are associated to a specific user. The getEmitterMap method can be used to retrieve the
-   * appropriate map and a UUID can be used to send data to a specific user.
+   * A map of emitter maps, keyed by the emitter type. Each emitter map is keyed by UUID's which are
+   * associated to a specific user. The getEmitterMap method can be used to retrieve the appropriate
+   * map and a UUID can be used to send data to a specific user.
    */
-  private Map<EmitterType, Map<UUID, SseEmitter>> emitterMaps;
+  private Map<EmitterType, Map<UUID, EmitterModel>> emitterMaps;
 
   /**
    * Constructor that injects game constants and sets up the emitter map appropriately.
@@ -41,11 +51,12 @@ public class SseService {
   /**
    * Helper which will return the appropriate emitter map using the type provided, or throw if the
    * type is invalid.
+   *
    * @param type The type of emitter map specified.
    * @return Emitter map with the specified type.
    */
-  private Map<UUID, SseEmitter> getEmitterMap(EmitterType type) {
-    final Map<UUID, SseEmitter> emitterMap = emitterMaps.get(type);
+  private Map<UUID, EmitterModel> getEmitterMap(EmitterType type) {
+    final Map<UUID, EmitterModel> emitterMap = emitterMaps.get(type);
     if (emitterMaps.get(type) == null) {
       log.error("Invalid emitter type specified.");
       throw gameConstants.getInvalidEmitterTypeException();
@@ -78,21 +89,74 @@ public class SseService {
   /**
    * Helper that retrieves an emitter of a specified type for a specified user. Handles the case
    * where there is no such emitter so that there is no chance of unhandled null pointer exceptions.
-   * @param type The type of emitter being sought.
+   * @param type The type of emitter being sought (GameList, Lobby, etc...).
    * @param userId The user the emitter being sought is associated with.
    * @return An SseEmitter of the specified type, associated with the specified user, provided such
    * an emitter exists. If no such emitter exists, then a BadRequestException is thrown.
    */
   private SseEmitter getEmitter(EmitterType type, UUID userId) {
-    log.debug("Attempting to retrieved {} emitter for {}.", type, userId);
-    final Map<UUID, SseEmitter> map = getEmitterMap(type);
-    final SseEmitter emitter = map.get(userId);
+    log.debug("Attempting to retrieve {} emitter for {}.", type, userId);
+    final SseEmitter emitter = getEmitterModel(type, userId).getEmitter();
     if (emitter == null) {
       log.error("There is no {} emitter associated with the user ID: {}.", type, userId);
       throw gameConstants.getNoEmitterForIdException();
     }
     log.debug("{} emitter retrieved for {} successfully.", type, userId);
     return emitter;
+  }
+
+  /**
+   * Helper that retrieves the emitter model of a specified type for a specified user. Handles the
+   * case where there is no such emitter so that a BadRequestException will be thrown with the
+   * appropriate message.
+   *
+   * @param type   The type of emitter model being sought (GameList, Lobby, etc...).
+   * @param userId The user the emitter being sought is associated with.
+   * @return An emitter model of the specified type, associated with the specified user, provided
+   * such an emitter model exists. If no such emitter model exists, then a BadRequestException is
+   * thrown.
+   */
+  private EmitterModel getEmitterModel(EmitterType type, UUID userId) {
+    // Note: This logging is a bit overkill, but we can set debug level logs to be ignored later.
+    log.debug("Attempting to retrieve {} emitter model for {}.", type, userId);
+    final Map<UUID, EmitterModel> map = getEmitterMap(type);
+    final EmitterModel emitterModel = map.get(userId);
+    if (emitterModel == null) {
+      log.error("There is no {} emitter associated with the user ID: {}.", type, userId);
+      throw gameConstants.getNoEmitterModelForIdException();
+    }
+    log.debug("{} emitter model retrieved for {} successfully.", type, userId);
+    return emitterModel;
+  }
+
+  private void updateEmitterModel(EmitterType type, UUID userId, DateTime time, Object data) {
+    final EmitterModel emitterModel = getEmitterModel(type, userId);
+    emitterModel.setLastSendTime(time);
+    emitterModel.setLastSent(data);
+    log.debug("{} emitter model for user {} was updated successfully.", type, userId);
+  }
+
+  /**
+   * A scheduled task that will re-send whatever data was last sent, to each emitter, in order to
+   * prevent browsers from deeming the emitter to be inactive.
+   */
+  @Scheduled(cron = "0 0/1 * * * ?") // Runs at the start of every minute
+  public void keepEmittersAlive() {
+    log.debug("Running scheduled task to keep emitters alive.");
+    for (Map<UUID, EmitterModel> map : emitterMaps.values()) {
+      for (EmitterModel emitterModel : map.values()) {
+        if (emitterModel.getLastSendTime() == null ||
+            emitterModel.getLastSendTime().isBefore(DateTime.now().minusMinutes(1))) {
+          try {
+            emitterModel.getEmitter().send(emitterModel.getLastSent());
+          } catch (IOException e) {
+            log.error("Scheduled emitter updater failed to send to an emitter, calling complete() "
+                + "on this emitter.");
+            emitterModel.getEmitter().complete();
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -112,7 +176,7 @@ public class SseService {
     validator.run();
 
     final SseEmitter emitter;
-    final Map<UUID, SseEmitter> emitterMap = getEmitterMap(type);
+    final Map<UUID, EmitterModel> emitterMap = getEmitterMap(type);
 
     // Create the emitter.
     emitter = new SseEmitter(getEmitterTimeout(type));
@@ -134,6 +198,10 @@ public class SseService {
           emitterMap.remove(userId);
         });
 
+    // Save the emitter to the map.
+    emitterMap.put(userId, new EmitterModel(emitter, DateTime.now(), null, null));
+
+    // Return the emitter.
     log.debug("Sending {} emitter to {}.", type, userId);
     return emitter;
   }
@@ -150,9 +218,20 @@ public class SseService {
     try {
       getEmitter(type, userId).send(data);
       log.debug("{} data appears to have been sent successfully to {}.", type, userId);
+      updateEmitterModel(type, userId, DateTime.now(), data);
     } catch (IOException e) {
       log.error("{} emitter failed to send data to {} due to IOException.", type, userId);
     }
+  }
+
+  /**
+   * Sends data to all clients associated with emitters of the specified type.
+   *
+   * @param type The type of emitter to broadcast to.
+   * @param data The data to send.
+   */
+  public void sendToAll(EmitterType type, Object data) {
+    getEmitterMap(type).keySet().forEach(id -> sendUpdate(type, id, data));
   }
 
   /**

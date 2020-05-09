@@ -128,7 +128,6 @@ public class GameServiceTests extends TestBaseClass {
             activeGames,
             gameEmitters,
             userIdToGameIdMap,
-            joinGameEmitters,
             gameConstants,
             uuidService);
 
