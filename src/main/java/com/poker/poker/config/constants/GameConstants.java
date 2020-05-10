@@ -15,13 +15,9 @@ public class GameConstants extends AppConstants {
   private final long joinGameEmitterDuration = 1000 * 60 * 10;
   private final int minNumberOfPlayers = 2;
   private final int maxNumberOfPlayers = 10;
-  /**
-   * Re-send last data sent by emitter to prevent browser from timing the emitter out.
-   */
+  /** Re-send last data sent by emitter to prevent browser from timing the emitter out. */
   private final int emitterRefreshRateInMinutes = 1;
-  /**
-   * If no new data has been sent to an emitter for this many minutes, then destroy the emitter.
-   */
+  /** If no new data has been sent to an emitter for this many minutes, then destroy the emitter. */
   private final int emitterInactiveExpirationInMinutes = 60;
 
   // Exceptions
