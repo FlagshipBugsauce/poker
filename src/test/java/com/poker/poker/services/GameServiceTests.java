@@ -123,12 +123,7 @@ public class GameServiceTests extends TestBaseClass {
     joinGameEmitters = new HashMap<>();
 
     gameService =
-        new GameService(
-            sseService,
-            activeGames,
-            userIdToGameIdMap,
-            gameConstants,
-            uuidService);
+        new GameService(sseService, activeGames, userIdToGameIdMap, gameConstants, uuidService);
 
     Mockito.when(uuidService.isValidUuidString(Mockito.anyString())).thenCallRealMethod();
     Mockito.doAnswer(

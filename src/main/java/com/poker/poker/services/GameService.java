@@ -63,6 +63,7 @@ public class GameService {
 
   /**
    * Helper to do determine whether a user is in a game.
+   *
    * @param userId ID of the user.
    * @return True if user is in some game, false otherwise.
    */
@@ -72,6 +73,7 @@ public class GameService {
 
   /**
    * Helper to retrieve the game document associated with the game a specified user is in.
+   *
    * @param userId ID of the user.
    * @return GameDocument of the game the user is in.
    */
@@ -81,6 +83,7 @@ public class GameService {
 
   /**
    * Helper to determine whether a specified user is listed as one of the players in a game.
+   *
    * @param userId ID of the user.
    */
   public void checkUserIsPlayerInGame(UUID userId) {
@@ -142,9 +145,10 @@ public class GameService {
   }
 
   /**
-   * Checks whether a user is in/not in a game and throws. If the boolean argument in is true,
-   * then this method will throw if the user IS NOT in a game. If the boolean argument is false,
-   * then this method will throw if the user IS in a game.
+   * Checks whether a user is in/not in a game and throws. If the boolean argument in is true, then
+   * this method will throw if the user IS NOT in a game. If the boolean argument is false, then
+   * this method will throw if the user IS in a game.
+   *
    * @param userId ID of the user being checked.
    * @param in Flag to determine whether the user should or should not, be in a game.
    */
@@ -164,8 +168,8 @@ public class GameService {
    * @return ApiSuccessModel indicating that the request was successful.
    */
   public ApiSuccessModel getGameDocumentUpdate(UUID userId) {
-    sseService
-        .sendUpdate(EmitterType.Lobby, userId, activeGames.get(userIdToGameIdMap.get(userId)));
+    sseService.sendUpdate(
+        EmitterType.Lobby, userId, activeGames.get(userIdToGameIdMap.get(userId)));
     return new ApiSuccessModel("Updated game document was sent successfully.");
   }
 
@@ -245,8 +249,8 @@ public class GameService {
     uuidService.checkIfValidAndThrowBadRequest(gameId);
 
     // Check if user is already in the current game.
-    if (isUserInGame(user.getId()) &&
-        userIdToGameIdMap.get(user.getId()).equals(UUID.fromString(gameId))) {
+    if (isUserInGame(user.getId())
+        && userIdToGameIdMap.get(user.getId()).equals(UUID.fromString(gameId))) {
       return new ApiSuccessModel("Player is already in the game.");
     }
     // If user isn't in the game with ID = gameId, then throw.

@@ -1,7 +1,6 @@
 package com.poker.poker.controllers;
 
 import com.poker.poker.config.constants.GameConstants;
-import com.poker.poker.documents.GameDocument;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.game.CreateGameModel;
@@ -161,11 +160,14 @@ public class GameController {
     // TODO: Add faux-security here, i.e. validate the JWT manually since security is disabled.
     UUID userId = userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId();
 
-    return sseService.createEmitter(EmitterType.Lobby, userId, () -> {
-      log.debug("Performing validation to ensure {} should receive an emitter.", userId);
-      gameService.checkWhetherUserIsInGameAndThrow(userId, true);
-      gameService.checkUserIsPlayerInGame(userId);
-    });
+    return sseService.createEmitter(
+        EmitterType.Lobby,
+        userId,
+        () -> {
+          log.debug("Performing validation to ensure {} should receive an emitter.", userId);
+          gameService.checkWhetherUserIsInGameAndThrow(userId, true);
+          gameService.checkUserIsPlayerInGame(userId);
+        });
   }
 
   @Operation(
@@ -230,8 +232,7 @@ public class GameController {
     return sseService.createEmitter(
         EmitterType.GameList,
         userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId(),
-        () -> {
-        });
+        () -> {});
   }
 
   @Operation(
@@ -272,9 +273,10 @@ public class GameController {
   @RequestMapping(value = "/destroy-join-game-emitter", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> destroyJoinGameEmitter(
       @RequestHeader("Authorization") String jwt) {
-    return ResponseEntity.ok(sseService.completeEmitter(
-        EmitterType.GameList,
-        userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId()));
+    return ResponseEntity.ok(
+        sseService.completeEmitter(
+            EmitterType.GameList,
+            userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId()));
   }
 
   @Operation(
@@ -294,9 +296,10 @@ public class GameController {
   @RequestMapping(value = "/refresh-game-list", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> refreshGameList(
       @RequestHeader("Authorization") String jwt) {
-    return ResponseEntity.ok(sseService.sendUpdate(
-        EmitterType.GameList,
-        userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId(),
-        gameService.getGameList()));
+    return ResponseEntity.ok(
+        sseService.sendUpdate(
+            EmitterType.GameList,
+            userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId(),
+            gameService.getGameList()));
   }
 }

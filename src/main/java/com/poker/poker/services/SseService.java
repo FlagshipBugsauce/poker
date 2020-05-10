@@ -41,6 +41,7 @@ public class SseService {
 
   /**
    * Constructor that injects game constants and sets up the emitter map appropriately.
+   *
    * @param gameConstants Constants required for events which occur in the game.
    */
   public SseService(GameConstants gameConstants) {
@@ -69,6 +70,7 @@ public class SseService {
   /**
    * Helper which returns the emitter timeout value from constants class based on the type
    * specified.
+   *
    * @param type The type of the emitter the timeout value is being sought for.
    * @return The appropriate timeout value for the emitter type specified.
    */
@@ -91,10 +93,11 @@ public class SseService {
   /**
    * Helper that retrieves an emitter of a specified type for a specified user. Handles the case
    * where there is no such emitter so that there is no chance of unhandled null pointer exceptions.
+   *
    * @param type The type of emitter being sought (GameList, Lobby, etc...).
    * @param userId The user the emitter being sought is associated with.
    * @return An SseEmitter of the specified type, associated with the specified user, provided such
-   * an emitter exists. If no such emitter exists, then a BadRequestException is thrown.
+   *     an emitter exists. If no such emitter exists, then a BadRequestException is thrown.
    */
   private SseEmitter getEmitter(EmitterType type, UUID userId) {
     log.debug("Attempting to retrieve {} emitter for {}.", type, userId);
@@ -112,11 +115,11 @@ public class SseService {
    * case where there is no such emitter so that a BadRequestException will be thrown with the
    * appropriate message.
    *
-   * @param type   The type of emitter model being sought (GameList, Lobby, etc...).
+   * @param type The type of emitter model being sought (GameList, Lobby, etc...).
    * @param userId The user the emitter being sought is associated with.
    * @return An emitter model of the specified type, associated with the specified user, provided
-   * such an emitter model exists. If no such emitter model exists, then a BadRequestException is
-   * thrown.
+   *     such an emitter model exists. If no such emitter model exists, then a BadRequestException
+   *     is thrown.
    */
   private EmitterModel getEmitterModel(EmitterType type, UUID userId) {
     // Note: This logging is a bit overkill, but we can set debug level logs to be ignored later.
@@ -147,13 +150,14 @@ public class SseService {
     log.debug("Running scheduled task to keep emitters alive.");
     for (Map<UUID, EmitterModel> map : emitterMaps.values()) {
       for (EmitterModel emitterModel : map.values()) {
-        if (emitterModel.getLastSendTime() == null ||
-            emitterModel.getLastSendTime().isBefore(DateTime.now().minusMinutes(1))) {
+        if (emitterModel.getLastSendTime() == null
+            || emitterModel.getLastSendTime().isBefore(DateTime.now().minusMinutes(1))) {
           try {
             emitterModel.getEmitter().send(emitterModel.getLastSent());
           } catch (IOException e) {
-            log.error("Scheduled emitter updater failed to send to an emitter, calling complete() "
-                + "on this emitter.");
+            log.error(
+                "Scheduled emitter updater failed to send to an emitter, calling complete() "
+                    + "on this emitter.");
             emitterModel.getEmitter().complete();
           }
         }
@@ -164,12 +168,11 @@ public class SseService {
   /**
    * Creates, stores and returns an emitter which will be used to send the client updates.
    *
-   * @param type      The type of the emitter. There are several types, such as a lobby emitter,
-   *                  which will send the client updates whenever the state of the game lobby
-   *                  changes.
-   * @param userId    The UUID of the user requesting an emitter.
+   * @param type The type of the emitter. There are several types, such as a lobby emitter, which
+   *     will send the client updates whenever the state of the game lobby changes.
+   * @param userId The UUID of the user requesting an emitter.
    * @param validator A lambda supplied by the caller to ensure an emitter is only sent when certain
-   *                  preconditions have been satisfied.
+   *     preconditions have been satisfied.
    * @return An SSE emitter which will send updates to the client that requested the emitter.
    */
   public SseEmitter createEmitter(EmitterType type, UUID userId, Runnable validator) {
@@ -211,6 +214,7 @@ public class SseService {
   /**
    * Sends data to the client associated with the userId specified, using the type of emitter
    * specified.
+   *
    * @param type The type of emitter to use in order to send the client data.
    * @param userId The ID of the user the data should be sent to.
    * @param data The data that should be sent to the client.
@@ -241,7 +245,7 @@ public class SseService {
    * Calls the complete method on the emitter, provided the emitter type specified is valid and
    * there is an emitter of the specified type, associated with the user ID provided.
    *
-   * @param type   The type of emitter being destroyed.
+   * @param type The type of emitter being destroyed.
    * @param userId The user ID of the user the emitter is associated with.
    */
   public ApiSuccessModel completeEmitter(EmitterType type, UUID userId) {
