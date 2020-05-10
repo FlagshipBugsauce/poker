@@ -2,6 +2,7 @@ package com.poker.poker.models.game;
 
 import com.poker.poker.models.enums.GameAction;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GameActionModel {
+  @Schema(
+      description = "ID of the action performed which identifies it.",
+      implementation = UUID.class,
+      example = "0a7d95ef-94ba-47bc-b591-febb365bc543")
+  private UUID id;
 
   @Schema(
       description = "Player model representing the player that performed the action.",

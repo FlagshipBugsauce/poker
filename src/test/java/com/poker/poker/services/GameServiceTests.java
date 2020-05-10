@@ -34,6 +34,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class GameServiceTests extends TestBaseClass {
 
+  @Mock private SseService sseService;
   @Spy private Map<UUID, GameDocument> activeGames;
   @Spy private Map<UUID, SseEmitter> gameEmitters;
   @Spy private Map<UUID, UUID> userIdToGameIdMap;
@@ -122,13 +123,7 @@ public class GameServiceTests extends TestBaseClass {
     joinGameEmitters = new HashMap<>();
 
     gameService =
-        new GameService(
-            activeGames,
-            gameEmitters,
-            userIdToGameIdMap,
-            joinGameEmitters,
-            gameConstants,
-            uuidService);
+        new GameService(sseService, activeGames, userIdToGameIdMap, gameConstants, uuidService);
 
     Mockito.when(uuidService.isValidUuidString(Mockito.anyString())).thenCallRealMethod();
     Mockito.doAnswer(

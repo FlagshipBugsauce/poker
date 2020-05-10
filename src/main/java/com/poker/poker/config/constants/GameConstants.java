@@ -10,12 +10,20 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class GameConstants extends AppConstants {
+
   private final long gameEmitterDuration = 1000 * 60 * 60 * 24;
   private final long joinGameEmitterDuration = 1000 * 60 * 10;
   private final int minNumberOfPlayers = 2;
   private final int maxNumberOfPlayers = 10;
+  /** Re-send last data sent by emitter to prevent browser from timing the emitter out. */
+  private final int emitterRefreshRateInMinutes = 1;
+  /** If no new data has been sent to an emitter for this many minutes, then destroy the emitter. */
+  private final int emitterInactiveExpirationInMinutes = 60;
 
   // Exceptions
+  private final BadRequestException invalidEmitterTypeException =
+      new BadRequestException("Invalid Emitter Type", "The emitter type specified is invalid.");
+
   private final BadRequestException joinGamePlayerAlreadyJoinedException =
       new BadRequestException("Failed to Join", "Cannot join more than one game at a time.");
 
@@ -33,6 +41,10 @@ public class GameConstants extends AppConstants {
   private final BadRequestException noEmitterForIdException =
       new BadRequestException(
           "No Emitter Found", "There is no emitter associated with the ID provided.");
+
+  private final BadRequestException noEmitterModelForIdException =
+      new BadRequestException(
+          "No Emitter Model Found", "There is no emitter model associated with the ID provided.");
 
   private final BadRequestException leaveGameException =
       new BadRequestException(

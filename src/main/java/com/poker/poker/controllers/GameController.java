@@ -1,12 +1,14 @@
 package com.poker.poker.controllers;
 
-import com.poker.poker.config.constants.AppConstants;
+import com.poker.poker.config.constants.GameConstants;
 import com.poker.poker.models.ApiSuccessModel;
+import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.game.CreateGameModel;
 import com.poker.poker.models.game.GetGameModel;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.services.GameService;
 import com.poker.poker.services.JwtService;
+import com.poker.poker.services.SseService;
 import com.poker.poker.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -16,8 +18,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.UUID;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+@Slf4j
 @AllArgsConstructor
 @RestController
 @RequestMapping("/game")
@@ -36,9 +41,11 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
     description =
         "Games API handles all game requests, like creating a game, joining a game, etc...")
 public class GameController {
+
   private GameService gameService;
+  private SseService sseService;
   private UserService userService;
-  private AppConstants appConstants;
+  private GameConstants constants;
   private JwtService jwtService;
   private UserRepository userRepository;
 
@@ -68,7 +75,7 @@ public class GameController {
   public ResponseEntity<ApiSuccessModel> createGame(
       @RequestHeader("Authorization") String jwt,
       @Valid @RequestBody CreateGameModel createGameModel) {
-    userService.validate(jwt, appConstants.getClientGroups());
+    userService.validate(jwt, constants.getClientGroups());
     return ResponseEntity.ok(
         gameService.createGame(
             createGameModel, userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
@@ -99,7 +106,7 @@ public class GameController {
   @RequestMapping(value = "/getAll", method = RequestMethod.GET)
   public ResponseEntity<List<GetGameModel>> getGameList(
       @RequestHeader("Authorization") String jwt) {
-    userService.validate(jwt, appConstants.getClientGroups());
+    userService.validate(jwt, constants.getClientGroups());
     return ResponseEntity.ok(gameService.getGameList());
   }
 
@@ -128,7 +135,7 @@ public class GameController {
   @RequestMapping(value = "/join/{gameId}", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> joinGame(
       @RequestHeader("Authorization") String jwt, @PathVariable String gameId) {
-    userService.validate(jwt, appConstants.getClientGroups());
+    userService.validate(jwt, constants.getClientGroups());
     return ResponseEntity.ok(
         gameService.joinGame(
             gameId, userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
@@ -151,8 +158,15 @@ public class GameController {
   @RequestMapping(value = "/emitter/game/{jwt}", method = RequestMethod.GET)
   public SseEmitter getGameEmitter(@PathVariable String jwt) {
     // TODO: Add faux-security here, i.e. validate the JWT manually since security is disabled.
-    return gameService.getGameEmitter(
-        userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId());
+    UUID userId = userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId();
+    return sseService.createEmitter(
+        EmitterType.Lobby,
+        userId,
+        () -> {
+          log.debug("Performing validation to ensure {} should receive an emitter.", userId);
+          gameService.checkWhetherUserIsInGameAndThrow(userId, true);
+          gameService.checkUserIsPlayerInGame(userId);
+        });
   }
 
   @Operation(
@@ -214,8 +228,10 @@ public class GameController {
   @RequestMapping(value = "/emitter/join/{jwt}", method = RequestMethod.GET)
   public SseEmitter getJoinGameEmitter(@PathVariable String jwt) {
     // TODO: Add faux-security here, i.e. validate the JWT manually since security is disabled.
-    return gameService.getJoinGameEmitter(
-        userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId());
+    return sseService.createEmitter(
+        EmitterType.GameList,
+        userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId(),
+        () -> {});
   }
 
   @Operation(
@@ -257,7 +273,8 @@ public class GameController {
   public ResponseEntity<ApiSuccessModel> destroyJoinGameEmitter(
       @RequestHeader("Authorization") String jwt) {
     return ResponseEntity.ok(
-        gameService.completeJoinGameEmitter(
+        sseService.completeEmitter(
+            EmitterType.GameList,
             userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId()));
   }
 
@@ -279,7 +296,9 @@ public class GameController {
   public ResponseEntity<ApiSuccessModel> refreshGameList(
       @RequestHeader("Authorization") String jwt) {
     return ResponseEntity.ok(
-        gameService.getGameListUpdate(
-            userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId()));
+        sseService.sendUpdate(
+            EmitterType.GameList,
+            userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId(),
+            gameService.getGameList()));
   }
 }
