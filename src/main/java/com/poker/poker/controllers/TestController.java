@@ -1,6 +1,6 @@
 package com.poker.poker.controllers;
 
-import com.poker.poker.documents.GameDocument;
+import com.poker.poker.documents.LobbyDocument;
 import com.poker.poker.models.ApiSuccessModel;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -142,8 +142,8 @@ public class TestController {
   }
 
   @GetMapping("/test/gameDoc")
-  public ResponseEntity<GameDocument> test006() {
-    return ResponseEntity.ok(new GameDocument());
+  public ResponseEntity<LobbyDocument> test006() {
+    return ResponseEntity.ok(new LobbyDocument());
   }
 }
 

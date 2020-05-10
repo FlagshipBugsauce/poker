@@ -21,6 +21,9 @@ public class GameConstants extends AppConstants {
   private final int emitterInactiveExpirationInMinutes = 60;
 
   // Exceptions
+  private final BadRequestException gameNotFoundException =
+      new BadRequestException("No Game Found", "There is no game associated with the ID provided");
+
   private final BadRequestException invalidEmitterTypeException =
       new BadRequestException("Invalid Emitter Type", "The emitter type specified is invalid.");
 

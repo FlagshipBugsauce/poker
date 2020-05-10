@@ -1,0 +1,151 @@
+package com.poker.poker.services.game;
+
+import com.poker.poker.config.constants.GameConstants;
+import com.poker.poker.documents.GameDocument;
+import com.poker.poker.documents.LobbyDocument;
+import com.poker.poker.documents.UserDocument;
+import com.poker.poker.models.ApiSuccessModel;
+import com.poker.poker.models.enums.EmitterType;
+import com.poker.poker.models.enums.GameState;
+import com.poker.poker.models.game.CreateGameModel;
+import com.poker.poker.services.SseService;
+import com.poker.poker.services.UuidService;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+@Slf4j
+@Service
+@AllArgsConstructor
+public class GameService {
+
+  private Map<UUID, UUID> userIdToGameIdMap;
+
+  private Map<UUID, GameDocument> games;
+
+  private GameConstants gameConstants;
+
+  private SseService sseService;
+
+  private LobbyService lobbyService;
+
+  private UuidService uuidService;
+
+  // TODO: Add javadoc
+  public GameDocument getUsersGameDocument(UUID userId) {
+    // TODO: May want to add validation here.
+    return games.get(userIdToGameIdMap.get(userId));
+  }
+
+  /**
+   * Creates a new game.
+   * @param createGameModel Model representing the game parameters.
+   * @param user The user who created the game.
+   * @return An ApiSuccessModel containing the ID of the game, to indicate creation was successful.
+   */
+  public ApiSuccessModel createGame(CreateGameModel createGameModel, UserDocument user) {
+    if (userIdToGameIdMap.get(user.getId()) != null) {
+      // TODO: Might be irrelevant exception
+      throw gameConstants.getJoinGamePlayerAlreadyJoinedException();
+    }
+
+    // Create game document with state set to "Lobby"
+    GameDocument gameDocument = new GameDocument(
+        UUID.randomUUID(),
+        GameState.Lobby,
+        new ArrayList<>(),  // List of player models is only updated after game begins.
+        new ArrayList<>()); // List of hands is empty until the game starts.
+
+    userIdToGameIdMap.put(user.getId(), gameDocument.getId());
+    games.put(gameDocument.getId(), gameDocument);
+
+    // Create the lobby.
+    lobbyService.createLobby(createGameModel, user, gameDocument.getId());
+    return new ApiSuccessModel(gameDocument.getId().toString());
+  }
+
+  public ApiSuccessModel joinGame(String gameIdString, UserDocument user) {
+    uuidService.checkIfValidAndThrowBadRequest(gameIdString);
+
+    // Check that game exists
+    if (games.get(UUID.fromString(gameIdString)) == null) {
+      throw gameConstants.getGameNotFoundException();
+    }
+
+    ApiSuccessModel response;
+    GameDocument gameDocument = games.get(UUID.fromString(gameIdString));
+
+    if (gameDocument.getState() == GameState.Lobby) {
+      // If game is in lobby, then user can only join if they're not in ANY other games
+
+      // First let's check if they're trying to join a lobby they're already in, don't want to throw OR proceed further, if this is the case.
+      if (lobbyService.isUserInLobby(user.getId()) &&
+          userIdToGameIdMap.get(user.getId()).equals(gameDocument.getId())) {
+        return new ApiSuccessModel("Player is already in the game.");
+      }
+      // Now let's check if they're in a game. If they are, then throw.
+      if (userIdToGameIdMap.get(user.getId()) != null) {
+        // TODO: Might be irrelevant exception
+        throw gameConstants.getJoinGamePlayerAlreadyJoinedException();
+      }
+
+      // Now, let's call lobbyService and say the user wants to join.
+      response = lobbyService.joinLobby(gameDocument.getId(), user);
+      userIdToGameIdMap.put(user.getId(), gameDocument.getId());
+    } else if (gameDocument.getState() == GameState.Play) {
+      // Joining will be different if the game has already started.
+      // TODO: Handle logic for rejoining here.
+      // TODO: Remove this exception.
+      throw gameConstants.getGameNotFoundException();
+    } else {
+      // TODO: Change this to relevant exception.
+      throw gameConstants.getGameNotFoundException();
+    }
+
+    return response;
+  }
+
+  public ApiSuccessModel removePlayerFromLobby(UserDocument user) {
+    userIdToGameIdMap.remove(user.getId());
+
+    // Destroy the game emitter sending the player updates.
+    try {
+      sseService.completeEmitter(EmitterType.Game, user.getId());
+    } catch (Exception e) {
+      log.error("Issue removing the game emitter when player with ID: {}.", user.getId());
+    }
+    return lobbyService.removePlayerFromLobby(user);
+  }
+
+  /**
+   * Starts the game associated with the provided ID, provided all pre-conditions are satisfied.
+   * @param gameId The ID of the game to start.
+   */
+  public void startGame(UUID gameId) {
+    // Transitions the games state from Lobby -> Play
+
+    // Some validation to ensure gameId is valid
+    LobbyDocument lobbyDocument = lobbyService.getLobbyDocument(gameId);
+    GameDocument gameDocument = games.get(gameId);
+
+    // Set the players
+    gameDocument.setPlayers(lobbyDocument.getPlayers());
+    gameDocument.setState(GameState.Play);
+
+    // Send update so client knows the game state has changed.
+    gameDocument.getPlayers().forEach(player -> {
+      sseService.sendUpdate(EmitterType.Game, player.getId(), gameDocument);
+    });
+
+    // Start the first hand.
+    startNewHand(gameId);
+  }
+
+  public void startNewHand(UUID gameId) {
+    // Games occur in "hands" (rounds).
+    // Each "hand" will provide a new SSE for the player, will be tracked on
+  }
+}

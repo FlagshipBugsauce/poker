@@ -1,16 +1,17 @@
-package com.poker.poker.services;
+package com.poker.poker.services.game;
 
 import com.poker.poker.config.constants.GameConstants;
-import com.poker.poker.documents.GameDocument;
+import com.poker.poker.documents.LobbyDocument;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.enums.GameAction;
-import com.poker.poker.models.enums.GameState;
 import com.poker.poker.models.game.CreateGameModel;
 import com.poker.poker.models.game.GameActionModel;
 import com.poker.poker.models.game.GetGameModel;
 import com.poker.poker.models.game.PlayerModel;
+import com.poker.poker.services.SseService;
+import com.poker.poker.services.UuidService;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,19 +29,19 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-public class GameService {
+public class LobbyService {
 
   private SseService sseService;
 
   /** A map of active games, keyed by the games ID. */
-  private Map<UUID, GameDocument> activeGames;
+  private Map<UUID, LobbyDocument> activeLobby;
 
   /**
    * A map of game UUID's, keyed by user UUID's, to identify which game a user is currently in, and
    * also to identify whether a user is currently in a game, in order to impose a one game limit at
    * any given time.
    */
-  private Map<UUID, UUID> userIdToGameIdMap;
+  private Map<UUID, UUID> userIdToLobbyIdMap;
 
   private GameConstants gameConstants;
 
@@ -50,15 +51,28 @@ public class GameService {
    * Sends out a game document to all players in the game associated with the game document
    * argument.
    *
-   * @param gameDocument GameDocument representing the game that is being updated.
+   * @param lobbyDocument GameDocument representing the game that is being updated.
    */
-  private void sendGameDocumentToAllPlayers(GameDocument gameDocument) {
-    for (PlayerModel player : gameDocument.getPlayers()) {
+  private void sendLobbyDocumentToAllPlayers(LobbyDocument lobbyDocument) {
+    for (PlayerModel player : lobbyDocument.getPlayers()) {
       try {
-        sseService.sendUpdate(EmitterType.Lobby, player.getId(), gameDocument);
+        sseService.sendUpdate(EmitterType.Lobby, player.getId(), lobbyDocument);
       } catch (BadRequestException ignored) { // Exception already logged.
       }
     }
+  }
+
+  /**
+   * Helper to retrieve a lobby document. Throws if there is no document with the ID provided.
+   *
+   * @param lobbyId The ID of the lobby document being sought.
+   * @return LobbyDocument associated with the ID provided if it exists, otherwise, throws.
+   */
+  public LobbyDocument getLobbyDocument(UUID lobbyId) {
+    if (activeLobby.get(lobbyId) == null) {
+      throw gameConstants.getGameNotFoundException();
+    }
+    return activeLobby.get(lobbyId);
   }
 
   /**
@@ -67,8 +81,8 @@ public class GameService {
    * @param userId ID of the user.
    * @return True if user is in some game, false otherwise.
    */
-  public boolean isUserInGame(UUID userId) {
-    return userIdToGameIdMap.get(userId) != null;
+  public boolean isUserInLobby(UUID userId) {
+    return userIdToLobbyIdMap.get(userId) != null;
   }
 
   /**
@@ -77,8 +91,9 @@ public class GameService {
    * @param userId ID of the user.
    * @return GameDocument of the game the user is in.
    */
-  public GameDocument getUsersGameDocument(UUID userId) {
-    return activeGames.get(userIdToGameIdMap.get(userId));
+  public LobbyDocument getUsersLobbyDocument(UUID userId) {
+    // TODO: May need some validation here.
+    return activeLobby.get(userIdToLobbyIdMap.get(userId));
   }
 
   /**
@@ -86,37 +101,37 @@ public class GameService {
    *
    * @param userId ID of the user.
    */
-  public void checkUserIsPlayerInGame(UUID userId) {
-    GameDocument gameDocument = getUsersGameDocument(userId);
-    if (gameDocument == null) {
+  public void checkUserIsPlayerInLobby(UUID userId) {
+    LobbyDocument lobbyDocument = getUsersLobbyDocument(userId);
+    if (lobbyDocument == null) {
       log.error("There is no game associated with user {}.", userId);
       throw gameConstants.getInvalidUuidException();
     }
-    if (gameDocument.getPlayers().stream().noneMatch(p -> p.getId().equals(userId))) {
-      log.error("User {} is not listed as a player of game {}.", gameDocument.getId(), userId);
+    if (lobbyDocument.getPlayers().stream().noneMatch(p -> p.getId().equals(userId))) {
+      log.error("User {} is not listed as a player of game {}.", lobbyDocument.getId(), userId);
       throw gameConstants.getUserNotInGameException();
     }
   }
 
   /**
-   * Updates the game document associated with the game a player is in, to indicate that the player
-   * is ready for the game to start.
+   * Updates the lobby document associated with the lobby a player is in, to indicate that the
+   * player is ready for the game to start.
    *
    * @param user The user who is ready.
    * @return ApiSuccessModel indicating the request was successful.
    */
   public ApiSuccessModel ready(UserDocument user) {
-    if (!isUserInGame(user.getId()) || getUsersGameDocument(user.getId()) == null) {
+    if (!isUserInLobby(user.getId()) || getUsersLobbyDocument(user.getId()) == null) {
       log.error("Failed to set player's status to ready (user ID: {}).", user.getId());
       throw gameConstants.getReadyStatusUpdateFailException();
     }
 
     // Get the game document for the game now that we're sure it exists.
-    GameDocument gameDocument = getUsersGameDocument(user.getId());
+    LobbyDocument lobbyDocument = getUsersLobbyDocument(user.getId());
 
     // Find the playerModel, throw if not found, otherwise, remove player from game.
     final Optional<PlayerModel> player =
-        gameDocument.getPlayers().stream()
+        lobbyDocument.getPlayers().stream()
             .filter(playerModel -> playerModel.getId().equals(user.getId()))
             .findFirst();
     if (!player.isPresent()) {
@@ -128,7 +143,7 @@ public class GameService {
     player.get().setReady(true);
 
     // Add the appropriate game action model.
-    gameDocument
+    lobbyDocument
         .getGameActions()
         .add(
             new GameActionModel(
@@ -140,7 +155,7 @@ public class GameService {
 
     log.debug("Player status set to ready (ID: {}).", user.getId().toString());
 
-    sendGameDocumentToAllPlayers(gameDocument);
+    sendLobbyDocumentToAllPlayers(lobbyDocument);
     return new ApiSuccessModel("Player status set to ready.");
   }
 
@@ -152,25 +167,12 @@ public class GameService {
    * @param userId ID of the user being checked.
    * @param in Flag to determine whether the user should or should not, be in a game.
    */
-  public void checkWhetherUserIsInGameAndThrow(final UUID userId, final boolean in) {
-    if (userIdToGameIdMap.get(userId) == null && in) {
+  public void checkWhetherUserIsInLobbyAndThrow(final UUID userId, final boolean in) {
+    if (userIdToLobbyIdMap.get(userId) == null && in) {
       throw gameConstants.getUserNotInGameException();
-    } else if (userIdToGameIdMap.get(userId) != null && !in) {
+    } else if (userIdToLobbyIdMap.get(userId) != null && !in) {
       throw gameConstants.getJoinGamePlayerAlreadyJoinedException();
     }
-  }
-
-  /**
-   * Sometimes a client will want to manually request an updated game document. In cases such as
-   * these, this service will send an update to the client.
-   *
-   * @param userId ID of the user in need of the updated game document.
-   * @return ApiSuccessModel indicating that the request was successful.
-   */
-  public ApiSuccessModel getGameDocumentUpdate(UUID userId) {
-    sseService.sendUpdate(
-        EmitterType.Lobby, userId, activeGames.get(userIdToGameIdMap.get(userId)));
-    return new ApiSuccessModel("Updated game document was sent successfully.");
   }
 
   /**
@@ -180,11 +182,11 @@ public class GameService {
    * @param user the user document of the player creating the game.
    * @return a UUID, the unique id for the game document created in this method.
    */
-  public ApiSuccessModel createGame(CreateGameModel createGameModel, UserDocument user) {
-    checkWhetherUserIsInGameAndThrow(user.getId(), false);
-    GameDocument gameDocument =
-        new GameDocument(
-            UUID.randomUUID(),
+  public void createLobby(CreateGameModel createGameModel, UserDocument user, UUID id) {
+    checkWhetherUserIsInLobbyAndThrow(user.getId(), false);
+    LobbyDocument lobbyDocument =
+        new LobbyDocument(
+            id,
             user.getId(),
             createGameModel.getName(),
             createGameModel.getMaxPlayers(),
@@ -199,14 +201,12 @@ public class GameService {
                         user.getLastName(),
                         false,
                         true))),
-            new ArrayList<>(),
-            GameState.PreGame);
+            new ArrayList<>());
     log.info("User: {} created a game.", user.getId());
-    activeGames.put(gameDocument.getId(), gameDocument);
-    userIdToGameIdMap.put(user.getId(), gameDocument.getId());
+    activeLobby.put(lobbyDocument.getId(), lobbyDocument);
+    userIdToLobbyIdMap.put(user.getId(), lobbyDocument.getId());
 
-    sseService.sendToAll(EmitterType.GameList, getGameList());
-    return new ApiSuccessModel(gameDocument.getId().toString());
+    sseService.sendToAll(EmitterType.GameList, getLobbyList());
   }
 
   /**
@@ -214,25 +214,22 @@ public class GameService {
    *
    * @return An ActiveGameModel which is a subset of a game document.
    */
-  public List<GetGameModel> getGameList() {
-    List<GetGameModel> activeGameModels = new ArrayList<>();
-    for (GameDocument gd : activeGames.values()) {
-      // Games are only join-able in the PreGame game state
-      if (gd.getCurrentGameState() == GameState.PreGame) {
-        activeGameModels.add(
-            new GetGameModel(
-                gd.getId(),
-                gd.getName(),
-                gd.getPlayers().stream()
-                    .filter(p -> p.getId().equals(gd.getHost()))
-                    .findFirst()
-                    .get(),
-                gd.getPlayers().size(),
-                gd.getMaxPlayers(),
-                gd.getBuyIn()));
-      }
+  public List<GetGameModel> getLobbyList() {
+    List<GetGameModel> lobbyListModels = new ArrayList<>();
+    for (LobbyDocument lobbyDocument : activeLobby.values()) {
+      lobbyListModels.add(
+          new GetGameModel(
+              lobbyDocument.getId(),
+              lobbyDocument.getName(),
+              lobbyDocument.getPlayers().stream()
+                  .filter(p -> p.getId().equals(lobbyDocument.getHost()))
+                  .findFirst()
+                  .get(),
+              lobbyDocument.getPlayers().size(),
+              lobbyDocument.getMaxPlayers(),
+              lobbyDocument.getBuyIn()));
     }
-    return activeGameModels;
+    return lobbyListModels;
   }
 
   /**
@@ -244,32 +241,16 @@ public class GameService {
    * @return An ApiSuccessModel containing a message which indicates the attempt to join was
    *     successful.
    */
-  public ApiSuccessModel joinGame(String gameId, UserDocument user) {
-    // Make sure the game ID is a valid UUID.
-    uuidService.checkIfValidAndThrowBadRequest(gameId);
-
-    // Check if user is already in the current game.
-    if (isUserInGame(user.getId())
-        && userIdToGameIdMap.get(user.getId()).equals(UUID.fromString(gameId))) {
-      return new ApiSuccessModel("Player is already in the game.");
-    }
-    // If user isn't in the game with ID = gameId, then throw.
-    checkWhetherUserIsInGameAndThrow(user.getId(), false);
-
+  public ApiSuccessModel joinLobby(UUID gameId, UserDocument user) {
     // Find the active game you wish to join
-    GameDocument gameDocument = activeGames.get(UUID.fromString(gameId));
-
-    // Return a bad request status if there is no game with ID provided.
-    if (gameDocument == null) {
-      throw gameConstants.getInvalidUuidException();
-    }
+    LobbyDocument lobbyDocument = activeLobby.get(gameId);
 
     // Add new player to list of players in currently in the game.
     final PlayerModel playerModel = new PlayerModel(user, false, false);
-    gameDocument.getPlayers().add(playerModel);
+    lobbyDocument.getPlayers().add(playerModel);
 
     // Add the appropriate game action model.
-    gameDocument
+    lobbyDocument
         .getGameActions()
         .add(
             new GameActionModel(
@@ -279,19 +260,19 @@ public class GameService {
                 String.format(
                     "%s %s has joined the game.",
                     playerModel.getFirstName(), playerModel.getLastName())));
-    userIdToGameIdMap.put(user.getId(), gameDocument.getId());
+    userIdToLobbyIdMap.put(user.getId(), lobbyDocument.getId());
 
     // Update all players copy of gameDocument who are in the game via SSE
-    for (PlayerModel player : gameDocument.getPlayers()) {
+    for (PlayerModel player : lobbyDocument.getPlayers()) {
       if (!player.getId().equals(user.getId())) {
         try {
-          sseService.sendUpdate(EmitterType.Lobby, player.getId(), gameDocument);
+          sseService.sendUpdate(EmitterType.Lobby, player.getId(), lobbyDocument);
         } catch (BadRequestException ignored) { // Exception is already logged.
         }
       }
     }
 
-    sseService.sendToAll(EmitterType.GameList, getGameList());
+    sseService.sendToAll(EmitterType.GameList, getLobbyList());
     return new ApiSuccessModel("User joined the game successfully.");
   }
 
@@ -302,13 +283,13 @@ public class GameService {
    * @param user The user to be removed.
    * @return ApiSuccessModel indicating that the request was completed successfully.
    */
-  public ApiSuccessModel removePlayerFromGame(UserDocument user) {
-    UUID gameId = userIdToGameIdMap.get(user.getId());
+  public ApiSuccessModel removePlayerFromLobby(UserDocument user) {
+    UUID gameId = userIdToLobbyIdMap.get(user.getId());
     if (gameId == null) {
       throw gameConstants.getLeaveGameException();
     }
 
-    GameDocument game = activeGames.get(gameId);
+    LobbyDocument game = activeLobby.get(gameId);
     if (game == null) {
       throw gameConstants.getLeaveGameException();
     }
@@ -329,19 +310,19 @@ public class GameService {
       log.debug("Changing host from: {}, to: {}.", user.getId(), game.getHost());
     } else {
       // The game is empty, so remove it.
-      activeGames.remove(game.getId());
+      activeLobby.remove(game.getId());
       log.debug("No players left in game: {}, removing game.", game.getId());
     }
 
     // Remove user from mapping of user ID to game ID.
-    userIdToGameIdMap.remove(user.getId());
+    userIdToLobbyIdMap.remove(user.getId());
     log.debug("Player with ID: {}, has left game with ID: {}.", user.getId(), game.getId());
 
     // Destroy the emitter sending this user updates.
     try {
       sseService.completeEmitter(EmitterType.Lobby, user.getId());
     } catch (Exception e) {
-      log.error("Issue removing the game emitter when player with ID: {}.", user.getId());
+      log.error("Issue removing the lobby emitter when player with ID: {}.", user.getId());
     }
 
     // Add GameActionModel with the appropriate action.
@@ -356,9 +337,9 @@ public class GameService {
                     player.get().getFirstName(), player.get().getLastName())));
 
     // Update the players in the game, and players who are on the join game page.
-    sendGameDocumentToAllPlayers(game);
+    sendLobbyDocumentToAllPlayers(game);
 
-    sseService.sendToAll(EmitterType.GameList, getGameList());
+    sseService.sendToAll(EmitterType.GameList, getLobbyList());
     return new ApiSuccessModel("Player has left the game.");
   }
 }

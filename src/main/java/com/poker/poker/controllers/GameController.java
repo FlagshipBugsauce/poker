@@ -1,15 +1,17 @@
 package com.poker.poker.controllers;
 
 import com.poker.poker.config.constants.GameConstants;
+import com.poker.poker.documents.GameDocument;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.game.CreateGameModel;
 import com.poker.poker.models.game.GetGameModel;
 import com.poker.poker.repositories.UserRepository;
-import com.poker.poker.services.GameService;
 import com.poker.poker.services.JwtService;
 import com.poker.poker.services.SseService;
 import com.poker.poker.services.UserService;
+import com.poker.poker.services.game.GameService;
+import com.poker.poker.services.game.LobbyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -43,6 +45,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class GameController {
 
   private GameService gameService;
+  private LobbyService lobbyService;
   private SseService sseService;
   private UserService userService;
   private GameConstants constants;
@@ -81,6 +84,12 @@ public class GameController {
             createGameModel, userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
   }
 
+  // TODO: CLEAN UP
+  @RequestMapping(value = "/get-game-document", method = RequestMethod.POST)
+  public ResponseEntity<GameDocument> getGameDocument() {
+    return ResponseEntity.ok(new GameDocument());
+  }
+
   /**
    * Retrieves a list of games which are not full and have not yet started.
    *
@@ -103,11 +112,11 @@ public class GameController {
                     array = @ArraySchema(schema = @Schema(implementation = GetGameModel.class)),
                     mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
-  @RequestMapping(value = "/getAll", method = RequestMethod.GET)
+  @RequestMapping(value = "/get-list", method = RequestMethod.GET)
   public ResponseEntity<List<GetGameModel>> getGameList(
       @RequestHeader("Authorization") String jwt) {
     userService.validate(jwt, constants.getClientGroups());
-    return ResponseEntity.ok(gameService.getGameList());
+    return ResponseEntity.ok(lobbyService.getLobbyList());
   }
 
   /**
@@ -142,21 +151,22 @@ public class GameController {
   }
 
   @Operation(
-      summary = "Request SSE Emitter",
-      description = "Request an SSE emitter to be sent updates regarding the game state.",
+      summary = "Request Lobby SSE Emitter",
+      description =
+          "Request a Lobby type SSE emitter to be sent updates regarding the lobby state.",
       tags = "game")
   @ApiResponses(
       value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Emitter was created successfully.",
-            content =
-                @Content(
-                    schema = @Schema(implementation = SseEmitter.class),
-                    mediaType = MediaType.TEXT_EVENT_STREAM_VALUE))
+          @ApiResponse(
+              responseCode = "200",
+              description = "Emitter was created successfully.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = SseEmitter.class),
+                  mediaType = MediaType.TEXT_EVENT_STREAM_VALUE))
       })
-  @RequestMapping(value = "/emitter/game/{jwt}", method = RequestMethod.GET)
-  public SseEmitter getGameEmitter(@PathVariable String jwt) {
+  @RequestMapping(value = "/emitter/lobby/{jwt}", method = RequestMethod.GET)
+  public SseEmitter getLobbyEmitter(@PathVariable String jwt) {
     // TODO: Add faux-security here, i.e. validate the JWT manually since security is disabled.
     UUID userId = userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId();
     return sseService.createEmitter(
@@ -164,15 +174,36 @@ public class GameController {
         userId,
         () -> {
           log.debug("Performing validation to ensure {} should receive an emitter.", userId);
-          gameService.checkWhetherUserIsInGameAndThrow(userId, true);
-          gameService.checkUserIsPlayerInGame(userId);
+          lobbyService.checkWhetherUserIsInLobbyAndThrow(userId, true);
+          lobbyService.checkUserIsPlayerInLobby(userId);
         });
   }
 
   @Operation(
-      summary = "Request Game Document Update",
-      description = "Request an updated game document.",
+      summary = "Request Game SSE Emitter",
+      description = "Request a Game type SSE emitter to be sent updates regarding the game state.",
       tags = "game")
+  @ApiResponses(
+      value = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Emitter was created successfully.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = SseEmitter.class),
+                  mediaType = MediaType.TEXT_EVENT_STREAM_VALUE))
+      })
+  @RequestMapping(value = "/emitter/game/{jwt}", method = RequestMethod.GET)
+  public SseEmitter getGameEmitter(@PathVariable String jwt) {
+    // TODO: Add faux-security here, i.e. validate the JWT manually since security is disabled.
+    UUID userId = userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId();
+    return sseService.createEmitter(EmitterType.Game, userId, () -> { });
+  }
+
+  @Operation(
+      summary = "Request Lobby Document Update",
+      description = "Request an updated lobby document.",
+      tags = "lobby")
   @ApiResponses(
       value = {
         @ApiResponse(
@@ -183,12 +214,40 @@ public class GameController {
                     schema = @Schema(implementation = ApiSuccessModel.class),
                     mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
+  @RequestMapping(value = "/refresh-lobby-doc", method = RequestMethod.GET)
+  public ResponseEntity<ApiSuccessModel> getLobbyDocumentUpdate(
+      @RequestHeader("Authorization") String jwt) {
+    final UUID userId =
+        userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId();
+    return ResponseEntity.ok(sseService.sendUpdate(
+        EmitterType.Lobby,
+        userId,
+        lobbyService.getUsersLobbyDocument(userId)));
+  }
+
+  @Operation(
+      summary = "Request Game Document Update",
+      description = "Request an updated game document.",
+      tags = "game")
+  @ApiResponses(
+      value = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Request handled successfully.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = ApiSuccessModel.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+      })
   @RequestMapping(value = "/refresh-game-doc", method = RequestMethod.GET)
   public ResponseEntity<ApiSuccessModel> getGameDocumentUpdate(
       @RequestHeader("Authorization") String jwt) {
-    return ResponseEntity.ok(
-        gameService.getGameDocumentUpdate(
-            userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId()));
+    final UUID userId =
+        userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId();
+    return ResponseEntity.ok(sseService.sendUpdate(
+        EmitterType.Game,
+        userId,
+        gameService.getUsersGameDocument(userId)));
   }
 
   @Operation(
@@ -208,11 +267,11 @@ public class GameController {
   @RequestMapping(value = "/ready", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> ready(@RequestHeader("Authorization") String jwt) {
     return ResponseEntity.ok(
-        gameService.ready(userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
+        lobbyService.ready(userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
   }
 
   @Operation(
-      summary = "Request SSE Emitter",
+      summary = "Request Join Game SSE Emitter",
       description = "Request an SSE emitter to be sent updates to the list of games.",
       tags = "game")
   @ApiResponses(
@@ -251,7 +310,7 @@ public class GameController {
   @RequestMapping(value = "/leave-lobby", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> leaveLobby(@RequestHeader("Authorization") String jwt) {
     return ResponseEntity.ok(
-        gameService.removePlayerFromGame(
+        gameService.removePlayerFromLobby(
             userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
   }
 
@@ -299,6 +358,6 @@ public class GameController {
         sseService.sendUpdate(
             EmitterType.GameList,
             userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId(),
-            gameService.getGameList()));
+            lobbyService.getLobbyList()));
   }
 }
