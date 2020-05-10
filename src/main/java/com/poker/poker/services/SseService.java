@@ -143,23 +143,40 @@ public class SseService {
 
   /**
    * A scheduled task that will re-send whatever data was last sent, to each emitter, in order to
-   * prevent browsers from deeming the emitter to be inactive.
+   * prevent browsers from deeming the emitter to be inactive. This task will also check if no new
+   * data has been sent for a specified period of time (specified in game constants) and if this is
+   * the case, the emitter's complete() method will be called in order to destroy it. A period of
+   * inactivity this long most likely indicates something went wrong and even though the emitter was
+   * not manually destroyed, it is no longer needed and should not be kept.
    */
   @Scheduled(cron = "0 0/1 * * * ?") // Runs at the start of every minute
-  public void keepEmittersAlive() {
+  public void emitterManagement() {
     log.debug("Running scheduled task to keep emitters alive.");
     for (Map<UUID, EmitterModel> map : emitterMaps.values()) {
-      for (EmitterModel emitterModel : map.values()) {
-        if (emitterModel.getLastSendTime() == null
-            || emitterModel.getLastSendTime().isBefore(DateTime.now().minusMinutes(1))) {
+      for (UUID userId : map.keySet()) {
+        EmitterModel emitterModel = map.get(userId);
+        // Now minus refresh rate.
+        DateTime t = DateTime.now().minusMinutes(gameConstants.getEmitterRefreshRateInMinutes());
+        if (emitterModel.getLastSendTime().isBefore(t)) {
           try {
+            // Re-send whatever was sent last.
             emitterModel.getEmitter().send(emitterModel.getLastSent());
+            log.debug("Emitter for user {} was refreshed.", userId);
           } catch (IOException e) {
             log.error(
                 "Scheduled emitter updater failed to send to an emitter, calling complete() "
                     + "on this emitter.");
             emitterModel.getEmitter().complete();
           }
+        }
+        // Check if the emitter should be destroyed due to inactivity.
+        t = DateTime.now().minusMinutes(gameConstants.getEmitterInactiveExpirationInMinutes());
+        if (emitterModel.getLastSendTime().isBefore(t)) {
+          log.info(
+              "Emitter for user {} was destroyed due to {} minutes of inactivity.",
+              userId,
+              gameConstants.getEmitterInactiveExpirationInMinutes());
+          emitterModel.getEmitter().complete();
         }
       }
     }
@@ -204,7 +221,8 @@ public class SseService {
         });
 
     // Save the emitter to the map.
-    emitterMap.put(userId, new EmitterModel(emitter, DateTime.now(), null, null));
+    DateTime now = DateTime.now();
+    emitterMap.put(userId, new EmitterModel(emitter, now, now, now));
 
     // Return the emitter.
     log.debug("Sending {} emitter to {}.", type, userId);

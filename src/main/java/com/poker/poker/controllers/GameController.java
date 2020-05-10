@@ -159,7 +159,6 @@ public class GameController {
   public SseEmitter getGameEmitter(@PathVariable String jwt) {
     // TODO: Add faux-security here, i.e. validate the JWT manually since security is disabled.
     UUID userId = userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId();
-
     return sseService.createEmitter(
         EmitterType.Lobby,
         userId,
