@@ -126,7 +126,6 @@ public class GameServiceTests extends TestBaseClass {
         new GameService(
             sseService,
             activeGames,
-            gameEmitters,
             userIdToGameIdMap,
             gameConstants,
             uuidService);

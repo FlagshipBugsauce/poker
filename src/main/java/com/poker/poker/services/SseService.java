@@ -1,6 +1,7 @@
 package com.poker.poker.services;
 
 import com.poker.poker.config.constants.GameConstants;
+import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.EmitterModel;
 import com.poker.poker.models.enums.EmitterType;
 import java.io.IOException;
@@ -22,10 +23,11 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class SseService {
   /*
        TODO: It seems like the .complete() is running on a different thread, and thus, the
-        emitter is not being removed from the hash map before this log which outputs all the
+        emitter is not being removed from the hash map before the log which outputs all the
         emitters in the hash map, is outputted. The emitter is being removed, it's just
         occurring AFTER the log. Should investigate some way of ensuring the emitter is removed
         before logging. Probably can use a semaphore or some kind of loop with a thread.sleep.
+        Update: No longer outputting a hash map but this problem should still be investigated.
   */
 
   private final GameConstants gameConstants;
@@ -213,7 +215,7 @@ public class SseService {
    * @param userId The ID of the user the data should be sent to.
    * @param data The data that should be sent to the client.
    */
-  public void sendUpdate(EmitterType type, UUID userId, Object data) {
+  public ApiSuccessModel sendUpdate(EmitterType type, UUID userId, Object data) {
     log.debug("Attempting to use {} emitter to send data to {}.", type, userId);
     try {
       getEmitter(type, userId).send(data);
@@ -222,6 +224,7 @@ public class SseService {
     } catch (IOException e) {
       log.error("{} emitter failed to send data to {} due to IOException.", type, userId);
     }
+    return new ApiSuccessModel("Data sent successfully.");
   }
 
   /**
@@ -241,8 +244,9 @@ public class SseService {
    * @param type   The type of emitter being destroyed.
    * @param userId The user ID of the user the emitter is associated with.
    */
-  public void completeEmitter(EmitterType type, UUID userId) {
+  public ApiSuccessModel completeEmitter(EmitterType type, UUID userId) {
     log.debug("Attempting to call complete() on {} emitter for {}.", type, userId);
     getEmitter(type, userId).complete();
+    return new ApiSuccessModel("Emitter was destroyed successfully.");
   }
 }
