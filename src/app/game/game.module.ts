@@ -6,13 +6,17 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { JoinComponent } from './join/join.component';
 import { LobbyComponent } from './lobby/lobby.component';
 import { GameComponent } from './game/game.component';
+import { HandComponent } from './hand/hand.component';
+import { PlayComponent } from './play/play.component';
 
 @NgModule({
   declarations: [
     CreateComponent,
     JoinComponent,
     LobbyComponent,
-    GameComponent
+    GameComponent,
+    HandComponent,
+    PlayComponent
   ],
   imports: [
     CommonModule,

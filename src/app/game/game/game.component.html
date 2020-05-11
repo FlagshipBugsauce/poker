@@ -1,6 +1,7 @@
 <!-- TODO: Once we have backend models update, need to change 0 to proper enum value. -->
 <!-- If the state is "pre-game", then we want to display the game lobby -->
-<pkr-lobby *ngIf="gameModel.currentGameState == 'PreGame'" [gameModel]="gameModel" [canStart]="canStart"></pkr-lobby>
+<pkr-lobby *ngIf="gameModel.state == 'Lobby'"></pkr-lobby>
+<pkr-play *ngIf="gameModel.state == 'Play'"></pkr-play>
 <pkr-popup
     #popup
     title="Leaving Page"

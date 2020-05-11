@@ -32,7 +32,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let player of gameModel.players" class="text-center">
+                            <tr *ngFor="let player of lobbyModel.players" class="text-center">
                                 <td>
                                     <img [src]="crownIcon" class="crown" *ngIf="player.id == hostModel.id">
                                     {{ player.firstName }} {{ player.lastName }}
@@ -56,7 +56,7 @@
                             Name:
                         </div>
                         <div class="col-sm-8 text-truncate">
-                            {{ gameModel.name }}
+                            {{ lobbyModel.name }}
                         </div>
                         <div class="col-sm-4 font-weight-bold">
                             Host:
@@ -68,13 +68,13 @@
                             Max Players:
                         </div>
                         <div class="col-sm-8">
-                            {{ gameModel.maxPlayers }}
+                            {{ lobbyModel.maxPlayers }}
                         </div>
                         <div class="col-sm-4 font-weight-bold">
                             Buy-In:
                         </div>
                         <div class="col-sm-8">
-                            {{ gameModel.buyIn | currency }}
+                            {{ lobbyModel.buyIn | currency }}
                         </div>
                     </div>
                 </div>
@@ -96,15 +96,16 @@
                         type="submit" 
                         class="btn btn-warning button ml-3 text-light mt-3" 
                         ngbTooltip="Start the game!"
-                        *ngIf="authService.userModel.id == gameModel.host"
-                        [disabled]="!canStart || gameModel.players.length < 2">Start</button>
+                        *ngIf="authService.userModel.id == lobbyModel.host"
+                        (click)="startGame()"
+                        [disabled]="!canStart">Start</button>
                 </div>
             </div>
         </div>
     </div>
     <div 
         class="container-fluid mt-3" 
-        *ngIf="displayCanStartAlert && canStart && authService.userModel.id == hostModel.id && gameModel.players.length > 1">
+        *ngIf="displayCanStartAlert && canStart && authService.userModel.id == hostModel.id">
         <ngb-alert [type]="'success'" (close)="displayCanStartAlert = false">
             Note: All players are ready, you can start the game.
         </ngb-alert>

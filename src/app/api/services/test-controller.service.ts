@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
 import { ApiSuccessModel } from '../models/api-success-model';
-import { GameDocument } from '../models/game-document';
+import { LobbyDocument } from '../models/lobby-document';
 import { SseEmitter } from '../models/sse-emitter';
 
 @Injectable({
@@ -21,52 +21,6 @@ export class TestControllerService extends BaseService {
     http: HttpClient
   ) {
     super(config, http);
-  }
-
-  /**
-   * Path part for operation test002
-   */
-  static readonly Test002Path = '/test/get';
-
-  /**
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `test002()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  test002$Response(params?: {
-
-  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
-
-    const rb = new RequestBuilder(this.rootUrl, TestControllerService.Test002Path, 'get');
-    if (params) {
-
-
-    }
-    return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<ApiSuccessModel>;
-      })
-    );
-  }
-
-  /**
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `test002$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  test002(params?: {
-
-  }): Observable<ApiSuccessModel> {
-
-    return this.test002$Response(params).pipe(
-      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
-    );
   }
 
   /**
@@ -111,6 +65,52 @@ export class TestControllerService extends BaseService {
   }): Observable<ApiSuccessModel> {
 
     return this.test001$Response(params).pipe(
+      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
+    );
+  }
+
+  /**
+   * Path part for operation test002
+   */
+  static readonly Test002Path = '/test/get';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `test002()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  test002$Response(params?: {
+
+  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
+
+    const rb = new RequestBuilder(this.rootUrl, TestControllerService.Test002Path, 'get');
+    if (params) {
+
+
+    }
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<ApiSuccessModel>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `test002$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  test002(params?: {
+
+  }): Observable<ApiSuccessModel> {
+
+    return this.test002$Response(params).pipe(
       map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
     );
   }
@@ -278,7 +278,7 @@ export class TestControllerService extends BaseService {
    */
   test006$Response(params?: {
 
-  }): Observable<StrictHttpResponse<GameDocument>> {
+  }): Observable<StrictHttpResponse<LobbyDocument>> {
 
     const rb = new RequestBuilder(this.rootUrl, TestControllerService.Test006Path, 'get');
     if (params) {
@@ -291,7 +291,7 @@ export class TestControllerService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<GameDocument>;
+        return r as StrictHttpResponse<LobbyDocument>;
       })
     );
   }
@@ -304,10 +304,10 @@ export class TestControllerService extends BaseService {
    */
   test006(params?: {
 
-  }): Observable<GameDocument> {
+  }): Observable<LobbyDocument> {
 
     return this.test006$Response(params).pipe(
-      map((r: StrictHttpResponse<GameDocument>) => r.body as GameDocument)
+      map((r: StrictHttpResponse<LobbyDocument>) => r.body as LobbyDocument)
     );
   }
 

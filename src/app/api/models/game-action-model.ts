@@ -11,5 +11,10 @@ export interface GameActionModel {
    * The action that occurred.
    */
   gameAction?: 'Fold' | 'Check' | 'Raise' | 'Call' | 'Bet' | 'ReRaise' | 'Ready' | 'Join' | 'Leave' | 'Start';
+
+  /**
+   * ID of the action performed which identifies it.
+   */
+  id?: string;
   player?: PlayerModel;
 }

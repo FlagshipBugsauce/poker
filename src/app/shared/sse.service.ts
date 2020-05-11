@@ -1,13 +1,13 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Observable } from 'rxjs';
 import * as _ from 'lodash';
+import { EmitterType } from './models/emitter-type.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SseService {
-
-  private eventSources: EventSourceContainer = <EventSourceContainer> { };
+  private eventDictionary: EventSourceKVP[] = <EventSourceKVP[]> [];
 
   constructor(private zone: NgZone) { }
 
@@ -15,26 +15,43 @@ export class SseService {
     return new EventSource(url);
   }
 
-  getServerSentEvent<R>(url: string, type: string, converter: (data: string) => R = _.identity): Observable<R> {
+  getServerSentEvent<R>(url: string, type: EmitterType, converter: (data: string) => R = _.identity): Observable<R> {
     return Observable.create(observer => {
       const eventSource = this.getEventSource(url);
 
-      // TODO: Need a more elegant solution for this. Possibly an enum...
-      if (type == "joinGame") this.eventSources.joinGame = eventSource;
-      if (type == "game") this.eventSources.game = eventSource;
+      switch (type) {
+        case EmitterType.GameList:
+          this.eventDictionary.push(<EventSourceKVP> { type: EmitterType.GameList, event: eventSource });
+          break;
+        case EmitterType.Game:
+          this.eventDictionary.push(<EventSourceKVP> { type: EmitterType.Game, event: eventSource });
+          break;
+        case EmitterType.Lobby:
+          this.eventDictionary.push(<EventSourceKVP> { type: EmitterType.Lobby, event: eventSource });
+          break;
+      }
 
       eventSource.onmessage = event => this.zone.run(() => observer.next(converter(event.data)));
       eventSource.onerror = event => this.zone.run(() => observer.next(event));
     });
   }
 
-  public closeEvent(type: string): void {
-    if (type == "joinGame") this.eventSources.joinGame.close();
-    if (type == "game") this.eventSources.game.close();
+  public closeEvent(type: EmitterType): void {
+    if (this.eventDictionary.find((kvp: EventSourceKVP) => kvp.type == type) != undefined) {
+      try {
+        // Close the event.
+        this.eventDictionary.find((kvp: EventSourceKVP) => kvp.type == type).event.close();
+        // Remove the KVP from array.
+        this.eventDictionary = this.eventDictionary.filter((kvp: EventSourceKVP) => kvp.type != type);
+      } catch (error) {
+        console.log("Something went wrong trying to close the emitter.");
+      }
+    }
+    
   }
 }
 
-export interface EventSourceContainer {
-  joinGame: EventSource;
-  game: EventSource;
+export interface EventSourceKVP {
+  type: EmitterType;
+  event: EventSource;
 }

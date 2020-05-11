@@ -6,6 +6,7 @@ import { SseService } from 'src/app/shared/sse.service';
 import { GameService } from 'src/app/api/services';
 import { ApiSuccessModel } from 'src/app/api/models';
 import { GameComponent } from './game.component';
+import { EmitterType } from 'src/app/shared/models/emitter-type.model';
 
 @Injectable({
   providedIn: 'root'
@@ -33,7 +34,8 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
     if (!this.canLeave && this.confirmationPopup != null) {
       this.confirmationPopup.okCloseProcedure = () => {
         this.canLeave = true;
-        this.sseService.closeEvent("game");
+        this.sseService.closeEvent(EmitterType.Game);
+        this.sseService.closeEvent(EmitterType.Lobby);
         this.gameService.leaveLobby({ Authorization: null }).subscribe((result: ApiSuccessModel) => { });
         this.router.navigate([this.link]);
       };
