@@ -157,13 +157,13 @@ public class GameController {
       tags = "game")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Emitter was created successfully.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = SseEmitter.class),
-                  mediaType = MediaType.TEXT_EVENT_STREAM_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Emitter was created successfully.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = SseEmitter.class),
+                    mediaType = MediaType.TEXT_EVENT_STREAM_VALUE))
       })
   @RequestMapping(value = "/emitter/lobby/{jwt}", method = RequestMethod.GET)
   public SseEmitter getLobbyEmitter(@PathVariable String jwt) {
@@ -185,19 +185,19 @@ public class GameController {
       tags = "game")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Emitter was created successfully.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = SseEmitter.class),
-                  mediaType = MediaType.TEXT_EVENT_STREAM_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Emitter was created successfully.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = SseEmitter.class),
+                    mediaType = MediaType.TEXT_EVENT_STREAM_VALUE))
       })
   @RequestMapping(value = "/emitter/game/{jwt}", method = RequestMethod.GET)
   public SseEmitter getGameEmitter(@PathVariable String jwt) {
     // TODO: Add faux-security here, i.e. validate the JWT manually since security is disabled.
     UUID userId = userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId();
-    return sseService.createEmitter(EmitterType.Game, userId, () -> { });
+    return sseService.createEmitter(EmitterType.Game, userId, () -> {});
   }
 
   @Operation(
@@ -219,10 +219,9 @@ public class GameController {
       @RequestHeader("Authorization") String jwt) {
     final UUID userId =
         userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId();
-    return ResponseEntity.ok(sseService.sendUpdate(
-        EmitterType.Lobby,
-        userId,
-        lobbyService.getUsersLobbyDocument(userId)));
+    return ResponseEntity.ok(
+        sseService.sendUpdate(
+            EmitterType.Lobby, userId, lobbyService.getUsersLobbyDocument(userId)));
   }
 
   @Operation(
@@ -231,23 +230,21 @@ public class GameController {
       tags = "game")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Request handled successfully.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = ApiSuccessModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Request handled successfully.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiSuccessModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/refresh-game-doc", method = RequestMethod.GET)
   public ResponseEntity<ApiSuccessModel> getGameDocumentUpdate(
       @RequestHeader("Authorization") String jwt) {
     final UUID userId =
         userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId();
-    return ResponseEntity.ok(sseService.sendUpdate(
-        EmitterType.Game,
-        userId,
-        gameService.getUsersGameDocument(userId)));
+    return ResponseEntity.ok(
+        sseService.sendUpdate(EmitterType.Game, userId, gameService.getUsersGameDocument(userId)));
   }
 
   @Operation(
@@ -367,17 +364,16 @@ public class GameController {
       tags = "game")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Game started successfully.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = ApiSuccessModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Game started successfully.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiSuccessModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/start", method = RequestMethod.POST)
-  public ResponseEntity<ApiSuccessModel> startGame(
-      @RequestHeader("Authorization") String jwt) {
+  public ResponseEntity<ApiSuccessModel> startGame(@RequestHeader("Authorization") String jwt) {
     return ResponseEntity.ok(
         gameService.startGame(
             userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));

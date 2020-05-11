@@ -8,7 +8,6 @@ import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.AuthRequestModel;
 import com.poker.poker.models.AuthResponseModel;
-import com.poker.poker.models.enums.GameState;
 import com.poker.poker.models.enums.UserGroup;
 import com.poker.poker.models.game.CreateGameModel;
 import com.poker.poker.models.game.PlayerModel;

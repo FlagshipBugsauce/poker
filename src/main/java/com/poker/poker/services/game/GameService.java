@@ -45,6 +45,7 @@ public class GameService {
 
   /**
    * Creates a new game.
+   *
    * @param createGameModel Model representing the game parameters.
    * @param user The user who created the game.
    * @return An ApiSuccessModel containing the ID of the game, to indicate creation was successful.
@@ -56,11 +57,12 @@ public class GameService {
     }
 
     // Create game document with state set to "Lobby"
-    GameDocument gameDocument = new GameDocument(
-        UUID.randomUUID(),
-        GameState.Lobby,
-        new ArrayList<>(),  // List of player models is only updated after game begins.
-        new ArrayList<>()); // List of hands is empty until the game starts.
+    GameDocument gameDocument =
+        new GameDocument(
+            UUID.randomUUID(),
+            GameState.Lobby,
+            new ArrayList<>(), // List of player models is only updated after game begins.
+            new ArrayList<>()); // List of hands is empty until the game starts.
 
     userIdToGameIdMap.put(user.getId(), gameDocument.getId());
     games.put(gameDocument.getId(), gameDocument);
@@ -84,9 +86,10 @@ public class GameService {
     if (gameDocument.getState() == GameState.Lobby) {
       // If game is in lobby, then user can only join if they're not in ANY other games
 
-      // First let's check if they're trying to join a lobby they're already in, don't want to throw OR proceed further, if this is the case.
-      if (lobbyService.isUserInLobby(user.getId()) &&
-          userIdToGameIdMap.get(user.getId()).equals(gameDocument.getId())) {
+      // First let's check if they're trying to join a lobby they're already in, don't want to throw
+      // OR proceed further, if this is the case.
+      if (lobbyService.isUserInLobby(user.getId())
+          && userIdToGameIdMap.get(user.getId()).equals(gameDocument.getId())) {
         return new ApiSuccessModel("Player is already in the game.");
       }
       // Now let's check if they're in a game. If they are, then throw.
@@ -125,6 +128,7 @@ public class GameService {
 
   /**
    * Starts the game associated with the provided ID, provided all pre-conditions are satisfied.
+   *
    * @param user The ID of the game to start.
    */
   public ApiSuccessModel startGame(UserDocument user) {
@@ -146,12 +150,16 @@ public class GameService {
 
     // Complete the Lobby emitter.
     // Send update so client knows the game state has changed.
-    gameDocument.getPlayers().forEach(player -> {
-      try {
-        sseService.completeEmitter(EmitterType.Lobby, player.getId());
-        sseService.sendUpdate(EmitterType.Game, player.getId(), gameDocument);
-      } catch (Exception ignore) {}
-    });
+    gameDocument
+        .getPlayers()
+        .forEach(
+            player -> {
+              try {
+                sseService.completeEmitter(EmitterType.Lobby, player.getId());
+                sseService.sendUpdate(EmitterType.Game, player.getId(), gameDocument);
+              } catch (Exception ignore) {
+              }
+            });
 
     log.debug(gameDocument.getPlayers().toString());
 

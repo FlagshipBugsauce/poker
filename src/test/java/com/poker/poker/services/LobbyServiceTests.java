@@ -105,11 +105,7 @@ public class LobbyServiceTests extends TestBaseClass {
     UUID gameId = UUID.randomUUID();
     lobbyService.createLobby(newGame, host, gameId);
     List<Object> arguments =
-        Arrays.asList(
-            newGame,
-            host,
-            gameId,
-            new ArrayList<>(Arrays.asList(host)));
+        Arrays.asList(newGame, host, gameId, new ArrayList<>(Arrays.asList(host)));
     actions.accept(arguments);
   }
 
@@ -202,8 +198,7 @@ public class LobbyServiceTests extends TestBaseClass {
 
     // When/Then
     Assertions.assertThrows(
-        BadRequestException.class,
-        () -> lobbyService.createLobby(newGame, host, gameId));
+        BadRequestException.class, () -> lobbyService.createLobby(newGame, host, gameId));
     // Verify that the game wasn't created and there are no userId->gameId mappings for the game.
     Assertions.assertEquals(1, activeGames.size());
     Assertions.assertEquals(1, userIdToGameIdMap.size());
@@ -259,24 +254,26 @@ public class LobbyServiceTests extends TestBaseClass {
   }
 
   // TODO: Replace this test.
-//  @Test
-//  public void testJoinGame_fails_whenArgumentsInvalid() {
-//    // Given
-//    final UUID badId = UUID.randomUUID();
-//    final UUID realGameId = UUID.randomUUID();
-//    lobbyService.createLobby(getSampleCreateGameModel(), getUserDocument(), realGameId);
-//    final UserDocument user = new UserDocument();
-//    user.setId(UUID.randomUUID());
-//
-//    // When/Then
-//    // Check that join game throws a bad request exception when attempting to join with a bad ID.
-//    Assertions.assertThrows(BadRequestException.class, () -> lobbyService.joinLobby(badId, user));
-//    // Check that only the user that created the game is in a game.
-//    userIdToGameIdMap
-//        .keySet()
-//        .forEach(id -> Assertions.assertEquals(getUserDocument().getId(), id));
-//    Assertions.assertEquals(1, activeGames.get(realGameId).getPlayers().size());
-//  }
+  //  @Test
+  //  public void testJoinGame_fails_whenArgumentsInvalid() {
+  //    // Given
+  //    final UUID badId = UUID.randomUUID();
+  //    final UUID realGameId = UUID.randomUUID();
+  //    lobbyService.createLobby(getSampleCreateGameModel(), getUserDocument(), realGameId);
+  //    final UserDocument user = new UserDocument();
+  //    user.setId(UUID.randomUUID());
+  //
+  //    // When/Then
+  //    // Check that join game throws a bad request exception when attempting to join with a bad
+  // ID.
+  //    Assertions.assertThrows(BadRequestException.class, () -> lobbyService.joinLobby(badId,
+  // user));
+  //    // Check that only the user that created the game is in a game.
+  //    userIdToGameIdMap
+  //        .keySet()
+  //        .forEach(id -> Assertions.assertEquals(getUserDocument().getId(), id));
+  //    Assertions.assertEquals(1, activeGames.get(realGameId).getPlayers().size());
+  //  }
 
   @Test
   public void testReady_succeeds_whenPlayerIsInGame() {

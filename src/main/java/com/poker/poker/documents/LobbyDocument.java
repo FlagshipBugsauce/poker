@@ -54,5 +54,5 @@ public class LobbyDocument {
   private List<PlayerModel> players;
 
   @ArraySchema(schema = @Schema(implementation = GameActionModel.class))
-  private List<GameActionModel> gameActions;  // TODO: Refactor to "LobbyActions"
+  private List<GameActionModel> gameActions; // TODO: Refactor to "LobbyActions"
 }

@@ -200,8 +200,8 @@ public class SseService {
     validator.run();
 
     // If the user requesting an emitter already has one, then return that.
-    if (emitterMaps.get(type).get(userId) != null &&
-        emitterMaps.get(type).get(userId).getEmitter() != null) {
+    if (emitterMaps.get(type).get(userId) != null
+        && emitterMaps.get(type).get(userId).getEmitter() != null) {
       return emitterMaps.get(type).get(userId).getEmitter();
     }
 

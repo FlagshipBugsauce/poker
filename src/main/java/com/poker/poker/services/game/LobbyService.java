@@ -45,7 +45,7 @@ public class LobbyService {
 
   private GameConstants gameConstants;
 
-  private UuidService uuidService;  // TODO: Don't need this anymore
+  private UuidService uuidService; // TODO: Don't need this anymore
 
   /**
    * Sends out a game document to all players in the game associated with the game document
@@ -64,6 +64,7 @@ public class LobbyService {
 
   /**
    * Performs necessary actions to start the game.
+   *
    * @param gameId ID of the game which is starting.
    * @return LobbyDocument associated with the game.
    */
