@@ -34,7 +34,7 @@ public class LobbyService {
   private SseService sseService;
 
   /** A map of active games, keyed by the games ID. */
-  private Map<UUID, LobbyDocument> activeLobby;
+  private Map<UUID, LobbyDocument> lobbys;
 
   /**
    * A map of game UUID's, keyed by user UUID's, to identify which game a user is currently in, and
@@ -45,7 +45,7 @@ public class LobbyService {
 
   private GameConstants gameConstants;
 
-  private UuidService uuidService;
+  private UuidService uuidService;  // TODO: Don't need this anymore
 
   /**
    * Sends out a game document to all players in the game associated with the game document
@@ -63,16 +63,31 @@ public class LobbyService {
   }
 
   /**
+   * Performs necessary actions to start the game.
+   * @param gameId ID of the game which is starting.
+   * @return LobbyDocument associated with the game.
+   */
+  public LobbyDocument startGame(UUID gameId) {
+    LobbyDocument lobbyDocument = lobbys.remove(gameId);
+    if (lobbyDocument == null) {
+      throw gameConstants.getGameNotFoundException();
+    }
+    // Remove players from userIdToLobbyIdMap
+    lobbyDocument.getPlayers().forEach(player -> userIdToLobbyIdMap.remove(player.getId()));
+    return lobbyDocument;
+  }
+
+  /**
    * Helper to retrieve a lobby document. Throws if there is no document with the ID provided.
    *
    * @param lobbyId The ID of the lobby document being sought.
    * @return LobbyDocument associated with the ID provided if it exists, otherwise, throws.
    */
   public LobbyDocument getLobbyDocument(UUID lobbyId) {
-    if (activeLobby.get(lobbyId) == null) {
+    if (lobbys.get(lobbyId) == null) {
       throw gameConstants.getGameNotFoundException();
     }
-    return activeLobby.get(lobbyId);
+    return lobbys.get(lobbyId);
   }
 
   /**
@@ -93,7 +108,7 @@ public class LobbyService {
    */
   public LobbyDocument getUsersLobbyDocument(UUID userId) {
     // TODO: May need some validation here.
-    return activeLobby.get(userIdToLobbyIdMap.get(userId));
+    return lobbys.get(userIdToLobbyIdMap.get(userId));
   }
 
   /**
@@ -203,7 +218,7 @@ public class LobbyService {
                         true))),
             new ArrayList<>());
     log.info("User: {} created a game.", user.getId());
-    activeLobby.put(lobbyDocument.getId(), lobbyDocument);
+    lobbys.put(lobbyDocument.getId(), lobbyDocument);
     userIdToLobbyIdMap.put(user.getId(), lobbyDocument.getId());
 
     sseService.sendToAll(EmitterType.GameList, getLobbyList());
@@ -216,7 +231,7 @@ public class LobbyService {
    */
   public List<GetGameModel> getLobbyList() {
     List<GetGameModel> lobbyListModels = new ArrayList<>();
-    for (LobbyDocument lobbyDocument : activeLobby.values()) {
+    for (LobbyDocument lobbyDocument : lobbys.values()) {
       lobbyListModels.add(
           new GetGameModel(
               lobbyDocument.getId(),
@@ -243,7 +258,7 @@ public class LobbyService {
    */
   public ApiSuccessModel joinLobby(UUID gameId, UserDocument user) {
     // Find the active game you wish to join
-    LobbyDocument lobbyDocument = activeLobby.get(gameId);
+    LobbyDocument lobbyDocument = lobbys.get(gameId);
 
     // Add new player to list of players in currently in the game.
     final PlayerModel playerModel = new PlayerModel(user, false, false);
@@ -289,7 +304,7 @@ public class LobbyService {
       throw gameConstants.getLeaveGameException();
     }
 
-    LobbyDocument game = activeLobby.get(gameId);
+    LobbyDocument game = lobbys.get(gameId);
     if (game == null) {
       throw gameConstants.getLeaveGameException();
     }
@@ -310,7 +325,7 @@ public class LobbyService {
       log.debug("Changing host from: {}, to: {}.", user.getId(), game.getHost());
     } else {
       // The game is empty, so remove it.
-      activeLobby.remove(game.getId());
+      lobbys.remove(game.getId());
       log.debug("No players left in game: {}, removing game.", game.getId());
     }
 

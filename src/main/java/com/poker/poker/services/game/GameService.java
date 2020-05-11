@@ -8,6 +8,7 @@ import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.enums.GameState;
 import com.poker.poker.models.game.CreateGameModel;
+import com.poker.poker.repositories.LobbyRepository;
 import com.poker.poker.services.SseService;
 import com.poker.poker.services.UuidService;
 import java.util.ArrayList;
@@ -33,6 +34,8 @@ public class GameService {
   private LobbyService lobbyService;
 
   private UuidService uuidService;
+
+  private LobbyRepository lobbyRepository;
 
   // TODO: Add javadoc
   public GameDocument getUsersGameDocument(UUID userId) {
@@ -122,29 +125,44 @@ public class GameService {
 
   /**
    * Starts the game associated with the provided ID, provided all pre-conditions are satisfied.
-   * @param gameId The ID of the game to start.
+   * @param user The ID of the game to start.
    */
-  public void startGame(UUID gameId) {
+  public ApiSuccessModel startGame(UserDocument user) {
+    log.debug("User {} has attempted to start a game.", user.getId());
     // Transitions the games state from Lobby -> Play
 
     // Some validation to ensure gameId is valid
-    LobbyDocument lobbyDocument = lobbyService.getLobbyDocument(gameId);
+    UUID gameId = userIdToGameIdMap.get(user.getId());
+    LobbyDocument lobbyDocument = lobbyService.startGame(gameId);
+    lobbyRepository.save(lobbyDocument);
+
+    // Send updated game lists
+    sseService.sendToAll(EmitterType.GameList, lobbyService.getLobbyList());
     GameDocument gameDocument = games.get(gameId);
 
     // Set the players
     gameDocument.setPlayers(lobbyDocument.getPlayers());
     gameDocument.setState(GameState.Play);
 
+    // Complete the Lobby emitter.
     // Send update so client knows the game state has changed.
     gameDocument.getPlayers().forEach(player -> {
-      sseService.sendUpdate(EmitterType.Game, player.getId(), gameDocument);
+      try {
+        sseService.completeEmitter(EmitterType.Lobby, player.getId());
+        sseService.sendUpdate(EmitterType.Game, player.getId(), gameDocument);
+      } catch (Exception ignore) {}
     });
+
+    log.debug(gameDocument.getPlayers().toString());
 
     // Start the first hand.
     startNewHand(gameId);
+
+    return new ApiSuccessModel("The game has been started successfully.");
   }
 
   public void startNewHand(UUID gameId) {
+    log.debug("Hand #X of game {} has started.", gameId);
     // Games occur in "hands" (rounds).
     // Each "hand" will provide a new SSE for the player, will be tracked on
   }

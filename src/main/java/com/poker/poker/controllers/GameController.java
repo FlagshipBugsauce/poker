@@ -360,4 +360,26 @@ public class GameController {
             userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId(),
             lobbyService.getLobbyList()));
   }
+
+  @Operation(
+      summary = "Start Game",
+      description = "Starts the game, provided all preconditions are satisfied..",
+      tags = "game")
+  @ApiResponses(
+      value = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Game started successfully.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = ApiSuccessModel.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+      })
+  @RequestMapping(value = "/start", method = RequestMethod.POST)
+  public ResponseEntity<ApiSuccessModel> startGame(
+      @RequestHeader("Authorization") String jwt) {
+    return ResponseEntity.ok(
+        gameService.startGame(
+            userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
+  }
 }

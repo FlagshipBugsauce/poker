@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class GameConstants extends AppConstants {
 
   private final long gameEmitterDuration = 1000 * 60 * 60 * 24;
-  private final long joinGameEmitterDuration = 1000 * 60 * 10;
+  private final long joinGameEmitterDuration = 1000 * 60 * 60;
   private final int minNumberOfPlayers = 2;
   private final int maxNumberOfPlayers = 10;
   /** Re-send last data sent by emitter to prevent browser from timing the emitter out. */
