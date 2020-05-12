@@ -62,6 +62,7 @@ export class GameComponent implements OnInit, AfterViewInit {
           this.gameModel = <GameDocument> JSON.parse(event);
         } catch(err) {
           console.log("Something went wrong with the emitter.");
+          this.sseService.closeEvent(EmitterType.Game);
         }
       });
 
@@ -76,6 +77,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   public userLeftPage($event: any): void {
     this.sseService.closeEvent(EmitterType.Game);
     this.sseService.closeEvent(EmitterType.Lobby);
+    this.sseService.closeEvent(EmitterType.Hand);
     this.gameService.leaveLobby({ Authorization: null }).subscribe((result: ApiSuccessModel) => { });
   }
 

@@ -67,6 +67,7 @@ export class LobbyComponent implements OnInit {
           this.lobbyModel = <LobbyDocument> JSON.parse(event);
         } catch(err) {
           console.log("Something went wrong with the emitter.");
+          this.sseService.closeEvent(EmitterType.Lobby);
         }
         
         this.checkIfGameCanStart();

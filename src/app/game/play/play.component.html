@@ -5,4 +5,10 @@
             <p>The game has started!</p>
         </div>
     </div>
+    <div class="card m-3">
+        <h3 class="card-header bg-success text-light">Game Status</h3>
+        <div class="card-body">
+            <p>{{ hand == null ? "Nothing happened yet" : hand.message }}</p>
+        </div>
+    </div>
 </div>

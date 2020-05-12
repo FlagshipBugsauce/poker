@@ -55,6 +55,7 @@ export class JoinComponent implements OnInit {
           this._games = JSON.parse(event);
         } catch(err) {
           console.log("Something went wrong with the join game emitter.");
+          this.sseService.closeEvent(EmitterType.GameList);
           this._games = games;
         }
       });

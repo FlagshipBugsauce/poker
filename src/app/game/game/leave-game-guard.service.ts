@@ -36,6 +36,7 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
         this.canLeave = true;
         this.sseService.closeEvent(EmitterType.Game);
         this.sseService.closeEvent(EmitterType.Lobby);
+        this.sseService.closeEvent(EmitterType.Hand);
         this.gameService.leaveLobby({ Authorization: null }).subscribe((result: ApiSuccessModel) => { });
         this.router.navigate([this.link]);
       };

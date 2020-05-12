@@ -18,18 +18,8 @@ export class SseService {
   getServerSentEvent<R>(url: string, type: EmitterType, converter: (data: string) => R = _.identity): Observable<R> {
     return Observable.create(observer => {
       const eventSource = this.getEventSource(url);
-
-      switch (type) {
-        case EmitterType.GameList:
-          this.eventDictionary.push(<EventSourceKVP> { type: EmitterType.GameList, event: eventSource });
-          break;
-        case EmitterType.Game:
-          this.eventDictionary.push(<EventSourceKVP> { type: EmitterType.Game, event: eventSource });
-          break;
-        case EmitterType.Lobby:
-          this.eventDictionary.push(<EventSourceKVP> { type: EmitterType.Lobby, event: eventSource });
-          break;
-      }
+      
+      this.eventDictionary.push(<EventSourceKVP> { type: type, event: eventSource });
 
       eventSource.onmessage = event => this.zone.run(() => observer.next(converter(event.data)));
       eventSource.onerror = event => this.zone.run(() => observer.next(event));
