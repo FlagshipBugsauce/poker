@@ -6,6 +6,7 @@ import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.game.CreateGameModel;
 import com.poker.poker.models.game.GetGameModel;
+import com.poker.poker.models.game.HandModel;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.services.JwtService;
 import com.poker.poker.services.SseService;
@@ -377,5 +378,72 @@ public class GameController {
     return ResponseEntity.ok(
         gameService.startGame(
             userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
+  }
+
+  @Operation(
+      summary = "Request Hand SSE Emitter",
+      description = "Request an SSE emitter to be sent updates to the current hand.",
+      tags = "hand")
+  @ApiResponses(
+      value = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Emitter was created successfully.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = SseEmitter.class),
+                  mediaType = MediaType.TEXT_EVENT_STREAM_VALUE))
+      })
+  @RequestMapping(value = "/emitter/hand/{jwt}", method = RequestMethod.GET)
+  public SseEmitter getHandEmitter(@PathVariable String jwt) {
+    // TODO: Add faux-security here, i.e. validate the JWT manually since security is disabled.
+    return sseService.createEmitter(
+        EmitterType.Hand,
+        userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId(),
+        () -> {});
+  }
+
+  @Operation(
+      summary = "Destroy Hand Emitter",
+      description = "Destroy the emitter that is sending hand information.",
+      tags = "hand")
+  @ApiResponses(
+      value = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Request handled successfully.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = ApiSuccessModel.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+      })
+  @RequestMapping(value = "/destroy-hand-emitter", method = RequestMethod.POST)
+  public ResponseEntity<ApiSuccessModel> destroyHandEmitter(
+      @RequestHeader("Authorization") String jwt) {
+    return ResponseEntity.ok(
+        sseService.completeEmitter(
+            EmitterType.Hand,
+            userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId()));
+  }
+
+  @Operation(
+      summary = "Refresh Hand",
+      description = "Requests updated hand data.",
+      tags = "game")
+  @ApiResponses(
+      value = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Request handled successfully.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = ApiSuccessModel.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+      })
+  @RequestMapping(value = "/refresh-hand", method = RequestMethod.POST)
+  public ResponseEntity<ApiSuccessModel> refreshHand(
+      @RequestHeader("Authorization") String jwt) {
+    sseService.sendToAll(EmitterType.Hand, new HandModel(UUID.randomUUID(), UUID.randomUUID(), "This is a test"));
+    return ResponseEntity.ok(new ApiSuccessModel("Success!"));
   }
 }

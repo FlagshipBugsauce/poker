@@ -8,6 +8,8 @@ import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.enums.GameState;
 import com.poker.poker.models.game.CreateGameModel;
+import com.poker.poker.models.game.HandModel;
+import com.poker.poker.models.game.PlayerModel;
 import com.poker.poker.repositories.LobbyRepository;
 import com.poker.poker.services.SseService;
 import com.poker.poker.services.UuidService;
@@ -16,11 +18,14 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 @AllArgsConstructor
+@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class GameService {
 
   private Map<UUID, UUID> userIdToGameIdMap;
@@ -134,7 +139,7 @@ public class GameService {
   public ApiSuccessModel startGame(UserDocument user) {
     log.debug("User {} has attempted to start a game.", user.getId());
     // Transitions the games state from Lobby -> Play
-
+    // TODO: Add some validation to ensure game exists, etc...
     // Some validation to ensure gameId is valid
     UUID gameId = userIdToGameIdMap.get(user.getId());
     LobbyDocument lobbyDocument = lobbyService.startGame(gameId);
@@ -173,5 +178,27 @@ public class GameService {
     log.debug("Hand #X of game {} has started.", gameId);
     // Games occur in "hands" (rounds).
     // Each "hand" will provide a new SSE for the player, will be tracked on
+    try {
+      Thread.sleep(10000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    GameDocument gameDocument = games.get(gameId);
+
+    // Temporary
+    final PlayerModel winner = gameDocument
+        .getPlayers()
+        .get((int) (Math.random() * gameDocument.getPlayers().size()));
+    final String winnerMessage = String.format(
+        "%s %s won the game.",
+        winner.getFirstName(),
+        winner.getLastName());
+
+    gameDocument.getPlayers().forEach(player -> {
+      try {
+        HandModel hand = new HandModel(UUID.randomUUID(), gameDocument.getId(), winnerMessage);
+        sseService.sendUpdate(EmitterType.Hand, player.getId(), hand);
+      } catch (Exception ignore) {}
+    });
   }
 }

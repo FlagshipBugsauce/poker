@@ -2,6 +2,7 @@ package com.poker.poker.controllers;
 
 import com.poker.poker.documents.LobbyDocument;
 import com.poker.poker.models.ApiSuccessModel;
+import com.poker.poker.models.game.HandModel;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -144,6 +145,11 @@ public class TestController {
   @GetMapping("/test/gameDoc")
   public ResponseEntity<LobbyDocument> test006() {
     return ResponseEntity.ok(new LobbyDocument());
+  }
+
+  @GetMapping("/test/something")
+  public ResponseEntity<HandModel> test007() {
+    return ResponseEntity.ok(new HandModel());
   }
 }
 
