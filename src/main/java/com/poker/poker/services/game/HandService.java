@@ -1,7 +1,6 @@
 package com.poker.poker.services.game;
 
 import com.poker.poker.models.game.HandModel;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -18,7 +17,5 @@ public class HandService {
 
   private Map<UUID, HandModel> hands;
 
-  public void newHand(UUID gameId) {
-
-  }
+  public void newHand(UUID gameId) {}
 }

@@ -186,19 +186,21 @@ public class GameService {
     GameDocument gameDocument = games.get(gameId);
 
     // Temporary
-    final PlayerModel winner = gameDocument
-        .getPlayers()
-        .get((int) (Math.random() * gameDocument.getPlayers().size()));
-    final String winnerMessage = String.format(
-        "%s %s won the game.",
-        winner.getFirstName(),
-        winner.getLastName());
+    final PlayerModel winner =
+        gameDocument.getPlayers().get((int) (Math.random() * gameDocument.getPlayers().size()));
+    final String winnerMessage =
+        String.format("%s %s won the game.", winner.getFirstName(), winner.getLastName());
 
-    gameDocument.getPlayers().forEach(player -> {
-      try {
-        HandModel hand = new HandModel(UUID.randomUUID(), gameDocument.getId(), winnerMessage);
-        sseService.sendUpdate(EmitterType.Hand, player.getId(), hand);
-      } catch (Exception ignore) {}
-    });
+    gameDocument
+        .getPlayers()
+        .forEach(
+            player -> {
+              try {
+                HandModel hand =
+                    new HandModel(UUID.randomUUID(), gameDocument.getId(), winnerMessage);
+                sseService.sendUpdate(EmitterType.Hand, player.getId(), hand);
+              } catch (Exception ignore) {
+              }
+            });
   }
 }
