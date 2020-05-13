@@ -49,6 +49,8 @@ public class SseService {
     emitterMaps = new HashMap<>();
     emitterMaps.put(EmitterType.GameList, new HashMap<>());
     emitterMaps.put(EmitterType.Lobby, new HashMap<>());
+    emitterMaps.put(EmitterType.Game, new HashMap<>());
+    emitterMaps.put(EmitterType.Hand, new HashMap<>());
   }
 
   /**
@@ -81,6 +83,8 @@ public class SseService {
         timeout = gameConstants.getJoinGameEmitterDuration();
         break;
       case Lobby:
+      case Game:
+      case Hand:
         timeout = gameConstants.getGameEmitterDuration();
         break;
       default:
@@ -196,6 +200,12 @@ public class SseService {
     log.debug("Attempting to create {} emitter for {}.", type, userId);
     // Caller provides a lambda that will throw if pre-conditions are not satisfied.
     validator.run();
+
+    // If the user requesting an emitter already has one, then return that.
+    if (emitterMaps.get(type).get(userId) != null
+        && emitterMaps.get(type).get(userId).getEmitter() != null) {
+      return emitterMaps.get(type).get(userId).getEmitter();
+    }
 
     final SseEmitter emitter;
     final Map<UUID, EmitterModel> emitterMap = getEmitterMap(type);

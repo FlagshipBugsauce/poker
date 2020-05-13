@@ -1,11 +1,9 @@
 package com.poker.poker.documents;
 
 import com.poker.poker.models.enums.GameState;
-import com.poker.poker.models.game.GameActionModel;
 import com.poker.poker.models.game.PlayerModel;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -17,30 +15,24 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Document(collection = "games")
+@Document(collection = "game")
 public class GameDocument {
-  @Schema(description = "Game's ID.", example = "0a7d95ef-94ba-47bc-b591-febb365bc543")
+
+  /** The game ID is the same as the lobby ID. */
+  @Schema(
+      description = "Game ID (same as game lobby ID).",
+      example = "0a7d95ef-94ba-47bc-b591-febb365bc543",
+      implementation = UUID.class)
   @Id
   private UUID id;
 
-  @Schema(description = "Host's ID.", example = "0a7d95ef-94ba-47bc-b591-febb365bc543")
-  private UUID host;
+  @Schema(description = "Game state.", example = "Lobby", implementation = GameState.class)
+  private GameState state;
 
-  @Schema(description = "Name of the game.", example = "All night poker with Jimmy")
-  private String name;
-
-  @Schema(description = "Maximum number of players allowed in the game.", example = "10")
-  private int maxPlayers;
-
-  @Schema(description = "Buy-in required to play in the game.", example = "$25")
-  private BigDecimal buyIn;
-
+  /** This list of player ID's will only be updated after the game begins. */
   @ArraySchema(schema = @Schema(implementation = PlayerModel.class))
   private List<PlayerModel> players;
 
-  @ArraySchema(schema = @Schema(implementation = GameActionModel.class))
-  private List<GameActionModel> gameActions;
-
-  @Schema(description = "Current state of the game.", example = "PreGame")
-  private GameState currentGameState;
+  @ArraySchema(schema = @Schema(implementation = UUID.class))
+  private List<UUID> hands;
 }
