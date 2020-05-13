@@ -6,6 +6,7 @@ import { GetGameModel, ApiSuccessModel } from 'src/app/api/models';
 import { SseService } from 'src/app/shared/sse.service';
 import { ApiInterceptor } from 'src/app/api-interceptor.service';
 import { ApiConfiguration } from 'src/app/api/api-configuration';
+import { EmitterType } from 'src/app/shared/models/emitter-type.model';
 
 @Component({
   selector: 'pkr-join',
@@ -46,13 +47,16 @@ export class JoinComponent implements OnInit {
 
   ngOnInit(): void {
     this.sseService
-      .getServerSentEvent(`${this.apiConfiguration.rootUrl}/game/emitter/join/${this.apiInterceptor.jwt}`, "joinGame")
+      .getServerSentEvent(`${this.apiConfiguration.rootUrl}/game/emitter/join/${this.apiInterceptor.jwt}`, EmitterType.GameList)
       .subscribe((event: any) => {
         // Using try catch to avoid a bunch of red text in the console. The error is worthless since it's due to JSON.parse.
+        let games = this._games;
         try {
           this._games = JSON.parse(event);
         } catch(err) {
           console.log("Something went wrong with the join game emitter.");
+          this.sseService.closeEvent(EmitterType.GameList);
+          this._games = games;
         }
       });
     
@@ -65,7 +69,7 @@ export class JoinComponent implements OnInit {
    */
   @HostListener('window:beforeunload', ['$event'])
   public userLeftPage($event: any): void {
-    this.sseService.closeEvent("joinGame");
+    this.sseService.closeEvent(EmitterType.GameList);
     this.gameService.destroyJoinGameEmitter({ Authorization: null }).subscribe(() => { });
   }
 
