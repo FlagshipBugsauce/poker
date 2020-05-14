@@ -87,26 +87,141 @@ export class GameService extends BaseService {
   }
 
   /**
-   * Path part for operation destroyJoinGameEmitter
+   * Path part for operation createGame
    */
-  static readonly DestroyJoinGameEmitterPath = '/game/destroy-join-game-emitter';
+  static readonly CreateGamePath = '/game/create';
 
   /**
-   * Destroy Join Game Emitter.
+   * Create a new game.
    *
-   * Destroy the emitter that is sending updated game lists.
+   * Creates a new game and returns the UUID to the client.
    *
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `destroyJoinGameEmitter()` instead.
+   * To access only the response body, use `createGame()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  createGame$Response(params: {
+    Authorization: string;
+      body: CreateGameModel
+  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
+
+    const rb = new RequestBuilder(this.rootUrl, GameService.CreateGamePath, 'post');
+    if (params) {
+
+      rb.header('Authorization', params.Authorization);
+
+      rb.body(params.body, 'application/json');
+    }
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<ApiSuccessModel>;
+      })
+    );
+  }
+
+  /**
+   * Create a new game.
+   *
+   * Creates a new game and returns the UUID to the client.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `createGame$Response()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  createGame(params: {
+    Authorization: string;
+      body: CreateGameModel
+  }): Observable<ApiSuccessModel> {
+
+    return this.createGame$Response(params).pipe(
+      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
+    );
+  }
+
+  /**
+   * Path part for operation getGameList
+   */
+  static readonly GetGameListPath = '/game/get-list';
+
+  /**
+   * Get game list.
+   *
+   * Retrieves a list of games which are not full and have not yet started.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `getGameList()` instead.
    *
    * This method doesn't expect any request body.
    */
-  destroyJoinGameEmitter$Response(params: {
+  getGameList$Response(params: {
+    Authorization: string;
+
+  }): Observable<StrictHttpResponse<Array<GetGameModel>>> {
+
+    const rb = new RequestBuilder(this.rootUrl, GameService.GetGameListPath, 'get');
+    if (params) {
+
+      rb.header('Authorization', params.Authorization);
+
+    }
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<Array<GetGameModel>>;
+      })
+    );
+  }
+
+  /**
+   * Get game list.
+   *
+   * Retrieves a list of games which are not full and have not yet started.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `getGameList$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getGameList(params: {
+    Authorization: string;
+
+  }): Observable<Array<GetGameModel>> {
+
+    return this.getGameList$Response(params).pipe(
+      map((r: StrictHttpResponse<Array<GetGameModel>>) => r.body as Array<GetGameModel>)
+    );
+  }
+
+  /**
+   * Path part for operation startGame
+   */
+  static readonly StartGamePath = '/game/start';
+
+  /**
+   * Start Game.
+   *
+   * Starts the game, provided all preconditions are satisfied..
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `startGame()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  startGame$Response(params: {
     Authorization: string;
 
   }): Observable<StrictHttpResponse<ApiSuccessModel>> {
 
-    const rb = new RequestBuilder(this.rootUrl, GameService.DestroyJoinGameEmitterPath, 'post');
+    const rb = new RequestBuilder(this.rootUrl, GameService.StartGamePath, 'post');
     if (params) {
 
       rb.header('Authorization', params.Authorization);
@@ -124,136 +239,79 @@ export class GameService extends BaseService {
   }
 
   /**
-   * Destroy Join Game Emitter.
+   * Start Game.
    *
-   * Destroy the emitter that is sending updated game lists.
+   * Starts the game, provided all preconditions are satisfied..
    *
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `destroyJoinGameEmitter$Response()` instead.
+   * To access the full response (for headers, for example), `startGame$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  destroyJoinGameEmitter(params: {
+  startGame(params: {
     Authorization: string;
 
   }): Observable<ApiSuccessModel> {
 
-    return this.destroyJoinGameEmitter$Response(params).pipe(
+    return this.startGame$Response(params).pipe(
       map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
     );
   }
 
   /**
-   * Path part for operation getLobbyDocumentUpdate
+   * Path part for operation getGameEmitter
    */
-  static readonly GetLobbyDocumentUpdatePath = '/game/refresh-lobby-doc';
+  static readonly GetGameEmitterPath = '/game/emitter/game/{jwt}';
 
   /**
-   * Request Lobby Document Update.
+   * Request Game SSE Emitter.
    *
-   * Request an updated lobby document.
+   * Request a Game type SSE emitter to be sent updates regarding the game state.
    *
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `getLobbyDocumentUpdate()` instead.
+   * To access only the response body, use `getGameEmitter()` instead.
    *
    * This method doesn't expect any request body.
    */
-  getLobbyDocumentUpdate$Response(params: {
-    Authorization: string;
+  getGameEmitter$Response(params: {
+    jwt: string;
 
-  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
+  }): Observable<StrictHttpResponse<SseEmitter>> {
 
-    const rb = new RequestBuilder(this.rootUrl, GameService.GetLobbyDocumentUpdatePath, 'get');
+    const rb = new RequestBuilder(this.rootUrl, GameService.GetGameEmitterPath, 'get');
     if (params) {
 
-      rb.header('Authorization', params.Authorization);
+      rb.path('jwt', params.jwt);
 
     }
     return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
+      responseType: 'text',
+      accept: 'text/event-stream'
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<ApiSuccessModel>;
+        return r as StrictHttpResponse<SseEmitter>;
       })
     );
   }
 
   /**
-   * Request Lobby Document Update.
+   * Request Game SSE Emitter.
    *
-   * Request an updated lobby document.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `getLobbyDocumentUpdate$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getLobbyDocumentUpdate(params: {
-    Authorization: string;
-
-  }): Observable<ApiSuccessModel> {
-
-    return this.getLobbyDocumentUpdate$Response(params).pipe(
-      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
-    );
-  }
-
-  /**
-   * Path part for operation getGameDocumentUpdate
-   */
-  static readonly GetGameDocumentUpdatePath = '/game/refresh-game-doc';
-
-  /**
-   * Request Game Document Update.
-   *
-   * Request an updated game document.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `getGameDocumentUpdate()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getGameDocumentUpdate$Response(params: {
-    Authorization: string;
-
-  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
-
-    const rb = new RequestBuilder(this.rootUrl, GameService.GetGameDocumentUpdatePath, 'get');
-    if (params) {
-
-      rb.header('Authorization', params.Authorization);
-
-    }
-    return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<ApiSuccessModel>;
-      })
-    );
-  }
-
-  /**
-   * Request Game Document Update.
-   *
-   * Request an updated game document.
+   * Request a Game type SSE emitter to be sent updates regarding the game state.
    *
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `getGameDocumentUpdate$Response()` instead.
+   * To access the full response (for headers, for example), `getGameEmitter$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  getGameDocumentUpdate(params: {
-    Authorization: string;
+  getGameEmitter(params: {
+    jwt: string;
 
-  }): Observable<ApiSuccessModel> {
+  }): Observable<SseEmitter> {
 
-    return this.getGameDocumentUpdate$Response(params).pipe(
-      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
+    return this.getGameEmitter$Response(params).pipe(
+      map((r: StrictHttpResponse<SseEmitter>) => r.body as SseEmitter)
     );
   }
 
@@ -315,6 +373,109 @@ export class GameService extends BaseService {
   }
 
   /**
+   * Path part for operation getGameDocument
+   */
+  static readonly GetGameDocumentPath = '/game/get-game-document';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `getGameDocument()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getGameDocument$Response(params?: {
+
+  }): Observable<StrictHttpResponse<GameDocument>> {
+
+    const rb = new RequestBuilder(this.rootUrl, GameService.GetGameDocumentPath, 'post');
+    if (params) {
+
+
+    }
+    return this.http.request(rb.build({
+      responseType: 'blob',
+      accept: '*/*'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<GameDocument>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `getGameDocument$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getGameDocument(params?: {
+
+  }): Observable<GameDocument> {
+
+    return this.getGameDocument$Response(params).pipe(
+      map((r: StrictHttpResponse<GameDocument>) => r.body as GameDocument)
+    );
+  }
+
+  /**
+   * Path part for operation refreshHand
+   */
+  static readonly RefreshHandPath = '/game/refresh-hand';
+
+  /**
+   * Refresh Hand.
+   *
+   * Requests updated hand data.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `refreshHand()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  refreshHand$Response(params: {
+    Authorization: string;
+
+  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
+
+    const rb = new RequestBuilder(this.rootUrl, GameService.RefreshHandPath, 'post');
+    if (params) {
+
+      rb.header('Authorization', params.Authorization);
+
+    }
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<ApiSuccessModel>;
+      })
+    );
+  }
+
+  /**
+   * Refresh Hand.
+   *
+   * Requests updated hand data.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `refreshHand$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  refreshHand(params: {
+    Authorization: string;
+
+  }): Observable<ApiSuccessModel> {
+
+    return this.refreshHand$Response(params).pipe(
+      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
+    );
+  }
+
+  /**
    * Path part for operation getHandEmitter
    */
   static readonly GetHandEmitterPath = '/game/emitter/hand/{jwt}';
@@ -367,63 +528,6 @@ export class GameService extends BaseService {
   }): Observable<SseEmitter> {
 
     return this.getHandEmitter$Response(params).pipe(
-      map((r: StrictHttpResponse<SseEmitter>) => r.body as SseEmitter)
-    );
-  }
-
-  /**
-   * Path part for operation getLobbyEmitter
-   */
-  static readonly GetLobbyEmitterPath = '/game/emitter/lobby/{jwt}';
-
-  /**
-   * Request Lobby SSE Emitter.
-   *
-   * Request a Lobby type SSE emitter to be sent updates regarding the lobby state.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `getLobbyEmitter()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getLobbyEmitter$Response(params: {
-    jwt: string;
-
-  }): Observable<StrictHttpResponse<SseEmitter>> {
-
-    const rb = new RequestBuilder(this.rootUrl, GameService.GetLobbyEmitterPath, 'get');
-    if (params) {
-
-      rb.path('jwt', params.jwt);
-
-    }
-    return this.http.request(rb.build({
-      responseType: 'text',
-      accept: 'text/event-stream'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<SseEmitter>;
-      })
-    );
-  }
-
-  /**
-   * Request Lobby SSE Emitter.
-   *
-   * Request a Lobby type SSE emitter to be sent updates regarding the lobby state.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `getLobbyEmitter$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getLobbyEmitter(params: {
-    jwt: string;
-
-  }): Observable<SseEmitter> {
-
-    return this.getLobbyEmitter$Response(params).pipe(
       map((r: StrictHttpResponse<SseEmitter>) => r.body as SseEmitter)
     );
   }
@@ -482,6 +586,63 @@ export class GameService extends BaseService {
 
     return this.destroyHandEmitter$Response(params).pipe(
       map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
+    );
+  }
+
+  /**
+   * Path part for operation getLobbyEmitter
+   */
+  static readonly GetLobbyEmitterPath = '/game/emitter/lobby/{jwt}';
+
+  /**
+   * Request Lobby SSE Emitter.
+   *
+   * Request a Lobby type SSE emitter to be sent updates regarding the lobby state.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `getLobbyEmitter()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getLobbyEmitter$Response(params: {
+    jwt: string;
+
+  }): Observable<StrictHttpResponse<SseEmitter>> {
+
+    const rb = new RequestBuilder(this.rootUrl, GameService.GetLobbyEmitterPath, 'get');
+    if (params) {
+
+      rb.path('jwt', params.jwt);
+
+    }
+    return this.http.request(rb.build({
+      responseType: 'text',
+      accept: 'text/event-stream'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<SseEmitter>;
+      })
+    );
+  }
+
+  /**
+   * Request Lobby SSE Emitter.
+   *
+   * Request a Lobby type SSE emitter to be sent updates regarding the lobby state.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `getLobbyEmitter$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getLobbyEmitter(params: {
+    jwt: string;
+
+  }): Observable<SseEmitter> {
+
+    return this.getLobbyEmitter$Response(params).pipe(
+      map((r: StrictHttpResponse<SseEmitter>) => r.body as SseEmitter)
     );
   }
 
@@ -603,281 +764,6 @@ export class GameService extends BaseService {
   }
 
   /**
-   * Path part for operation getGameList
-   */
-  static readonly GetGameListPath = '/game/get-list';
-
-  /**
-   * Get game list.
-   *
-   * Retrieves a list of games which are not full and have not yet started.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `getGameList()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getGameList$Response(params: {
-    Authorization: string;
-
-  }): Observable<StrictHttpResponse<Array<GetGameModel>>> {
-
-    const rb = new RequestBuilder(this.rootUrl, GameService.GetGameListPath, 'get');
-    if (params) {
-
-      rb.header('Authorization', params.Authorization);
-
-    }
-    return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<Array<GetGameModel>>;
-      })
-    );
-  }
-
-  /**
-   * Get game list.
-   *
-   * Retrieves a list of games which are not full and have not yet started.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `getGameList$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getGameList(params: {
-    Authorization: string;
-
-  }): Observable<Array<GetGameModel>> {
-
-    return this.getGameList$Response(params).pipe(
-      map((r: StrictHttpResponse<Array<GetGameModel>>) => r.body as Array<GetGameModel>)
-    );
-  }
-
-  /**
-   * Path part for operation refreshHand
-   */
-  static readonly RefreshHandPath = '/game/refresh-hand';
-
-  /**
-   * Refresh Hand.
-   *
-   * Requests updated hand data.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `refreshHand()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  refreshHand$Response(params: {
-    Authorization: string;
-
-  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
-
-    const rb = new RequestBuilder(this.rootUrl, GameService.RefreshHandPath, 'post');
-    if (params) {
-
-      rb.header('Authorization', params.Authorization);
-
-    }
-    return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<ApiSuccessModel>;
-      })
-    );
-  }
-
-  /**
-   * Refresh Hand.
-   *
-   * Requests updated hand data.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `refreshHand$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  refreshHand(params: {
-    Authorization: string;
-
-  }): Observable<ApiSuccessModel> {
-
-    return this.refreshHand$Response(params).pipe(
-      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
-    );
-  }
-
-  /**
-   * Path part for operation getGameEmitter
-   */
-  static readonly GetGameEmitterPath = '/game/emitter/game/{jwt}';
-
-  /**
-   * Request Game SSE Emitter.
-   *
-   * Request a Game type SSE emitter to be sent updates regarding the game state.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `getGameEmitter()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getGameEmitter$Response(params: {
-    jwt: string;
-
-  }): Observable<StrictHttpResponse<SseEmitter>> {
-
-    const rb = new RequestBuilder(this.rootUrl, GameService.GetGameEmitterPath, 'get');
-    if (params) {
-
-      rb.path('jwt', params.jwt);
-
-    }
-    return this.http.request(rb.build({
-      responseType: 'text',
-      accept: 'text/event-stream'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<SseEmitter>;
-      })
-    );
-  }
-
-  /**
-   * Request Game SSE Emitter.
-   *
-   * Request a Game type SSE emitter to be sent updates regarding the game state.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `getGameEmitter$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getGameEmitter(params: {
-    jwt: string;
-
-  }): Observable<SseEmitter> {
-
-    return this.getGameEmitter$Response(params).pipe(
-      map((r: StrictHttpResponse<SseEmitter>) => r.body as SseEmitter)
-    );
-  }
-
-  /**
-   * Path part for operation getGameDocument
-   */
-  static readonly GetGameDocumentPath = '/game/get-game-document';
-
-  /**
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `getGameDocument()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getGameDocument$Response(params?: {
-
-  }): Observable<StrictHttpResponse<GameDocument>> {
-
-    const rb = new RequestBuilder(this.rootUrl, GameService.GetGameDocumentPath, 'post');
-    if (params) {
-
-
-    }
-    return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<GameDocument>;
-      })
-    );
-  }
-
-  /**
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `getGameDocument$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getGameDocument(params?: {
-
-  }): Observable<GameDocument> {
-
-    return this.getGameDocument$Response(params).pipe(
-      map((r: StrictHttpResponse<GameDocument>) => r.body as GameDocument)
-    );
-  }
-
-  /**
-   * Path part for operation createGame
-   */
-  static readonly CreateGamePath = '/game/create';
-
-  /**
-   * Create a new game.
-   *
-   * Creates a new game and returns the UUID to the client.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `createGame()` instead.
-   *
-   * This method sends `application/json` and handles request body of type `application/json`.
-   */
-  createGame$Response(params: {
-    Authorization: string;
-      body: CreateGameModel
-  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
-
-    const rb = new RequestBuilder(this.rootUrl, GameService.CreateGamePath, 'post');
-    if (params) {
-
-      rb.header('Authorization', params.Authorization);
-
-      rb.body(params.body, 'application/json');
-    }
-    return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<ApiSuccessModel>;
-      })
-    );
-  }
-
-  /**
-   * Create a new game.
-   *
-   * Creates a new game and returns the UUID to the client.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `createGame$Response()` instead.
-   *
-   * This method sends `application/json` and handles request body of type `application/json`.
-   */
-  createGame(params: {
-    Authorization: string;
-      body: CreateGameModel
-  }): Observable<ApiSuccessModel> {
-
-    return this.createGame$Response(params).pipe(
-      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
-    );
-  }
-
-  /**
    * Path part for operation refreshGameList
    */
   static readonly RefreshGameListPath = '/game/refresh-game-list';
@@ -935,26 +821,26 @@ export class GameService extends BaseService {
   }
 
   /**
-   * Path part for operation startGame
+   * Path part for operation getLobbyDocumentUpdate
    */
-  static readonly StartGamePath = '/game/start';
+  static readonly GetLobbyDocumentUpdatePath = '/game/refresh-lobby-doc';
 
   /**
-   * Start Game.
+   * Request Lobby Document Update.
    *
-   * Starts the game, provided all preconditions are satisfied..
+   * Request an updated lobby document.
    *
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `startGame()` instead.
+   * To access only the response body, use `getLobbyDocumentUpdate()` instead.
    *
    * This method doesn't expect any request body.
    */
-  startGame$Response(params: {
+  getLobbyDocumentUpdate$Response(params: {
     Authorization: string;
 
   }): Observable<StrictHttpResponse<ApiSuccessModel>> {
 
-    const rb = new RequestBuilder(this.rootUrl, GameService.StartGamePath, 'post');
+    const rb = new RequestBuilder(this.rootUrl, GameService.GetLobbyDocumentUpdatePath, 'get');
     if (params) {
 
       rb.header('Authorization', params.Authorization);
@@ -972,21 +858,135 @@ export class GameService extends BaseService {
   }
 
   /**
-   * Start Game.
+   * Request Lobby Document Update.
    *
-   * Starts the game, provided all preconditions are satisfied..
+   * Request an updated lobby document.
    *
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `startGame$Response()` instead.
+   * To access the full response (for headers, for example), `getLobbyDocumentUpdate$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  startGame(params: {
+  getLobbyDocumentUpdate(params: {
     Authorization: string;
 
   }): Observable<ApiSuccessModel> {
 
-    return this.startGame$Response(params).pipe(
+    return this.getLobbyDocumentUpdate$Response(params).pipe(
+      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
+    );
+  }
+
+  /**
+   * Path part for operation getGameDocumentUpdate
+   */
+  static readonly GetGameDocumentUpdatePath = '/game/refresh-game-doc';
+
+  /**
+   * Request Game Document Update.
+   *
+   * Request an updated game document.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `getGameDocumentUpdate()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getGameDocumentUpdate$Response(params: {
+    Authorization: string;
+
+  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
+
+    const rb = new RequestBuilder(this.rootUrl, GameService.GetGameDocumentUpdatePath, 'get');
+    if (params) {
+
+      rb.header('Authorization', params.Authorization);
+
+    }
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<ApiSuccessModel>;
+      })
+    );
+  }
+
+  /**
+   * Request Game Document Update.
+   *
+   * Request an updated game document.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `getGameDocumentUpdate$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getGameDocumentUpdate(params: {
+    Authorization: string;
+
+  }): Observable<ApiSuccessModel> {
+
+    return this.getGameDocumentUpdate$Response(params).pipe(
+      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
+    );
+  }
+
+  /**
+   * Path part for operation destroyJoinGameEmitter
+   */
+  static readonly DestroyJoinGameEmitterPath = '/game/destroy-join-game-emitter';
+
+  /**
+   * Destroy Join Game Emitter.
+   *
+   * Destroy the emitter that is sending updated game lists.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `destroyJoinGameEmitter()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  destroyJoinGameEmitter$Response(params: {
+    Authorization: string;
+
+  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
+
+    const rb = new RequestBuilder(this.rootUrl, GameService.DestroyJoinGameEmitterPath, 'post');
+    if (params) {
+
+      rb.header('Authorization', params.Authorization);
+
+    }
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<ApiSuccessModel>;
+      })
+    );
+  }
+
+  /**
+   * Destroy Join Game Emitter.
+   *
+   * Destroy the emitter that is sending updated game lists.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `destroyJoinGameEmitter$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  destroyJoinGameEmitter(params: {
+    Authorization: string;
+
+  }): Observable<ApiSuccessModel> {
+
+    return this.destroyJoinGameEmitter$Response(params).pipe(
       map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
     );
   }
