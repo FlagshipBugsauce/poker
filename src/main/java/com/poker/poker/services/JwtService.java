@@ -3,7 +3,6 @@ package com.poker.poker.services;
 import com.poker.poker.config.constants.AppConstants;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.repositories.UserRepository;
-import com.poker.poker.validation.exceptions.BadRequestException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -28,6 +27,7 @@ public class JwtService {
 
   /**
    * Retrieves a user ID from a JWT.
+   *
    * @param token JWT.
    * @return User ID of the user associated with the JWT.
    */
@@ -38,6 +38,7 @@ public class JwtService {
 
   /**
    * Retrieves a user document from a JWT.
+   *
    * @param token JWT.
    * @return UserDocument associated with the JWT.
    */
