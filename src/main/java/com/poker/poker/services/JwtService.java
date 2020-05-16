@@ -26,17 +26,25 @@ public class JwtService {
   private final AppConstants appConstants;
   private final UserRepository userRepository;
 
-  // TODO: Javadoc
+  /**
+   * Retrieves a user ID from a JWT.
+   * @param token JWT.
+   * @return User ID of the user associated with the JWT.
+   */
   public UUID getUserId(String token) {
     // TODO: Look into baking the UUID into the token to make this not require checking the DB.
     return getUserDocument(token).getId();
   }
 
-  // TODO: Javadoc
+  /**
+   * Retrieves a user document from a JWT.
+   * @param token JWT.
+   * @return UserDocument associated with the JWT.
+   */
   public UserDocument getUserDocument(String token) {
     final UserDocument userDocument = userRepository.findUserDocumentByEmail(extractEmail(token));
     if (userDocument == null) {
-      throw new BadRequestException("", ""); // TODO: Add strings
+      throw appConstants.getUserNotFoundException();
     }
     return userDocument;
   }
