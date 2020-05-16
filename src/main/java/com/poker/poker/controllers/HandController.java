@@ -25,10 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/game/hand")
-@Tag(
-    name = "hand",
-    description =
-        "Hand API handles all game requests after the game has started.")
+@Tag(name = "hand", description = "Hand API handles all game requests after the game has started.")
 public class HandController {
 
   private UserService userService;
@@ -42,13 +39,13 @@ public class HandController {
       tags = "game")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Roll was successful.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = ApiSuccessModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Roll was successful.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiSuccessModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/roll", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> roll(

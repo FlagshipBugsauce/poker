@@ -103,9 +103,9 @@ public class GameController {
             description =
                 "Getting game active list was successful. A GetGameModel should be returned",
             content =
-            @Content(
-                array = @ArraySchema(schema = @Schema(implementation = GetGameModel.class)),
-                mediaType = MediaType.APPLICATION_JSON_VALUE))
+                @Content(
+                    array = @ArraySchema(schema = @Schema(implementation = GetGameModel.class)),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/get-list", method = RequestMethod.GET)
   public ResponseEntity<List<GetGameModel>> getGameList(
@@ -128,13 +128,13 @@ public class GameController {
       tags = "game")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Game was joined successfully.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = ApiSuccessModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Game was joined successfully.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiSuccessModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/join/{gameId}", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> joinGame(
@@ -152,13 +152,13 @@ public class GameController {
       tags = "game")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Request handled successfully.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = ApiSuccessModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Request handled successfully.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiSuccessModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/ready", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> ready(
@@ -173,13 +173,13 @@ public class GameController {
       tags = "game")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Request handled successfully.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = ApiSuccessModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Request handled successfully.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiSuccessModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/leave-lobby", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> leaveLobby(
@@ -195,13 +195,13 @@ public class GameController {
       tags = "game")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Game started successfully.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = ApiSuccessModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Game started successfully.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiSuccessModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/start", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> startGame(

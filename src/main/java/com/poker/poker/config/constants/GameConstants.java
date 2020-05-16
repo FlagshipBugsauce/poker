@@ -25,8 +25,7 @@ public class GameConstants extends AppConstants {
 
   private final BadRequestException noUserIdToGameIdMappingFound =
       new BadRequestException(
-          "No Mapping Found",
-          "There is no mapping from the user ID to game ID provided.");
+          "No Mapping Found", "There is no mapping from the user ID to game ID provided.");
 
   private final BadRequestException joinGamePlayerAlreadyJoinedException =
       new BadRequestException("Failed to Join", "Cannot join more than one game at a time.");

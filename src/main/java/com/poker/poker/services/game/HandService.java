@@ -38,19 +38,13 @@ public class HandService {
 
   private HandConstants handConstants;
 
-  /**
-   * Mapping of hand Id to HandModel of active hand.
-   */
+  /** Mapping of hand Id to HandModel of active hand. */
   private Map<UUID, HandModel> hands;
 
-  /**
-   * Mapping of game Id to Id of an active hand.
-   */
+  /** Mapping of game Id to Id of an active hand. */
   private Map<UUID, UUID> gameIdToHandIdMap;
 
-  /**
-   * Mapping of user Id to game Id.
-   */
+  /** Mapping of user Id to game Id. */
   private Map<UUID, UUID> userIdToGameIdMap;
 
   private UserRepository userRepository;
@@ -128,12 +122,8 @@ public class HandService {
    */
   public void newHand(GameDocument gameDocument) {
     log.debug("Creating new hand for game {}.", gameDocument.getId());
-    HandModel hand = new HandModel(
-        UUID.randomUUID(),
-        gameDocument.getId(),
-        null,
-        new ArrayList<>(),
-        null);
+    HandModel hand =
+        new HandModel(UUID.randomUUID(), gameDocument.getId(), null, new ArrayList<>(), null);
 
     // Adding hand to list of hands in game document.
     gameDocument.getHands().add(hand.getId());
@@ -145,9 +135,12 @@ public class HandService {
     gameIdToHandIdMap.put(gameDocument.getId(), hand.getId());
 
     // Map user ID's to game ID & sends updated hand model to players
-    gameDocument.getPlayers().forEach(p -> {
-      userIdToGameIdMap.put(p.getId(), gameDocument.getId());
-    });
+    gameDocument
+        .getPlayers()
+        .forEach(
+            p -> {
+              userIdToGameIdMap.put(p.getId(), gameDocument.getId());
+            });
   }
 
   /**
@@ -157,7 +150,8 @@ public class HandService {
    */
   public void broadcastHandUpdate(GameDocument gameDocument) {
     final HandModel hand = getHand(gameDocument);
-    gameDocument.getPlayers()
+    gameDocument
+        .getPlayers()
         .forEach(p -> sseService.sendUpdate(EmitterType.Hand, p.getId(), hand));
   }
 
@@ -185,11 +179,14 @@ public class HandService {
       return;
     }
 
-    log.debug("Waited for {} ms, did not detect any action from {}.",
-        handConstants.getTimeToActInMillis(), userId);
+    log.debug(
+        "Waited for {} ms, did not detect any action from {}.",
+        handConstants.getTimeToActInMillis(),
+        userId);
     log.debug("Performing default action for {}.", userId);
-    roll(userRepository
-        .findUserDocumentById(userId));  // TODO: Probably want to avoid using repo here
+    roll(
+        userRepository.findUserDocumentById(
+            userId)); // TODO: Probably want to avoid using repo here
   }
 
   /**
@@ -205,8 +202,8 @@ public class HandService {
 
     if (!hand.getPlayerToAct().equals(user.getId())) {
       log.error("Player {} attempted to roll but it is not this players turn.", user.getId());
-      throw new BadRequestException("Action Denied",
-          "It is not your turn."); // TODO: Update with constant and better text
+      throw new BadRequestException(
+          "Action Denied", "It is not your turn."); // TODO: Update with constant and better text
     }
 
     // Make sure the roll is unique so there are no ties.
@@ -226,19 +223,18 @@ public class HandService {
 
     log.debug("{} rolled {}.", user.getId(), number);
 
-    hand.getActions().add(new RollActionModel(
-        UUID.randomUUID(),
-        String.format("%s %s rolled %d.", user.getFirstName(), user.getLastName(), number),
-        new PlayerModel(user),
-        number));
+    hand.getActions()
+        .add(
+            new RollActionModel(
+                UUID.randomUUID(),
+                String.format("%s %s rolled %d.", user.getFirstName(), user.getLastName(), number),
+                new PlayerModel(user),
+                number));
 
     // Create event indicating that a player rolled.
     log.debug("Creating roll event to be handled by game service.");
-    applicationEventPublisher.publishEvent(new HandActionEvent(
-        this,
-        hand.getGameId(),
-        hand.getId(),
-        HandAction.Roll));
+    applicationEventPublisher.publishEvent(
+        new HandActionEvent(this, hand.getGameId(), hand.getId(), HandAction.Roll));
 
     return new ApiSuccessModel("Roll was successful");
   }
@@ -254,9 +250,9 @@ public class HandService {
     final UUID handId = gameDocument.getHands().get(gameDocument.getHands().size() - 1);
 
     // Verify that this is an active hand.
-    getHand(handId);          // This will throw if the hand does not exist
+    getHand(handId); // This will throw if the hand does not exist
     getHand(
-        gameDocument);    // This will also throw if the gameDocument isn't associated with this hand
+        gameDocument); // This will also throw if the gameDocument isn't associated with this hand
 
     // Save the hand to the database.
     handRepository.save(hands.remove(handId));

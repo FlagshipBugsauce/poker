@@ -14,10 +14,9 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 public class RollActionModel extends HandActionModel {
 
-  @Schema(
-      description = "Player that performed the roll.",
-      implementation = PlayerModel.class)
+  @Schema(description = "Player that performed the roll.", implementation = PlayerModel.class)
   protected PlayerModel player;
+
   @Schema(description = "Value that was rolled.", example = "27")
   protected int value;
 

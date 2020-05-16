@@ -81,7 +81,7 @@ public class GameService {
    * Creates a new game.
    *
    * @param createGameModel Model representing the game parameters.
-   * @param user            The user who created the game.
+   * @param user The user who created the game.
    * @return An ApiSuccessModel containing the ID of the game, to indicate creation was successful.
    * @throws BadRequestException If the user is already in a game.
    */
@@ -127,8 +127,8 @@ public class GameService {
    * @param userDocument Model representing the user attempting to join the game.
    * @return An ApiSuccessModel indicating the request was successful.
    * @throws BadRequestException If the game ID provided is invalid or if the specified user is
-   *                             already in a game (other than the game they are attempting to join
-   *                             - if they attempt to join this game, nothing will happen).
+   *     already in a game (other than the game they are attempting to join - if they attempt to
+   *     join this game, nothing will happen).
    */
   public ApiSuccessModel joinLobby(String gameIdString, UserDocument userDocument)
       throws BadRequestException {
@@ -273,17 +273,20 @@ public class GameService {
     hand.setPlayerToAct(nextPlayerToAct.getId());
 
     log.debug("Sending updated hand models to players in game {}.", gameDocument.getId());
-    gameDocument.getPlayers().forEach(p -> {
-      try {
-        sseService.sendUpdate(EmitterType.Hand, p.getId(), hand);
-      } catch (Exception ignore) {
-      }
-    });
+    gameDocument
+        .getPlayers()
+        .forEach(
+            p -> {
+              try {
+                sseService.sendUpdate(EmitterType.Hand, p.getId(), hand);
+              } catch (Exception ignore) {
+              }
+            });
 
     /*
-          Temporary logic here to help design game flow for later. Most of this will be gone. Just
-          trying to work out the kinks with waiting for players to act, etc...
-     */
+         Temporary logic here to help design game flow for later. Most of this will be gone. Just
+         trying to work out the kinks with waiting for players to act, etc...
+    */
 
     final int numRounds = gameConstants.getNumRoundsInRollGame();
     final RollActionModel rollActionModel = (RollActionModel) hand.getActions().get(0);
@@ -371,13 +374,11 @@ public class GameService {
     final String currentOutput = sb.toString().substring(0, sb.toString().length() - 2);
 
     assert winner != null;
-    gameDocument.setSummary(new GameSummaryModel(
-        String.format(
-            "%s. The winrar is %s %s, with a score of %d.",
-            currentOutput,
-            winner.getFirstName(),
-            winner.getLastName(),
-            highestScore)));
+    gameDocument.setSummary(
+        new GameSummaryModel(
+            String.format(
+                "%s. The winrar is %s %s, with a score of %d.",
+                currentOutput, winner.getFirstName(), winner.getLastName(), highestScore)));
 
     // General housekeeping:
 

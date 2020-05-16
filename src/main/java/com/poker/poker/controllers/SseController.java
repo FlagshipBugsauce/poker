@@ -48,17 +48,17 @@ public class SseController {
       tags = "request")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Emitter was created successfully.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = SseEmitter.class),
-                  mediaType = MediaType.TEXT_EVENT_STREAM_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Emitter was created successfully.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = SseEmitter.class),
+                    mediaType = MediaType.TEXT_EVENT_STREAM_VALUE))
       })
   @RequestMapping(value = "/request/{type}/{jwt}", method = RequestMethod.GET)
   public SseEmitter requestEmitter(@PathVariable String jwt, @PathVariable EmitterType type) {
-//    userService.validate(jwt, appConstants.getAllUsers());
+    //    userService.validate(jwt, appConstants.getAllUsers());
     log.debug("User {} requested {} emitter.", jwtService.getUserId(jwt), type);
     final UUID userId = jwtService.getUserId(jwt);
     final Runnable validator;
@@ -83,13 +83,13 @@ public class SseController {
       tags = "update")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Request handled successfully.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = ApiSuccessModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Request handled successfully.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiSuccessModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/update/{type}", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> requestUpdate(
@@ -120,13 +120,13 @@ public class SseController {
       tags = "destroy")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Request handled successfully.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = ApiSuccessModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Request handled successfully.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiSuccessModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/destroy/{type}", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> destroyEmitter(

@@ -36,10 +36,8 @@ public class LobbyServiceTests extends TestBaseClass {
   @Mock private SseService sseService;
   @Spy private Map<UUID, LobbyDocument> activeGames;
   @Spy private Map<UUID, UUID> userIdToGameIdMap;
-  @Spy
-  private GameConstants gameConstants;
-  @Mock
-  private LobbyRepository lobbyRepository;
+  @Spy private GameConstants gameConstants;
+  @Mock private LobbyRepository lobbyRepository;
 
   private LobbyService lobbyService;
 
@@ -118,19 +116,19 @@ public class LobbyServiceTests extends TestBaseClass {
     userIdToGameIdMap = new HashMap<>();
 
     lobbyService =
-        new LobbyService(sseService, activeGames, userIdToGameIdMap, gameConstants,
-            lobbyRepository);
+        new LobbyService(
+            sseService, activeGames, userIdToGameIdMap, gameConstants, lobbyRepository);
 
-//    Mockito.when(uuidService.isValidUuidString(Mockito.anyString())).thenCallRealMethod();
-//    Mockito.doAnswer(
-//            (invocation) -> {
-//              if (!uuidService.isValidUuidString(invocation.getArgument(0))) {
-//                throw new BadRequestException("Invalid UUID", "Invalid UUID");
-//              }
-//              return null;
-//            })
-//        .when(uuidService)
-//        .checkIfValidAndThrowBadRequest(Mockito.anyString());
+    //    Mockito.when(uuidService.isValidUuidString(Mockito.anyString())).thenCallRealMethod();
+    //    Mockito.doAnswer(
+    //            (invocation) -> {
+    //              if (!uuidService.isValidUuidString(invocation.getArgument(0))) {
+    //                throw new BadRequestException("Invalid UUID", "Invalid UUID");
+    //              }
+    //              return null;
+    //            })
+    //        .when(uuidService)
+    //        .checkIfValidAndThrowBadRequest(Mockito.anyString());
   }
 
   /* TODO: Update pre/post conditions here after refactoring.

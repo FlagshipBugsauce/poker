@@ -100,10 +100,9 @@ public class SseService {
 
   /**
    * Helper that retrieves an emitter of a specified type for a specified user. Handles the case
-   * where there is no such emitter so that there is no chance of unhandled null pointer
-   * exceptions.
+   * where there is no such emitter so that there is no chance of unhandled null pointer exceptions.
    *
-   * @param type   The type of emitter being sought (GameList, Lobby, etc...).
+   * @param type The type of emitter being sought (GameList, Lobby, etc...).
    * @param userId The user the emitter being sought is associated with.
    * @return An SseEmitter of the specified type, associated with the specified user.
    * @throws BadRequestException If no emitter of the specified type for the specified user exists.
@@ -121,7 +120,7 @@ public class SseService {
    * case where there is no such emitter so that a BadRequestException will be thrown with the
    * appropriate message.
    *
-   * @param type   The type of emitter model being sought (GameList, Lobby, etc...).
+   * @param type The type of emitter model being sought (GameList, Lobby, etc...).
    * @param userId The user the emitter being sought is associated with.
    * @return An emitter model of the specified type, associated with the specified user.
    * @throws BadRequestException If no emitter model matching the parameters is found.
@@ -139,10 +138,10 @@ public class SseService {
   /**
    * Updates the emitter model of the specified type for the specified user.
    *
-   * @param type   The type of emitter model being updated.
+   * @param type The type of emitter model being updated.
    * @param userId The ID of the user the emitter belongs to.
-   * @param time   The time the last new data was sent to the user.
-   * @param data   The data that was last sent to the user.
+   * @param time The time the last new data was sent to the user.
+   * @param data The data that was last sent to the user.
    * @throws BadRequestException If the model cannot be retrieved.
    */
   private void updateEmitterModel(EmitterType type, UUID userId, DateTime time, Object data)
@@ -199,18 +198,17 @@ public class SseService {
   /**
    * Creates, stores and returns an emitter which will be used to send the client updates.
    *
-   * @param type      The type of the emitter. There are several types, such as a lobby emitter,
-   *                  which will send the client updates whenever the state of the game lobby
-   *                  changes.
-   * @param userId    The UUID of the user requesting an emitter.
+   * @param type The type of the emitter. There are several types, such as a lobby emitter, which
+   *     will send the client updates whenever the state of the game lobby changes.
+   * @param userId The UUID of the user requesting an emitter.
    * @param validator A lambda supplied by the caller to ensure an emitter is only sent when certain
-   *                  preconditions have been satisfied.
+   *     preconditions have been satisfied.
    * @return An SSE emitter which will send updates to the client that requested the emitter.
    * @throws BadRequestException If the validator fails, this exception could be thrown.
-   * @throws ForbiddenException  If the validator fails, this exception could be thrown.
+   * @throws ForbiddenException If the validator fails, this exception could be thrown.
    */
-  public SseEmitter createEmitter(EmitterType type, UUID userId, Runnable validator) throws
-      BadRequestException, ForbiddenException {
+  public SseEmitter createEmitter(EmitterType type, UUID userId, Runnable validator)
+      throws BadRequestException, ForbiddenException {
     log.debug("Attempting to create {} emitter for {}.", type, userId);
     // Caller provides a lambda that will throw if pre-conditions are not satisfied.
     if (validator != null) {

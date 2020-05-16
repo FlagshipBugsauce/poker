@@ -29,11 +29,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice(
     assignableTypes = {
-        UserController.class,
-        TestController.class,
-        GameController.class,
-        HandController.class,
-        SseController.class})
+      UserController.class,
+      TestController.class,
+      GameController.class,
+      HandController.class,
+      SseController.class
+    })
 public class ApiExceptionHandler {
 
   /**
