@@ -1,5 +1,6 @@
 package com.poker.poker.documents;
 
+import com.poker.poker.models.GameSummaryModel;
 import com.poker.poker.models.enums.GameState;
 import com.poker.poker.models.game.PlayerModel;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -29,10 +30,15 @@ public class GameDocument {
   @Schema(description = "Game state.", example = "Lobby", implementation = GameState.class)
   private GameState state;
 
-  /** This list of player ID's will only be updated after the game begins. */
+  /**
+   * This list of player ID's will only be updated after the game begins.
+   */
   @ArraySchema(schema = @Schema(implementation = PlayerModel.class))
   private List<PlayerModel> players;
 
   @ArraySchema(schema = @Schema(implementation = UUID.class))
   private List<UUID> hands;
+
+  @Schema(implementation = GameSummaryModel.class)
+  private GameSummaryModel summary;
 }

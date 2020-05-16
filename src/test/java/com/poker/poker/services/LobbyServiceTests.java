@@ -8,6 +8,7 @@ import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.enums.GameAction;
 import com.poker.poker.models.enums.UserGroup;
 import com.poker.poker.models.game.CreateGameModel;
+import com.poker.poker.repositories.LobbyRepository;
 import com.poker.poker.services.game.LobbyService;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import java.math.BigDecimal;
@@ -23,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -36,8 +36,10 @@ public class LobbyServiceTests extends TestBaseClass {
   @Mock private SseService sseService;
   @Spy private Map<UUID, LobbyDocument> activeGames;
   @Spy private Map<UUID, UUID> userIdToGameIdMap;
-  @Spy private GameConstants gameConstants;
-  @Mock private UuidService uuidService;
+  @Spy
+  private GameConstants gameConstants;
+  @Mock
+  private LobbyRepository lobbyRepository;
 
   private LobbyService lobbyService;
 
@@ -116,18 +118,19 @@ public class LobbyServiceTests extends TestBaseClass {
     userIdToGameIdMap = new HashMap<>();
 
     lobbyService =
-        new LobbyService(sseService, activeGames, userIdToGameIdMap, gameConstants, uuidService);
+        new LobbyService(sseService, activeGames, userIdToGameIdMap, gameConstants,
+            lobbyRepository);
 
-    Mockito.when(uuidService.isValidUuidString(Mockito.anyString())).thenCallRealMethod();
-    Mockito.doAnswer(
-            (invocation) -> {
-              if (!uuidService.isValidUuidString(invocation.getArgument(0))) {
-                throw new BadRequestException("Invalid UUID", "Invalid UUID");
-              }
-              return null;
-            })
-        .when(uuidService)
-        .checkIfValidAndThrowBadRequest(Mockito.anyString());
+//    Mockito.when(uuidService.isValidUuidString(Mockito.anyString())).thenCallRealMethod();
+//    Mockito.doAnswer(
+//            (invocation) -> {
+//              if (!uuidService.isValidUuidString(invocation.getArgument(0))) {
+//                throw new BadRequestException("Invalid UUID", "Invalid UUID");
+//              }
+//              return null;
+//            })
+//        .when(uuidService)
+//        .checkIfValidAndThrowBadRequest(Mockito.anyString());
   }
 
   /* TODO: Update pre/post conditions here after refactoring.
