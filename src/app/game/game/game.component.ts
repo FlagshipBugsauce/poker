@@ -1,6 +1,6 @@
 import { Component, OnInit, HostListener, ViewChild, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
-import { GameService, UsersService } from 'src/app/api/services';
+import { GameService, UsersService, EmittersService } from 'src/app/api/services';
 import { SseService } from 'src/app/shared/sse.service';
 import { ApiInterceptor } from 'src/app/api-interceptor.service';
 import { GameDocument as LobbyDocument, ApiSuccessModel, PlayerModel, GameActionModel, GameDocument } from 'src/app/api/models';
@@ -10,6 +10,7 @@ import { LeaveGameGuardService } from './leave-game-guard.service';
 import { PopupComponent, PopupContentModel } from 'src/app/shared/popup/popup.component';
 import { ToastService } from 'src/app/shared/toast.service';
 import { EmitterType } from 'src/app/shared/models/emitter-type.model';
+import { GameState } from 'src/app/shared/models/game-state.enum';
 
 @Component({
   selector: 'pkr-game',
@@ -21,7 +22,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   @ViewChild(LobbyComponent) lobbyComponent: LobbyComponent;
 
   /** The model representing the state of the game at any given point in time. */
-  public gameModel: GameDocument = <GameDocument> { state: "PostGame" };
+  public gameModel: GameDocument;
 
   /** Flag that is used to determine whether or not the host can start the game. */
   public canStart: boolean = false;
@@ -44,6 +45,7 @@ export class GameComponent implements OnInit, AfterViewInit {
     private leaveGameGuardService: LeaveGameGuardService,
     private apiConfiguration: ApiConfiguration,
     private gameService: GameService, 
+    private emittersService: EmittersService,
     private sseService: SseService,
     private apiInterceptor: ApiInterceptor,
     private toastService: ToastService) { }
@@ -56,12 +58,16 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.leaveGameGuardService.canLeave = false;  // Need to set this to false when page loads.
 
     this.sseService
-      .getServerSentEvent(`${this.apiConfiguration.rootUrl}/game/emitter/game/${this.apiInterceptor.jwt}`, EmitterType.Game)
+      .getServerSentEvent(`${this.apiConfiguration.rootUrl}/emitters/request/${EmitterType.Game}/${this.apiInterceptor.jwt}`, EmitterType.Game)
       .subscribe((event: any) => {
         try {
           this.gameModel = <GameDocument> JSON.parse(event);
+
+          // Update state in leave game guard:
+          this.leaveGameGuardService.gameState = <GameState> this.gameModel.state;
+          console.log(this.leaveGameGuardService.gameState);
         } catch(err) {
-          console.log("Something went wrong with the emitter.");
+          console.log("Something went wrong with the game emitter.");
           this.sseService.closeEvent(EmitterType.Game);
         }
       });
@@ -78,7 +84,9 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.sseService.closeEvent(EmitterType.Game);
     this.sseService.closeEvent(EmitterType.Lobby);
     this.sseService.closeEvent(EmitterType.Hand);
-    this.gameService.leaveLobby({ Authorization: null }).subscribe((result: ApiSuccessModel) => { });
+    if (this.gameModel.state == GameState.Lobby) {
+      this.gameService.leaveLobby().subscribe((result: ApiSuccessModel) => { });
+    }
   }
 
   /** 
@@ -87,6 +95,6 @@ export class GameComponent implements OnInit, AfterViewInit {
    */
   private async refreshGameModel(): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, 100));
-    this.gameService.getGameDocumentUpdate({ Authorization: null }).subscribe(() => { });
+    this.emittersService.requestUpdate({ type: EmitterType.Game }).subscribe(() => { });
   }
 }

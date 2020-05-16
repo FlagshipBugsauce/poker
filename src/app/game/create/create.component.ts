@@ -38,7 +38,6 @@ export class CreateComponent implements OnInit {
 
   public createGame(values: any): void {
     this.gameService.createGame({
-      Authorization: null,
       body: <CreateGameModel> {
         buyIn: values.buyIn,
         maxPlayers: values.maxPlayers,

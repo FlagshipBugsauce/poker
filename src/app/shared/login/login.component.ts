@@ -20,14 +20,18 @@ export class LoginComponent implements OnInit {
   //   email: "admin@domain.com",
   //   password: "admin!@#"
   // }
-  private quickCredentials: AuthRequestModel = <AuthRequestModel> {
-    email: "test.account@domain.com",
-    password: "admin!@#"
-  }
+  // private quickCredentials: AuthRequestModel = <AuthRequestModel> {
+  //   email: "test.account@domain.com",
+  //   password: "admin!@#"
+  // }
   // private quickCredentials: AuthRequestModel = <AuthRequestModel> {
   //   email: "test.account2@domain.com",
   //   password: "admin!@#"
   // }
+  private quickCredentials: AuthRequestModel = <AuthRequestModel> {
+    email: "jon@domain.com",
+    password: "jonathan"
+  }
 
   constructor(
     private authService: AuthService, 

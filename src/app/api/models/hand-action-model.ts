@@ -1,5 +1,4 @@
 /* tslint:disable */
-import { PlayerModel } from './player-model';
 export interface HandActionModel {
 
   /**
@@ -11,10 +10,4 @@ export interface HandActionModel {
    * Message related to action which was performed.
    */
   message?: string;
-  player?: PlayerModel;
-
-  /**
-   * Type of action.
-   */
-  type?: 'Roll';
 }

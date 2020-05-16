@@ -8,6 +8,7 @@ import { LobbyComponent } from './lobby/lobby.component';
 import { GameComponent } from './game/game.component';
 import { HandComponent } from './hand/hand.component';
 import { PlayComponent } from './play/play.component';
+import { EndComponent } from './end/end.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { PlayComponent } from './play/play.component';
     LobbyComponent,
     GameComponent,
     HandComponent,
-    PlayComponent
+    PlayComponent,
+    EndComponent
   ],
   imports: [
     CommonModule,

@@ -1,10 +1,11 @@
 export { ApiErrorModel } from './models/api-error-model';
 export { ApiSuccessModel } from './models/api-success-model';
-export { CreateGameModel } from './models/create-game-model';
 export { GetGameModel } from './models/get-game-model';
 export { PlayerModel } from './models/player-model';
-export { SseEmitter } from './models/sse-emitter';
+export { CreateGameModel } from './models/create-game-model';
 export { GameDocument } from './models/game-document';
+export { GameSummaryModel } from './models/game-summary-model';
+export { SseEmitter } from './models/sse-emitter';
 export { HandActionModel } from './models/hand-action-model';
 export { HandModel } from './models/hand-model';
 export { GameActionModel } from './models/game-action-model';

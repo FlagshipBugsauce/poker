@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlayerModel, ApiSuccessModel, GameActionModel } from 'src/app/api/models';
-import { GameService } from 'src/app/api/services';
+import { GameService, EmittersService } from 'src/app/api/services';
 import { SseService } from 'src/app/shared/sse.service';
 import { AuthService } from 'src/app/shared/auth.service';
 import { ToastService } from 'src/app/shared/toast.service';
@@ -54,6 +54,7 @@ export class LobbyComponent implements OnInit {
     private apiInterceptor: ApiInterceptor,
     private activatedRoute: ActivatedRoute, 
     private gameService: GameService,
+    private emittersService: EmittersService,
     private router: Router,
     private sseService: SseService,
     public authService: AuthService,
@@ -61,7 +62,7 @@ export class LobbyComponent implements OnInit {
 
   ngOnInit(): void {
     this.sseService
-      .getServerSentEvent(`${this.apiConfiguration.rootUrl}/game/emitter/lobby/${this.apiInterceptor.jwt}`, EmitterType.Lobby)
+      .getServerSentEvent(`${this.apiConfiguration.rootUrl}/emitters/request/${EmitterType.Lobby}/${this.apiInterceptor.jwt}`, EmitterType.Lobby)
       .subscribe((event: any) => {
         try {
           this.lobbyModel = <LobbyDocument> JSON.parse(event);
@@ -109,14 +110,14 @@ export class LobbyComponent implements OnInit {
    */
   private async refreshLobbyModel(): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, 100));
-    this.gameService.getLobbyDocumentUpdate({ Authorization: null }).subscribe(() => { });
+    this.emittersService.requestUpdate({ type: EmitterType.Lobby }).subscribe(() => { });
   }
 
   /**
    * Called when a player is ready for the game to start.
    */
   public sendReadyRequest(): void {
-    this.gameService.ready({ Authorization: null }).subscribe((result: ApiSuccessModel) => {
+    this.gameService.ready().subscribe((result: ApiSuccessModel) => {
       this.ready = true;
     });
   }
@@ -131,6 +132,6 @@ export class LobbyComponent implements OnInit {
 
   public startGame(): void {
     this.sseService.closeEvent(EmitterType.Lobby);
-    this.gameService.startGame({ Authorization: null }).subscribe(() => { });
+    this.gameService.startGame().subscribe(() => { });
   }
 }

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiConfiguration } from 'src/app/api/api-configuration';
 import { Router } from '@angular/router';
-import { GameService, HandService } from 'src/app/api/services';
+import { GameService, HandService, EmittersService } from 'src/app/api/services';
 import { SseService } from 'src/app/shared/sse.service';
 import { ApiInterceptor } from 'src/app/api-interceptor.service';
 import { EmitterType } from 'src/app/shared/models/emitter-type.model';
@@ -22,7 +22,8 @@ export class PlayComponent implements OnInit {
   constructor(
     private apiConfiguration: ApiConfiguration,
     private router: Router,
-    private gameService: GameService,
+    private gameService: GameService, 
+    private emittersService: EmittersService,
     private handService: HandService,
     private sseService: SseService,
     private apiInterceptor: ApiInterceptor,
@@ -30,12 +31,11 @@ export class PlayComponent implements OnInit {
 
   ngOnInit(): void {
     this.sseService
-      .getServerSentEvent(`${this.apiConfiguration.rootUrl}/game/emitter/hand/${this.apiInterceptor.jwt}`, EmitterType.Hand)
+      .getServerSentEvent(`${this.apiConfiguration.rootUrl}/emitters/request/${EmitterType.Hand}/${this.apiInterceptor.jwt}`, EmitterType.Hand)
       .subscribe((event: any) => {
         try {
           this.hand = JSON.parse(event);
           this.canRoll = this.hand.playerToAct == this.authService.userModel.id;
-          console.log(this.hand);
 
           // Add the message to
           let lastAction = this.hand.actions != null ? this.hand.actions[this.hand.actions.length - 1] : null;
@@ -53,11 +53,11 @@ export class PlayComponent implements OnInit {
   }
 
   private async refreshHand(): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    this.gameService.refreshHand({ Authorization: null }).subscribe((response: ApiSuccessModel) => { });
+    await new Promise(resolve => setTimeout(resolve, 1200));
+    this.emittersService.requestUpdate({ type: EmitterType.Hand }).subscribe(() => { });
   }
 
   public roll(): void {
-    this.handService.roll({ Authorization: null }).subscribe(() => { });
+    this.handService.roll().subscribe(() => { });
   }
 }

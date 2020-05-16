@@ -1,4 +1,5 @@
 /* tslint:disable */
+import { GameSummaryModel } from './game-summary-model';
 import { PlayerModel } from './player-model';
 export interface GameDocument {
   hands?: Array<string>;
@@ -12,5 +13,6 @@ export interface GameDocument {
   /**
    * Game state.
    */
-  state?: 'Lobby' | 'Play' | 'PostGame';
+  state?: 'Lobby' | 'Play' | 'Over';
+  summary?: GameSummaryModel;
 }

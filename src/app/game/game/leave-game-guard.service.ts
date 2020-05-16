@@ -7,6 +7,7 @@ import { GameService } from 'src/app/api/services';
 import { ApiSuccessModel } from 'src/app/api/models';
 import { GameComponent } from './game.component';
 import { EmitterType } from 'src/app/shared/models/emitter-type.model';
+import { GameState } from 'src/app/shared/models/game-state.enum';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +15,7 @@ import { EmitterType } from 'src/app/shared/models/emitter-type.model';
 export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
   public confirmationPopup: PopupComponent;
   public canLeave: boolean = false;
+  public gameState: GameState;
   public link: string;
 
   constructor(
@@ -31,13 +33,21 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
       import("@angular/router").UrlTree> | 
       Promise<boolean | 
       import("@angular/router").UrlTree> {
+    if (this.gameState == GameState.Over) {
+      this.sseService.closeEvent(EmitterType.Game);
+      return true;
+    }
     if (!this.canLeave && this.confirmationPopup != null) {
       this.confirmationPopup.okCloseProcedure = () => {
         this.canLeave = true;
         this.sseService.closeEvent(EmitterType.Game);
         this.sseService.closeEvent(EmitterType.Lobby);
         this.sseService.closeEvent(EmitterType.Hand);
-        this.gameService.leaveLobby({ Authorization: null }).subscribe((result: ApiSuccessModel) => { });
+
+        if (this.gameState == GameState.Lobby) {
+          this.gameService.leaveLobby().subscribe(() => { });
+        }
+        
         this.router.navigate([this.link]);
       };
       this.confirmationPopup.open();

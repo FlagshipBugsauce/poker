@@ -40,15 +40,13 @@ export class HandService extends BaseService {
    *
    * This method doesn't expect any request body.
    */
-  roll$Response(params: {
-    Authorization: string;
+  roll$Response(params?: {
 
   }): Observable<StrictHttpResponse<ApiSuccessModel>> {
 
     const rb = new RequestBuilder(this.rootUrl, HandService.RollPath, 'post');
     if (params) {
 
-      rb.header('Authorization', params.Authorization);
 
     }
     return this.http.request(rb.build({
@@ -72,8 +70,7 @@ export class HandService extends BaseService {
    *
    * This method doesn't expect any request body.
    */
-  roll(params: {
-    Authorization: string;
+  roll(params?: {
 
   }): Observable<ApiSuccessModel> {
 

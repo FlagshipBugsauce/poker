@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { CanDeactivate } from '@angular/router';
 import { JoinComponent } from './join.component';
 import { SseService } from 'src/app/shared/sse.service';
-import { GameService } from 'src/app/api/services';
+import { GameService, EmittersService } from 'src/app/api/services';
 import { EmitterType } from 'src/app/shared/models/emitter-type.model';
 
 @Injectable({
@@ -12,7 +12,8 @@ export class LeaveJoinPageGuardService implements CanDeactivate<JoinComponent> {
 
   constructor(
     private sseService: SseService,
-    private gameService: GameService) { }
+    private gameService: GameService,
+    private emittersService: EmittersService) { }
   canDeactivate(
       component: JoinComponent, 
       currentRoute: import("@angular/router").ActivatedRouteSnapshot, 
@@ -25,7 +26,6 @@ export class LeaveJoinPageGuardService implements CanDeactivate<JoinComponent> {
       import("@angular/router").UrlTree> {
     // Make sure we close the event and destroy the game emitter before leaving the join game page.
     this.sseService.closeEvent(EmitterType.GameList);
-    this.gameService.destroyJoinGameEmitter({ Authorization: null }).subscribe(() => { });
     return true;
   }
 }
