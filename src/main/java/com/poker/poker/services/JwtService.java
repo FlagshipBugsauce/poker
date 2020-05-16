@@ -1,12 +1,15 @@
 package com.poker.poker.services;
 
 import com.poker.poker.config.constants.AppConstants;
+import com.poker.poker.documents.UserDocument;
+import com.poker.poker.repositories.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -18,7 +21,34 @@ import org.springframework.stereotype.Service;
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 @AllArgsConstructor
 public class JwtService {
-  private AppConstants appConstants;
+
+  private final AppConstants appConstants;
+  private final UserRepository userRepository;
+
+  /**
+   * Retrieves a user ID from a JWT.
+   *
+   * @param token JWT.
+   * @return User ID of the user associated with the JWT.
+   */
+  public UUID getUserId(String token) {
+    // TODO: Look into baking the UUID into the token to make this not require checking the DB.
+    return getUserDocument(token).getId();
+  }
+
+  /**
+   * Retrieves a user document from a JWT.
+   *
+   * @param token JWT.
+   * @return UserDocument associated with the JWT.
+   */
+  public UserDocument getUserDocument(String token) {
+    final UserDocument userDocument = userRepository.findUserDocumentByEmail(extractEmail(token));
+    if (userDocument == null) {
+      throw appConstants.getUserNotFoundException();
+    }
+    return userDocument;
+  }
 
   /**
    * Extracts the email baked into a JWT.

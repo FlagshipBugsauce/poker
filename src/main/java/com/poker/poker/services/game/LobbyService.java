@@ -10,8 +10,8 @@ import com.poker.poker.models.game.CreateGameModel;
 import com.poker.poker.models.game.GameActionModel;
 import com.poker.poker.models.game.GetGameModel;
 import com.poker.poker.models.game.PlayerModel;
+import com.poker.poker.repositories.LobbyRepository;
 import com.poker.poker.services.SseService;
-import com.poker.poker.services.UuidService;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +45,15 @@ public class LobbyService {
 
   private GameConstants gameConstants;
 
-  private UuidService uuidService; // TODO: Don't need this anymore
+  private LobbyRepository lobbyRepository;
+
+  public Runnable getEmitterValidator(UUID userId) {
+    return () -> {
+      log.debug("Performing validation to ensure {} should receive an emitter.", userId);
+      checkWhetherUserIsInLobbyAndThrow(userId, true);
+      checkUserIsPlayerInLobby(userId);
+    };
+  }
 
   /**
    * Sends out a game document to all players in the game associated with the game document
@@ -67,14 +75,16 @@ public class LobbyService {
    *
    * @param gameId ID of the game which is starting.
    * @return LobbyDocument associated with the game.
+   * @throws BadRequestException If there is no lobby associated with the specified game ID.
    */
-  public LobbyDocument startGame(UUID gameId) {
+  public LobbyDocument startGame(UUID gameId) throws BadRequestException {
     LobbyDocument lobbyDocument = lobbys.remove(gameId);
     if (lobbyDocument == null) {
       throw gameConstants.getGameNotFoundException();
     }
     // Remove players from userIdToLobbyIdMap
     lobbyDocument.getPlayers().forEach(player -> userIdToLobbyIdMap.remove(player.getId()));
+    lobbyRepository.save(lobbyDocument);
     return lobbyDocument;
   }
 

@@ -1,9 +1,11 @@
 package com.poker.poker.services;
 
-import com.poker.poker.config.constants.GameConstants;
+import com.poker.poker.config.constants.EmitterConstants;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.EmitterModel;
 import com.poker.poker.models.enums.EmitterType;
+import com.poker.poker.validation.exceptions.BadRequestException;
+import com.poker.poker.validation.exceptions.ForbiddenException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,7 +32,7 @@ public class SseService {
         Update: No longer outputting a hash map but this problem should still be investigated.
   */
 
-  private final GameConstants gameConstants;
+  private final EmitterConstants emitterConstants;
 
   /**
    * A map of emitter maps, keyed by the emitter type. Each emitter map is keyed by UUID's which are
@@ -42,10 +44,10 @@ public class SseService {
   /**
    * Constructor that injects game constants and sets up the emitter map appropriately.
    *
-   * @param gameConstants Constants required for events which occur in the game.
+   * @param emitterConstants Constants required for events which occur in the game.
    */
-  public SseService(GameConstants gameConstants) {
-    this.gameConstants = gameConstants;
+  public SseService(EmitterConstants emitterConstants) {
+    this.emitterConstants = emitterConstants;
     emitterMaps = new HashMap<>();
     emitterMaps.put(EmitterType.GameList, new HashMap<>());
     emitterMaps.put(EmitterType.Lobby, new HashMap<>());
@@ -59,12 +61,13 @@ public class SseService {
    *
    * @param type The type of emitter map specified.
    * @return Emitter map with the specified type.
+   * @throws BadRequestException If no emitter map for the specified type exists.
    */
-  private Map<UUID, EmitterModel> getEmitterMap(EmitterType type) {
+  private Map<UUID, EmitterModel> getEmitterMap(EmitterType type) throws BadRequestException {
     final Map<UUID, EmitterModel> emitterMap = emitterMaps.get(type);
     if (emitterMaps.get(type) == null) {
       log.error("Invalid emitter type specified.");
-      throw gameConstants.getInvalidEmitterTypeException();
+      throw emitterConstants.getInvalidEmitterTypeException();
     }
     return emitterMap;
   }
@@ -75,21 +78,22 @@ public class SseService {
    *
    * @param type The type of the emitter the timeout value is being sought for.
    * @return The appropriate timeout value for the emitter type specified.
+   * @throws BadRequestException If no emitter of the specified type exists.
    */
-  private long getEmitterTimeout(EmitterType type) {
+  private long getEmitterTimeout(EmitterType type) throws BadRequestException {
     final long timeout;
     switch (type) {
       case GameList:
-        timeout = gameConstants.getJoinGameEmitterDuration();
+        timeout = emitterConstants.getJoinGameEmitterDuration();
         break;
       case Lobby:
       case Game:
       case Hand:
-        timeout = gameConstants.getGameEmitterDuration();
+        timeout = emitterConstants.getGameEmitterDuration();
         break;
       default:
         log.error("Invalid emitter type specified.");
-        throw gameConstants.getInvalidEmitterTypeException();
+        throw emitterConstants.getInvalidEmitterTypeException();
     }
     return timeout;
   }
@@ -100,17 +104,14 @@ public class SseService {
    *
    * @param type The type of emitter being sought (GameList, Lobby, etc...).
    * @param userId The user the emitter being sought is associated with.
-   * @return An SseEmitter of the specified type, associated with the specified user, provided such
-   *     an emitter exists. If no such emitter exists, then a BadRequestException is thrown.
+   * @return An SseEmitter of the specified type, associated with the specified user.
+   * @throws BadRequestException If no emitter of the specified type for the specified user exists.
    */
-  private SseEmitter getEmitter(EmitterType type, UUID userId) {
-    log.debug("Attempting to retrieve {} emitter for {}.", type, userId);
+  private SseEmitter getEmitter(EmitterType type, UUID userId) throws BadRequestException {
     final SseEmitter emitter = getEmitterModel(type, userId).getEmitter();
     if (emitter == null) {
-      log.error("There is no {} emitter associated with the user ID: {}.", type, userId);
-      throw gameConstants.getNoEmitterForIdException();
+      throw emitterConstants.getNoEmitterForIdException();
     }
-    log.debug("{} emitter retrieved for {} successfully.", type, userId);
     return emitter;
   }
 
@@ -121,24 +122,30 @@ public class SseService {
    *
    * @param type The type of emitter model being sought (GameList, Lobby, etc...).
    * @param userId The user the emitter being sought is associated with.
-   * @return An emitter model of the specified type, associated with the specified user, provided
-   *     such an emitter model exists. If no such emitter model exists, then a BadRequestException
-   *     is thrown.
+   * @return An emitter model of the specified type, associated with the specified user.
+   * @throws BadRequestException If no emitter model matching the parameters is found.
    */
-  private EmitterModel getEmitterModel(EmitterType type, UUID userId) {
-    // Note: This logging is a bit overkill, but we can set debug level logs to be ignored later.
-    log.debug("Attempting to retrieve {} emitter model for {}.", type, userId);
+  private EmitterModel getEmitterModel(EmitterType type, UUID userId) throws BadRequestException {
     final Map<UUID, EmitterModel> map = getEmitterMap(type);
     final EmitterModel emitterModel = map.get(userId);
     if (emitterModel == null) {
       log.error("There is no {} emitter associated with the user ID: {}.", type, userId);
-      throw gameConstants.getNoEmitterModelForIdException();
+      throw emitterConstants.getNoEmitterModelForIdException();
     }
-    log.debug("{} emitter model retrieved for {} successfully.", type, userId);
     return emitterModel;
   }
 
-  private void updateEmitterModel(EmitterType type, UUID userId, DateTime time, Object data) {
+  /**
+   * Updates the emitter model of the specified type for the specified user.
+   *
+   * @param type The type of emitter model being updated.
+   * @param userId The ID of the user the emitter belongs to.
+   * @param time The time the last new data was sent to the user.
+   * @param data The data that was last sent to the user.
+   * @throws BadRequestException If the model cannot be retrieved.
+   */
+  private void updateEmitterModel(EmitterType type, UUID userId, DateTime time, Object data)
+      throws BadRequestException {
     final EmitterModel emitterModel = getEmitterModel(type, userId);
     emitterModel.setLastSendTime(time);
     emitterModel.setLastSent(data);
@@ -151,21 +158,19 @@ public class SseService {
    * data has been sent for a specified period of time (specified in game constants) and if this is
    * the case, the emitter's complete() method will be called in order to destroy it. A period of
    * inactivity this long most likely indicates something went wrong and even though the emitter was
-   * not manually destroyed, it is no longer needed and should not be kept.
+   * not manually destroyed. Since it is no longer needed, there's no reason to keep it.
    */
   @Scheduled(cron = "0 0/1 * * * ?") // Runs at the start of every minute
   public void emitterManagement() {
-    log.debug("Running scheduled task to keep emitters alive.");
     for (Map<UUID, EmitterModel> map : emitterMaps.values()) {
       for (UUID userId : map.keySet()) {
         EmitterModel emitterModel = map.get(userId);
         // Now minus refresh rate.
-        DateTime t = DateTime.now().minusMinutes(gameConstants.getEmitterRefreshRateInMinutes());
+        DateTime t = DateTime.now().minusMinutes(emitterConstants.getEmitterRefreshRateInMinutes());
         if (emitterModel.getLastSendTime().isBefore(t)) {
           try {
             // Re-send whatever was sent last.
             emitterModel.getEmitter().send(emitterModel.getLastSent());
-            log.debug("Emitter for user {} was refreshed.", userId);
           } catch (IOException e) {
             log.error(
                 "Scheduled emitter updater failed to send to an emitter, calling complete() "
@@ -174,16 +179,20 @@ public class SseService {
           }
         }
         // Check if the emitter should be destroyed due to inactivity.
-        t = DateTime.now().minusMinutes(gameConstants.getEmitterInactiveExpirationInMinutes());
+        t = DateTime.now().minusMinutes(emitterConstants.getEmitterInactiveExpirationInMinutes());
         if (emitterModel.getLastSendTime().isBefore(t)) {
           log.info(
               "Emitter for user {} was destroyed due to {} minutes of inactivity.",
               userId,
-              gameConstants.getEmitterInactiveExpirationInMinutes());
+              emitterConstants.getEmitterInactiveExpirationInMinutes());
           emitterModel.getEmitter().complete();
         }
       }
     }
+  }
+
+  public SseEmitter createEmitter(EmitterType type, UUID userId) {
+    return createEmitter(type, userId, null);
   }
 
   /**
@@ -195,11 +204,16 @@ public class SseService {
    * @param validator A lambda supplied by the caller to ensure an emitter is only sent when certain
    *     preconditions have been satisfied.
    * @return An SSE emitter which will send updates to the client that requested the emitter.
+   * @throws BadRequestException If the validator fails, this exception could be thrown.
+   * @throws ForbiddenException If the validator fails, this exception could be thrown.
    */
-  public SseEmitter createEmitter(EmitterType type, UUID userId, Runnable validator) {
+  public SseEmitter createEmitter(EmitterType type, UUID userId, Runnable validator)
+      throws BadRequestException, ForbiddenException {
     log.debug("Attempting to create {} emitter for {}.", type, userId);
     // Caller provides a lambda that will throw if pre-conditions are not satisfied.
-    validator.run();
+    if (validator != null) {
+      validator.run();
+    }
 
     // If the user requesting an emitter already has one, then return that.
     if (emitterMaps.get(type).get(userId) != null
@@ -248,13 +262,16 @@ public class SseService {
    * @param data The data that should be sent to the client.
    */
   public ApiSuccessModel sendUpdate(EmitterType type, UUID userId, Object data) {
-    log.debug("Attempting to use {} emitter to send data to {}.", type, userId);
     try {
       getEmitter(type, userId).send(data);
-      log.debug("{} data appears to have been sent successfully to {}.", type, userId);
+      log.debug("{} data was sent to {}.", type, userId);
       updateEmitterModel(type, userId, DateTime.now(), data);
     } catch (IOException e) {
       log.error("{} emitter failed to send data to {} due to IOException.", type, userId);
+    } catch (BadRequestException e) {
+      log.error("{} emitter failed to send data to {} due to BadRequestException.", type, userId);
+    } catch (ForbiddenException e) {
+      log.error("{} emitter failed to send data to {} due to ForbiddenException.", type, userId);
     }
     return new ApiSuccessModel("Data sent successfully.");
   }
@@ -277,8 +294,11 @@ public class SseService {
    * @param userId The user ID of the user the emitter is associated with.
    */
   public ApiSuccessModel completeEmitter(EmitterType type, UUID userId) {
-    log.debug("Attempting to call complete() on {} emitter for {}.", type, userId);
-    getEmitter(type, userId).complete();
-    return new ApiSuccessModel("Emitter was destroyed successfully.");
+    try {
+      getEmitter(type, userId).complete();
+    } catch (Exception e) {
+      log.error("Something went wrong removing {} emitter for {}.", type, userId);
+    }
+    return new ApiSuccessModel("Emitter has been removed.");
   }
 }

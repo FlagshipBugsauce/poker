@@ -1,4 +1,4 @@
-package com.poker.poker.models.game;
+package com.poker.poker.models.game.hand;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
@@ -10,24 +10,18 @@ import org.springframework.data.annotation.Id;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class HandModel {
+public abstract class HandActionModel {
+
   @Schema(
-      description = "Hand ID.",
+      description = "Hand Action ID.",
       example = "0a7d95ef-94ba-47bc-b591-febb365bc543",
       implementation = UUID.class)
   @Id
-  private UUID id;
+  protected UUID id;
 
   @Schema(
-      description = "Game ID.",
-      example = "0a7d95ef-94ba-47bc-b591-febb365bc543",
-      implementation = UUID.class)
-  private UUID gameId;
-
-  // Temporary
-  @Schema(
-      description = "Temporary message.",
-      example = "Player X won.",
+      description = "Message related to action which was performed.",
+      example = "Player X rolled 27.",
       implementation = String.class)
-  private String message;
+  protected String message;
 }

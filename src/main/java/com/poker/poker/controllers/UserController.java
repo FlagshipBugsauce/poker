@@ -8,6 +8,7 @@ import com.poker.poker.models.user.NewAccountModel;
 import com.poker.poker.models.user.UserModel;
 import com.poker.poker.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -92,7 +93,8 @@ public class UserController {
       })
   @GetMapping("/getUserInfo/{userId}")
   public ResponseEntity<UserModel> getUserInfo(
-      @RequestHeader("Authorization") String jwt, @PathVariable String userId) {
+      @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+      @PathVariable String userId) {
     userService.validate(jwt, appConstants.getAllUsers());
     return ResponseEntity.ok(userService.getUserInfo(userId));
   }

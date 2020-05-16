@@ -1,5 +1,6 @@
 package com.poker.poker.documents;
 
+import com.poker.poker.models.GameSummaryModel;
 import com.poker.poker.models.enums.GameState;
 import com.poker.poker.models.game.PlayerModel;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -35,4 +36,7 @@ public class GameDocument {
 
   @ArraySchema(schema = @Schema(implementation = UUID.class))
   private List<UUID> hands;
+
+  @Schema(implementation = GameSummaryModel.class)
+  private GameSummaryModel summary;
 }
