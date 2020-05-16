@@ -10,7 +10,7 @@ import org.springframework.data.annotation.Id;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class HandActionModel {
+public abstract class HandActionModel {
 
   @Schema(
       description = "Hand Action ID.",
