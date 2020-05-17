@@ -1,5 +1,5 @@
-import { Component, OnInit, Input, ViewChild } from '@angular/core';
-import { NgbModal, NgbActiveModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import {Component, Input, OnInit, ViewChild} from '@angular/core';
+import {NgbActiveModal, NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'pkr-popup',
@@ -8,25 +8,25 @@ import { NgbModal, NgbActiveModal, NgbModalRef } from '@ng-bootstrap/ng-bootstra
 })
 export class PopupComponent implements OnInit {
   /** Specify the title of the popup. */
-  @Input('title') title: string;
+  @Input() title: string;
 
   /** Specify the desired size of the popup. */
-  @Input('size') size: string = 'md';
+  @Input() size: string = 'md';
 
   /** Specify whether the popup should be centered vertically. */
-  @Input('centered') centered: boolean = true;
+  @Input() centered: boolean = true;
 
   /** Specify what content should appear in the popup. */
-  @Input('content') content: PopupContentModel[];
+  @Input() content: PopupContentModel[];
 
   /** Specify whether the popup should have a cancel button. */
-  @Input('cancelButton') cancelButton: boolean = true;
+  @Input() cancelButton: boolean = true;
 
   /** Specify a function that will be called when the popup is closed by clicking Ok. */
-  @Input('okCloseProcedure') okCloseProcedure: Function;
+  @Input() okCloseProcedure: () => void;
 
   /** Specify a function that will be called when the popup is closed by clicking Cancel or the X in the top-right. */
-  @Input('cancelCloseProcedure') cancelCloseProcedure: Function;
+  @Input() cancelCloseProcedure: () => void;
 
   /** Reference to the popup. Needed so that this popup and ONLY this popup can be closed. */
   @ViewChild('popup') popup: NgbActiveModal;
@@ -51,7 +51,9 @@ export class PopupComponent implements OnInit {
    * Removes the popup from the screen when cancel, or the X in the top-right, is clicked.
    */
   public cancelClose(): void {
-    if (this.cancelCloseProcedure != null) this.cancelCloseProcedure();
+    if (this.cancelCloseProcedure != null) {
+      this.cancelCloseProcedure();
+    }
     this.ngbModalRef.close();
   }
 
@@ -59,12 +61,14 @@ export class PopupComponent implements OnInit {
    * Removes the popup from the screen when Ok is clicked.
    */
   public okClose(): void {
-    if (this.okCloseProcedure != null) this.okCloseProcedure();
+    if (this.okCloseProcedure != null) {
+      this.okCloseProcedure();
+    }
     this.ngbModalRef.close();
   }
 }
 
-/** 
+/**
  * A section of content on the popup. Can have a header if desired, or a body.
  * The header will be in an <h3> tag, the body in a <p> tag.
  */

@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { AuthService } from '../auth.service';
-import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthRequestModel } from 'src/app/api/models';
-import { ToastService } from '../toast.service';
+import {Component, OnInit} from '@angular/core';
+import {AuthService} from '../auth.service';
+import {Router} from '@angular/router';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {AuthRequestModel} from 'src/app/api/models';
+import {ToastService} from '../toast.service';
 
 @Component({
   selector: 'pkr-login',
@@ -20,20 +20,25 @@ export class LoginComponent implements OnInit {
   //   email: "admin@domain.com",
   //   password: "admin!@#"
   // }
-  private quickCredentials: AuthRequestModel = <AuthRequestModel> {
-    email: "test.account@domain.com",
-    password: "admin!@#"
-  }
+  // private quickCredentials: AuthRequestModel = <AuthRequestModel> {
+  //   email: "test.account@domain.com",
+  //   password: "admin!@#"
+  // }
   // private quickCredentials: AuthRequestModel = <AuthRequestModel> {
   //   email: "test.account2@domain.com",
   //   password: "admin!@#"
   // }
+  private quickCredentials: AuthRequestModel = {
+    email: 'jon@domain.com',
+    password: 'jonathan'
+  } as AuthRequestModel;
 
   constructor(
-    private authService: AuthService, 
-    private router: Router, 
+    private authService: AuthService,
+    private router: Router,
     private formBuilder: FormBuilder,
-    public toastService: ToastService) { }
+    public toastService: ToastService) {
+  }
 
   public ngOnInit(): void {
     this.loginForm = this.formBuilder.group({
@@ -44,7 +49,9 @@ export class LoginComponent implements OnInit {
     // DEV HELPER: AUTOMATICALLY AUTHORIZES AND NAVIGATES TO PAGE BEING WORKED ON
     this.authService.authorize(this.quickCredentials.email, this.quickCredentials.password).then((success: boolean) => {
       // if (success) this.router.navigate(['/game/0a7d95ef-94ba-47bc-b591-febb365bc543']);
-      if (success) this.router.navigate(['/join']);
+      if (success) {
+        this.router.navigate(['/join']);
+      }
     });
   }
 
@@ -54,8 +61,8 @@ export class LoginComponent implements OnInit {
    */
   public async authorize(formValues: any): Promise<void> {
     if (await this.authService.authorize(formValues.email, formValues.password)) {
-      this.toastService.show("Login Successful!", { classname: 'bg-light toast-md', delay: 5000 });
-      this.router.navigate(["/home"]);
+      this.toastService.show('Login Successful!', {classname: 'bg-light toast-md', delay: 5000});
+      this.router.navigate(['/home']);
     } else {
       this.showFailAlert = true;
     }

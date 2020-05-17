@@ -1,5 +1,7 @@
 /* tslint:disable */
+import { HandActionModel } from './hand-action-model';
 export interface HandModel {
+  actions?: Array<HandActionModel>;
 
   /**
    * Game ID.
@@ -15,4 +17,9 @@ export interface HandModel {
    * Temporary message.
    */
   message?: string;
+
+  /**
+   * ID of the player whose turn it is.
+   */
+  playerToAct?: string;
 }

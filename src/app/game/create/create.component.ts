@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ToastService } from 'src/app/shared/toast.service';
-import { GameService } from 'src/app/api/services';
-import { GetGameModel, CreateGameModel, ApiSuccessModel } from 'src/app/api/models';
+import {Component, OnInit} from '@angular/core';
+import {Router} from '@angular/router';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ToastService} from 'src/app/shared/toast.service';
+import {GameService} from 'src/app/api/services';
+import {ApiSuccessModel, CreateGameModel} from 'src/app/api/models';
 
 @Component({
   selector: 'pkr-create',
@@ -15,8 +15,8 @@ export class CreateComponent implements OnInit {
   public maxPlayers: number = 10; // TODO: Retrieve this from the backend.
 
   constructor(
-    private router: Router, 
-    private formBuilder: FormBuilder, 
+    private router: Router,
+    private formBuilder: FormBuilder,
     public toastService: ToastService,
     private gameService: GameService) { }
 
@@ -30,7 +30,7 @@ export class CreateComponent implements OnInit {
   }
 
   /**
-   * 
+   *
    */
   public fillNumbers(): number[] {
     return Array(this.maxPlayers - 1).fill(this.maxPlayers).map((x, i) => i + 2);
@@ -38,12 +38,11 @@ export class CreateComponent implements OnInit {
 
   public createGame(values: any): void {
     this.gameService.createGame({
-      Authorization: null,
-      body: <CreateGameModel> {
+      body: {
         buyIn: values.buyIn,
         maxPlayers: values.maxPlayers,
         name: values.name
-      }
+      } as CreateGameModel
     }).subscribe((response: ApiSuccessModel) => {
       this.router.navigate([`/game/${response.message}`]);
     });

@@ -100,7 +100,6 @@ export class UsersService extends BaseService {
    * This method doesn't expect any request body.
    */
   getUserInfo$Response(params: {
-    Authorization: string;
     userId: string;
 
   }): Observable<StrictHttpResponse<UserModel>> {
@@ -108,7 +107,6 @@ export class UsersService extends BaseService {
     const rb = new RequestBuilder(this.rootUrl, UsersService.GetUserInfoPath, 'get');
     if (params) {
 
-      rb.header('Authorization', params.Authorization);
       rb.path('userId', params.userId);
 
     }
@@ -134,7 +132,6 @@ export class UsersService extends BaseService {
    * This method doesn't expect any request body.
    */
   getUserInfo(params: {
-    Authorization: string;
     userId: string;
 
   }): Observable<UserModel> {
