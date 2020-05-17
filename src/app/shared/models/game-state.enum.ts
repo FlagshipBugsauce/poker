@@ -1,5 +1,5 @@
 export enum GameState {
-    Lobby = "Lobby",
-    Play = "Play",
-    Over = "Over"
+  Lobby = 'Lobby',
+  Play = 'Play',
+  Over = 'Over'
 }

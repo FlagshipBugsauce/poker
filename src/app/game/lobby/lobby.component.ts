@@ -1,14 +1,14 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { PlayerModel, ApiSuccessModel, GameActionModel } from 'src/app/api/models';
-import { GameService, EmittersService } from 'src/app/api/services';
-import { SseService } from 'src/app/shared/sse.service';
-import { AuthService } from 'src/app/shared/auth.service';
-import { ToastService } from 'src/app/shared/toast.service';
-import { ApiConfiguration } from 'src/app/api/api-configuration';
-import { ApiInterceptor } from 'src/app/api-interceptor.service';
-import { LobbyDocument } from 'src/app/api/models/lobby-document';
-import { EmitterType } from 'src/app/shared/models/emitter-type.model';
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ApiSuccessModel, GameActionModel, PlayerModel} from 'src/app/api/models';
+import {EmittersService, GameService} from 'src/app/api/services';
+import {SseService} from 'src/app/shared/sse.service';
+import {AuthService} from 'src/app/shared/auth.service';
+import {ToastService} from 'src/app/shared/toast.service';
+import {ApiConfiguration} from 'src/app/api/api-configuration';
+import {ApiInterceptor} from 'src/app/api-interceptor.service';
+import {LobbyDocument} from 'src/app/api/models/lobby-document';
+import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 
 @Component({
   selector: 'pkr-lobby',
@@ -16,7 +16,7 @@ import { EmitterType } from 'src/app/shared/models/emitter-type.model';
   styleUrls: ['./lobby.component.scss']
 })
 export class LobbyComponent implements OnInit {
-  public lobbyModel: LobbyDocument = <LobbyDocument> { };
+  public lobbyModel: LobbyDocument = {} as LobbyDocument;
 
   public canStart: boolean;
   public ready: boolean = false;
@@ -24,57 +24,58 @@ export class LobbyComponent implements OnInit {
   public displayCanStartAlert: boolean = true;
 
   private lastAction: GameActionModel;
-
-  public get hostModel(): PlayerModel {
-    if (this.lobbyModel == null || this.lobbyModel.players == null) {
-      return <PlayerModel> { host: false };
-    } else {
-      let hostModel: PlayerModel = this.lobbyModel.players.find(player => player.id == this.lobbyModel.host);
-      return this.lobbyModel.players.find(player => player.id == this.lobbyModel.host);
-    }
-  }
-
-  public get host(): string {
-    if (this.lobbyModel == null || this.lobbyModel.players == null) {
-      return "";
-    } else {
-      let hostModel: PlayerModel = this.lobbyModel.players.find(player => player.id == this.lobbyModel.host);
-      return `${hostModel.firstName} ${hostModel.lastName}`;
-    }
-  }
-
   public readyIcons = {
-    ready: "../../assets/icons/green_checkmark.svg",
-    notReady: "../../assets/icons/red_x.svg"
-  }
-  public crownIcon = "../../assets/icons/crown.svg";
+    ready: '../../assets/icons/green_checkmark.svg',
+    notReady: '../../assets/icons/red_x.svg'
+  };
+  public crownIcon = '../../assets/icons/crown.svg';
 
   constructor(
     private apiConfiguration: ApiConfiguration,
     private apiInterceptor: ApiInterceptor,
-    private activatedRoute: ActivatedRoute, 
+    private activatedRoute: ActivatedRoute,
     private gameService: GameService,
     private emittersService: EmittersService,
     private router: Router,
     private sseService: SseService,
     public authService: AuthService,
-    private toastService: ToastService) { }
+    private toastService: ToastService) {
+  }
+
+  public get hostModel(): PlayerModel {
+    if (this.lobbyModel == null || this.lobbyModel.players == null) {
+      return {host: false} as PlayerModel;
+    } else {
+      const hostModel: PlayerModel = this.lobbyModel.players.find(player => player.id === this.lobbyModel.host);
+      return this.lobbyModel.players.find(player => player.id === this.lobbyModel.host);
+    }
+  }
+
+  public get host(): string {
+    if (this.lobbyModel == null || this.lobbyModel.players == null) {
+      return '';
+    } else {
+      const hostModel: PlayerModel = this.lobbyModel.players.find(player => player.id === this.lobbyModel.host);
+      return `${hostModel.firstName} ${hostModel.lastName}`;
+    }
+  }
 
   ngOnInit(): void {
     this.sseService
-      .getServerSentEvent(`${this.apiConfiguration.rootUrl}/emitters/request/${EmitterType.Lobby}/${this.apiInterceptor.jwt}`, EmitterType.Lobby)
-      .subscribe((event: any) => {
-        try {
-          this.lobbyModel = <LobbyDocument> JSON.parse(event);
-        } catch(err) {
-          console.log("Something went wrong with the emitter.");
-          this.sseService.closeEvent(EmitterType.Lobby);
-        }
-        
-        this.checkIfGameCanStart();
-        this.displayToast();
-      });
-    
+    .getServerSentEvent(
+      `${this.apiConfiguration.rootUrl}/emitters/request/${EmitterType.Lobby}/${this.apiInterceptor.jwt}`, EmitterType.Lobby)
+    .subscribe((event: any) => {
+      try {
+        this.lobbyModel = JSON.parse(event) as LobbyDocument;
+      } catch (err) {
+        console.log('Something went wrong with the emitter.');
+        this.sseService.closeEvent(EmitterType.Lobby);
+      }
+
+      this.checkIfGameCanStart();
+      this.displayToast();
+    });
+
     this.refreshLobbyModel();
   }
 
@@ -83,9 +84,9 @@ export class LobbyComponent implements OnInit {
    */
   private displayToast(): void {
     if (this.lobbyModel != null && this.lobbyModel.gameActions != null && this.lobbyModel.gameActions.length > 0) {
-      let currentAction: GameActionModel = this.lobbyModel.gameActions[this.lobbyModel.gameActions.length - 1];
+      const currentAction: GameActionModel = this.lobbyModel.gameActions[this.lobbyModel.gameActions.length - 1];
 
-      if (this.lastAction == null || currentAction.id != this.lastAction.id) {
+      if (this.lastAction == null || currentAction.id !== this.lastAction.id) {
         this.toastService.show(currentAction.clientMessage, { classname: 'bg-light toast-md', delay: 5000 });
       }
       this.lastAction = currentAction;
@@ -96,9 +97,9 @@ export class LobbyComponent implements OnInit {
    * Helper to determine when to show the alert notifying the host that they may start the game.
    */
   private checkIfGameCanStart(): void {
-    let oldCanStart = this.canStart;
+    const oldCanStart = this.canStart;
     this.canStart = this.lobbyModel.players
-      .find((player: PlayerModel) => !player.ready) == undefined && this.lobbyModel.players.length > 1;
+      .find((player: PlayerModel) => !player.ready) === undefined && this.lobbyModel.players.length > 1;
 
     if (!oldCanStart && this.canStart) {  // If we went from not being able to start -> being able to start, show the alert
       this.displayCanStartAlert = true;
@@ -127,7 +128,7 @@ export class LobbyComponent implements OnInit {
    */
   public leaveGame(): void {
     // Only need to leave the page, the leave game guard will handle making the leave game call.
-    this.router.navigate(['/join']);
+    this.router.navigate(['/join']).then();
   }
 
   public startGame(): void {

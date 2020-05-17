@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { UsersService } from 'src/app/api/services';
-import { NewAccountModel, ApiSuccessModel } from 'src/app/api/models';
-import { ToastService } from '../toast.service';
+import {Component, OnInit} from '@angular/core';
+import {Router} from '@angular/router';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {UsersService} from 'src/app/api/services';
+import {ApiSuccessModel, NewAccountModel} from 'src/app/api/models';
+import {ToastService} from '../toast.service';
 
 @Component({
   selector: 'pkr-register',
@@ -16,8 +16,8 @@ export class RegisterComponent implements OnInit {
   public showFailAlert: boolean = false;
 
   constructor(
-    private router: Router, 
-    private formBuilder: FormBuilder, 
+    private router: Router,
+    private formBuilder: FormBuilder,
     private usersService: UsersService,
     private toastService: ToastService) { }
 
@@ -36,9 +36,9 @@ export class RegisterComponent implements OnInit {
    * @param group FormGroup that is being validated.
    */
   public checkPasswords(group: FormGroup) {
-    let password = group.controls.password.value;
-    let confirmPassword = group.controls.confirmPassword.value;
-    return password === confirmPassword ? null : { notSame: true };
+    const password = group.controls.password.value;
+    const confirmPassword = group.controls.confirmPassword.value;
+    return password === confirmPassword ? null : {notSame: true};
   }
 
   /**
@@ -46,18 +46,20 @@ export class RegisterComponent implements OnInit {
    * @param values Values from the registration form.
    */
   public register(values: any): void {
-    this.usersService.register({ body: <NewAccountModel>{
-      email: values.email,
-      password: values.password,
-      firstName: values.firstName,
-      lastName: values.lastName
-    }}).subscribe((response: ApiSuccessModel) => {
-      this.toastService.show("Registration Successful!", { classname: 'bg-light toast-md', delay: 5000 });
+    this.usersService.register({
+      body: {
+        email: values.email,
+        password: values.password,
+        firstName: values.firstName,
+        lastName: values.lastName
+      } as NewAccountModel
+    }).subscribe((response: ApiSuccessModel) => {
+      this.toastService.show('Registration Successful!', {classname: 'bg-light toast-md', delay: 5000});
       this.router.navigate(['/login']);
     }, (error: any) => {
       console.log(error);
       this.showFailAlert = true;
-    })
+    });
   }
 
   /**
