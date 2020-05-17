@@ -1,13 +1,11 @@
-import { Injectable } from '@angular/core';
-import { CanDeactivate, Router } from '@angular/router';
-import { JoinComponent } from '../join/join.component';
-import { PopupComponent } from 'src/app/shared/popup/popup.component';
-import { SseService } from 'src/app/shared/sse.service';
-import { GameService } from 'src/app/api/services';
-import { ApiSuccessModel } from 'src/app/api/models';
-import { GameComponent } from './game.component';
-import { EmitterType } from 'src/app/shared/models/emitter-type.model';
-import { GameState } from 'src/app/shared/models/game-state.enum';
+import {Injectable} from '@angular/core';
+import {CanDeactivate, Router} from '@angular/router';
+import {PopupComponent} from 'src/app/shared/popup/popup.component';
+import {SseService} from 'src/app/shared/sse.service';
+import {GameService} from 'src/app/api/services';
+import {GameComponent} from './game.component';
+import {EmitterType} from 'src/app/shared/models/emitter-type.model';
+import {GameState} from 'src/app/shared/models/game-state.enum';
 
 @Injectable({
   providedIn: 'root'
@@ -24,16 +22,16 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
     private gameService: GameService) { }
 
   canDeactivate(
-      component: GameComponent, 
-      currentRoute: import("@angular/router").ActivatedRouteSnapshot, 
-      currentState: import("@angular/router").RouterStateSnapshot, 
-      nextState?: import("@angular/router").RouterStateSnapshot): 
-      boolean | import("@angular/router").UrlTree | 
-      import("rxjs").Observable<boolean | 
-      import("@angular/router").UrlTree> | 
-      Promise<boolean | 
-      import("@angular/router").UrlTree> {
-    if (this.gameState == GameState.Over) {
+    component: GameComponent,
+    currentRoute: import('@angular/router').ActivatedRouteSnapshot,
+    currentState: import('@angular/router').RouterStateSnapshot,
+    nextState?: import('@angular/router').RouterStateSnapshot):
+    boolean | import('@angular/router').UrlTree |
+    import('rxjs').Observable<boolean |
+      import('@angular/router').UrlTree> |
+    Promise<boolean |
+      import('@angular/router').UrlTree> {
+    if (this.gameState === GameState.Over) {
       this.sseService.closeEvent(EmitterType.Game);
       return true;
     }
@@ -44,10 +42,10 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
         this.sseService.closeEvent(EmitterType.Lobby);
         this.sseService.closeEvent(EmitterType.Hand);
 
-        if (this.gameState == GameState.Lobby) {
+        if (this.gameState === GameState.Lobby) {
           this.gameService.leaveLobby().subscribe(() => { });
         }
-        
+
         this.router.navigate([this.link]);
       };
       this.confirmationPopup.open();

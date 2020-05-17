@@ -1,12 +1,12 @@
-import { Component, OnInit, ViewChild, HostListener } from '@angular/core';
-import { PopupComponent, PopupContentModel } from 'src/app/shared/popup/popup.component';
-import { Router } from '@angular/router';
-import { GameService, EmittersService } from 'src/app/api/services';
-import { GetGameModel, ApiSuccessModel } from 'src/app/api/models';
-import { SseService } from 'src/app/shared/sse.service';
-import { ApiInterceptor } from 'src/app/api-interceptor.service';
-import { ApiConfiguration } from 'src/app/api/api-configuration';
-import { EmitterType } from 'src/app/shared/models/emitter-type.model';
+import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
+import {PopupComponent, PopupContentModel} from 'src/app/shared/popup/popup.component';
+import {Router} from '@angular/router';
+import {EmittersService, GameService} from 'src/app/api/services';
+import {ApiSuccessModel, GetGameModel} from 'src/app/api/models';
+import {SseService} from 'src/app/shared/sse.service';
+import {ApiInterceptor} from 'src/app/api-interceptor.service';
+import {ApiConfiguration} from 'src/app/api/api-configuration';
+import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 
 @Component({
   selector: 'pkr-join',
@@ -15,25 +15,25 @@ import { EmitterType } from 'src/app/shared/models/emitter-type.model';
 })
 export class JoinComponent implements OnInit {
   /** List of games. */
-  private _games: GetGameModel[] = [];
+  private allGames: GetGameModel[] = [];
 
   // Pagination fields:
   public page: number = 1;
   public pageSize: number = 5;
-  public totalGames: number = this._games.length;
+  public totalGames: number = this.allGames.length;
 
   /** Popup to confirm player wishes to join the game they clicked on. */
   @ViewChild('popup') public confirmationPopup: PopupComponent;
   /** Content that will appear on the confirmation popup. */
-  public popupContent: PopupContentModel[] = <PopupContentModel[]> [
-    <PopupContentModel> { body: "" },
-    <PopupContentModel> { body: "Click cancel if you do not wish to proceed." }
-  ];
-  public popupOkCloseProcedure: Function;
+  public popupContent: PopupContentModel[] = [
+    {body: ''} as PopupContentModel,
+    {body: 'Click cancel if you do not wish to proceed.'} as PopupContentModel
+  ] as PopupContentModel[];
+  public popupOkCloseProcedure;
 
   /** Returns a slice of the list of games for pagination. */
   public get games(): any[] {
-    return this._games
+    return this.allGames
       .map((game: any) => ({...game}))
       .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize);
   }
@@ -41,26 +41,27 @@ export class JoinComponent implements OnInit {
   constructor(
     private apiConfiguration: ApiConfiguration,
     private router: Router,
-    private gameService: GameService, 
+    private gameService: GameService,
     private emittersService: EmittersService,
     private sseService: SseService,
     private apiInterceptor: ApiInterceptor) { }
 
   ngOnInit(): void {
     this.sseService
-      .getServerSentEvent(`${this.apiConfiguration.rootUrl}/emitters/request/${EmitterType.GameList}/${this.apiInterceptor.jwt}`, EmitterType.GameList)
+      .getServerSentEvent(
+        `${this.apiConfiguration.rootUrl}/emitters/request/${EmitterType.GameList}/${this.apiInterceptor.jwt}`, EmitterType.GameList)
       .subscribe((event: any) => {
         // Using try catch to avoid a bunch of red text in the console. The error is worthless since it's due to JSON.parse.
-        let games = this._games;
+        const games = this.allGames;
         try {
-          this._games = JSON.parse(event);
-        } catch(err) {
-          console.log("Something went wrong with the join game emitter.");
+          this.allGames = JSON.parse(event);
+        } catch (err) {
+          console.log('Something went wrong with the join game emitter.');
           this.sseService.closeEvent(EmitterType.GameList);
-          this._games = games;
+          this.allGames = games;
         }
       });
-    
+
     this.refreshGameList();
   }
 
@@ -90,11 +91,11 @@ export class JoinComponent implements OnInit {
     this.popupContent[0].body = `Attempting to join game "${game.name}".`;
     this.popupOkCloseProcedure = () => {
       // Join the lobby.
-      this.gameService.joinGame({ gameId: game.id }).subscribe((response: ApiSuccessModel) => {
+      this.gameService.joinGame({gameId: game.id}).subscribe((response: ApiSuccessModel) => {
         this.router.navigate([`/game/${game.id}`]);
       });
-      
-    }
+
+    };
     this.confirmationPopup.open();
   }
 }

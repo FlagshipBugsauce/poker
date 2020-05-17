@@ -1,14 +1,14 @@
-import { Component, TemplateRef, Input } from '@angular/core';
+import {Component, TemplateRef, Input, HostBinding} from '@angular/core';
 import { ToastService } from '../toast.service';
 
 @Component({
   selector: 'pkr-toast-container',
   templateUrl: './toast-container.component.html',
-  styleUrls: ['./toast-container.component.scss'],
-  host: {'[class.ngb-toasts]': 'true'}
+  styleUrls: ['./toast-container.component.scss']
 })
 export class ToastContainerComponent {
-  @Input('header') header: string;
+  @HostBinding('class.ngb-toasts') true;
+  @Input() header: string;
 
   constructor(public toastService: ToastService) { }
 
