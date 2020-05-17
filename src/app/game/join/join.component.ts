@@ -29,7 +29,7 @@ export class JoinComponent implements OnInit {
     {body: ''} as PopupContentModel,
     {body: 'Click cancel if you do not wish to proceed.'} as PopupContentModel
   ] as PopupContentModel[];
-  public popupOkCloseProcedure;
+  public popupOkCloseProcedure: () => void;
 
   /** Returns a slice of the list of games for pagination. */
   public get games(): any[] {
