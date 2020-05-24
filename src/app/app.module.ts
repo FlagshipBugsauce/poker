@@ -1,17 +1,15 @@
 /* Modules */
-import { BrowserModule } from '@angular/platform-browser';
-import { SharedModule } from './shared/shared.module';
-import { NgModule } from '@angular/core';
-import { AppRoutingModule } from './app-routing.module';
-
+import {BrowserModule} from '@angular/platform-browser';
+import {SharedModule} from './shared/shared.module';
+import {NgModule} from '@angular/core';
+import {AppRoutingModule} from './app-routing.module';
 /* Components */
-import { MainComponent } from './shared/main/main.component';
-import { HomeModule } from './home/home.module';
-import { GameModule } from './game/game.module';
+import {MainComponent} from './shared/main/main.component';
+import {HomeModule} from './home/home.module';
+import {GameModule} from './game/game.module';
 
 @NgModule({
-  declarations: [
-  ],
+  declarations: [],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -22,8 +20,8 @@ import { GameModule } from './game/game.module';
   exports: [
     SharedModule
   ],
-  providers: [
-  ],
+  providers: [],
   bootstrap: [MainComponent]
 })
-export class AppModule { }
+export class AppModule {
+}

@@ -32,7 +32,8 @@ export class PopupComponent implements OnInit {
   @ViewChild('popup') popup: NgbActiveModal;
   private ngbModalRef: NgbModalRef;
 
-  constructor(private ngbModal: NgbModal) { }
+  constructor(private ngbModal: NgbModal) {
+  }
 
   public ngOnInit(): void {
   }

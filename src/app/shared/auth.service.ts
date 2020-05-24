@@ -8,11 +8,31 @@ import {Router} from '@angular/router';
   providedIn: 'root'
 })
 export class AuthService {
-
+  /**
+   * Flag that is used to indicate whether a player is logged in.
+   */
   private loggedIn: boolean = false;
+
+  /**
+   * Model of the currently logged in player.
+   */
   private userModelInternal: UserModel = {} as UserModel;
 
   constructor(private apiInterceptor: ApiInterceptor, private usersService: UsersService, private router: Router) {
+  }
+
+  /**
+   * Used to determine if a user has authenticated. Returns true when user has authenticated, false otherwise.
+   */
+  public get authenticated(): boolean {
+    return this.loggedIn;
+  }
+
+  /**
+   * Getter for the model of the currently logged in player.
+   */
+  public get userModel(): UserModel {
+    return this.userModelInternal;
   }
 
   /**
@@ -23,23 +43,12 @@ export class AuthService {
    */
   public async authorize(email: string, password: string): Promise<boolean> {
     await this.usersService.authorize({body: {email, password} as AuthRequestModel})
-    .toPromise().then((authResponseModel: AuthResponseModel) => {
-      this.apiInterceptor.jwt = authResponseModel.jwt;
-      this.loggedIn = true;
-      this.userModelInternal = authResponseModel.userDetails;
-    }, (error: any) => console.log(error.error));
+      .toPromise().then((authResponseModel: AuthResponseModel) => {
+        this.apiInterceptor.jwt = authResponseModel.jwt;
+        this.loggedIn = true;
+        this.userModelInternal = authResponseModel.userDetails;
+      }, (error: any) => console.log(error.error));
     return this.loggedIn;
-  }
-
-  /**
-   * Used to determine if a user has authenticated. Returns true when user has authenticated, false otherwise.
-   */
-  public get authenticated(): boolean {
-    return this.loggedIn;
-  }
-
-  public get userModel(): UserModel {
-    return this.userModelInternal;
   }
 
   /**

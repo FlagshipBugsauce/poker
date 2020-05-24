@@ -19,7 +19,8 @@ export class RegisterComponent implements OnInit {
     private router: Router,
     private formBuilder: FormBuilder,
     private usersService: UsersService,
-    private toastService: ToastService) { }
+    private toastService: ToastService) {
+  }
 
   ngOnInit(): void {
     this.registrationForm = this.formBuilder.group({
@@ -28,7 +29,7 @@ export class RegisterComponent implements OnInit {
       confirmPassword: ['', [Validators.required]],
       firstName: ['', [Validators.required]],
       lastName: ['', [Validators.required]]
-    }, { validator: this.checkPasswords });
+    }, {validator: this.checkPasswords});
   }
 
   /**

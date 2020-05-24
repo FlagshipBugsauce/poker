@@ -1,113 +1,112 @@
 <div class="container-fluid mx-0 px-0">
-    <div class="card m-3">
-        <h3 class="card-header bg-success text-light">Lobby</h3>
+  <div class="card m-3">
+    <h3 class="card-header bg-success text-light">Lobby</h3>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-sm-12">
+          <p class="m-0">
+            Below you can see a summary of the game parameters and who is currently
+            in the game.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="displayLeaveWarning" class="container-fluid">
+    <ngb-alert (close)="displayLeaveWarning = false" [type]="'warning'">
+      Note: If you leave this page, you will removed from the game.
+    </ngb-alert>
+  </div>
+  <div class="row mx-0">
+    <div class="col-sm-6 pl-3 pr-2">
+      <div class="card">
+        <h3 class="card-header bg-success text-light">Players</h3>
         <div class="card-body">
-            <div class="row">
-                <div class="col-sm-12">
-                    <p class="m-0">
-                        Later on, we'll have a nicer UI with a poker table and as people join, they can select their seat,
-                        similar to how things work in most poker apps. For now, we're going to have a list of players, some
-                        basic information about these players, such as their names and ready status, and we'll have some
-                        buttons so players can signal when they are ready. 
-                    </p>
-                </div>
-            </div>
+          <table class="table table-hover table-striped">
+            <thead>
+            <tr class="text-center">
+              <th scope="col">Name</th>
+              <th scope="col">Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let player of lobbyModel.players" class="text-center">
+              <td>
+                <img *ngIf="player.id == hostModel.id" [src]="crownIcon" class="crown">
+                {{ player.firstName }} {{ player.lastName }}
+              </td>
+              <td>
+                <img *ngIf="player.ready" [src]="readyIcons.ready" class="image">
+                <img *ngIf="!player.ready" [src]="readyIcons.notReady" class="image">
+              </td>
+            </tr>
+            </tbody>
+          </table>
         </div>
+      </div>
     </div>
-    <div class="container-fluid" *ngIf="displayLeaveWarning">
-        <ngb-alert [type]="'warning'" (close)="displayLeaveWarning = false">
-            Note: If you leave this page, you will removed from the game.
-        </ngb-alert>
-    </div>
-    <div class="row mx-0">
-        <div class="col-sm-6 pl-3 pr-2">
-            <div class="card">
-                <h3 class="card-header bg-success text-light">Players</h3>
-                <div class="card-body">
-                    <table class="table table-hover table-striped">
-                        <thead>
-                            <tr class="text-center">
-                                <th scope="col">Name</th>
-                                <th scope="col">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let player of lobbyModel.players" class="text-center">
-                                <td>
-                                    <img [src]="crownIcon" class="crown" *ngIf="player.id == hostModel.id">
-                                    {{ player.firstName }} {{ player.lastName }}
-                                </td>
-                                <td>
-                                    <img [src]="readyIcons.ready" class="image" *ngIf="player.ready">
-                                    <img [src]="readyIcons.notReady" class="image" *ngIf="!player.ready">
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+    <div class="col-sm-6 pr-3 pl-2">
+      <div class="card">
+        <h3 class="card-header bg-success text-light">Game Parameters</h3>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-sm-4 font-weight-bold">
+              Name:
             </div>
+            <div class="col-sm-8 text-truncate">
+              {{ lobbyModel.name }}
+            </div>
+            <div class="col-sm-4 font-weight-bold">
+              Host:
+            </div>
+            <div class="col-sm-8">
+              {{ host }}
+            </div>
+            <div class="col-sm-4 font-weight-bold">
+              Max Players:
+            </div>
+            <div class="col-sm-8">
+              {{ lobbyModel.maxPlayers }}
+            </div>
+            <div class="col-sm-4 font-weight-bold">
+              Buy-In:
+            </div>
+            <div class="col-sm-8">
+              {{ lobbyModel.buyIn | currency }}
+            </div>
+          </div>
         </div>
-        <div class="col-sm-6 pr-3 pl-2">
-            <div class="card">
-                <h3 class="card-header bg-success text-light">Game Parameters</h3>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-sm-4 font-weight-bold">
-                            Name:
-                        </div>
-                        <div class="col-sm-8 text-truncate">
-                            {{ lobbyModel.name }}
-                        </div>
-                        <div class="col-sm-4 font-weight-bold">
-                            Host:
-                        </div>
-                        <div class="col-sm-8">
-                            {{ host }}
-                        </div>
-                        <div class="col-sm-4 font-weight-bold">
-                            Max Players:
-                        </div>
-                        <div class="col-sm-8">
-                            {{ lobbyModel.maxPlayers }}
-                        </div>
-                        <div class="col-sm-4 font-weight-bold">
-                            Buy-In:
-                        </div>
-                        <div class="col-sm-8">
-                            {{ lobbyModel.buyIn | currency }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-12 text-right">
-                    <button 
-                        type="reset" 
-                        ngbTooltip="Leave the game"
-                        (click)="leaveGame()"
-                        class="btn btn-danger button mt-3">Leave</button>
-                    <button 
-                        type="submit" 
-                        class="btn btn-success button ml-3 mt-3" 
-                        ngbTooltip="Ready to start"
-                        (click)="sendReadyRequest()"
-                        [disabled]="ready">Ready</button>
-                    <button 
-                        type="submit" 
-                        class="btn btn-warning button ml-3 text-light mt-3" 
-                        ngbTooltip="Start the game!"
-                        *ngIf="authService.userModel.id == lobbyModel.host"
-                        (click)="startGame()"
-                        [disabled]="!canStart">Start</button>
-                </div>
-            </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12 text-right">
+          <button
+            (click)="leaveGame()"
+            class="btn btn-danger button mt-3"
+            ngbTooltip="Leave the game"
+            type="reset">Leave
+          </button>
+          <button
+            (click)="sendReadyRequest()"
+            class="btn btn-success button ml-3 mt-3"
+            ngbTooltip="Ready to start"
+            type="submit">{{ready ? "Un-Ready" : "Ready"}}</button>
+          <button
+            (click)="startGame()"
+            *ngIf="authService.userModel.id == lobbyModel.host"
+            [disabled]="!canStart"
+            class="btn btn-warning button ml-3 text-light mt-3"
+            ngbTooltip="Start the game!"
+            type="submit">Start
+          </button>
         </div>
+      </div>
     </div>
-    <div 
-        class="container-fluid mt-3" 
-        *ngIf="displayCanStartAlert && canStart && authService.userModel.id == hostModel.id">
-        <ngb-alert [type]="'success'" (close)="displayCanStartAlert = false">
-            Note: All players are ready, you can start the game.
-        </ngb-alert>
-    </div>
+  </div>
+  <div
+    *ngIf="displayCanStartAlert && canStart && authService.userModel.id == hostModel.id"
+    class="container-fluid mt-3">
+    <ngb-alert (close)="displayCanStartAlert = false" [type]="'success'">
+      Note: All players are ready, you can start the game.
+    </ngb-alert>
+  </div>
 </div>

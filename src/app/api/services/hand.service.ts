@@ -1,14 +1,14 @@
 /* tslint:disable */
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
-import { BaseService } from '../base-service';
-import { ApiConfiguration } from '../api-configuration';
-import { StrictHttpResponse } from '../strict-http-response';
-import { RequestBuilder } from '../request-builder';
-import { Observable } from 'rxjs';
-import { map, filter } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpResponse} from '@angular/common/http';
+import {BaseService} from '../base-service';
+import {ApiConfiguration} from '../api-configuration';
+import {StrictHttpResponse} from '../strict-http-response';
+import {RequestBuilder} from '../request-builder';
+import {Observable} from 'rxjs';
+import {filter, map} from 'rxjs/operators';
 
-import { ApiSuccessModel } from '../models/api-success-model';
+import {ApiSuccessModel} from '../models/api-success-model';
 
 
 /**
@@ -18,17 +18,17 @@ import { ApiSuccessModel } from '../models/api-success-model';
   providedIn: 'root',
 })
 export class HandService extends BaseService {
+  /**
+   * Path part for operation roll
+   */
+  static readonly RollPath = '/game/hand/roll';
+
   constructor(
     config: ApiConfiguration,
     http: HttpClient
   ) {
     super(config, http);
   }
-
-  /**
-   * Path part for operation roll
-   */
-  static readonly RollPath = '/game/hand/roll';
 
   /**
    * Roll a random number.
@@ -40,9 +40,7 @@ export class HandService extends BaseService {
    *
    * This method doesn't expect any request body.
    */
-  roll$Response(params?: {
-
-  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
+  roll$Response(params?: {}): Observable<StrictHttpResponse<ApiSuccessModel>> {
 
     const rb = new RequestBuilder(this.rootUrl, HandService.RollPath, 'post');
     if (params) {
@@ -70,9 +68,7 @@ export class HandService extends BaseService {
    *
    * This method doesn't expect any request body.
    */
-  roll(params?: {
-
-  }): Observable<ApiSuccessModel> {
+  roll(params?: {}): Observable<ApiSuccessModel> {
 
     return this.roll$Response(params).pipe(
       map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)

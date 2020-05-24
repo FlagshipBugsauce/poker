@@ -1,6 +1,6 @@
-import { TestBed } from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 
-import { LeaveGameGuardService } from './leave-game-guard.service';
+import {LeaveGameGuardService} from './leave-game-guard.service';
 
 describe('LeaveGameGuardService', () => {
   let service: LeaveGameGuardService;

@@ -1,5 +1,6 @@
 /* tslint:disable */
-import { PlayerModel } from './player-model';
+import {LobbyPlayerModel} from './lobby-player-model';
+
 export interface GetGameModel {
 
   /**
@@ -11,7 +12,7 @@ export interface GetGameModel {
    * The current number of players in the game
    */
   currentPlayers?: number;
-  host?: PlayerModel;
+  host?: LobbyPlayerModel;
 
   /**
    * The ID of the game.

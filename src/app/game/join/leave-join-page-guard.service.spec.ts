@@ -1,6 +1,6 @@
-import { TestBed } from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 
-import { LeaveJoinPageGuardService } from './leave-join-page-guard.service';
+import {LeaveJoinPageGuardService} from './leave-join-page-guard.service';
 
 describe('LeaveJoinPageGuardService', () => {
   let service: LeaveJoinPageGuardService;
