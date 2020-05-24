@@ -2,7 +2,7 @@ package com.poker.poker.services.game;
 
 import com.poker.poker.config.constants.GameConstants;
 import com.poker.poker.documents.GameDocument;
-import com.poker.poker.documents.LobbyDocument;
+import com.poker.poker.documents.HandDocument;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.HandActionEvent;
 import com.poker.poker.events.WaitForPlayerEvent;
@@ -12,17 +12,12 @@ import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.enums.GameState;
 import com.poker.poker.models.game.CreateGameModel;
 import com.poker.poker.models.game.GamePlayerModel;
-import com.poker.poker.models.game.hand.HandActionModel;
-import com.poker.poker.documents.HandDocument;
-import com.poker.poker.models.game.hand.RollActionModel;
 import com.poker.poker.repositories.GameRepository;
-import com.poker.poker.repositories.HandRepository;
 import com.poker.poker.services.SseService;
 import com.poker.poker.services.UuidService;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -57,8 +52,6 @@ public class GameService {
   private HandService handService;
 
   private GameRepository gameRepository;
-
-  private HandRepository handRepository;
 
   private ApplicationEventPublisher applicationEventPublisher;
 
@@ -177,14 +170,9 @@ public class GameService {
    * @throws BadRequestException If the request is invalid.
    */
   public ApiSuccessModel removePlayerFromLobby(UserDocument user) throws BadRequestException {
-    // Remove userId -> gameId mapping.
-    userIdToGameIdMap.remove(user.getId());
-
-    // Destroy the game emitter sending the player updates.
-    sseService.completeEmitter(EmitterType.Game, user.getId());
-
-    // Allow lobbyService to handle the rest.
-    return lobbyService.removePlayerFromLobby(user);
+    userIdToGameIdMap.remove(user.getId()); // Remove mapping.
+    sseService.completeEmitter(EmitterType.Game, user.getId()); // Destroy emitter.
+    return lobbyService.removePlayerFromLobby(user);  // Let LobbyService do the rest.
   }
 
   /**
@@ -201,38 +189,10 @@ public class GameService {
       throw gameConstants.getGameNotFoundException();
     }
     final GameDocument gameDocument = games.get(gameId);
-
-    // Inform lobbyService the game is starting, which sets the game document's list of players.
-    lobbyService.startGame(gameDocument);
-
-    // Send updated game lists (game can no longer be joined via game list).
-    sseService.sendToAll(EmitterType.GameList, lobbyService.getLobbyList());
-
-    // Transition the game state.
-    gameDocument.setState(GameState.Play);
-
-    // Send update so client knows the game state has changed.
-    broadcastGameUpdate(gameDocument);
-
-    // Create new hand.
-    handService.newHand(gameDocument);
-
-    // Get the hand.
-    final HandDocument hand = handService.getHand(gameDocument);
-
-    // Set the
-    hand.setPlayerToAct(gameDocument.getPlayers().get(0));
-
-    // Broadcast hand update.
-    handService.broadcastHandUpdate(gameDocument);
-
-    // Wait for player to act.
-    applicationEventPublisher
-        .publishEvent(new WaitForPlayerEvent(this, hand.getPlayerToAct()));
-
-    // Send another game document update so client knows that a hand has begun.
-    broadcastGameUpdate(gameDocument);
-
+    lobbyService.startGame(gameDocument);   // Lobby related housekeeping.
+    gameDocument.setState(GameState.Play);  // Transition game state.
+    handService.newHand(gameDocument);      // Create the hand.
+    broadcastGameUpdate(gameDocument);      // Broadcast the game document.
     return new ApiSuccessModel("The game has been started successfully.");
   }
 
@@ -274,34 +234,68 @@ public class GameService {
          Temporary logic here to help design game flow for later. Most of this will be gone. Just
          trying to work out the kinks with waiting for players to act, etc...
     */
-
-    final int numRounds = gameDocument.getTotalHands();
-    final boolean roundOver = hand.getPlayerToAct().equals(gameDocument.getPlayers().get(0));
+    final boolean handOver = hand.getPlayerToAct().equals(gameDocument.getPlayers().get(0));
     final int currentRound =
-        roundOver ? 1 + gameDocument.getHands().size() : gameDocument.getHands().size();
+        handOver ? 1 + gameDocument.getHands().size() : gameDocument.getHands().size();
 
-    if (!roundOver) {
+    if (!handOver) {
       applicationEventPublisher.publishEvent(new WaitForPlayerEvent(this, nextPlayerToAct));
-    } else if (currentRound <= numRounds) {
+    } else if (currentRound <= gameDocument.getTotalHands()) {
       log.debug("Hand ended. Beginning new hand.");
       // Update scores
-      handService.determineWinner(gameDocument);
-
       handService.endHand(gameDocument);
       handService.newHand(gameDocument);
-      final HandDocument newHand = handService.getHand(gameDocument);
-      newHand.setPlayerToAct(nextPlayerToAct);
-
       broadcastGameUpdate(gameDocument);
-      handService.broadcastHandUpdate(gameDocument);
-
-      // Publish a wait for player event.
-      applicationEventPublisher.publishEvent(new WaitForPlayerEvent(this, nextPlayerToAct));
     } else {
       // If the round is over and the current round > total rounds, then the game must be over.
       log.debug("The game has ended.");
       endGame(gameDocument);
     }
+  }
+
+  /**
+   * Creates a string summarizing who won the roll game.
+   *
+   * @param gameDocument The model of the game.
+   * @return A string summarizing who won the roll game.
+   */
+  private String getSummaryMessageForRollGame(GameDocument gameDocument) {
+    final int winningScore = Collections.max(gameDocument
+        .getPlayers()
+        .stream()
+        .map(GamePlayerModel::getScore)
+        .collect(Collectors.toList()));
+    final List<GamePlayerModel> winners = gameDocument
+        .getPlayers()
+        .stream()
+        .filter(p -> p.getScore() == winningScore)
+        .collect(Collectors.toList());
+    StringBuilder message = new StringBuilder();
+    if (winners.size() > 1) {
+      message
+          .append("There are ")
+          .append(winners.size())
+          .append(" players tied for first place. The winners are ");
+      for (int i = 0; i < winners.size() - 1; i++) {
+        message
+            .append(winners.get(i).getFirstName())
+            .append(' ')
+            .append(winners.get(i).getLastName())
+            .append(i == winners.size() - 2 ? "" : ", ");
+      }
+      message
+          .append(" and ")
+          .append(winners.get(winners.size() - 1).getFirstName())
+          .append(winners.get(winners.size() - 1).getLastName());
+    } else {
+      message
+          .append("The winner is ")
+          .append(winners.get(0).getFirstName())
+          .append(' ')
+          .append(winners.get(0).getLastName());
+    }
+    message.append(". Other scores can be viewed below.");
+    return message.toString();
   }
 
   /**
@@ -312,72 +306,12 @@ public class GameService {
    * @param gameDocument The game document associated with the game that is ending.
    */
   public void endGame(GameDocument gameDocument) {
-    // Conclude the hand.
-    handService.determineWinner(gameDocument);
-    handService.endHand(gameDocument);
-
-    // Transition the game state.
-    gameDocument.setState(GameState.Over);
-
-    // Determine the winner and generate a brief summary.
-    final List<HandDocument> hands = new ArrayList<>();
-    for (UUID handId : gameDocument.getHands()) {
-      hands.add(handRepository.findHandDocumentById(handId));
-    }
-
-    final Map<GamePlayerModel, Integer> points = new HashMap<>();
-    for (GamePlayerModel lobbyPlayerModel : gameDocument.getPlayers()) {
-      points.put(lobbyPlayerModel, 0);
-    }
-
-    for (HandDocument hand : hands) {
-      GamePlayerModel winner = null;
-      int winningRoll = -1;
-      for (HandActionModel a : hand.getActions()) {
-        RollActionModel r = (RollActionModel) a;
-        if (r.getValue() > winningRoll) {
-          winner = r.getPlayer();
-          winningRoll = r.getValue();
-        }
-      }
-      assert winner != null;
-      points.put(winner, points.get(winner) + 1);
-    }
-
-    // Create some output to show a summary for the scores and who won.
-    GamePlayerModel winner = null;
-    int highestScore = -1;
-    final StringBuilder sb = new StringBuilder();
-    sb.append("The scores are: ");
-    for (GamePlayerModel lobbyPlayerModel : points.keySet()) {
-      sb.append(lobbyPlayerModel.getFirstName()).append(" ").append(lobbyPlayerModel.getLastName());
-      sb.append(": ").append(points.get(lobbyPlayerModel)).append(", ");
-      if (points.get(lobbyPlayerModel) > highestScore) {
-        winner = lobbyPlayerModel;
-        highestScore = points.get(lobbyPlayerModel);
-      }
-    }
-    final String currentOutput = sb.toString().substring(0, sb.toString().length() - 2);
-
-    assert winner != null;
-    gameDocument.setSummary(
-        new GameSummaryModel(
-            String.format(
-                "%s. The winrar is %s %s, with a score of %d.",
-                currentOutput, winner.getFirstName(), winner.getLastName(), highestScore)));
-
-    // General housekeeping:
-
-    // Send final update to players.
-    broadcastGameUpdate(gameDocument);
-
-    // Save the game document.
-    gameRepository.save(gameDocument);
-
-    // Remove mapping from game ID to game document.
-    games.remove(gameDocument.getId());
-
-    // Remove mapping from user ID to game ID.
-    gameDocument.getPlayers().forEach(p -> userIdToGameIdMap.remove(p.getId()));
+    handService.endHand(gameDocument);  // End hand.
+    gameDocument.setState(GameState.Over); // Transition game state.
+    gameDocument.setSummary(new GameSummaryModel(getSummaryMessageForRollGame(gameDocument)));
+    gameRepository.save(gameDocument);  // Save game document.
+    games.remove(gameDocument.getId()); // Remove mapping.
+    gameDocument.getPlayers().forEach(p -> userIdToGameIdMap.remove(p.getId())); // Remove mappings.
+    broadcastGameUpdate(gameDocument);  // Broadcast final update.
   }
 }

@@ -2,6 +2,7 @@ package com.poker.poker.services.game;
 
 import com.poker.poker.config.constants.HandConstants;
 import com.poker.poker.documents.GameDocument;
+import com.poker.poker.documents.HandDocument;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.HandActionEvent;
 import com.poker.poker.events.WaitForPlayerEvent;
@@ -10,7 +11,6 @@ import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.enums.HandAction;
 import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.hand.HandActionModel;
-import com.poker.poker.documents.HandDocument;
 import com.poker.poker.models.game.hand.RollActionModel;
 import com.poker.poker.repositories.HandRepository;
 import com.poker.poker.repositories.UserRepository;
@@ -122,21 +122,22 @@ public class HandService {
    */
   public void newHand(GameDocument gameDocument) {
     log.debug("Creating new hand for game {}.", gameDocument.getId());
-    HandDocument hand =
+    final HandDocument hand =
         new HandDocument(UUID.randomUUID(), gameDocument.getId(), null, new ArrayList<>(), null);
 
     // Adding hand to list of hands in game document.
     gameDocument.getHands().add(hand.getId());
 
-    // Map hand ID to hand model.
+    // Add required mappings.
     hands.put(hand.getId(), hand);
-
-    // Map game ID to hand ID.
     gameIdToHandIdMap.put(gameDocument.getId(), hand.getId());
-
-    // Map user ID's to game ID & sends updated hand model to players
     gameDocument
         .getPlayers().forEach(p -> userIdToGameIdMap.put(p.getId(), gameDocument.getId()));
+
+    hand.setPlayerToAct(gameDocument.getPlayers().get(0)); // First in the list acts first.
+    broadcastHandUpdate(gameDocument);  // Broadcast the new hand.
+    applicationEventPublisher
+        .publishEvent(new WaitForPlayerEvent(this, hand.getPlayerToAct()));
   }
 
   /**
@@ -261,6 +262,7 @@ public class HandService {
    * @throws BadRequestException If there is no active hand associated with the game specified.
    */
   public void endHand(GameDocument gameDocument) throws BadRequestException {
+    determineWinner(gameDocument);
     // Get the ID of the most recent hand in the game.
     final UUID handId = gameDocument.getHands().get(gameDocument.getHands().size() - 1);
 

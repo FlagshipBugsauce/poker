@@ -17,15 +17,24 @@ public class GameConstants extends AppConstants {
 
   private final long timeToActInMillis = 1000 * 10;
 
-  private final int numRoundsInRollGame = 9;
+  private final int numRoundsInRollGame = 10;
 
   // Exceptions
+  private final BadRequestException lobbyNotFoundException =
+      new BadRequestException(
+          "No Lobby Found",
+          "There is no lobby associated with the ID provided");
+
+  private final BadRequestException noUserIdToLobbyIdMappingFound =
+      new BadRequestException(
+          "No Mapping Found", "There is no mapping from the user ID provided, to a lobby ID.");
+
   private final BadRequestException gameNotFoundException =
       new BadRequestException("No Game Found", "There is no game associated with the ID provided");
 
   private final BadRequestException noUserIdToGameIdMappingFound =
       new BadRequestException(
-          "No Mapping Found", "There is no mapping from the user ID to game ID provided.");
+          "No Mapping Found", "There is no mapping from the user ID provided, to a game ID.");
 
   private final BadRequestException joinGamePlayerAlreadyJoinedException =
       new BadRequestException("Failed to Join", "Cannot join more than one game at a time.");
