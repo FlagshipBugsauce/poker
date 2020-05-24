@@ -5,33 +5,32 @@ import com.poker.poker.models.enums.UserGroup;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlayerModel {
+public abstract class PlayerModel {
+
   @Schema(description = "User's ID.", example = "0a7d95ef-94ba-47bc-b591-febb365bc543")
-  private UUID id;
+  protected UUID id;
 
   @Schema(description = "User's email address.", example = "user@domain.com")
-  private String email;
+  protected String email;
 
   @Schema(description = "User's user group.", example = "Administrator")
-  private UserGroup group;
+  protected UserGroup group;
 
   @Schema(description = "User's first name.", example = "Fred")
-  private String firstName;
+  protected String firstName;
 
   @Schema(description = "User's last name.", example = "Flintstone")
-  private String lastName;
-
-  @Schema(description = "Specifies whether a player is ready to start the game.", example = "true")
-  private boolean ready;
-
-  @Schema(description = "Specifies whether the player created the game.", example = "false")
-  private boolean host;
+  protected String lastName;
 
   /**
    * Constructor that takes in a UserDocument and fill in the fields the two classes have in common.
@@ -47,14 +46,16 @@ public class PlayerModel {
   }
 
   /**
-   * Constructor that takes in a UserDocument as well as the ready status and whether this player is
-   * currently the host of game.
+   * Copy constructor that will take a player model of any dynamic type and create a new player
+   * model with the same values in the main fields.
    *
-   * @param userDocument UserDocument representing a player.
+   * @param playerModel PlayerModel that will be copied.
    */
-  public PlayerModel(UserDocument userDocument, boolean ready, boolean host) {
-    this(userDocument);
-    this.ready = ready;
-    this.host = host;
+  public PlayerModel(PlayerModel playerModel) {
+    id = playerModel.getId();
+    email = playerModel.getEmail();
+    group = playerModel.getGroup();
+    firstName = playerModel.getFirstName();
+    lastName = playerModel.getLastName();
   }
 }

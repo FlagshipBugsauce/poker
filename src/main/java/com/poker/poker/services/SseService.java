@@ -23,14 +23,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class SseService {
-  /*
-       TODO: It seems like the .complete() is running on a different thread, and thus, the
-        emitter is not being removed from the hash map before the log which outputs all the
-        emitters in the hash map, is outputted. The emitter is being removed, it's just
-        occurring AFTER the log. Should investigate some way of ensuring the emitter is removed
-        before logging. Probably can use a semaphore or some kind of loop with a thread.sleep.
-        Update: No longer outputting a hash map but this problem should still be investigated.
-  */
 
   private final EmitterConstants emitterConstants;
 

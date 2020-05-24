@@ -1,7 +1,7 @@
 package com.poker.poker.documents;
 
 import com.poker.poker.models.game.GameActionModel;
-import com.poker.poker.models.game.PlayerModel;
+import com.poker.poker.models.game.LobbyPlayerModel;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
@@ -50,8 +50,8 @@ public class LobbyDocument {
       implementation = BigDecimal.class)
   private BigDecimal buyIn;
 
-  @ArraySchema(schema = @Schema(implementation = PlayerModel.class))
-  private List<PlayerModel> players;
+  @ArraySchema(schema = @Schema(implementation = LobbyPlayerModel.class))
+  private List<LobbyPlayerModel> players;
 
   @ArraySchema(schema = @Schema(implementation = GameActionModel.class))
   private List<GameActionModel> gameActions; // TODO: Refactor to "LobbyActions"
