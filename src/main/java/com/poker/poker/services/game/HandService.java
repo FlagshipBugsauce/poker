@@ -131,13 +131,11 @@ public class HandService {
     // Add required mappings.
     hands.put(hand.getId(), hand);
     gameIdToHandIdMap.put(gameDocument.getId(), hand.getId());
-    gameDocument
-        .getPlayers().forEach(p -> userIdToGameIdMap.put(p.getId(), gameDocument.getId()));
+    gameDocument.getPlayers().forEach(p -> userIdToGameIdMap.put(p.getId(), gameDocument.getId()));
 
     hand.setPlayerToAct(gameDocument.getPlayers().get(0)); // First in the list acts first.
-    broadcastHandUpdate(gameDocument);  // Broadcast the new hand.
-    applicationEventPublisher
-        .publishEvent(new WaitForPlayerEvent(this, hand.getPlayerToAct()));
+    broadcastHandUpdate(gameDocument); // Broadcast the new hand.
+    applicationEventPublisher.publishEvent(new WaitForPlayerEvent(this, hand.getPlayerToAct()));
   }
 
   /**
@@ -246,13 +244,15 @@ public class HandService {
         highestRoll = r.getValue();
       }
     }
-    assert(winner != null);
-    assert(highestRoll != -1);
+    assert (winner != null);
+    assert (highestRoll != -1);
     winner.setScore(winner.getScore() + 1);
 
     // TODO: Hack to avoid repeating the same toast on the client. Find a better solution.
-    hand.getActions().get(hand.getActions().size() - 1).setMessage(
-        String.format("%s %s wins the round.", winner.getFirstName(), winner.getLastName()));
+    hand.getActions()
+        .get(hand.getActions().size() - 1)
+        .setMessage(
+            String.format("%s %s wins the round.", winner.getFirstName(), winner.getLastName()));
   }
 
   /**

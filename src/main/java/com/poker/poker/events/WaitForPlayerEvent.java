@@ -1,7 +1,6 @@
 package com.poker.poker.events;
 
 import com.poker.poker.models.game.GamePlayerModel;
-import java.util.UUID;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 

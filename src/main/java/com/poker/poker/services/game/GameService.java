@@ -91,9 +91,9 @@ public class GameService {
         new GameDocument(
             UUID.randomUUID(),
             GameState.Lobby,
-            new ArrayList<>(),  // List of player models is only updated after game begins.
+            new ArrayList<>(), // List of player models is only updated after game begins.
             new ArrayList<>(),
-            null,     // List of hands is empty until the game starts.
+            null, // List of hands is empty until the game starts.
             gameConstants.getNumRoundsInRollGame(),
             (int) (gameConstants.getTimeToActInMillis() / 1000));
 
@@ -172,7 +172,7 @@ public class GameService {
   public ApiSuccessModel removePlayerFromLobby(UserDocument user) throws BadRequestException {
     userIdToGameIdMap.remove(user.getId()); // Remove mapping.
     sseService.completeEmitter(EmitterType.Game, user.getId()); // Destroy emitter.
-    return lobbyService.removePlayerFromLobby(user);  // Let LobbyService do the rest.
+    return lobbyService.removePlayerFromLobby(user); // Let LobbyService do the rest.
   }
 
   /**
@@ -189,10 +189,10 @@ public class GameService {
       throw gameConstants.getGameNotFoundException();
     }
     final GameDocument gameDocument = games.get(gameId);
-    lobbyService.startGame(gameDocument);   // Lobby related housekeeping.
-    gameDocument.setState(GameState.Play);  // Transition game state.
-    handService.newHand(gameDocument);      // Create the hand.
-    broadcastGameUpdate(gameDocument);      // Broadcast the game document.
+    lobbyService.startGame(gameDocument); // Lobby related housekeeping.
+    gameDocument.setState(GameState.Play); // Transition game state.
+    handService.newHand(gameDocument); // Create the hand.
+    broadcastGameUpdate(gameDocument); // Broadcast the game document.
     return new ApiSuccessModel("The game has been started successfully.");
   }
 
@@ -260,16 +260,15 @@ public class GameService {
    * @return A string summarizing who won the roll game.
    */
   private String getSummaryMessageForRollGame(GameDocument gameDocument) {
-    final int winningScore = Collections.max(gameDocument
-        .getPlayers()
-        .stream()
-        .map(GamePlayerModel::getScore)
-        .collect(Collectors.toList()));
-    final List<GamePlayerModel> winners = gameDocument
-        .getPlayers()
-        .stream()
-        .filter(p -> p.getScore() == winningScore)
-        .collect(Collectors.toList());
+    final int winningScore =
+        Collections.max(
+            gameDocument.getPlayers().stream()
+                .map(GamePlayerModel::getScore)
+                .collect(Collectors.toList()));
+    final List<GamePlayerModel> winners =
+        gameDocument.getPlayers().stream()
+            .filter(p -> p.getScore() == winningScore)
+            .collect(Collectors.toList());
     StringBuilder message = new StringBuilder();
     if (winners.size() > 1) {
       message
@@ -306,12 +305,12 @@ public class GameService {
    * @param gameDocument The game document associated with the game that is ending.
    */
   public void endGame(GameDocument gameDocument) {
-    handService.endHand(gameDocument);  // End hand.
+    handService.endHand(gameDocument); // End hand.
     gameDocument.setState(GameState.Over); // Transition game state.
     gameDocument.setSummary(new GameSummaryModel(getSummaryMessageForRollGame(gameDocument)));
-    gameRepository.save(gameDocument);  // Save game document.
+    gameRepository.save(gameDocument); // Save game document.
     games.remove(gameDocument.getId()); // Remove mapping.
     gameDocument.getPlayers().forEach(p -> userIdToGameIdMap.remove(p.getId())); // Remove mappings.
-    broadcastGameUpdate(gameDocument);  // Broadcast final update.
+    broadcastGameUpdate(gameDocument); // Broadcast final update.
   }
 }

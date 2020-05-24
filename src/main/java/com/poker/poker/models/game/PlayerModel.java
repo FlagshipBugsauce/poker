@@ -48,6 +48,7 @@ public abstract class PlayerModel {
   /**
    * Copy constructor that will take a player model of any dynamic type and create a new player
    * model with the same values in the main fields.
+   *
    * @param playerModel PlayerModel that will be copied.
    */
   public PlayerModel(PlayerModel playerModel) {

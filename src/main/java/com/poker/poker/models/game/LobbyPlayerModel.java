@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Represents a player in the game lobby. Contains several extra fields required for the lobby
- * stage of the game, such as ready status and whether this player is the games host.
+ * Represents a player in the game lobby. Contains several extra fields required for the lobby stage
+ * of the game, such as ready status and whether this player is the games host.
  */
 @Getter
 @Setter

@@ -22,8 +22,7 @@ public class GameConstants extends AppConstants {
   // Exceptions
   private final BadRequestException lobbyNotFoundException =
       new BadRequestException(
-          "No Lobby Found",
-          "There is no lobby associated with the ID provided");
+          "No Lobby Found", "There is no lobby associated with the ID provided");
 
   private final BadRequestException noUserIdToLobbyIdMappingFound =
       new BadRequestException(

@@ -1,8 +1,8 @@
 package com.poker.poker.controllers;
 
+import com.poker.poker.documents.HandDocument;
 import com.poker.poker.documents.LobbyDocument;
 import com.poker.poker.models.ApiSuccessModel;
-import com.poker.poker.documents.HandDocument;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

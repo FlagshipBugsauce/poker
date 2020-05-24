@@ -90,11 +90,8 @@ public class LobbyService {
     lobbyDocument.getPlayers().forEach(player -> userIdToLobbyIdMap.remove(player.getId()));
 
     // Add players to game document, then shuffle the players.
-    gameDocument.setPlayers(lobbyDocument
-        .getPlayers()
-        .stream()
-        .map(GamePlayerModel::new)
-        .collect(Collectors.toList()));
+    gameDocument.setPlayers(
+        lobbyDocument.getPlayers().stream().map(GamePlayerModel::new).collect(Collectors.toList()));
     Collections.shuffle(gameDocument.getPlayers());
 
     // Update game list.
@@ -184,11 +181,12 @@ public class LobbyService {
 
     // Toggle the players ready status
     player.get().setReady(!player.get().isReady());
-    final String message = String.format(
-        "%s %s %s ready.",
-        player.get().getFirstName(),
-        player.get().getLastName(),
-        player.get().isReady() ? "is" : "is not");
+    final String message =
+        String.format(
+            "%s %s %s ready.",
+            player.get().getFirstName(),
+            player.get().getLastName(),
+            player.get().isReady() ? "is" : "is not");
 
     // Add the appropriate game action model.
     lobbyDocument
@@ -284,13 +282,14 @@ public class LobbyService {
     // Add the appropriate game action model.
     lobbyDocument
         .getGameActions()
-        .add(new GameActionModel(
-            UUID.randomUUID(),
-            lobbyPlayerModel,
-            GameAction.Join,
-            String.format(
-                "%s %s has joined the game.",
-                lobbyPlayerModel.getFirstName(), lobbyPlayerModel.getLastName())));
+        .add(
+            new GameActionModel(
+                UUID.randomUUID(),
+                lobbyPlayerModel,
+                GameAction.Join,
+                String.format(
+                    "%s %s has joined the game.",
+                    lobbyPlayerModel.getFirstName(), lobbyPlayerModel.getLastName())));
     userIdToLobbyIdMap.put(user.getId(), lobbyDocument.getId());
 
     // Update all players copy of gameDocument who are in the game via SSE
@@ -373,13 +372,14 @@ public class LobbyService {
 
     // Add GameActionModel with the appropriate action.
     game.getGameActions()
-        .add(new GameActionModel(
-            UUID.randomUUID(),
-            player.get(),
-            GameAction.Leave,
-            String.format(
-                "%s %s has left the game.",
-                player.get().getFirstName(), player.get().getLastName())));
+        .add(
+            new GameActionModel(
+                UUID.randomUUID(),
+                player.get(),
+                GameAction.Leave,
+                String.format(
+                    "%s %s has left the game.",
+                    player.get().getFirstName(), player.get().getLastName())));
 
     // Update the players in the game, and players who are on the join game page.
     sendLobbyDocumentToAllPlayers(game);
