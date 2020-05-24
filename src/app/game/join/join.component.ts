@@ -13,20 +13,46 @@ import {EmitterType} from 'src/app/shared/models/emitter-type.model';
   styleUrls: ['./join.component.scss']
 })
 export class JoinComponent implements OnInit {
-  // Pagination fields:
+  /**
+   * The current page of the game list being displayed.
+   */
   public page: number = 1;
+
+  /**
+   * The current number of games being displayed per page.
+   */
   public pageSize: number = 5;
-  // public totalGames: number = this.allGames.length;
+
+  /**
+   * The total games in the list of games.
+   */
   public totalGames: number = this.sseService.gameList.length;
 
-  /** Popup to confirm player wishes to join the game they clicked on. */
+  /**
+   * Popup to confirm player wishes to join the game they clicked on.
+   */
   @ViewChild('popup') public confirmationPopup: PopupComponent;
-  /** Content that will appear on the confirmation popup. */
+
+  /**
+   * Content that will appear on the confirmation popup.
+   */
   public popupContent: PopupContentModel[] = [
     {body: ''} as PopupContentModel,
     {body: 'Click cancel if you do not wish to proceed.'} as PopupContentModel
   ] as PopupContentModel[];
+
+  /**
+   * Procedure to be executed when the OK button is clicked on the popup.
+   */
   public popupOkCloseProcedure: () => void;
+
+  constructor(
+    private apiConfiguration: ApiConfiguration,
+    private router: Router,
+    private gameService: GameService,
+    private emittersService: EmittersService,
+    private sseService: SseService) {
+  }
 
   /** Returns a slice of the list of games for pagination. */
   public get games(): any[] {
@@ -34,13 +60,6 @@ export class JoinComponent implements OnInit {
       .map((game: any) => ({...game}))
       .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize);
   }
-
-  constructor(
-    private apiConfiguration: ApiConfiguration,
-    private router: Router,
-    private gameService: GameService,
-    private emittersService: EmittersService,
-    private sseService: SseService) { }
 
   ngOnInit(): void {
     this.sseService.openEvent(EmitterType.GameList);

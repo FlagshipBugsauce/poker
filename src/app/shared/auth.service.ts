@@ -22,22 +22,6 @@ export class AuthService {
   }
 
   /**
-   * Authorizes the user and stores the authorization token in the apiInterceptor, which will
-   * add the token to all future requests.
-   * @param email The email being used to authenticate.
-   * @param password The password being used to authenticate.
-   */
-  public async authorize(email: string, password: string): Promise<boolean> {
-    await this.usersService.authorize({body: {email, password} as AuthRequestModel})
-    .toPromise().then((authResponseModel: AuthResponseModel) => {
-      this.apiInterceptor.jwt = authResponseModel.jwt;
-      this.loggedIn = true;
-      this.userModelInternal = authResponseModel.userDetails;
-    }, (error: any) => console.log(error.error));
-    return this.loggedIn;
-  }
-
-  /**
    * Used to determine if a user has authenticated. Returns true when user has authenticated, false otherwise.
    */
   public get authenticated(): boolean {
@@ -49,6 +33,22 @@ export class AuthService {
    */
   public get userModel(): UserModel {
     return this.userModelInternal;
+  }
+
+  /**
+   * Authorizes the user and stores the authorization token in the apiInterceptor, which will
+   * add the token to all future requests.
+   * @param email The email being used to authenticate.
+   * @param password The password being used to authenticate.
+   */
+  public async authorize(email: string, password: string): Promise<boolean> {
+    await this.usersService.authorize({body: {email, password} as AuthRequestModel})
+      .toPromise().then((authResponseModel: AuthResponseModel) => {
+        this.apiInterceptor.jwt = authResponseModel.jwt;
+        this.loggedIn = true;
+        this.userModelInternal = authResponseModel.userDetails;
+      }, (error: any) => console.log(error.error));
+    return this.loggedIn;
   }
 
   /**

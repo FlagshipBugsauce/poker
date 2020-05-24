@@ -15,14 +15,45 @@ import {HandDocument} from '../api/models/hand-document';
 })
 export class SseService {
   /**
+   * Dictionary of events that currently open. Event types are mapped to the events themselves.
+   */
+  public openEvents = {};
+  /**
+   * Dictionary of references. Event types are mapped to an event reference.
+   */
+  public eventReferences = {};
+  /**
    * Dictionary that stores all game models.
    */
   private data = {};
-
   /**
    * Default data (typically empty object/list) to be placed in data dictionary to avoid null pointer exceptions.
    */
   private defaultData = {};
+  /**
+   * Dictionary of callbacks to be executed when data is received. Callbacks are mapped to specific emitter type. Each type has a list of
+   * callbacks that will be executed so that different components can be updated.
+   */
+  private callbacks = {};
+
+  constructor(
+    private zone: NgZone,
+    private emittersService: EmittersService,
+    private apiConfiguration: ApiConfiguration,
+    private apiInterceptor: ApiInterceptor) {
+    this.openEvents[EmitterType.GameList] = false;
+    this.openEvents[EmitterType.Lobby] = false;
+    this.openEvents[EmitterType.Game] = false;
+    this.openEvents[EmitterType.Hand] = false;
+    this.callbacks[EmitterType.GameList] = [] as Array<() => void>;
+    this.callbacks[EmitterType.Lobby] = [] as Array<() => void>;
+    this.callbacks[EmitterType.Game] = [] as Array<() => void>;
+    this.callbacks[EmitterType.Hand] = [] as Array<() => void>;
+    this.gameList = this.defaultData[EmitterType.GameList] = [] as GetGameModel[];
+    this.lobbyDocument = this.defaultData[EmitterType.Lobby] = {} as LobbyDocument;
+    this.gameDocument = this.defaultData[EmitterType.Game] = {} as GameDocument;
+    this.handDocument = this.defaultData[EmitterType.Hand] = {} as HandDocument;
+  }
 
   /**
    * Getter for the game list.
@@ -85,85 +116,15 @@ export class SseService {
   }
 
   /**
-   * Dictionary of callbacks to be executed when data is received. Callbacks are mapped to specific emitter type. Each type has a list of
-   * callbacks that will be executed so that different components can be updated.
-   */
-  private callbacks = {};
-
-  /**
-   * Dictionary of events that currently open. Event types are mapped to the events themselves.
-   */
-  public openEvents = {};
-
-  /**
-   * Dictionary of references. Event types are mapped to an event reference.
-   */
-  public eventReferences = {};
-
-  constructor(
-    private zone: NgZone,
-    private emittersService: EmittersService,
-    private apiConfiguration: ApiConfiguration,
-    private apiInterceptor: ApiInterceptor) {
-    this.openEvents[EmitterType.GameList] = false;
-    this.openEvents[EmitterType.Lobby] = false;
-    this.openEvents[EmitterType.Game] = false;
-    this.openEvents[EmitterType.Hand] = false;
-    this.callbacks[EmitterType.GameList] = [] as Array<() => void>;
-    this.callbacks[EmitterType.Lobby] = [] as Array<() => void>;
-    this.callbacks[EmitterType.Game] = [] as Array<() => void>;
-    this.callbacks[EmitterType.Hand] = [] as Array<() => void>;
-    this.gameList = this.defaultData[EmitterType.GameList] = [] as GetGameModel[];
-    this.lobbyDocument = this.defaultData[EmitterType.Lobby] = {} as LobbyDocument;
-    this.gameDocument = this.defaultData[EmitterType.Game] = {} as GameDocument;
-    this.handDocument = this.defaultData[EmitterType.Hand] = {} as HandDocument;
-  }
-
-  /**
-   * Creates an observable that streams data to the client.
-   * @param url URL where the emitter is retrieved.
-   * @param type The type of emitter being retrieved.
-   * @param converter Converter which transforms the event to usable data.
-   */
-  private getServerSentEvent<R>(url: string, type: EmitterType, converter: (data: string) => R = _.identity): Observable<R> {
-    return new Observable(observer => {
-      this.eventReferences[type] = new EventSource(url);
-      this.eventReferences[type].onmessage = event => this.zone.run(() => {
-        try {
-          return observer.next(converter(JSON.parse(event.data)));
-        } catch (err) {
-          console.log(`Something went wrong with the ${type} emitter.`);
-          this.closeEvent(type);
-        }
-      });
-      this.eventReferences[type].onerror = event => this.zone.run(() => observer.next(null));
-    });
-  }
-
-  /**
-   * Helper method which retrieves the URL for the specified type of emitter.
-   * @param type The specified type of emitter.
-   */
-  private getUrl(type: EmitterType): string {
-    return `${this.apiConfiguration.rootUrl}/emitters/request/${type}/${this.apiInterceptor.jwt}`;
-  }
-
-  /**
-   * Retrieves an observable that will stream data to the client.
-   * @param type The type of emitter being requested.
-   */
-  private getEmitter<R>(type: EmitterType): Observable<R> {
-    return this.getServerSentEvent(this.getUrl(type), type);
-  }
-
-  /**
    * Requests an SSE emitter of a specific type from the backend. Data can be retrieved using the getter associated with the type specified.
    * @param type The type of emitter being requested.
    * @param callback A procedure that will be run each time data is received.
    */
   public openEvent(type: EmitterType, callback: () => void = null): void {
     if (!this.openEvents[type]) {
-      if (callback != null) { this.callbacks[type].push(callback); }
+      if (callback != null) {
+        this.callbacks[type].push(callback);
+      }
       this.getEmitter(type).subscribe((data: any) => {
         if (data != null) {
           this.data[type] = data;
@@ -214,5 +175,42 @@ export class SseService {
         console.log(`Something went wrong trying to close the ${type} emitter.`);
       }
     }
+  }
+
+  /**
+   * Creates an observable that streams data to the client.
+   * @param url URL where the emitter is retrieved.
+   * @param type The type of emitter being retrieved.
+   * @param converter Converter which transforms the event to usable data.
+   */
+  private getServerSentEvent<R>(url: string, type: EmitterType, converter: (data: string) => R = _.identity): Observable<R> {
+    return new Observable(observer => {
+      this.eventReferences[type] = new EventSource(url);
+      this.eventReferences[type].onmessage = event => this.zone.run(() => {
+        try {
+          return observer.next(converter(JSON.parse(event.data)));
+        } catch (err) {
+          console.log(`Something went wrong with the ${type} emitter.`);
+          this.closeEvent(type);
+        }
+      });
+      this.eventReferences[type].onerror = event => this.zone.run(() => observer.next(null));
+    });
+  }
+
+  /**
+   * Helper method which retrieves the URL for the specified type of emitter.
+   * @param type The specified type of emitter.
+   */
+  private getUrl(type: EmitterType): string {
+    return `${this.apiConfiguration.rootUrl}/emitters/request/${type}/${this.apiInterceptor.jwt}`;
+  }
+
+  /**
+   * Retrieves an observable that will stream data to the client.
+   * @param type The type of emitter being requested.
+   */
+  private getEmitter<R>(type: EmitterType): Observable<R> {
+    return this.getServerSentEvent(this.getUrl(type), type);
   }
 }

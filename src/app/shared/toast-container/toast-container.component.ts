@@ -1,5 +1,5 @@
-import {Component, TemplateRef, Input, HostBinding} from '@angular/core';
-import { ToastService } from '../toast.service';
+import {Component, HostBinding, Input, TemplateRef} from '@angular/core';
+import {ToastService} from '../toast.service';
 
 @Component({
   selector: 'pkr-toast-container',
@@ -10,7 +10,8 @@ export class ToastContainerComponent {
   @HostBinding('class.ngb-toasts') true;
   @Input() header: string;
 
-  constructor(public toastService: ToastService) { }
+  constructor(public toastService: ToastService) {
+  }
 
   public isTemplate(toast: any) {
     return toast.textOrTpl instanceof TemplateRef;

@@ -53,4 +53,5 @@ export const API_INTERCEPTOR_PROVIDER: Provider = {
     RouterModule
   ]
 })
-export class SharedModule { }
+export class SharedModule {
+}

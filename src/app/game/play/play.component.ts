@@ -8,6 +8,7 @@ import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 import {AuthService} from 'src/app/shared/auth.service';
 import {GameDocument, GamePlayerModel, HandDocument} from '../../api/models';
 import {ToastService} from '../../shared/toast.service';
+import {GameState} from '../../shared/models/game-state.enum';
 
 @Component({
   selector: 'pkr-play',
@@ -24,6 +25,30 @@ export class PlayComponent implements OnInit {
    * Current hand being played in the game.
    */
   public currentHand: number = 0;
+  /**
+   * Time remaining for a player to act (when applicable).
+   */
+  public timeToAct: number = 0;
+  /**
+   * Flag that informs the UI when a player is able to perform a roll action.
+   */
+  public canRoll: boolean = false;
+  /**
+   * Numbers used for the table summarizing what has occurred in the game.
+   */
+  public numbers: number[];
+
+  constructor(
+    private apiConfiguration: ApiConfiguration,
+    private router: Router,
+    private gameService: GameService,
+    private emittersService: EmittersService,
+    private handService: HandService,
+    private sseService: SseService,
+    private apiInterceptor: ApiInterceptor,
+    private authService: AuthService,
+    private toastService: ToastService) {
+  }
 
   /**
    * Getter for the model representing the current hand.
@@ -39,37 +64,12 @@ export class PlayComponent implements OnInit {
     return this.sseService.gameDocument;
   }
 
-  /**
-   * Time remaining for a player to act (when applicable).
-   */
-  public timeToAct: number = 0;
-
-  /**
-   * Flag that informs the UI when a player is able to perform a roll action.
-   */
-  public canRoll: boolean = false;
-
-  /**
-   * Numbers used for the table summarizing what has occurred in the game.
-   */
-  public numbers: number[];
-
-  constructor(
-    private apiConfiguration: ApiConfiguration,
-    private router: Router,
-    private gameService: GameService,
-    private emittersService: EmittersService,
-    private handService: HandService,
-    private sseService: SseService,
-    private apiInterceptor: ApiInterceptor,
-    private authService: AuthService,
-    private toastService: ToastService) { }
-
   ngOnInit(): void {
     this.sseService.closeEvent(EmitterType.Lobby);
     this.sseService.addCallback(EmitterType.Game, () => {
       if (this.gameModel.state === 'Over') {
         this.gameModel.hands.push('');
+        this.canRoll = false;
       }
       this.updateScore();
       this.highlightBestScore();
@@ -77,11 +77,11 @@ export class PlayComponent implements OnInit {
 
     this.sseService.openEvent(EmitterType.Hand, () => {
       if (this.hand.playerToAct != null && this.hand.playerToAct.id != null) {
-        this.canRoll = this.hand.playerToAct.id === this.authService.userModel.id;
+        this.canRoll = this.hand.playerToAct.id === this.authService.userModel.id && this.gameModel.state === GameState.Play;
         // Add the message to
         const lastAction = this.hand.actions != null ? this.hand.actions[this.hand.actions.length - 1] : null;
         if (lastAction != null) {
-          this.toastService.show(lastAction.message, { classname: 'bg-light toast-md', delay: 5000 });
+          this.toastService.show(lastAction.message, {classname: 'bg-light toast-md', delay: 5000});
         }
         this.updateGameData();
         if (this.gameModel.state !== 'Over') {
@@ -94,6 +94,14 @@ export class PlayComponent implements OnInit {
   }
 
   /**
+   * Performs a roll action, provided it is the player's turn to act.
+   */
+  public roll(): void {
+    this.handService.roll().subscribe(() => {
+    });
+  }
+
+  /**
    * Begins a timer which will display how much time a player has to perform an action, before the action is performed for them.
    */
   private async startTurnTimer(): Promise<void> {
@@ -102,7 +110,9 @@ export class PlayComponent implements OnInit {
     while (currentTime >= 0) {
       this.timeToAct = currentTime;
       await new Promise(resolve => setTimeout(resolve, 1000));
-      if (this.hand.actions.length !== numHandActions) { break; }
+      if (this.hand.actions.length !== numHandActions) {
+        break;
+      }
       this.timeToAct = --currentTime;
     }
   }
@@ -187,13 +197,6 @@ export class PlayComponent implements OnInit {
         this.gameData[this.gameData.length - 1].rolls[i] = {winner: false, acting: false, value: -1} as RollModel;
       }
     }
-  }
-
-  /**
-   * Performs a roll action, provided it is the player's turn to act.
-   */
-  public roll(): void {
-    this.handService.roll().subscribe(() => { });
   }
 }
 

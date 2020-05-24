@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {GameDocument, GameSummaryModel} from 'src/app/api/models';
+import {GameDocument} from 'src/app/api/models';
 import {EmittersService, GameService} from 'src/app/api/services';
 import {SseService} from 'src/app/shared/sse.service';
 import {EmitterType} from 'src/app/shared/models/emitter-type.model';
@@ -11,14 +11,10 @@ import {PlayerStatModel} from '../play/play.component';
   styleUrls: ['./end.component.scss']
 })
 export class EndComponent implements OnInit {
-  @Input() gameData: PlayerStatModel[] = [] as PlayerStatModel[];
-
   /**
-   * Getter for the game model.
+   * Game data that is used to display a summary of what occurred in the game.
    */
-  public get gameModel(): GameDocument {
-    return this.sseService.gameDocument;
-  }
+  @Input() gameData: PlayerStatModel[] = [] as PlayerStatModel[];
 
   /**
    * Array of numbers used for the game summary.
@@ -28,7 +24,15 @@ export class EndComponent implements OnInit {
   constructor(
     private gameService: GameService,
     private emittersService: EmittersService,
-    private sseService: SseService) { }
+    private sseService: SseService) {
+  }
+
+  /**
+   * Getter for the game model.
+   */
+  public get gameModel(): GameDocument {
+    return this.sseService.gameDocument;
+  }
 
   ngOnInit(): void {
     this.sseService.closeEvent(EmitterType.Hand);

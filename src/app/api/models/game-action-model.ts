@@ -1,5 +1,6 @@
 /* tslint:disable */
-import { LobbyPlayerModel } from './lobby-player-model';
+import {LobbyPlayerModel} from './lobby-player-model';
+
 export interface GameActionModel {
 
   /**

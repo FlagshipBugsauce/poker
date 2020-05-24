@@ -17,16 +17,57 @@ import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 })
 export class LobbyComponent implements OnInit {
   /**
+   * Flag that lets the UI know whether the players status is set to ready or not.
+   */
+  public ready: boolean = false;
+  /**
+   * Flag that lets the UI know whether the leave game warning should be displayed.
+   */
+  public displayLeaveWarning: boolean = true;
+  /**
+   * Flag that lets the UI know whether the can start alert should be displayed.
+   */
+  public displayCanStartAlert: boolean = true;
+  /**
+   * Paths to the ready icon assets used to communicate whether the players in the game are ready or not.
+   */
+  public readyIcons = {
+    ready: '../../assets/icons/green_checkmark.svg',
+    notReady: '../../assets/icons/red_x.svg'
+  };
+  /**
+   * Path to the crown icon used to communicate who is the host of the game.
+   */
+  public crownIcon = '../../assets/icons/crown.svg';
+  /**
+   * Previous value of canStart. Used to determine if canStart has changed when a new lobby document is received.
+   */
+  private lastCanStart: boolean = false;
+  /**
+   * Stores the last action that was performed. Used to help determine whether a toast should be displayed or not. The backend will
+   * occasionally re-send the same lobby document to prevent the emitter from timing out. In such a case, we don't want to re-display
+   * the same toast.
+   */
+  private lastAction: GameActionModel;
+
+  constructor(
+    private apiConfiguration: ApiConfiguration,
+    private apiInterceptor: ApiInterceptor,
+    private activatedRoute: ActivatedRoute,
+    private gameService: GameService,
+    private emittersService: EmittersService,
+    private router: Router,
+    private sseService: SseService,
+    public authService: AuthService,
+    private toastService: ToastService) {
+  }
+
+  /**
    * Model representing the lobby.
    */
   public get lobbyModel(): LobbyDocument {
     return this.sseService.lobbyDocument;
   }
-
-  /**
-   * Previous value of canStart. Used to determine if canStart has changed when a new lobby document is received.
-   */
-  private lastCanStart: boolean = false;
 
   /**
    * Flag that lets the UI know whether the game can be started or not.
@@ -42,53 +83,6 @@ export class LobbyComponent implements OnInit {
       return canStart;
     }
     return false;
-  }
-
-  /**
-   * Flag that lets the UI know whether the players status is set to ready or not.
-   */
-  public ready: boolean = false;
-
-  /**
-   * Flag that lets the UI know whether the leave game warning should be displayed.
-   */
-  public displayLeaveWarning: boolean = true;
-
-  /**
-   * Flag that lets the UI know whether the can start alert should be displayed.
-   */
-  public displayCanStartAlert: boolean = true;
-
-  /**
-   * Stores the last action that was performed. Used to help determine whether a toast should be displayed or not. The backend will
-   * occasionally re-send the same lobby document to prevent the emitter from timing out. In such a case, we don't want to re-display
-   * the same toast.
-   */
-  private lastAction: GameActionModel;
-
-  /**
-   * Paths to the ready icon assets used to communicate whether the players in the game are ready or not.
-   */
-  public readyIcons = {
-    ready: '../../assets/icons/green_checkmark.svg',
-    notReady: '../../assets/icons/red_x.svg'
-  };
-
-  /**
-   * Path to the crown icon used to communicate who is the host of the game.
-   */
-  public crownIcon = '../../assets/icons/crown.svg';
-
-  constructor(
-    private apiConfiguration: ApiConfiguration,
-    private apiInterceptor: ApiInterceptor,
-    private activatedRoute: ActivatedRoute,
-    private gameService: GameService,
-    private emittersService: EmittersService,
-    private router: Router,
-    private sseService: SseService,
-    public authService: AuthService,
-    private toastService: ToastService) {
   }
 
   /**
@@ -122,21 +116,6 @@ export class LobbyComponent implements OnInit {
   }
 
   /**
-   * Displays a toast when certain events occur. Will only display a toast if the latest action is different from the action that
-   * preceded it.
-   */
-  private displayToast(): void {
-    if (this.lobbyModel.gameActions != null && this.lobbyModel.gameActions.length > 0) {
-      const currentAction: GameActionModel = this.lobbyModel.gameActions[this.lobbyModel.gameActions.length - 1];
-
-      if (this.lastAction == null || currentAction.id !== this.lastAction.id) {
-        this.toastService.show(currentAction.clientMessage, { classname: 'bg-light toast-md', delay: 5000 });
-      }
-      this.lastAction = currentAction;
-    }
-  }
-
-  /**
    * Called when a player is ready for the game to start.
    */
   public sendReadyRequest(): void {
@@ -156,6 +135,22 @@ export class LobbyComponent implements OnInit {
    */
   public startGame(): void {
     this.sseService.closeEvent(EmitterType.Lobby);
-    this.gameService.startGame().subscribe(() => { });
+    this.gameService.startGame().subscribe(() => {
+    });
+  }
+
+  /**
+   * Displays a toast when certain events occur. Will only display a toast if the latest action is different from the action that
+   * preceded it.
+   */
+  private displayToast(): void {
+    if (this.lobbyModel.gameActions != null && this.lobbyModel.gameActions.length > 0) {
+      const currentAction: GameActionModel = this.lobbyModel.gameActions[this.lobbyModel.gameActions.length - 1];
+
+      if (this.lastAction == null || currentAction.id !== this.lastAction.id) {
+        this.toastService.show(currentAction.clientMessage, {classname: 'bg-light toast-md', delay: 5000});
+      }
+      this.lastAction = currentAction;
+    }
   }
 }

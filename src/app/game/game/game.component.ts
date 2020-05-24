@@ -46,12 +46,6 @@ export class GameComponent implements OnInit, AfterViewInit {
    * A summary of what occurred in the game.
    */
   public gameData: PlayerStatModel[] = [] as PlayerStatModel[];
-
-  /** The model representing the state of the game at any given point in time. */
-  public get gameModel(): GameDocument {
-    return this.sseService.gameDocument;
-  }
-
   /**
    * Content for the popup that appears when leaving the page (except when refreshing or going to external site).
    */
@@ -66,6 +60,11 @@ export class GameComponent implements OnInit, AfterViewInit {
     private gameService: GameService,
     private emittersService: EmittersService,
     private sseService: SseService) {
+  }
+
+  /** The model representing the state of the game at any given point in time. */
+  public get gameModel(): GameDocument {
+    return this.sseService.gameDocument;
   }
 
   ngAfterViewInit(): void {
@@ -86,6 +85,21 @@ export class GameComponent implements OnInit, AfterViewInit {
   }
 
   /**
+   * Ensures that the user "leaves" the game if they leave the page (by refreshing, closing tab, or going to another
+   * website).
+   */
+  @HostListener('window:beforeunload', ['$event'])
+  public userLeftPage($event: any): void {
+    this.sseService.closeEvent(EmitterType.Game);
+    this.sseService.closeEvent(EmitterType.Lobby);
+    this.sseService.closeEvent(EmitterType.Hand);
+    if (this.gameModel.state === GameState.Lobby) {
+      this.gameService.leaveLobby().subscribe((result: ApiSuccessModel) => {
+      });
+    }
+  }
+
+  /**
    * Helper which adds a small delay after the game state transitions, to ensure any calculations that need to be done in the play
    * component have time to complete before the component is hidden. Not having this was causing issues.
    */
@@ -96,19 +110,5 @@ export class GameComponent implements OnInit, AfterViewInit {
     await new Promise(resolve => setTimeout(resolve, 1000));
     this.inPlay = false;
     this.gameOver = true;
-  }
-
-  /**
-   * Ensures that the user "leaves" the game if they leave the page (by refreshing, closing tab, or going to another
-   * website).
-   */
-  @HostListener('window:beforeunload', ['$event'])
-  public userLeftPage($event: any): void {
-    this.sseService.closeEvent(EmitterType.Game);
-    this.sseService.closeEvent(EmitterType.Lobby);
-    this.sseService.closeEvent(EmitterType.Hand);
-    if (this.gameModel.state === GameState.Lobby) {
-      this.gameService.leaveLobby().subscribe((result: ApiSuccessModel) => { });
-    }
   }
 }

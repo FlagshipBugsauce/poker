@@ -1,18 +1,18 @@
 /* tslint:disable */
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
-import { BaseService } from '../base-service';
-import { ApiConfiguration } from '../api-configuration';
-import { StrictHttpResponse } from '../strict-http-response';
-import { RequestBuilder } from '../request-builder';
-import { Observable } from 'rxjs';
-import { map, filter } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpResponse} from '@angular/common/http';
+import {BaseService} from '../base-service';
+import {ApiConfiguration} from '../api-configuration';
+import {StrictHttpResponse} from '../strict-http-response';
+import {RequestBuilder} from '../request-builder';
+import {Observable} from 'rxjs';
+import {filter, map} from 'rxjs/operators';
 
-import { ApiSuccessModel } from '../models/api-success-model';
-import { AuthRequestModel } from '../models/auth-request-model';
-import { AuthResponseModel } from '../models/auth-response-model';
-import { NewAccountModel } from '../models/new-account-model';
-import { UserModel } from '../models/user-model';
+import {ApiSuccessModel} from '../models/api-success-model';
+import {AuthRequestModel} from '../models/auth-request-model';
+import {AuthResponseModel} from '../models/auth-response-model';
+import {NewAccountModel} from '../models/new-account-model';
+import {UserModel} from '../models/user-model';
 
 
 /**
@@ -22,17 +22,25 @@ import { UserModel } from '../models/user-model';
   providedIn: 'root',
 })
 export class UsersService extends BaseService {
+  /**
+   * Path part for operation register
+   */
+  static readonly RegisterPath = '/user/register';
+  /**
+   * Path part for operation getUserInfo
+   */
+  static readonly GetUserInfoPath = '/user/getUserInfo/{userId}';
+  /**
+   * Path part for operation authorize
+   */
+  static readonly AuthorizePath = '/user/auth';
+
   constructor(
     config: ApiConfiguration,
     http: HttpClient
   ) {
     super(config, http);
   }
-
-  /**
-   * Path part for operation register
-   */
-  static readonly RegisterPath = '/user/register';
 
   /**
    * Register.
@@ -45,7 +53,7 @@ export class UsersService extends BaseService {
    * This method sends `application/json` and handles request body of type `application/json`.
    */
   register$Response(params: {
-      body: NewAccountModel
+    body: NewAccountModel
   }): Observable<StrictHttpResponse<ApiSuccessModel>> {
 
     const rb = new RequestBuilder(this.rootUrl, UsersService.RegisterPath, 'post');
@@ -76,18 +84,13 @@ export class UsersService extends BaseService {
    * This method sends `application/json` and handles request body of type `application/json`.
    */
   register(params: {
-      body: NewAccountModel
+    body: NewAccountModel
   }): Observable<ApiSuccessModel> {
 
     return this.register$Response(params).pipe(
       map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
     );
   }
-
-  /**
-   * Path part for operation getUserInfo
-   */
-  static readonly GetUserInfoPath = '/user/getUserInfo/{userId}';
 
   /**
    * Get User Info.
@@ -142,11 +145,6 @@ export class UsersService extends BaseService {
   }
 
   /**
-   * Path part for operation authorize
-   */
-  static readonly AuthorizePath = '/user/auth';
-
-  /**
    * Authenticate.
    *
    * The client must call this endpoint in order to obtain a JWT, which must be passed in the header of most requests.
@@ -157,7 +155,7 @@ export class UsersService extends BaseService {
    * This method sends `application/json` and handles request body of type `application/json`.
    */
   authorize$Response(params: {
-      body: AuthRequestModel
+    body: AuthRequestModel
   }): Observable<StrictHttpResponse<AuthResponseModel>> {
 
     const rb = new RequestBuilder(this.rootUrl, UsersService.AuthorizePath, 'post');
@@ -188,7 +186,7 @@ export class UsersService extends BaseService {
    * This method sends `application/json` and handles request body of type `application/json`.
    */
   authorize(params: {
-      body: AuthRequestModel
+    body: AuthRequestModel
   }): Observable<AuthResponseModel> {
 
     return this.authorize$Response(params).pipe(

@@ -1,15 +1,15 @@
 /* tslint:disable */
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
-import { BaseService } from '../base-service';
-import { ApiConfiguration } from '../api-configuration';
-import { StrictHttpResponse } from '../strict-http-response';
-import { RequestBuilder } from '../request-builder';
-import { Observable } from 'rxjs';
-import { map, filter } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpResponse} from '@angular/common/http';
+import {BaseService} from '../base-service';
+import {ApiConfiguration} from '../api-configuration';
+import {StrictHttpResponse} from '../strict-http-response';
+import {RequestBuilder} from '../request-builder';
+import {Observable} from 'rxjs';
+import {filter, map} from 'rxjs/operators';
 
-import { ApiSuccessModel } from '../models/api-success-model';
-import { SseEmitter } from '../models/sse-emitter';
+import {ApiSuccessModel} from '../models/api-success-model';
+import {SseEmitter} from '../models/sse-emitter';
 
 
 /**
@@ -19,17 +19,25 @@ import { SseEmitter } from '../models/sse-emitter';
   providedIn: 'root',
 })
 export class EmittersService extends BaseService {
+  /**
+   * Path part for operation destroyEmitter
+   */
+  static readonly DestroyEmitterPath = '/emitters/destroy/{type}';
+  /**
+   * Path part for operation requestEmitter
+   */
+  static readonly RequestEmitterPath = '/emitters/request/{type}/{jwt}';
+  /**
+   * Path part for operation requestUpdate
+   */
+  static readonly RequestUpdatePath = '/emitters/update/{type}';
+
   constructor(
     config: ApiConfiguration,
     http: HttpClient
   ) {
     super(config, http);
   }
-
-  /**
-   * Path part for operation destroyEmitter
-   */
-  static readonly DestroyEmitterPath = '/emitters/destroy/{type}';
 
   /**
    * Destroy Emitter.
@@ -82,11 +90,6 @@ export class EmittersService extends BaseService {
       map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
     );
   }
-
-  /**
-   * Path part for operation requestEmitter
-   */
-  static readonly RequestEmitterPath = '/emitters/request/{type}/{jwt}';
 
   /**
    * Request SSE Emitter.
@@ -142,11 +145,6 @@ export class EmittersService extends BaseService {
       map((r: StrictHttpResponse<SseEmitter>) => r.body as SseEmitter)
     );
   }
-
-  /**
-   * Path part for operation requestUpdate
-   */
-  static readonly RequestUpdatePath = '/emitters/update/{type}';
 
   /**
    * Request Update.

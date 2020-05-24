@@ -30,7 +30,8 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
   constructor(
     private router: Router,
     private sseService: SseService,
-    private gameService: GameService) { }
+    private gameService: GameService) {
+  }
 
   canDeactivate(
     component: GameComponent,
@@ -55,7 +56,8 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
         this.sseService.closeEvent(EmitterType.Hand);
 
         if (this.sseService.gameDocument.state != null && this.sseService.gameDocument.state === GameState.Lobby) {
-          this.gameService.leaveLobby().subscribe(() => { });
+          this.gameService.leaveLobby().subscribe(() => {
+          });
         }
 
         this.router.navigate([this.link]).then();

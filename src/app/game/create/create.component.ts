@@ -18,7 +18,8 @@ export class CreateComponent implements OnInit {
     private router: Router,
     private formBuilder: FormBuilder,
     public toastService: ToastService,
-    private gameService: GameService) { }
+    private gameService: GameService) {
+  }
 
   public ngOnInit(): void {
     this.createGameForm = this.formBuilder.group({

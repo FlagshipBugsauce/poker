@@ -1,5 +1,6 @@
 /* tslint:disable */
-import { GamePlayerModel } from './game-player-model';
+import {GamePlayerModel} from './game-player-model';
+
 export interface RollActionModel {
 
   /**
