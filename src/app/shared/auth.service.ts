@@ -8,8 +8,14 @@ import {Router} from '@angular/router';
   providedIn: 'root'
 })
 export class AuthService {
-
+  /**
+   * Flag that is used to indicate whether a player is logged in.
+   */
   private loggedIn: boolean = false;
+
+  /**
+   * Model of the currently logged in player.
+   */
   private userModelInternal: UserModel = {} as UserModel;
 
   constructor(private apiInterceptor: ApiInterceptor, private usersService: UsersService, private router: Router) {
@@ -38,6 +44,9 @@ export class AuthService {
     return this.loggedIn;
   }
 
+  /**
+   * Getter for the model of the currently logged in player.
+   */
   public get userModel(): UserModel {
     return this.userModelInternal;
   }

@@ -5,10 +5,8 @@
             <div class="row">
                 <div class="col-sm-12">
                     <p class="m-0">
-                        Later on, we'll have a nicer UI with a poker table and as people join, they can select their seat,
-                        similar to how things work in most poker apps. For now, we're going to have a list of players, some
-                        basic information about these players, such as their names and ready status, and we'll have some
-                        buttons so players can signal when they are ready. 
+                        Below you can see a summary of the game parameters and who is currently
+                        in the game.
                     </p>
                 </div>
             </div>
@@ -81,20 +79,19 @@
             </div>
             <div class="row">
                 <div class="col-sm-12 text-right">
-                    <button 
-                        type="reset" 
+                    <button
+                        type="reset"
                         ngbTooltip="Leave the game"
                         (click)="leaveGame()"
                         class="btn btn-danger button mt-3">Leave</button>
-                    <button 
-                        type="submit" 
-                        class="btn btn-success button ml-3 mt-3" 
+                    <button
+                        type="submit"
+                        class="btn btn-success button ml-3 mt-3"
                         ngbTooltip="Ready to start"
-                        (click)="sendReadyRequest()"
-                        [disabled]="ready">Ready</button>
-                    <button 
-                        type="submit" 
-                        class="btn btn-warning button ml-3 text-light mt-3" 
+                        (click)="sendReadyRequest()">{{ready ? "Un-Ready" : "Ready"}}</button>
+                    <button
+                        type="submit"
+                        class="btn btn-warning button ml-3 text-light mt-3"
                         ngbTooltip="Start the game!"
                         *ngIf="authService.userModel.id == lobbyModel.host"
                         (click)="startGame()"
@@ -103,8 +100,8 @@
             </div>
         </div>
     </div>
-    <div 
-        class="container-fluid mt-3" 
+    <div
+        class="container-fluid mt-3"
         *ngIf="displayCanStartAlert && canStart && authService.userModel.id == hostModel.id">
         <ngb-alert [type]="'success'" (close)="displayCanStartAlert = false">
             Note: All players are ready, you can start the game.

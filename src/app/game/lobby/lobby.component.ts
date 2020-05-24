@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {ApiSuccessModel, GameActionModel, PlayerModel} from 'src/app/api/models';
+import {GameActionModel, LobbyPlayerModel} from 'src/app/api/models';
 import {EmittersService, GameService} from 'src/app/api/services';
 import {SseService} from 'src/app/shared/sse.service';
 import {AuthService} from 'src/app/shared/auth.service';
@@ -16,18 +16,67 @@ import {EmitterType} from 'src/app/shared/models/emitter-type.model';
   styleUrls: ['./lobby.component.scss']
 })
 export class LobbyComponent implements OnInit {
-  public lobbyModel: LobbyDocument = {} as LobbyDocument;
+  /**
+   * Model representing the lobby.
+   */
+  public get lobbyModel(): LobbyDocument {
+    return this.sseService.lobbyDocument;
+  }
 
-  public canStart: boolean;
+  /**
+   * Previous value of canStart. Used to determine if canStart has changed when a new lobby document is received.
+   */
+  private lastCanStart: boolean = false;
+
+  /**
+   * Flag that lets the UI know whether the game can be started or not.
+   */
+  public get canStart(): boolean {
+    if (this.lobbyModel.players !== undefined) {
+      const canStart: boolean = this.lobbyModel.players
+        .find((player: LobbyPlayerModel) => !player.ready) === undefined && this.lobbyModel.players.length > 1;
+      if (!this.lastCanStart && canStart) {
+        this.displayCanStartAlert = true;
+      }
+      this.lastCanStart = canStart;
+      return canStart;
+    }
+    return false;
+  }
+
+  /**
+   * Flag that lets the UI know whether the players status is set to ready or not.
+   */
   public ready: boolean = false;
+
+  /**
+   * Flag that lets the UI know whether the leave game warning should be displayed.
+   */
   public displayLeaveWarning: boolean = true;
+
+  /**
+   * Flag that lets the UI know whether the can start alert should be displayed.
+   */
   public displayCanStartAlert: boolean = true;
 
+  /**
+   * Stores the last action that was performed. Used to help determine whether a toast should be displayed or not. The backend will
+   * occasionally re-send the same lobby document to prevent the emitter from timing out. In such a case, we don't want to re-display
+   * the same toast.
+   */
   private lastAction: GameActionModel;
+
+  /**
+   * Paths to the ready icon assets used to communicate whether the players in the game are ready or not.
+   */
   public readyIcons = {
     ready: '../../assets/icons/green_checkmark.svg',
     notReady: '../../assets/icons/red_x.svg'
   };
+
+  /**
+   * Path to the crown icon used to communicate who is the host of the game.
+   */
   public crownIcon = '../../assets/icons/crown.svg';
 
   constructor(
@@ -42,48 +91,42 @@ export class LobbyComponent implements OnInit {
     private toastService: ToastService) {
   }
 
-  public get hostModel(): PlayerModel {
+  /**
+   * Getter for the model representing the host of the game.
+   */
+  public get hostModel(): LobbyPlayerModel {
     if (this.lobbyModel == null || this.lobbyModel.players == null) {
-      return {host: false} as PlayerModel;
+      return {host: false} as LobbyPlayerModel;
     } else {
-      const hostModel: PlayerModel = this.lobbyModel.players.find(player => player.id === this.lobbyModel.host);
+      const hostModel: LobbyPlayerModel = this.lobbyModel.players.find(player => player.id === this.lobbyModel.host);
       return this.lobbyModel.players.find(player => player.id === this.lobbyModel.host);
     }
   }
 
+  /**
+   * Getter for the name of the host. Format is '{First Name} {Last Name}'.
+   */
   public get host(): string {
     if (this.lobbyModel == null || this.lobbyModel.players == null) {
       return '';
     } else {
-      const hostModel: PlayerModel = this.lobbyModel.players.find(player => player.id === this.lobbyModel.host);
+      const hostModel: LobbyPlayerModel = this.lobbyModel.players.find(player => player.id === this.lobbyModel.host);
       return `${hostModel.firstName} ${hostModel.lastName}`;
     }
   }
 
   ngOnInit(): void {
-    this.sseService
-    .getServerSentEvent(
-      `${this.apiConfiguration.rootUrl}/emitters/request/${EmitterType.Lobby}/${this.apiInterceptor.jwt}`, EmitterType.Lobby)
-    .subscribe((event: any) => {
-      try {
-        this.lobbyModel = JSON.parse(event) as LobbyDocument;
-      } catch (err) {
-        console.log('Something went wrong with the emitter.');
-        this.sseService.closeEvent(EmitterType.Lobby);
-      }
-
-      this.checkIfGameCanStart();
+    this.sseService.openEvent(EmitterType.Lobby, () => {
       this.displayToast();
     });
-
-    this.refreshLobbyModel();
   }
 
   /**
-   * Displays a toast when certain events occur.
+   * Displays a toast when certain events occur. Will only display a toast if the latest action is different from the action that
+   * preceded it.
    */
   private displayToast(): void {
-    if (this.lobbyModel != null && this.lobbyModel.gameActions != null && this.lobbyModel.gameActions.length > 0) {
+    if (this.lobbyModel.gameActions != null && this.lobbyModel.gameActions.length > 0) {
       const currentAction: GameActionModel = this.lobbyModel.gameActions[this.lobbyModel.gameActions.length - 1];
 
       if (this.lastAction == null || currentAction.id !== this.lastAction.id) {
@@ -94,33 +137,10 @@ export class LobbyComponent implements OnInit {
   }
 
   /**
-   * Helper to determine when to show the alert notifying the host that they may start the game.
-   */
-  private checkIfGameCanStart(): void {
-    const oldCanStart = this.canStart;
-    this.canStart = this.lobbyModel.players
-      .find((player: PlayerModel) => !player.ready) === undefined && this.lobbyModel.players.length > 1;
-
-    if (!oldCanStart && this.canStart) {  // If we went from not being able to start -> being able to start, show the alert
-      this.displayCanStartAlert = true;
-    }
-  }
-
-  /**
-   * Refreshes the lobby model by requesting an updated copy be sent via the SSE emitter.
-   */
-  private async refreshLobbyModel(): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    this.emittersService.requestUpdate({ type: EmitterType.Lobby }).subscribe(() => { });
-  }
-
-  /**
    * Called when a player is ready for the game to start.
    */
   public sendReadyRequest(): void {
-    this.gameService.ready().subscribe((result: ApiSuccessModel) => {
-      this.ready = true;
-    });
+    this.gameService.ready().subscribe(() => this.ready = !this.ready);
   }
 
   /**
@@ -131,6 +151,9 @@ export class LobbyComponent implements OnInit {
     this.router.navigate(['/join']).then();
   }
 
+  /**
+   * Starts the game.
+   */
   public startGame(): void {
     this.sseService.closeEvent(EmitterType.Lobby);
     this.gameService.startGame().subscribe(() => { });

@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {CanDeactivate} from '@angular/router';
 import {JoinComponent} from './join.component';
 import {SseService} from 'src/app/shared/sse.service';
-import {EmittersService, GameService} from 'src/app/api/services';
 import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 
 @Injectable({
@@ -11,9 +10,7 @@ import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 export class LeaveJoinPageGuardService implements CanDeactivate<JoinComponent> {
 
   constructor(
-    private sseService: SseService,
-    private gameService: GameService,
-    private emittersService: EmittersService) {
+    private sseService: SseService) {
   }
 
   canDeactivate(

@@ -4,11 +4,21 @@
 @import '~bootstrap/scss/bootstrap';
 
 $button-width: 130px;
+$roll-cell-width: 80px;
+$button-size-md: 100px;
 $toast-xs: 100px;
 $toast-sm: 200px;
 $toast-md: 300px;
 $toast-lg: 400px;
 $toast-xl: 500px;
+
+.btn-size-md {
+  width: $button-size-md;
+}
+
+.roll-cell {
+  width: $roll-cell-width;
+}
 
 .toast-xs {
     width: $toast-xs;

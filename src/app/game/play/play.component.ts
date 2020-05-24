@@ -5,8 +5,9 @@ import {EmittersService, GameService, HandService} from 'src/app/api/services';
 import {SseService} from 'src/app/shared/sse.service';
 import {ApiInterceptor} from 'src/app/api-interceptor.service';
 import {EmitterType} from 'src/app/shared/models/emitter-type.model';
-import {HandModel} from 'src/app/api/models/hand-model';
 import {AuthService} from 'src/app/shared/auth.service';
+import {GameDocument, GamePlayerModel, HandDocument} from '../../api/models';
+import {ToastService} from '../../shared/toast.service';
 
 @Component({
   selector: 'pkr-play',
@@ -14,9 +15,44 @@ import {AuthService} from 'src/app/shared/auth.service';
   styleUrls: ['./play.component.scss']
 })
 export class PlayComponent implements OnInit {
-  public hand: HandModel;
+  /**
+   * Data representing a summary of the game.
+   */
+  public gameData: PlayerStatModel[] = [];
+
+  /**
+   * Current hand being played in the game.
+   */
+  public currentHand: number = 0;
+
+  /**
+   * Getter for the model representing the current hand.
+   */
+  public get hand(): HandDocument {
+    return this.sseService.handDocument;
+  }
+
+  /**
+   * Getter for the model representing the current game.
+   */
+  public get gameModel(): GameDocument {
+    return this.sseService.gameDocument;
+  }
+
+  /**
+   * Time remaining for a player to act (when applicable).
+   */
+  public timeToAct: number = 0;
+
+  /**
+   * Flag that informs the UI when a player is able to perform a roll action.
+   */
   public canRoll: boolean = false;
-  public actionText: string[] = [];
+
+  /**
+   * Numbers used for the table summarizing what has occurred in the game.
+   */
+  public numbers: number[];
 
   constructor(
     private apiConfiguration: ApiConfiguration,
@@ -26,38 +62,155 @@ export class PlayComponent implements OnInit {
     private handService: HandService,
     private sseService: SseService,
     private apiInterceptor: ApiInterceptor,
-    private authService: AuthService) { }
+    private authService: AuthService,
+    private toastService: ToastService) { }
 
   ngOnInit(): void {
-    this.sseService
-      .getServerSentEvent(
-        `${this.apiConfiguration.rootUrl}/emitters/request/${EmitterType.Hand}/${this.apiInterceptor.jwt}`, EmitterType.Hand)
-      .subscribe((event: any) => {
-        try {
-          this.hand = JSON.parse(event);
-          this.canRoll = this.hand.playerToAct === this.authService.userModel.id;
+    this.sseService.closeEvent(EmitterType.Lobby);
+    this.sseService.addCallback(EmitterType.Game, () => {
+      if (this.gameModel.state === 'Over') {
+        this.gameModel.hands.push('');
+      }
+      this.updateScore();
+      this.highlightBestScore();
+    });
 
-          // Add the message to
-          const lastAction = this.hand.actions != null ? this.hand.actions[this.hand.actions.length - 1] : null;
-          if (lastAction != null) {
-            this.actionText.push(lastAction.message);
-          }
-
-        } catch (err) {
-          console.log('Something went wrong with the hand emitter.');
-          this.sseService.closeEvent(EmitterType.Hand);
+    this.sseService.openEvent(EmitterType.Hand, () => {
+      if (this.hand.playerToAct != null && this.hand.playerToAct.id != null) {
+        this.canRoll = this.hand.playerToAct.id === this.authService.userModel.id;
+        // Add the message to
+        const lastAction = this.hand.actions != null ? this.hand.actions[this.hand.actions.length - 1] : null;
+        if (lastAction != null) {
+          this.toastService.show(lastAction.message, { classname: 'bg-light toast-md', delay: 5000 });
         }
-      });
-
-    this.refreshHand().then();
+        this.updateGameData();
+        if (this.gameModel.state !== 'Over') {
+          this.highlightWaitingToAct();
+          this.startTurnTimer().then();
+        }
+      }
+    });
+    this.initializeGameData();
   }
 
-  private async refreshHand(): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 1200));
-    this.emittersService.requestUpdate({ type: EmitterType.Hand }).subscribe(() => { });
+  /**
+   * Begins a timer which will display how much time a player has to perform an action, before the action is performed for them.
+   */
+  private async startTurnTimer(): Promise<void> {
+    const numHandActions = this.hand.actions.length;
+    let currentTime = this.gameModel.timeToAct;
+    while (currentTime >= 0) {
+      this.timeToAct = currentTime;
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (this.hand.actions.length !== numHandActions) { break; }
+      this.timeToAct = --currentTime;
+    }
   }
 
+  /**
+   * Updates game data so the summary displayed is accurate.
+   */
+  private updateGameData(): void {
+    this.currentHand = this.gameModel.hands.length - 1;
+
+    if (this.hand.actions.length > 0) {
+      const lastActingPlayer = this.hand.actions[this.hand.actions.length - 1].player;
+      const lastActingIndex = this.gameModel.players.findIndex(p => p.id === lastActingPlayer.id);
+      this.gameData[lastActingIndex].rolls[this.currentHand] = {
+        value: this.hand.actions[this.hand.actions.length - 1].value,
+        winner: false,
+        acting: false
+      } as RollModel;
+    }
+  }
+
+  /**
+   * Highlights the cell in the game summary that will be filled next. This helps to indicate who needs to act.
+   */
+  private highlightWaitingToAct(): void {
+    let flag = false;
+    for (let i = 0; i < this.gameData[0].rolls.length; i++) {
+      for (const row of this.gameData) {
+        row.rolls[i].acting = false;
+      }
+    }
+    for (let i = 0; i < this.gameData[0].rolls.length; i++) {
+      for (const row of this.gameData) {
+        if (!flag && row.rolls[i].value === -1) {
+          row.rolls[i].acting = true;
+          flag = true;
+        }
+      }
+    }
+  }
+
+  /**
+   * When a hand is over, the best roll is highlighted in green so it is easy to see who won the hand.
+   */
+  private highlightBestScore(): void {
+    // After the last roll of the hand, we highlight the best score by setting the winner property to true
+    if (this.gameModel.hands != null) {
+      const lastRound = this.gameModel.hands.length - 2;
+      if (lastRound >= 0) {
+        let bestScore = -1;
+        for (let i = 0; i < this.gameModel.players.length; i++) {
+          bestScore = Math.max(bestScore, this.gameData[i].rolls[lastRound].value);
+        }
+        for (let i = 0; i < this.gameModel.players.length; i++) {
+          this.gameData[i].rolls[lastRound].winner = this.gameData[i].rolls[lastRound].value === bestScore;
+        }
+      }
+    }
+  }
+
+  /**
+   * When a hand ends, updates the score column of the game summary.
+   */
+  private updateScore(): void {
+    for (const row of this.gameData) {
+      row.player = this.gameModel.players.find(p => p.id === row.player.id);
+    }
+  }
+
+  /**
+   * Filling the game data array with empty strings.
+   */
+  private initializeGameData(): void {
+    this.numbers = Array(this.gameModel.totalHands).fill('').map((v, i) => i + 1);
+    for (const player of this.gameModel.players) {
+      this.gameData.push({
+        player,
+        rolls: Array(this.gameModel.totalHands),
+        acting: false
+      } as PlayerStatModel);
+      for (let i = 0; i < this.gameModel.totalHands; i++) {
+        this.gameData[this.gameData.length - 1].rolls[i] = {winner: false, acting: false, value: -1} as RollModel;
+      }
+    }
+  }
+
+  /**
+   * Performs a roll action, provided it is the player's turn to act.
+   */
   public roll(): void {
     this.handService.roll().subscribe(() => { });
   }
+}
+
+/**
+ * This will most likely only be a temporary model, so I will leave it in this file for now.
+ */
+export interface PlayerStatModel {
+  player: GamePlayerModel;
+  rolls: RollModel[];
+  acting: boolean;
+}
+
+/**
+ * Another model that is most likely temporary, so I will let this one live here for now as well.
+ */
+export interface RollModel {
+  value: number;
+  winner: boolean;
+  acting: boolean;
 }

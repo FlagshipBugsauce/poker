@@ -1,15 +1,14 @@
 import {AfterViewInit, Component, HostListener, OnInit, ViewChild} from '@angular/core';
 import {EmittersService, GameService} from 'src/app/api/services';
 import {SseService} from 'src/app/shared/sse.service';
-import {ApiInterceptor} from 'src/app/api-interceptor.service';
-import {ApiSuccessModel, GameActionModel, GameDocument} from 'src/app/api/models';
+import {ApiSuccessModel, GameDocument} from 'src/app/api/models';
 import {LobbyComponent} from '../lobby/lobby.component';
 import {ApiConfiguration} from 'src/app/api/api-configuration';
 import {LeaveGameGuardService} from './leave-game-guard.service';
 import {PopupComponent, PopupContentModel} from 'src/app/shared/popup/popup.component';
-import {ToastService} from 'src/app/shared/toast.service';
 import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 import {GameState} from 'src/app/shared/models/game-state.enum';
+import {PlayComponent, PlayerStatModel} from '../play/play.component';
 
 @Component({
   selector: 'pkr-game',
@@ -17,37 +16,56 @@ import {GameState} from 'src/app/shared/models/game-state.enum';
   styleUrls: ['./game.component.scss']
 })
 export class GameComponent implements OnInit, AfterViewInit {
-  /** Reference to the lobby component. */
+  /**
+   * Reference to the lobby component.
+   */
   @ViewChild(LobbyComponent) lobbyComponent: LobbyComponent;
 
-  /** The model representing the state of the game at any given point in time. */
-  public gameModel: GameDocument;
-
-  /** Flag that is used to determine whether or not the host can start the game. */
-  public canStart: boolean = false;
-
-  public popupContent: PopupContentModel[] = [
-    {body: 'You will be removed from the game if you leave this page.'} as PopupContentModel,
-    {body: 'Click Ok to continue.'} as PopupContentModel
-  ] as PopupContentModel[];
+  /**
+   * Reference to the play component.
+   */
+  @ViewChild(PlayComponent) playComponent: PlayComponent;
 
   /**
    * Popup that will appear if a player clicks on a link to warn them that they will be removed from the game
    * if they navigate to another page.
    */
   @ViewChild('popup') public confirmationPopup: PopupComponent;
-  /** Stores the last action that took place in the game. */
-  private lastAction: GameActionModel = {id: null} as GameActionModel;
-  public confirmLeavePageProcedure = () => true;
+
+  /**
+   * Flag that informs the UI when the game has ended.
+   */
+  public gameOver: boolean = false;
+
+  /**
+   * Flag that informs the UI when the game is in play.
+   */
+  public inPlay: boolean = false;
+
+  /**
+   * A summary of what occurred in the game.
+   */
+  public gameData: PlayerStatModel[] = [] as PlayerStatModel[];
+
+  /** The model representing the state of the game at any given point in time. */
+  public get gameModel(): GameDocument {
+    return this.sseService.gameDocument;
+  }
+
+  /**
+   * Content for the popup that appears when leaving the page (except when refreshing or going to external site).
+   */
+  public popupContent: PopupContentModel[] = [
+    {body: 'You will be removed from the game if you leave this page.'} as PopupContentModel,
+    {body: 'Click Ok to continue.'} as PopupContentModel
+  ] as PopupContentModel[];
 
   constructor(
     private leaveGameGuardService: LeaveGameGuardService,
     private apiConfiguration: ApiConfiguration,
     private gameService: GameService,
     private emittersService: EmittersService,
-    private sseService: SseService,
-    private apiInterceptor: ApiInterceptor,
-    private toastService: ToastService) {
+    private sseService: SseService) {
   }
 
   ngAfterViewInit(): void {
@@ -55,25 +73,29 @@ export class GameComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.gameOver = false;
     this.leaveGameGuardService.canLeave = false;  // Need to set this to false when page loads.
+    this.sseService.openEvent(EmitterType.Game, () => {
+      if (this.gameModel.state === 'Over') {
+        this.updateGameOver().then();
+      }
+      if (this.gameModel.state === 'Play') {
+        this.inPlay = true;
+      }
+    });
+  }
 
-    this.sseService
-    .getServerSentEvent(
-      `${this.apiConfiguration.rootUrl}/emitters/request/${EmitterType.Game}/${this.apiInterceptor.jwt}`, EmitterType.Game)
-      .subscribe((event: any) => {
-        try {
-          this.gameModel = JSON.parse(event) as GameDocument;
-
-          // Update state in leave game guard:
-          this.leaveGameGuardService.gameState = this.gameModel.state as GameState;
-          console.log(this.leaveGameGuardService.gameState);
-        } catch (err) {
-          console.log('Something went wrong with the game emitter.');
-          this.sseService.closeEvent(EmitterType.Game);
-        }
-      });
-
-    this.refreshGameModel().then();
+  /**
+   * Helper which adds a small delay after the game state transitions, to ensure any calculations that need to be done in the play
+   * component have time to complete before the component is hidden. Not having this was causing issues.
+   */
+  private async updateGameOver(): Promise<void> {
+    for (const psm of this.playComponent.gameData) {
+      this.gameData.push(psm);
+    }
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    this.inPlay = false;
+    this.gameOver = true;
   }
 
   /**
@@ -88,14 +110,5 @@ export class GameComponent implements OnInit, AfterViewInit {
     if (this.gameModel.state === GameState.Lobby) {
       this.gameService.leaveLobby().subscribe((result: ApiSuccessModel) => { });
     }
-  }
-
-  /**
-   * Retrieves an updated game document. Typically called right after joining. May add a button to allow client to refresh,
-   * which would use this as well.
-   */
-  private async refreshGameModel(): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    this.emittersService.requestUpdate({ type: EmitterType.Game }).subscribe(() => { });
   }
 }

@@ -1,6 +1,6 @@
 /* tslint:disable */
 import { GameActionModel } from './game-action-model';
-import { PlayerModel } from './player-model';
+import { LobbyPlayerModel } from './lobby-player-model';
 export interface LobbyDocument {
 
   /**
@@ -28,5 +28,5 @@ export interface LobbyDocument {
    * Name of the game.
    */
   name?: string;
-  players?: Array<PlayerModel>;
+  players?: Array<LobbyPlayerModel>;
 }

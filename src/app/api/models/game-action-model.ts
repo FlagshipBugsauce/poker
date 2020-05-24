@@ -1,5 +1,5 @@
 /* tslint:disable */
-import { PlayerModel } from './player-model';
+import { LobbyPlayerModel } from './lobby-player-model';
 export interface GameActionModel {
 
   /**
@@ -16,5 +16,5 @@ export interface GameActionModel {
    * ID of the action performed which identifies it.
    */
   id?: string;
-  player?: PlayerModel;
+  player?: LobbyPlayerModel;
 }

@@ -1,9 +1,10 @@
 /* tslint:disable */
+export interface GamePlayerModel {
 
-/**
- * The ID of the host.
- */
-export interface PlayerModel {
+  /**
+   * Specifies whether a player is active.
+   */
+  active?: boolean;
 
   /**
    * User's email address.
@@ -21,11 +22,6 @@ export interface PlayerModel {
   group?: 'Administrator' | 'Client' | 'Guest';
 
   /**
-   * Specifies whether the player created the game.
-   */
-  host?: boolean;
-
-  /**
    * User's ID.
    */
   id?: string;
@@ -36,7 +32,7 @@ export interface PlayerModel {
   lastName?: string;
 
   /**
-   * Specifies whether a player is ready to start the game.
+   * The players current score.
    */
-  ready?: boolean;
+  score?: number;
 }
