@@ -262,11 +262,15 @@ public class GameService {
   private String getSummaryMessageForRollGame(GameDocument gameDocument) {
     final int winningScore =
         Collections.max(
-            gameDocument.getPlayers().stream()
+            gameDocument
+                .getPlayers()
+                .stream()
                 .map(GamePlayerModel::getScore)
                 .collect(Collectors.toList()));
     final List<GamePlayerModel> winners =
-        gameDocument.getPlayers().stream()
+        gameDocument
+            .getPlayers()
+            .stream()
             .filter(p -> p.getScore() == winningScore)
             .collect(Collectors.toList());
     StringBuilder message = new StringBuilder();
