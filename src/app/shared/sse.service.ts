@@ -15,21 +15,25 @@ import {HandDocument} from '../api/models/hand-document';
 })
 export class SseService {
   /**
-   * Dictionary of events that currently open. Event types are mapped to the events themselves.
+   * Dictionary of events that are currently open. Event types are mapped to the events themselves.
    */
   public openEvents = {};
+
   /**
    * Dictionary of references. Event types are mapped to an event reference.
    */
   public eventReferences = {};
+
   /**
    * Dictionary that stores all game models.
    */
   private data = {};
+
   /**
    * Default data (typically empty object/list) to be placed in data dictionary to avoid null pointer exceptions.
    */
   private defaultData = {};
+
   /**
    * Dictionary of callbacks to be executed when data is received. Callbacks are mapped to specific emitter type. Each type has a list of
    * callbacks that will be executed so that different components can be updated.
