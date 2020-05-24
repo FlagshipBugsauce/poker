@@ -1,5 +1,7 @@
-package com.poker.poker.models.game.hand;
+package com.poker.poker.documents;
 
+import com.poker.poker.models.game.GamePlayerModel;
+import com.poker.poker.models.game.hand.RollActionModel;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
@@ -14,7 +16,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "hands") // TODO: Refactor to be HandDocument
-public class HandModel {
+public class HandDocument {
   @Schema(
       description = "Hand ID.",
       example = "0a7d95ef-94ba-47bc-b591-febb365bc543",
@@ -35,12 +37,9 @@ public class HandModel {
       implementation = String.class)
   private String message;
 
-  @ArraySchema(schema = @Schema(implementation = HandActionModel.class))
-  private List<HandActionModel> actions;
+  @ArraySchema(schema = @Schema(implementation = RollActionModel.class))
+  private List<RollActionModel> actions;
 
-  @Schema(
-      description = "ID of the player whose turn it is.",
-      example = "0a7d95ef-94ba-47bc-b591-febb365bc543",
-      implementation = UUID.class)
-  private UUID playerToAct;
+  @Schema(description = "Player whose turn it is.", implementation = GamePlayerModel.class)
+  private GamePlayerModel playerToAct;
 }

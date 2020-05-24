@@ -10,7 +10,7 @@ import com.poker.poker.models.AuthRequestModel;
 import com.poker.poker.models.AuthResponseModel;
 import com.poker.poker.models.enums.UserGroup;
 import com.poker.poker.models.game.CreateGameModel;
-import com.poker.poker.models.game.PlayerModel;
+import com.poker.poker.models.game.LobbyPlayerModel;
 import com.poker.poker.models.user.NewAccountModel;
 import com.poker.poker.models.user.UserModel;
 import java.math.BigDecimal;
@@ -72,7 +72,7 @@ public class TestBaseClass {
           sampleGameName,
           sampleMaxPlayers,
           sampleBuyIn,
-          Arrays.asList(new PlayerModel()), // TODO: Fix this properly
+          Arrays.asList(new LobbyPlayerModel()), // TODO: Fix this properly
           new ArrayList<>());
 
   public MockHttpServletResponse mockAuthResponse(

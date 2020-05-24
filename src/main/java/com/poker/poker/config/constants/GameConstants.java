@@ -15,9 +15,9 @@ public class GameConstants extends AppConstants {
 
   private final int maxNumberOfPlayers = 10;
 
-  private final long timeToActInMillis = 1000 * 5;
+  private final long timeToActInMillis = 1000 * 10;
 
-  private final int numRoundsInRollGame = 3;
+  private final int numRoundsInRollGame = 9;
 
   // Exceptions
   private final BadRequestException gameNotFoundException =

@@ -11,9 +11,9 @@ import com.poker.poker.models.GameSummaryModel;
 import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.enums.GameState;
 import com.poker.poker.models.game.CreateGameModel;
-import com.poker.poker.models.game.PlayerModel;
+import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.hand.HandActionModel;
-import com.poker.poker.models.game.hand.HandModel;
+import com.poker.poker.documents.HandDocument;
 import com.poker.poker.models.game.hand.RollActionModel;
 import com.poker.poker.repositories.GameRepository;
 import com.poker.poker.repositories.HandRepository;
@@ -21,10 +21,12 @@ import com.poker.poker.services.SseService;
 import com.poker.poker.services.UuidService;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -96,9 +98,11 @@ public class GameService {
         new GameDocument(
             UUID.randomUUID(),
             GameState.Lobby,
-            new ArrayList<>(), // List of player models is only updated after game begins.
+            new ArrayList<>(),  // List of player models is only updated after game begins.
             new ArrayList<>(),
-            null); // List of hands is empty until the game starts.
+            null,     // List of hands is empty until the game starts.
+            gameConstants.getNumRoundsInRollGame(),
+            (int) (gameConstants.getTimeToActInMillis() / 1000));
 
     userIdToGameIdMap.put(user.getId(), gameDocument.getId());
     games.put(gameDocument.getId(), gameDocument);
@@ -196,15 +200,15 @@ public class GameService {
     if (games.get(gameId) == null) {
       throw gameConstants.getGameNotFoundException();
     }
-    // Inform lobbyService the game is starting, which returns the relevant LobbyDocument.
-    final LobbyDocument lobbyDocument = lobbyService.startGame(gameId);
+    final GameDocument gameDocument = games.get(gameId);
+
+    // Inform lobbyService the game is starting, which sets the game document's list of players.
+    lobbyService.startGame(gameDocument);
 
     // Send updated game lists (game can no longer be joined via game list).
     sseService.sendToAll(EmitterType.GameList, lobbyService.getLobbyList());
-    final GameDocument gameDocument = games.get(gameId);
 
-    // Set the players
-    gameDocument.setPlayers(lobbyDocument.getPlayers());
+    // Transition the game state.
     gameDocument.setState(GameState.Play);
 
     // Send update so client knows the game state has changed.
@@ -214,17 +218,20 @@ public class GameService {
     handService.newHand(gameDocument);
 
     // Get the hand.
-    final HandModel hand = handService.getHand(gameDocument);
+    final HandDocument hand = handService.getHand(gameDocument);
 
-    // Set who starts first (select randomly).
-    final int firstToAct = (int) (gameDocument.getPlayers().size() * Math.random());
-    hand.setPlayerToAct(gameDocument.getPlayers().get(firstToAct).getId());
+    // Set the
+    hand.setPlayerToAct(gameDocument.getPlayers().get(0));
 
     // Broadcast hand update.
     handService.broadcastHandUpdate(gameDocument);
 
     // Wait for player to act.
-    applicationEventPublisher.publishEvent(new WaitForPlayerEvent(this, hand.getPlayerToAct()));
+    applicationEventPublisher
+        .publishEvent(new WaitForPlayerEvent(this, hand.getPlayerToAct()));
+
+    // Send another game document update so client knows that a hand has begun.
+    broadcastGameUpdate(gameDocument);
 
     return new ApiSuccessModel("The game has been started successfully.");
   }
@@ -249,65 +256,47 @@ public class GameService {
   @EventListener
   public void handleHandActionEvent(HandActionEvent handActionEvent) {
     log.debug("{} event detected by game service.", handActionEvent.getType());
-    GameDocument gameDocument = games.get(handActionEvent.getGameId());
-    final HandModel hand = handService.getHand(handActionEvent.getHandId());
-    final UUID playerId = hand.getPlayerToAct();
-
-    // TODO: can probably replace all this with indexOf
-    int nextPlayer = -1;
-    for (int i = 0; i < gameDocument.getPlayers().size(); i++) {
-      if (gameDocument.getPlayers().get(i).getId().equals(playerId)) {
-        nextPlayer = (i + 1) % gameDocument.getPlayers().size();
-        break;
-      }
-    }
-
-    if (nextPlayer == -1) {
-      throw new BadRequestException("", ""); // TODO: Handle this.
-    }
-
-    final PlayerModel nextPlayerToAct = gameDocument.getPlayers().get(nextPlayer);
+    final GameDocument gameDocument = games.get(handActionEvent.getGameId());
+    final HandDocument hand = handService.getHand(handActionEvent.getHandId());
+    final int playerThatActed = gameDocument.getPlayers().indexOf(hand.getPlayerToAct());
+    final GamePlayerModel nextPlayerToAct =
+        gameDocument.getPlayers().get((playerThatActed + 1) % gameDocument.getPlayers().size());
 
     // Set player to act:
     log.debug("Next player to act is {}.", nextPlayerToAct.getId());
-    hand.setPlayerToAct(nextPlayerToAct.getId());
+    hand.setPlayerToAct(nextPlayerToAct);
 
+    // Broadcast updated hand model
     log.debug("Sending updated hand models to players in game {}.", gameDocument.getId());
-    gameDocument
-        .getPlayers()
-        .forEach(
-            p -> {
-              try {
-                sseService.sendUpdate(EmitterType.Hand, p.getId(), hand);
-              } catch (Exception ignore) {
-              }
-            });
+    handService.broadcastHandUpdate(gameDocument);
 
     /*
          Temporary logic here to help design game flow for later. Most of this will be gone. Just
          trying to work out the kinks with waiting for players to act, etc...
     */
 
-    final int numRounds = gameConstants.getNumRoundsInRollGame();
-    final RollActionModel rollActionModel = (RollActionModel) hand.getActions().get(0);
-    final boolean roundOver = hand.getPlayerToAct().equals(rollActionModel.getPlayer().getId());
+    final int numRounds = gameDocument.getTotalHands();
+    final boolean roundOver = hand.getPlayerToAct().equals(gameDocument.getPlayers().get(0));
     final int currentRound =
         roundOver ? 1 + gameDocument.getHands().size() : gameDocument.getHands().size();
 
     if (!roundOver) {
-      applicationEventPublisher.publishEvent(new WaitForPlayerEvent(this, nextPlayerToAct.getId()));
+      applicationEventPublisher.publishEvent(new WaitForPlayerEvent(this, nextPlayerToAct));
     } else if (currentRound <= numRounds) {
       log.debug("Hand ended. Beginning new hand.");
+      // Update scores
+      handService.determineWinner(gameDocument);
+
       handService.endHand(gameDocument);
       handService.newHand(gameDocument);
-      final HandModel newHand = handService.getHand(gameDocument);
-      newHand.setPlayerToAct(nextPlayerToAct.getId());
+      final HandDocument newHand = handService.getHand(gameDocument);
+      newHand.setPlayerToAct(nextPlayerToAct);
 
       broadcastGameUpdate(gameDocument);
       handService.broadcastHandUpdate(gameDocument);
 
       // Publish a wait for player event.
-      applicationEventPublisher.publishEvent(new WaitForPlayerEvent(this, nextPlayerToAct.getId()));
+      applicationEventPublisher.publishEvent(new WaitForPlayerEvent(this, nextPlayerToAct));
     } else {
       // If the round is over and the current round > total rounds, then the game must be over.
       log.debug("The game has ended.");
@@ -323,27 +312,26 @@ public class GameService {
    * @param gameDocument The game document associated with the game that is ending.
    */
   public void endGame(GameDocument gameDocument) {
+    // Conclude the hand.
+    handService.determineWinner(gameDocument);
+    handService.endHand(gameDocument);
+
     // Transition the game state.
     gameDocument.setState(GameState.Over);
 
-    // Conclude the hand.
-    handService.endHand(gameDocument);
-
     // Determine the winner and generate a brief summary.
-    final List<HandModel> hands = new ArrayList<>();
+    final List<HandDocument> hands = new ArrayList<>();
     for (UUID handId : gameDocument.getHands()) {
       hands.add(handRepository.findHandDocumentById(handId));
     }
 
-    final Map<PlayerModel, Integer> points = new HashMap<>();
-    for (PlayerModel playerModel : gameDocument.getPlayers()) {
-      playerModel.setHost(false);
-      playerModel.setReady(false);
-      points.put(playerModel, 0);
+    final Map<GamePlayerModel, Integer> points = new HashMap<>();
+    for (GamePlayerModel lobbyPlayerModel : gameDocument.getPlayers()) {
+      points.put(lobbyPlayerModel, 0);
     }
 
-    for (HandModel hand : hands) {
-      PlayerModel winner = null;
+    for (HandDocument hand : hands) {
+      GamePlayerModel winner = null;
       int winningRoll = -1;
       for (HandActionModel a : hand.getActions()) {
         RollActionModel r = (RollActionModel) a;
@@ -353,22 +341,20 @@ public class GameService {
         }
       }
       assert winner != null;
-      winner.setHost(false);
-      winner.setReady(false);
       points.put(winner, points.get(winner) + 1);
     }
 
     // Create some output to show a summary for the scores and who won.
-    PlayerModel winner = null;
+    GamePlayerModel winner = null;
     int highestScore = -1;
     final StringBuilder sb = new StringBuilder();
     sb.append("The scores are: ");
-    for (PlayerModel playerModel : points.keySet()) {
-      sb.append(playerModel.getFirstName()).append(" ").append(playerModel.getLastName());
-      sb.append(": ").append(points.get(playerModel)).append(", ");
-      if (points.get(playerModel) > highestScore) {
-        winner = playerModel;
-        highestScore = points.get(playerModel);
+    for (GamePlayerModel lobbyPlayerModel : points.keySet()) {
+      sb.append(lobbyPlayerModel.getFirstName()).append(" ").append(lobbyPlayerModel.getLastName());
+      sb.append(": ").append(points.get(lobbyPlayerModel)).append(", ");
+      if (points.get(lobbyPlayerModel) > highestScore) {
+        winner = lobbyPlayerModel;
+        highestScore = points.get(lobbyPlayerModel);
       }
     }
     final String currentOutput = sb.toString().substring(0, sb.toString().length() - 2);

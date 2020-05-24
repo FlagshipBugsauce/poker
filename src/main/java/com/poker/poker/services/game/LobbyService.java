@@ -1,24 +1,29 @@
 package com.poker.poker.services.game;
 
 import com.poker.poker.config.constants.GameConstants;
+import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.LobbyDocument;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.enums.GameAction;
+import com.poker.poker.models.enums.GameState;
 import com.poker.poker.models.game.CreateGameModel;
 import com.poker.poker.models.game.GameActionModel;
+import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.GetGameModel;
-import com.poker.poker.models.game.PlayerModel;
+import com.poker.poker.models.game.LobbyPlayerModel;
 import com.poker.poker.repositories.LobbyRepository;
 import com.poker.poker.services.SseService;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -62,7 +67,7 @@ public class LobbyService {
    * @param lobbyDocument GameDocument representing the game that is being updated.
    */
   private void sendLobbyDocumentToAllPlayers(LobbyDocument lobbyDocument) {
-    for (PlayerModel player : lobbyDocument.getPlayers()) {
+    for (LobbyPlayerModel player : lobbyDocument.getPlayers()) {
       try {
         sseService.sendUpdate(EmitterType.Lobby, player.getId(), lobbyDocument);
       } catch (BadRequestException ignored) { // Exception already logged.
@@ -73,19 +78,26 @@ public class LobbyService {
   /**
    * Performs necessary actions to start the game.
    *
-   * @param gameId ID of the game which is starting.
-   * @return LobbyDocument associated with the game.
+   * @param gameDocument ID of the game which is starting.
    * @throws BadRequestException If there is no lobby associated with the specified game ID.
    */
-  public LobbyDocument startGame(UUID gameId) throws BadRequestException {
-    LobbyDocument lobbyDocument = lobbys.remove(gameId);
+  public void startGame(GameDocument gameDocument) throws BadRequestException {
+    LobbyDocument lobbyDocument = lobbys.remove(gameDocument.getId());
     if (lobbyDocument == null) {
       throw gameConstants.getGameNotFoundException();
     }
     // Remove players from userIdToLobbyIdMap
     lobbyDocument.getPlayers().forEach(player -> userIdToLobbyIdMap.remove(player.getId()));
+
+    // Add players to game document, then shuffle the players.
+    gameDocument.setPlayers(lobbyDocument
+        .getPlayers()
+        .stream()
+        .map(GamePlayerModel::new)
+        .collect(Collectors.toList()));
+    Collections.shuffle(gameDocument.getPlayers());
+
     lobbyRepository.save(lobbyDocument);
-    return lobbyDocument;
   }
 
   /**
@@ -156,7 +168,7 @@ public class LobbyService {
     LobbyDocument lobbyDocument = getUsersLobbyDocument(user.getId());
 
     // Find the playerModel, throw if not found, otherwise, remove player from game.
-    final Optional<PlayerModel> player =
+    final Optional<LobbyPlayerModel> player =
         lobbyDocument.getPlayers().stream()
             .filter(playerModel -> playerModel.getId().equals(user.getId()))
             .findFirst();
@@ -217,16 +229,7 @@ public class LobbyService {
             createGameModel.getName(),
             createGameModel.getMaxPlayers(),
             createGameModel.getBuyIn(),
-            new ArrayList<>(
-                Arrays.asList(
-                    new PlayerModel(
-                        user.getId(),
-                        user.getEmail(),
-                        user.getGroup(),
-                        user.getFirstName(),
-                        user.getLastName(),
-                        false,
-                        true))),
+            new ArrayList<>(Arrays.asList(new LobbyPlayerModel(user, false, true))),
             new ArrayList<>());
     log.info("User: {} created a game.", user.getId());
     lobbys.put(lobbyDocument.getId(), lobbyDocument);
@@ -272,8 +275,8 @@ public class LobbyService {
     LobbyDocument lobbyDocument = lobbys.get(gameId);
 
     // Add new player to list of players in currently in the game.
-    final PlayerModel playerModel = new PlayerModel(user, false, false);
-    lobbyDocument.getPlayers().add(playerModel);
+    final LobbyPlayerModel lobbyPlayerModel = new LobbyPlayerModel(user, false, false);
+    lobbyDocument.getPlayers().add(lobbyPlayerModel);
 
     // Add the appropriate game action model.
     lobbyDocument
@@ -281,21 +284,23 @@ public class LobbyService {
         .add(
             new GameActionModel(
                 UUID.randomUUID(),
-                playerModel,
+                lobbyPlayerModel,
                 GameAction.Join,
                 String.format(
                     "%s %s has joined the game.",
-                    playerModel.getFirstName(), playerModel.getLastName())));
+                    lobbyPlayerModel.getFirstName(), lobbyPlayerModel.getLastName())));
     userIdToLobbyIdMap.put(user.getId(), lobbyDocument.getId());
 
+    // TODO: When players join at the same time, this iterator gets confused and throws a ConcurrentModificationException
     // Update all players copy of gameDocument who are in the game via SSE
-    for (PlayerModel player : lobbyDocument.getPlayers()) {
-      if (!player.getId().equals(user.getId())) {
-        try {
-          sseService.sendUpdate(EmitterType.Lobby, player.getId(), lobbyDocument);
-        } catch (BadRequestException ignored) { // Exception is already logged.
+    try {
+      for (LobbyPlayerModel player : lobbyDocument.getPlayers()) {
+        if (!player.getId().equals(user.getId())) {
+            sseService.sendUpdate(EmitterType.Lobby, player.getId(), lobbyDocument);
         }
       }
+    } catch (Exception ignored) { // Exception is already logged.
+      // TODO: This will be catching the ConcurrentModificationException... This needs to be fixed.
     }
 
     sseService.sendToAll(EmitterType.GameList, getLobbyList());
@@ -321,7 +326,7 @@ public class LobbyService {
     }
 
     // Find the playerModel, throw if not found, otherwise, remove player from game.
-    final Optional<PlayerModel> player =
+    final Optional<LobbyPlayerModel> player =
         game.getPlayers().stream()
             .filter(playerModel -> playerModel.getId().equals(user.getId()))
             .findFirst();

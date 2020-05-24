@@ -19,8 +19,8 @@ public class GameActionModel {
 
   @Schema(
       description = "Player model representing the player that performed the action.",
-      implementation = PlayerModel.class)
-  private PlayerModel player;
+      implementation = LobbyPlayerModel.class)
+  private LobbyPlayerModel player;
 
   @Schema(
       description = "The action that occurred.",

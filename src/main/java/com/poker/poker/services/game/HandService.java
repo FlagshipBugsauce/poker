@@ -8,9 +8,9 @@ import com.poker.poker.events.WaitForPlayerEvent;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.enums.HandAction;
-import com.poker.poker.models.game.PlayerModel;
+import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.hand.HandActionModel;
-import com.poker.poker.models.game.hand.HandModel;
+import com.poker.poker.documents.HandDocument;
 import com.poker.poker.models.game.hand.RollActionModel;
 import com.poker.poker.repositories.HandRepository;
 import com.poker.poker.repositories.UserRepository;
@@ -38,8 +38,8 @@ public class HandService {
 
   private HandConstants handConstants;
 
-  /** Mapping of hand Id to HandModel of active hand. */
-  private Map<UUID, HandModel> hands;
+  /** Mapping of hand Id to HandDocument of active hand. */
+  private Map<UUID, HandDocument> hands;
 
   /** Mapping of game Id to Id of an active hand. */
   private Map<UUID, UUID> gameIdToHandIdMap;
@@ -63,7 +63,7 @@ public class HandService {
    * @return The hand associated with the ID specified.
    * @throws BadRequestException If there is no hand associated with the ID provided.
    */
-  public HandModel getHand(UUID handId) throws BadRequestException {
+  public HandDocument getHand(UUID handId) throws BadRequestException {
     if (hands.get(handId) == null) {
       throw handConstants.getHandNotFoundException();
     }
@@ -78,7 +78,7 @@ public class HandService {
    * @return The active hand associated with the game specified.
    * @throws BadRequestException If there is no hand associated with the game specified.
    */
-  public HandModel getHand(GameDocument gameDocument) throws BadRequestException {
+  public HandDocument getHand(GameDocument gameDocument) throws BadRequestException {
     if (gameIdToHandIdMap.get(gameDocument.getId()) == null) {
       throw handConstants.getNoGameToHandMappingException();
     }
@@ -90,10 +90,10 @@ public class HandService {
    * the hand if there is.
    *
    * @param userDocument The specified user.
-   * @return HandModel associated with the specified user.
+   * @return Hand associated with the specified user.
    * @throws BadRequestException If there is no hand associated with the specified user.
    */
-  public HandModel getHand(UserDocument userDocument) throws BadRequestException {
+  public HandDocument getHand(UserDocument userDocument) throws BadRequestException {
     return getHandForUserId(userDocument.getId());
   }
 
@@ -105,7 +105,7 @@ public class HandService {
    * @return The active hand associated with the user specified.
    * @throws BadRequestException If there is no hand associated with the specified user.
    */
-  public HandModel getHandForUserId(UUID userId) throws BadRequestException {
+  public HandDocument getHandForUserId(UUID userId) throws BadRequestException {
     if (userIdToGameIdMap.get(userId) == null) {
       throw handConstants.getNoUserIdToGameIdMappingFound();
     }
@@ -122,8 +122,8 @@ public class HandService {
    */
   public void newHand(GameDocument gameDocument) {
     log.debug("Creating new hand for game {}.", gameDocument.getId());
-    HandModel hand =
-        new HandModel(UUID.randomUUID(), gameDocument.getId(), null, new ArrayList<>(), null);
+    HandDocument hand =
+        new HandDocument(UUID.randomUUID(), gameDocument.getId(), null, new ArrayList<>(), null);
 
     // Adding hand to list of hands in game document.
     gameDocument.getHands().add(hand.getId());
@@ -136,11 +136,7 @@ public class HandService {
 
     // Map user ID's to game ID & sends updated hand model to players
     gameDocument
-        .getPlayers()
-        .forEach(
-            p -> {
-              userIdToGameIdMap.put(p.getId(), gameDocument.getId());
-            });
+        .getPlayers().forEach(p -> userIdToGameIdMap.put(p.getId(), gameDocument.getId()));
   }
 
   /**
@@ -149,7 +145,7 @@ public class HandService {
    * @param gameDocument The game whose players are being broadcast to.
    */
   public void broadcastHandUpdate(GameDocument gameDocument) {
-    final HandModel hand = getHand(gameDocument);
+    final HandDocument hand = getHand(gameDocument);
     gameDocument
         .getPlayers()
         .forEach(p -> sseService.sendUpdate(EmitterType.Hand, p.getId(), hand));
@@ -165,9 +161,9 @@ public class HandService {
   @Async
   @EventListener
   public void wait(WaitForPlayerEvent waitForPlayerEvent) {
-    final UUID userId = waitForPlayerEvent.getUserId();
+    final UUID userId = waitForPlayerEvent.getPlayer().getId();
     log.debug("Waiting for {} to act.", userId);
-    final HandModel hand = getHandForUserId(userId);
+    final HandDocument hand = getHandForUserId(userId);
     final int numActions = hand.getActions().size();
 
     try {
@@ -198,9 +194,9 @@ public class HandService {
    */
   public ApiSuccessModel roll(UserDocument user) {
     log.debug("{} performed a roll action.", user.getId());
-    final HandModel hand = getHand(user);
+    final HandDocument hand = getHand(user);
 
-    if (!hand.getPlayerToAct().equals(user.getId())) {
+    if (!hand.getPlayerToAct().getId().equals(user.getId())) {
       log.error("Player {} attempted to roll but it is not this players turn.", user.getId());
       throw new BadRequestException(
           "Action Denied", "It is not your turn."); // TODO: Update with constant and better text
@@ -228,7 +224,7 @@ public class HandService {
             new RollActionModel(
                 UUID.randomUUID(),
                 String.format("%s %s rolled %d.", user.getFirstName(), user.getLastName(), number),
-                new PlayerModel(user),
+                hand.getPlayerToAct(),
                 number));
 
     // Create event indicating that a player rolled.
@@ -237,6 +233,25 @@ public class HandService {
         new HandActionEvent(this, hand.getGameId(), hand.getId(), HandAction.Roll));
 
     return new ApiSuccessModel("Roll was successful");
+  }
+
+  public void determineWinner(GameDocument gameDocument) {
+    final HandDocument hand = getHand(gameDocument);
+    GamePlayerModel winner = null;
+    int highestRoll = -1;
+    for (RollActionModel r : hand.getActions()) {
+      if (r.getValue() > highestRoll) {
+        winner = r.getPlayer();
+        highestRoll = r.getValue();
+      }
+    }
+    assert(winner != null);
+    assert(highestRoll != -1);
+    winner.setScore(winner.getScore() + 1);
+
+    // TODO: Hack to avoid repeating the same toast on the client. Find a better solution.
+    hand.getActions().get(hand.getActions().size() - 1).setMessage(
+        String.format("%s %s wins the round.", winner.getFirstName(), winner.getLastName()));
   }
 
   /**
@@ -251,8 +266,7 @@ public class HandService {
 
     // Verify that this is an active hand.
     getHand(handId); // This will throw if the hand does not exist
-    getHand(
-        gameDocument); // This will also throw if the gameDocument isn't associated with this hand
+    getHand(gameDocument);
 
     // Save the hand to the database.
     handRepository.save(hands.remove(handId));
