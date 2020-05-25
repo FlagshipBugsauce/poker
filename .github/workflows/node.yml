@@ -7,7 +7,7 @@ on:
   push:
     paths:
       - './poker-client**'
-      - './github/workflows/node.yml'
+      - './.github/workflows/node.yml'
 
 jobs:
   build:
