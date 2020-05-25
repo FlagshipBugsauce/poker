@@ -1,0 +1,19 @@
+<ng-template #popup let-modal>
+  <div class="modal-header bg-light">
+    <h2 class="modal-title">{{ title }}</h2>
+    <button (click)="cancelClose()" aria-label="Close" class="close" type="button">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div *ngFor="let item of content">
+      <h4 *ngIf="item.header != null">{{ item.header }}</h4>
+      <p>{{ item.body }}</p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button (click)="cancelClose()" class="btn btn-secondary button" type="button">CANCEL</button>
+    <button (click)="okClose()" class="btn btn-success button ml-3" ngbAutoFocus type="button">OK
+    </button>
+  </div>
+</ng-template>

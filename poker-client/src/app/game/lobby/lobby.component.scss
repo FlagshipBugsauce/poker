@@ -1,0 +1,18 @@
+@import '../../../styles.scss';
+
+.image {
+  height: 20px;
+  width: 20px;
+}
+
+.crown {
+  height: 25px;
+}
+
+tr {
+  cursor: pointer;
+}
+
+.button {
+  width: $button-width;
+}

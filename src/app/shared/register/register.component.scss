@@ -1,0 +1,11 @@
+@import '../../../styles.scss';
+
+@media (min-width: 576px) {
+  .form-label {
+    text-align: right !important;
+  }
+}
+
+.button {
+  width: $button-width;
+}
