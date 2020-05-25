@@ -7,8 +7,8 @@ on:
       - '.github/workflows/server-formatting.yml'
   push:
     paths: 
-      - './poker-server**'
-      - './.github/workflows/server-formatting.yml'
+      - 'poker-server**'
+      - '.github/workflows/server-formatting.yml'
 
 jobs:
   formatting:
