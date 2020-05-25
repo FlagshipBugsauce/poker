@@ -1,6 +1,6 @@
 name: Google Formatter
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   formatting:
