@@ -1,6 +1,10 @@
 name: Google Formatter
 
-on: [push]
+on:
+  push:
+    paths: 
+      - './poker-server**'
+      - './.github/workflows/formatter.yml'
 
 jobs:
   formatting:
