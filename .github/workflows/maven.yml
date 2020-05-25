@@ -4,7 +4,7 @@ on:
   pull_request:
     paths: 
       - 'poker-server**'
-      - '.github/workflows/formatter.yml'
+      - '.github/workflows/maven.yml'
   push:
     paths: 
       - 'poker-server**'
