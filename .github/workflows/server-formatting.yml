@@ -4,7 +4,7 @@ on:
   push:
     paths: 
       - './poker-server**'
-      - './.github/workflows/formatter.yml'
+      - './.github/workflows/server-formatting.yml'
 
 jobs:
   formatting:
