@@ -6,8 +6,12 @@ name: Node.js CI
 on:
   push:
     paths:
-      - './poker-client**'
-      - './.github/workflows/node.yml'
+      - 'poker-client**'
+      - '.github/workflows/node.yml'
+  pull_request:
+    paths:
+      - 'poker-client**'
+      - '.github/workflows/node.yml'
 
 jobs:
   build:
