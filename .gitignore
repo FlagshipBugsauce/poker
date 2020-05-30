@@ -37,18 +37,18 @@ build/
 # poker-client ignore
 
 # compiled output
-/dist
-/tmp
-/out-tsc
+/poker-client/dist
+/poker-client/tmp
+/poker-client/out-tsc
 # Only exists if Bazel was run
-/bazel-out
+/poker-client/bazel-out
 
 # dependencies
-/node_modules
+/poker-client/node_modules
 
 # profiling files
-chrome-profiler-events*.json
-speed-measure-plugin*.json
+/poker-clientchrome-profiler-events*.json
+/poker-clientspeed-measure-plugin*.json
 
 # IDEs and editors
 /.idea
@@ -60,22 +60,22 @@ speed-measure-plugin*.json
 *.sublime-workspace
 
 # IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.history/*
+/poker-client.vscode/*
+/poker-client!.vscode/settings.json
+/poker-client!.vscode/tasks.json
+/poker-client!.vscode/launch.json
+/poker-client!.vscode/extensions.json
+/poker-client.history/*
 
 # misc
-/.sass-cache
-/connect.lock
-/coverage
-/libpeerconnection.log
-npm-debug.log
-yarn-error.log
-testem.log
-/typings
+/poker-client/.sass-cache
+/poker-client/connect.lock
+/poker-client/coverage
+/poker-client/libpeerconnection.log
+/poker-clientnpm-debug.log
+/poker-clientyarn-error.log
+/poker-clienttestem.log
+/poker-client/typings
 
 # System Files
 .DS_Store
