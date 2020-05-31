@@ -6,9 +6,16 @@ import {SseService} from 'src/app/shared/sse.service';
 import {ApiInterceptor} from 'src/app/api-interceptor.service';
 import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 import {AuthService} from 'src/app/shared/auth.service';
-import {GameDocument, GamePlayerModel, HandDocument} from '../../api/models';
+import {
+  CardModel,
+  GameDocument,
+  GamePlayerModel,
+  HandDocument,
+  PlayerModel
+} from '../../api/models';
 import {ToastService} from '../../shared/toast.service';
 import {GameState} from '../../shared/models/game-state.enum';
+import {CardSuit, CardValue} from "../../shared/models/card.enum";
 
 @Component({
   selector: 'pkr-play',
@@ -38,6 +45,10 @@ export class PlayComponent implements OnInit {
    */
   public numbers: number[];
 
+  public suitMapping = {};
+
+  public valueMapping = {};
+
   constructor(
     private apiConfiguration: ApiConfiguration,
     private router: Router,
@@ -48,6 +59,23 @@ export class PlayComponent implements OnInit {
     private apiInterceptor: ApiInterceptor,
     private authService: AuthService,
     private toastService: ToastService) {
+    this.suitMapping[CardSuit.Spades] = 'S';
+    this.suitMapping[CardSuit.Hearts] = 'H';
+    this.suitMapping[CardSuit.Clubs] = 'C';
+    this.suitMapping[CardSuit.Diamonds] = 'D';
+    this.valueMapping[CardValue.Ace] = 'A';
+    this.valueMapping[CardValue.King] = 'K';
+    this.valueMapping[CardValue.Queen] = 'Q';
+    this.valueMapping[CardValue.Jack] = 'J';
+    this.valueMapping[CardValue.Ten] = '10';
+    this.valueMapping[CardValue.Nine] = '9';
+    this.valueMapping[CardValue.Eight] = '8';
+    this.valueMapping[CardValue.Seven] = '7';
+    this.valueMapping[CardValue.Six] = '6';
+    this.valueMapping[CardValue.Five] = '5';
+    this.valueMapping[CardValue.Four] = '4';
+    this.valueMapping[CardValue.Three] = '3';
+    this.valueMapping[CardValue.Two] = '2';
   }
 
   /**
@@ -81,7 +109,7 @@ export class PlayComponent implements OnInit {
         // Add the message to
         const lastAction = this.hand.actions != null ? this.hand.actions[this.hand.actions.length - 1] : null;
         if (lastAction != null) {
-          this.toastService.show(lastAction.message, {classname: 'bg-light toast-md', delay: 5000});
+          this.toastService.show(lastAction.message, {classname: 'bg-light toast-lg', delay: 5000});
         }
         this.updateGameData();
         if (this.gameModel.state !== 'Over') {
@@ -91,6 +119,10 @@ export class PlayComponent implements OnInit {
       }
     });
     this.initializeGameData();
+  }
+
+  public draw(): void {
+    this.handService.draw().subscribe();
   }
 
   /**
@@ -126,8 +158,10 @@ export class PlayComponent implements OnInit {
     if (this.hand.actions.length > 0) {
       const lastActingPlayer = this.hand.actions[this.hand.actions.length - 1].player;
       const lastActingIndex = this.gameModel.players.findIndex(p => p.id === lastActingPlayer.id);
+      const card: CardModel = this.hand.actions[this.hand.actions.length - 1].drawnCard;
       this.gameData[lastActingIndex].rolls[this.currentHand] = {
-        value: this.hand.actions[this.hand.actions.length - 1].value,
+        // value: this.hand.actions[this.hand.actions.length - 1].value,
+        value: `${this.valueMapping[card.value]}${this.suitMapping[card.suit]}`,
         winner: false,
         acting: false
       } as RollModel;
@@ -146,7 +180,7 @@ export class PlayComponent implements OnInit {
     }
     for (let i = 0; i < this.gameData[0].rolls.length; i++) {
       for (const row of this.gameData) {
-        if (!flag && row.rolls[i].value === -1) {
+        if (!flag && row.rolls[i].value === '-1') {
           row.rolls[i].acting = true;
           flag = true;
         }
@@ -162,13 +196,14 @@ export class PlayComponent implements OnInit {
     if (this.gameModel.hands != null) {
       const lastRound = this.gameModel.hands.length - 2;
       if (lastRound >= 0) {
-        let bestScore = -1;
-        for (let i = 0; i < this.gameModel.players.length; i++) {
-          bestScore = Math.max(bestScore, this.gameData[i].rolls[lastRound].value);
-        }
-        for (let i = 0; i < this.gameModel.players.length; i++) {
-          this.gameData[i].rolls[lastRound].winner = this.gameData[i].rolls[lastRound].value === bestScore;
-        }
+        this.handService
+        .determineWinner({handId: this.gameModel.hands[this.gameModel.hands.length - 2]})
+        .subscribe((player: PlayerModel) => {
+          // tslint:disable-next-line:prefer-for-of
+          for (let i = 0; i < this.gameData.length; i++) {
+            this.gameData[i].rolls[lastRound].winner = this.gameData[i].player.id === player.id;
+          }
+        });
       }
     }
   }
@@ -194,7 +229,7 @@ export class PlayComponent implements OnInit {
         acting: false
       } as PlayerStatModel);
       for (let i = 0; i < this.gameModel.totalHands; i++) {
-        this.gameData[this.gameData.length - 1].rolls[i] = {winner: false, acting: false, value: -1} as RollModel;
+        this.gameData[this.gameData.length - 1].rolls[i] = {winner: false, acting: false, value: '-1'} as RollModel;
       }
     }
   }
@@ -213,7 +248,7 @@ export interface PlayerStatModel {
  * Another model that is most likely temporary, so I will let this one live here for now as well.
  */
 export interface RollModel {
-  value: number;
+  value: string;
   winner: boolean;
   acting: boolean;
 }

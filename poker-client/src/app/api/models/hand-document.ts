@@ -1,9 +1,8 @@
 /* tslint:disable */
-import {GamePlayerModel} from './game-player-model';
-import {RollActionModel} from './roll-action-model';
-
+import { GamePlayerModel } from './game-player-model';
+import { HandActionModel } from './hand-action-model';
 export interface HandDocument {
-  actions?: Array<RollActionModel>;
+  actions?: Array<HandActionModel>;
 
   /**
    * Game ID.

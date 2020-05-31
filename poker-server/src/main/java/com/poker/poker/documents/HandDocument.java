@@ -1,7 +1,7 @@
 package com.poker.poker.documents;
 
 import com.poker.poker.models.game.GamePlayerModel;
-import com.poker.poker.models.game.hand.RollActionModel;
+import com.poker.poker.models.game.hand.HandActionModel;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
@@ -37,8 +37,8 @@ public class HandDocument {
       implementation = String.class)
   private String message;
 
-  @ArraySchema(schema = @Schema(implementation = RollActionModel.class))
-  private List<RollActionModel> actions;
+  @ArraySchema(schema = @Schema(implementation = HandActionModel.class))
+  private List<HandActionModel> actions;
 
   @Schema(description = "Player whose turn it is.", implementation = GamePlayerModel.class)
   private GamePlayerModel playerToAct;
