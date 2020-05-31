@@ -143,6 +143,15 @@ public class HandService {
   }
 
   /**
+   * Removes the deck from the mapping.
+   * @param game Game the deck is associated with.
+   */
+  public void removeDeck(final GameDocument game) {
+    getDeck(game);  // Make sure deck exists.
+    gameIdToDeckMap.remove(game.getId());
+  }
+
+  /**
    * Shuffles the game for the specified game, throws if there is no deck associated with this game.
    *
    * @param game The specified game.

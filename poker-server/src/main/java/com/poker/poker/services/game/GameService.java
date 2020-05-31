@@ -311,6 +311,7 @@ public class GameService {
    */
   public void endGame(GameDocument gameDocument) {
     handService.endHand(gameDocument); // End hand.
+    handService.removeDeck(gameDocument);
     gameDocument.setState(GameState.Over); // Transition game state.
     gameDocument.setSummary(new GameSummaryModel(getSummaryMessageForRollGame(gameDocument)));
     gameRepository.save(gameDocument); // Save game document.

@@ -38,28 +38,6 @@ public class HandController {
   private HandService handService;
   private HandRepository handRepository;
 
-  // TODO: Remove
-  //  @Operation(
-  //      summary = "Roll a random number.",
-  //      description = "Generates a random number.",
-  //      tags = "game")
-  //  @ApiResponses(
-  //      value = {
-  //          @ApiResponse(
-  //              responseCode = "200",
-  //              description = "Roll was successful.",
-  //              content =
-  //              @Content(
-  //                  schema = @Schema(implementation = ApiSuccessModel.class),
-  //                  mediaType = MediaType.APPLICATION_JSON_VALUE))
-  //      })
-  //  @RequestMapping(value = "/roll", method = RequestMethod.POST)
-  //  public ResponseEntity<ApiSuccessModel> roll(
-  //      @Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
-  //    userService.validate(jwt, constants.getClientGroups());
-  //    return ResponseEntity.ok(handService.roll(jwtService.getUserDocument(jwt)));
-  //  }
-
   @Operation(
       summary = "Draws a card.",
       description = "Draws a card from the top of the deck.",
