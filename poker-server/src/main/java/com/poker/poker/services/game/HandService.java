@@ -9,7 +9,6 @@ import com.poker.poker.events.WaitForPlayerEvent;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.enums.HandAction;
-import com.poker.poker.models.enums.HandActionType;
 import com.poker.poker.models.game.CardModel;
 import com.poker.poker.models.game.DeckModel;
 import com.poker.poker.models.game.GamePlayerModel;
@@ -21,10 +20,8 @@ import com.poker.poker.services.SseService;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -127,6 +124,7 @@ public class HandService {
 
   /**
    * Creates the mapping from game Id to deck.
+   *
    * @param gameId The specified game Id.
    * @param deck The deck.
    */
@@ -136,6 +134,7 @@ public class HandService {
 
   /**
    * Creates the mapping from game Id to deck.
+   *
    * @param game The specified game.
    * @param deck The deck.
    */
@@ -145,6 +144,7 @@ public class HandService {
 
   /**
    * Shuffles the game for the specified game, throws if there is no deck associated with this game.
+   *
    * @param game The specified game.
    * @throws BadRequestException If there is no deck associated with the specified game.
    */
@@ -154,6 +154,7 @@ public class HandService {
 
   /**
    * Shuffles the game for the specified game, throws if there is no deck associated with this game.
+   *
    * @param gameId The specified game.
    * @throws BadRequestException If there is no deck associated with the specified game.
    */
@@ -163,6 +164,7 @@ public class HandService {
 
   /**
    * Retrieves the deck associated with the specified game. Throws if no such deck exists.
+   *
    * @param game The specified game.
    * @return The deck associated with the specified game.
    * @throws BadRequestException If there is no deck associated with the specified game.
@@ -173,6 +175,7 @@ public class HandService {
 
   /**
    * Retrieves the deck associated with the specified game. Throws if no such deck exists.
+   *
    * @param gameId The specified game.
    * @return The deck associated with the specified game.
    * @throws BadRequestException If there is no deck associated with the specified game.
@@ -204,7 +207,7 @@ public class HandService {
 
     hand.setPlayerToAct(gameDocument.getPlayers().get(0)); // First in the list acts first.
     broadcastHandUpdate(gameDocument); // Broadcast the new hand.
-    restoreAndShuffle(gameDocument);  // Restore the deck and shuffle it.
+    restoreAndShuffle(gameDocument); // Restore the deck and shuffle it.
     applicationEventPublisher.publishEvent(new WaitForPlayerEvent(this, hand.getPlayerToAct()));
   }
 
@@ -250,11 +253,12 @@ public class HandService {
         userId);
     log.debug("Performing default action for {}.", userId);
 
-    draw(userRepository.findUserDocumentById(userId));  // draw card
+    draw(userRepository.findUserDocumentById(userId)); // draw card
   }
 
   /**
    * Helper to determine if it is the specified user's turn to act in the specified hand.
+   *
    * @param hand The specified hand.
    * @param user The specified user.
    */
@@ -267,6 +271,7 @@ public class HandService {
 
   /**
    * Draws a card.
+   *
    * @param user The player who is attempting to draw.
    * @return The card that was drawn.
    * @throws BadRequestException If something goes wrong.
@@ -274,7 +279,7 @@ public class HandService {
   public ApiSuccessModel draw(final UserDocument user) throws BadRequestException {
     log.debug("{} drew a card.", user.getId());
     final HandDocument hand = getHand(user);
-    checkIfItsPlayersTurn(hand, user);  // Verify the player can act.
+    checkIfItsPlayersTurn(hand, user); // Verify the player can act.
 
     final CardModel card = getDeck(userIdToGameIdMap.get(user.getId())).draw(); // Draw card.
 
@@ -285,10 +290,7 @@ public class HandService {
                 HandAction.Draw,
                 String.format(
                     "%s %s drew the %s of %s.", // Bob Dole drew the Five of Diamonds.
-                    user.getFirstName(),
-                    user.getLastName(),
-                    card.getValue(),
-                    card.getSuit()),
+                    user.getFirstName(), user.getLastName(), card.getValue(), card.getSuit()),
                 hand.getPlayerToAct(),
                 -1,
                 card));
@@ -300,6 +302,7 @@ public class HandService {
 
   /**
    * Determines the winner of the current hand associated with the specified game document.
+   *
    * @param gameDocument The specified game document.
    */
   public void determineWinner(GameDocument gameDocument) {
@@ -309,6 +312,7 @@ public class HandService {
 
   /**
    * Determines the winner of the specified hand and returns the winner.
+   *
    * @param hand The specified hand.
    * @return The winner of the specified hand.
    */

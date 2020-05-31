@@ -17,9 +17,6 @@ public class CardModel {
       implementation = CardSuit.class)
   private CardSuit suit;
 
-  @Schema(
-      description = "The value of the card.",
-      example = "Ace",
-      implementation = CardValue.class)
+  @Schema(description = "The value of the card.", example = "Ace", implementation = CardValue.class)
   private CardValue value;
 }

@@ -1,9 +1,7 @@
 package com.poker.poker.controllers;
 
 import com.poker.poker.config.constants.GameConstants;
-import com.poker.poker.documents.HandDocument;
 import com.poker.poker.models.ApiSuccessModel;
-import com.poker.poker.models.game.CardModel;
 import com.poker.poker.models.game.PlayerModel;
 import com.poker.poker.repositories.HandRepository;
 import com.poker.poker.services.JwtService;
@@ -22,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -42,26 +39,26 @@ public class HandController {
   private HandRepository handRepository;
 
   // TODO: Remove
-//  @Operation(
-//      summary = "Roll a random number.",
-//      description = "Generates a random number.",
-//      tags = "game")
-//  @ApiResponses(
-//      value = {
-//          @ApiResponse(
-//              responseCode = "200",
-//              description = "Roll was successful.",
-//              content =
-//              @Content(
-//                  schema = @Schema(implementation = ApiSuccessModel.class),
-//                  mediaType = MediaType.APPLICATION_JSON_VALUE))
-//      })
-//  @RequestMapping(value = "/roll", method = RequestMethod.POST)
-//  public ResponseEntity<ApiSuccessModel> roll(
-//      @Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
-//    userService.validate(jwt, constants.getClientGroups());
-//    return ResponseEntity.ok(handService.roll(jwtService.getUserDocument(jwt)));
-//  }
+  //  @Operation(
+  //      summary = "Roll a random number.",
+  //      description = "Generates a random number.",
+  //      tags = "game")
+  //  @ApiResponses(
+  //      value = {
+  //          @ApiResponse(
+  //              responseCode = "200",
+  //              description = "Roll was successful.",
+  //              content =
+  //              @Content(
+  //                  schema = @Schema(implementation = ApiSuccessModel.class),
+  //                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+  //      })
+  //  @RequestMapping(value = "/roll", method = RequestMethod.POST)
+  //  public ResponseEntity<ApiSuccessModel> roll(
+  //      @Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
+  //    userService.validate(jwt, constants.getClientGroups());
+  //    return ResponseEntity.ok(handService.roll(jwtService.getUserDocument(jwt)));
+  //  }
 
   @Operation(
       summary = "Draws a card.",
@@ -69,13 +66,13 @@ public class HandController {
       tags = "game")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Draw was successful.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = ApiSuccessModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Draw was successful.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiSuccessModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/draw", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> draw(
@@ -90,13 +87,13 @@ public class HandController {
       tags = "game")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Draw was successful.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = PlayerModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Draw was successful.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = PlayerModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/determine-winner/{handId}", method = RequestMethod.POST)
   public ResponseEntity<PlayerModel> determineWinner(
@@ -106,6 +103,4 @@ public class HandController {
     return ResponseEntity.ok(
         handService.determineWinner(handRepository.findHandDocumentById(handId)));
   }
-
-
 }

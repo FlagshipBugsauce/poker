@@ -13,9 +13,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-/**
- * Service that can perform useful operations for a card game.
- */
+/** Service that can perform useful operations for a card game. */
 @Slf4j
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -36,6 +34,7 @@ public class CardService implements Comparator<CardModel> {
 
   /**
    * Returns the numerical value of a particular suit.
+   *
    * @param suit The suit.
    * @return The numerical value of the suit.
    */
@@ -45,6 +44,7 @@ public class CardService implements Comparator<CardModel> {
 
   /**
    * Returns the numerical value of a particular card (ignoring suit).
+   *
    * @param value The value of the card.
    * @return The numerical value of the card.
    */
@@ -60,6 +60,7 @@ public class CardService implements Comparator<CardModel> {
 
   /**
    * Creates a list of CardModels in the order of a fresh deck.
+   *
    * @return List of CardModels in the order of a fresh deck.
    */
   public List<CardModel> getFreshDeck() {
