@@ -1,7 +1,8 @@
 /* tslint:disable */
-import {GamePlayerModel} from './game-player-model';
-
-export interface RollActionModel {
+import { CardModel } from './card-model';
+import { GamePlayerModel } from './game-player-model';
+export interface HandActionModel {
+  drawnCard?: CardModel;
 
   /**
    * Hand Action ID.
@@ -13,6 +14,11 @@ export interface RollActionModel {
    */
   message?: string;
   player?: GamePlayerModel;
+
+  /**
+   * Type of action performed.
+   */
+  type?: 'Start' | 'Roll' | 'Draw';
 
   /**
    * Value that was rolled.

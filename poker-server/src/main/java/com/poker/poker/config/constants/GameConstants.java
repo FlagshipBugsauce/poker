@@ -55,4 +55,8 @@ public class GameConstants extends AppConstants {
 
   private final BadRequestException canOnlyJoinLobbyException =
       new BadRequestException("Error Joining Game", "Only lobbies can be joined.");
+
+  private final BadRequestException deckNotFoundException =
+      new BadRequestException(
+          "Error Retrieving Deck", "There is no deck associated with the specified game.");
 }

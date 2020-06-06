@@ -11,6 +11,7 @@ import com.poker.poker.models.GameSummaryModel;
 import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.enums.GameState;
 import com.poker.poker.models.game.CreateGameModel;
+import com.poker.poker.models.game.DeckModel;
 import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.repositories.GameRepository;
 import com.poker.poker.services.SseService;
@@ -37,23 +38,25 @@ import org.springframework.stereotype.Service;
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class GameService {
 
-  private Map<UUID, UUID> userIdToGameIdMap;
+  /** Mapping of user Id to game Id. */
+  private final Map<UUID, UUID> userIdToGameIdMap;
 
-  private Map<UUID, GameDocument> games;
+  /** Mapping of game Id to game document. */
+  private final Map<UUID, GameDocument> games;
 
-  private GameConstants gameConstants;
+  private final GameConstants gameConstants;
 
-  private SseService sseService;
+  private final SseService sseService;
 
-  private LobbyService lobbyService;
+  private final LobbyService lobbyService;
 
-  private UuidService uuidService;
+  private final UuidService uuidService;
 
-  private HandService handService;
+  private final HandService handService;
 
-  private GameRepository gameRepository;
+  private final GameRepository gameRepository;
 
-  private ApplicationEventPublisher applicationEventPublisher;
+  private final ApplicationEventPublisher applicationEventPublisher;
 
   /**
    * Retrieves the game document for the game the specified user is in.
@@ -191,6 +194,7 @@ public class GameService {
     final GameDocument gameDocument = games.get(gameId);
     lobbyService.startGame(gameDocument); // Lobby related housekeeping.
     gameDocument.setState(GameState.Play); // Transition game state.
+    handService.setDeck(gameId, new DeckModel()); // Give hand service the deck.
     handService.newHand(gameDocument); // Create the hand.
     broadcastGameUpdate(gameDocument); // Broadcast the game document.
     return new ApiSuccessModel("The game has been started successfully.");
@@ -285,6 +289,7 @@ public class GameService {
       message
           .append(" and ")
           .append(winners.get(winners.size() - 1).getFirstName())
+          .append(' ')
           .append(winners.get(winners.size() - 1).getLastName());
     } else {
       message
@@ -306,6 +311,7 @@ public class GameService {
    */
   public void endGame(GameDocument gameDocument) {
     handService.endHand(gameDocument); // End hand.
+    handService.removeDeck(gameDocument);
     gameDocument.setState(GameState.Over); // Transition game state.
     gameDocument.setSummary(new GameSummaryModel(getSummaryMessageForRollGame(gameDocument)));
     gameRepository.save(gameDocument); // Save game document.

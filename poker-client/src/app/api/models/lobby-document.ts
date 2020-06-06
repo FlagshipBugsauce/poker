@@ -1,7 +1,6 @@
 /* tslint:disable */
-import {GameActionModel} from './game-action-model';
-import {LobbyPlayerModel} from './lobby-player-model';
-
+import { GameActionModel } from './game-action-model';
+import { LobbyPlayerModel } from './lobby-player-model';
 export interface LobbyDocument {
 
   /**

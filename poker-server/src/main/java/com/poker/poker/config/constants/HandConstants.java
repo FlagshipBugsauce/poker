@@ -20,4 +20,9 @@ public class HandConstants extends GameConstants {
       new BadRequestException(
           "Hand Not Found",
           "There is no mapping from the game provided to a hand that is currently active.");
+
+  private final BadRequestException notPlayersTurnException =
+      new BadRequestException(
+          "Action Denied",
+          "Player attempted to perform an action when it is not the players turn to act.");
 }

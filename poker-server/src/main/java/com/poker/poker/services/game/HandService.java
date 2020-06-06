@@ -9,17 +9,19 @@ import com.poker.poker.events.WaitForPlayerEvent;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.enums.HandAction;
+import com.poker.poker.models.game.CardModel;
+import com.poker.poker.models.game.DeckModel;
 import com.poker.poker.models.game.GamePlayerModel;
+import com.poker.poker.models.game.PlayerModel;
 import com.poker.poker.models.game.hand.HandActionModel;
-import com.poker.poker.models.game.hand.RollActionModel;
 import com.poker.poker.repositories.HandRepository;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.services.SseService;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,21 +41,26 @@ public class HandService {
   private HandConstants handConstants;
 
   /** Mapping of hand Id to HandDocument of active hand. */
-  private Map<UUID, HandDocument> hands;
+  private final Map<UUID, HandDocument> hands;
 
   /** Mapping of game Id to Id of an active hand. */
-  private Map<UUID, UUID> gameIdToHandIdMap;
+  private final Map<UUID, UUID> gameIdToHandIdMap;
 
   /** Mapping of user Id to game Id. */
-  private Map<UUID, UUID> userIdToGameIdMap;
+  private final Map<UUID, UUID> userIdToGameIdMap;
 
-  private UserRepository userRepository;
+  /** Mapping of game Id to deck */
+  private Map<UUID, DeckModel> gameIdToDeckMap;
 
-  private ApplicationEventPublisher applicationEventPublisher;
+  private final UserRepository userRepository;
 
-  private SseService sseService;
+  private final ApplicationEventPublisher applicationEventPublisher;
 
-  private HandRepository handRepository;
+  private final SseService sseService;
+
+  private final CardService cardService;
+
+  private final HandRepository handRepository;
 
   /**
    * Checks if there is a hand associated with the ID provided, throws if not and returns the hand
@@ -63,7 +70,7 @@ public class HandService {
    * @return The hand associated with the ID specified.
    * @throws BadRequestException If there is no hand associated with the ID provided.
    */
-  public HandDocument getHand(UUID handId) throws BadRequestException {
+  public HandDocument getHand(final UUID handId) throws BadRequestException {
     if (hands.get(handId) == null) {
       throw handConstants.getHandNotFoundException();
     }
@@ -78,7 +85,7 @@ public class HandService {
    * @return The active hand associated with the game specified.
    * @throws BadRequestException If there is no hand associated with the game specified.
    */
-  public HandDocument getHand(GameDocument gameDocument) throws BadRequestException {
+  public HandDocument getHand(final GameDocument gameDocument) throws BadRequestException {
     if (gameIdToHandIdMap.get(gameDocument.getId()) == null) {
       throw handConstants.getNoGameToHandMappingException();
     }
@@ -93,7 +100,7 @@ public class HandService {
    * @return Hand associated with the specified user.
    * @throws BadRequestException If there is no hand associated with the specified user.
    */
-  public HandDocument getHand(UserDocument userDocument) throws BadRequestException {
+  public HandDocument getHand(final UserDocument userDocument) throws BadRequestException {
     return getHandForUserId(userDocument.getId());
   }
 
@@ -105,7 +112,7 @@ public class HandService {
    * @return The active hand associated with the user specified.
    * @throws BadRequestException If there is no hand associated with the specified user.
    */
-  public HandDocument getHandForUserId(UUID userId) throws BadRequestException {
+  public HandDocument getHandForUserId(final UUID userId) throws BadRequestException {
     if (userIdToGameIdMap.get(userId) == null) {
       throw handConstants.getNoUserIdToGameIdMappingFound();
     }
@@ -116,11 +123,86 @@ public class HandService {
   }
 
   /**
+   * Creates the mapping from game Id to deck.
+   *
+   * @param gameId The specified game Id.
+   * @param deck The deck.
+   */
+  public void setDeck(final UUID gameId, final DeckModel deck) {
+    gameIdToDeckMap.put(gameId, deck);
+  }
+
+  /**
+   * Creates the mapping from game Id to deck.
+   *
+   * @param game The specified game.
+   * @param deck The deck.
+   */
+  public void setDeck(final GameDocument game, final DeckModel deck) {
+    setDeck(game.getId(), deck);
+  }
+
+  /**
+   * Removes the deck from the mapping.
+   *
+   * @param game Game the deck is associated with.
+   */
+  public void removeDeck(final GameDocument game) {
+    getDeck(game); // Make sure deck exists.
+    gameIdToDeckMap.remove(game.getId());
+  }
+
+  /**
+   * Shuffles the game for the specified game, throws if there is no deck associated with this game.
+   *
+   * @param game The specified game.
+   * @throws BadRequestException If there is no deck associated with the specified game.
+   */
+  public void restoreAndShuffle(final GameDocument game) throws BadRequestException {
+    restoreAndShuffle(game.getId());
+  }
+
+  /**
+   * Shuffles the game for the specified game, throws if there is no deck associated with this game.
+   *
+   * @param gameId The specified game.
+   * @throws BadRequestException If there is no deck associated with the specified game.
+   */
+  public void restoreAndShuffle(final UUID gameId) throws BadRequestException {
+    getDeck(gameId).restoreAndShuffle();
+  }
+
+  /**
+   * Retrieves the deck associated with the specified game. Throws if no such deck exists.
+   *
+   * @param game The specified game.
+   * @return The deck associated with the specified game.
+   * @throws BadRequestException If there is no deck associated with the specified game.
+   */
+  public DeckModel getDeck(final GameDocument game) throws BadRequestException {
+    return getDeck(game.getId());
+  }
+
+  /**
+   * Retrieves the deck associated with the specified game. Throws if no such deck exists.
+   *
+   * @param gameId The specified game.
+   * @return The deck associated with the specified game.
+   * @throws BadRequestException If there is no deck associated with the specified game.
+   */
+  public DeckModel getDeck(final UUID gameId) throws BadRequestException {
+    if (gameIdToDeckMap.get(gameId) == null) {
+      throw handConstants.getDeckNotFoundException();
+    }
+    return gameIdToDeckMap.get(gameId);
+  }
+
+  /**
    * Creates a new hand for the specified game.
    *
    * @param gameDocument The game the new hand is being created for.
    */
-  public void newHand(GameDocument gameDocument) {
+  public void newHand(final GameDocument gameDocument) {
     log.debug("Creating new hand for game {}.", gameDocument.getId());
     final HandDocument hand =
         new HandDocument(UUID.randomUUID(), gameDocument.getId(), null, new ArrayList<>(), null);
@@ -135,6 +217,7 @@ public class HandService {
 
     hand.setPlayerToAct(gameDocument.getPlayers().get(0)); // First in the list acts first.
     broadcastHandUpdate(gameDocument); // Broadcast the new hand.
+    restoreAndShuffle(gameDocument); // Restore the deck and shuffle it.
     applicationEventPublisher.publishEvent(new WaitForPlayerEvent(this, hand.getPlayerToAct()));
   }
 
@@ -143,7 +226,7 @@ public class HandService {
    *
    * @param gameDocument The game whose players are being broadcast to.
    */
-  public void broadcastHandUpdate(GameDocument gameDocument) {
+  public void broadcastHandUpdate(final GameDocument gameDocument) {
     final HandDocument hand = getHand(gameDocument);
     gameDocument
         .getPlayers()
@@ -159,7 +242,7 @@ public class HandService {
    */
   @Async
   @EventListener
-  public void wait(WaitForPlayerEvent waitForPlayerEvent) {
+  public void wait(final WaitForPlayerEvent waitForPlayerEvent) {
     final UUID userId = waitForPlayerEvent.getPlayer().getId();
     log.debug("Waiting for {} to act.", userId);
     final HandDocument hand = getHandForUserId(userId);
@@ -179,80 +262,78 @@ public class HandService {
         handConstants.getTimeToActInMillis(),
         userId);
     log.debug("Performing default action for {}.", userId);
-    roll(
-        userRepository.findUserDocumentById(
-            userId)); // TODO: Probably want to avoid using repo here
+
+    draw(userRepository.findUserDocumentById(userId)); // draw card
   }
 
   /**
-   * Roll is one of the actions a player can perform. When this action is performed, an event is
-   * published and is handled by an asynchronous event listener in the game service.
+   * Helper to determine if it is the specified user's turn to act in the specified hand.
    *
-   * @param user The user performing the roll action.
-   * @return An ApiSuccessModel indicating the action was performed successfully.
+   * @param hand The specified hand.
+   * @param user The specified user.
    */
-  public ApiSuccessModel roll(UserDocument user) {
-    log.debug("{} performed a roll action.", user.getId());
-    final HandDocument hand = getHand(user);
-
+  public void checkIfItsPlayersTurn(final HandDocument hand, final UserDocument user) {
     if (!hand.getPlayerToAct().getId().equals(user.getId())) {
-      log.error("Player {} attempted to roll but it is not this players turn.", user.getId());
-      throw new BadRequestException(
-          "Action Denied", "It is not your turn."); // TODO: Update with constant and better text
+      log.error("Player {} attempted to act but it is not this players turn.", user.getId());
+      throw handConstants.getNotPlayersTurnException();
     }
+  }
 
-    // Make sure the roll is unique so there are no ties.
-    final Set<Integer> currentRolls = new HashSet<>();
-    for (HandActionModel handActionModel : hand.getActions()) {
-      if (handActionModel instanceof RollActionModel) {
-        currentRolls.add(((RollActionModel) handActionModel).getValue());
-      }
-    }
+  /**
+   * Draws a card.
+   *
+   * @param user The player who is attempting to draw.
+   * @return The card that was drawn.
+   * @throws BadRequestException If something goes wrong.
+   */
+  public ApiSuccessModel draw(final UserDocument user) throws BadRequestException {
+    log.debug("{} drew a card.", user.getId());
+    final HandDocument hand = getHand(user);
+    checkIfItsPlayersTurn(hand, user); // Verify the player can act.
 
-    int number = -1;
-    while (number == -1) {
-      number = (int) (Math.random() * 100);
-      final boolean unique = currentRolls.add(number);
-      number = unique ? number : -1;
-    }
-
-    log.debug("{} rolled {}.", user.getId(), number);
+    final CardModel card = getDeck(userIdToGameIdMap.get(user.getId())).draw(); // Draw card.
 
     hand.getActions()
         .add(
-            new RollActionModel(
+            new HandActionModel(
                 UUID.randomUUID(),
-                String.format("%s %s rolled %d.", user.getFirstName(), user.getLastName(), number),
+                HandAction.Draw,
+                String.format(
+                    "%s %s drew the %s of %s.", // Bob Dole drew the Five of Diamonds.
+                    user.getFirstName(), user.getLastName(), card.getValue(), card.getSuit()),
                 hand.getPlayerToAct(),
-                number));
+                -1,
+                card));
 
-    // Create event indicating that a player rolled.
-    log.debug("Creating roll event to be handled by game service.");
     applicationEventPublisher.publishEvent(
-        new HandActionEvent(this, hand.getGameId(), hand.getId(), HandAction.Roll));
-
-    return new ApiSuccessModel("Roll was successful");
+        new HandActionEvent(this, hand.getGameId(), hand.getId(), HandAction.Draw));
+    return new ApiSuccessModel("Card was drawn successfully.");
   }
 
+  /**
+   * Determines the winner of the current hand associated with the specified game document.
+   *
+   * @param gameDocument The specified game document.
+   */
   public void determineWinner(GameDocument gameDocument) {
     final HandDocument hand = getHand(gameDocument);
-    GamePlayerModel winner = null;
-    int highestRoll = -1;
-    for (RollActionModel r : hand.getActions()) {
-      if (r.getValue() > highestRoll) {
-        winner = r.getPlayer();
-        highestRoll = r.getValue();
-      }
-    }
-    assert (winner != null);
-    assert (highestRoll != -1);
-    winner.setScore(winner.getScore() + 1);
+    determineWinner(hand);
+  }
 
-    // TODO: Hack to avoid repeating the same toast on the client. Find a better solution.
-    hand.getActions()
-        .get(hand.getActions().size() - 1)
-        .setMessage(
-            String.format("%s %s wins the round.", winner.getFirstName(), winner.getLastName()));
+  /**
+   * Determines the winner of the specified hand and returns the winner.
+   *
+   * @param hand The specified hand.
+   * @return The winner of the specified hand.
+   */
+  public PlayerModel determineWinner(final HandDocument hand) {
+    GamePlayerModel winner = null;
+    // Should be able
+    final List<HandActionModel> actions = new ArrayList<>(hand.getActions());
+    actions.sort((a, b) -> cardService.compare(a.getDrawnCard(), b.getDrawnCard()));
+    Collections.reverse(actions);
+    actions.get(0).getPlayer().setScore(actions.get(0).getPlayer().getScore() + 1);
+    return actions.get(0).getPlayer();
   }
 
   /**
