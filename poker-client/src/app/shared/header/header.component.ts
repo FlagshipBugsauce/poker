@@ -8,7 +8,7 @@ import {AuthService} from '../auth.service';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit {
-  icon: string = '../../assets/icons/aces.svg';
+  icon: string = 'assets/icons/aces.svg';
 
   constructor(public router: Router, public authService: AuthService) {
   }

@@ -6,11 +6,11 @@
     </div>
   </div>
   <div class="card m-3">
-    <h3 class="card-header bg-success text-light">Hand Summary</h3>
+    <h3 class="card-header bg-success text-light">Game Summary</h3>
     <div class="card-body">
       <div class="row">
         <div class="col-sm-12">
-          <table class="table table-striped">
+          <table class="table table-striped table-hover">
             <thead>
             <tr>
               <th>Player</th>
@@ -22,18 +22,20 @@
             </thead>
             <tbody>
             <tr *ngFor="let row of gameData">
-              <td>{{ row.player.firstName }} {{ row.player.lastName }}</td>
+              <td class="align-middle">{{ row.player.firstName }} {{ row.player.lastName }}</td>
               <td
                 *ngFor="let roll of row.rolls"
                 [ngClass]="{
                 'roll-cell': true,
                 'table-success': roll.winner,
                 'table-active': roll.acting,
-                'text-center': true
+                'text-center': true,
+                'align-middle': true
               }">
-                {{ roll.value != -1 ? roll.value : '  ' }}
+                <pkr-card *ngIf="roll.value != null" [card]="roll.value" size="xs"></pkr-card>
+                {{ roll.value == null ? ' ' : '' }}
               </td>
-              <td class="text-center">
+              <td class="text-center align-middle">
                 {{ row.player.score }}
               </td>
             </tr>
@@ -52,6 +54,16 @@
             class="btn btn-success btn-size-md">Roll
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+  <div class="card m-3">
+    <h3 class="card-header bg-success text-light">Hand Summary</h3>
+    <div class="row">
+      <div class="col-sm-12 text-center p-3">
+        <span class="m-1" *ngFor="let card of currentHandCards">
+          <pkr-card [card]="card" size="xl"></pkr-card>
+        </span>
       </div>
     </div>
   </div>

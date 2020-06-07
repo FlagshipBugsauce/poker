@@ -15,7 +15,6 @@ import {
 } from '../../api/models';
 import {ToastService} from '../../shared/toast.service';
 import {GameState} from '../../shared/models/game-state.enum';
-import {CardSuit, CardValue} from "../../shared/models/card.enum";
 
 @Component({
   selector: 'pkr-play',
@@ -26,28 +25,32 @@ export class PlayComponent implements OnInit {
   /**
    * Data representing a summary of the game.
    */
-  public gameData: PlayerStatModel[] = [];
+  public gameData: PlayerStatModel[] = [] as PlayerStatModel[];
 
   /**
    * Current hand being played in the game.
    */
   public currentHand: number = 0;
+
   /**
    * Time remaining for a player to act (when applicable).
    */
   public timeToAct: number = 0;
+
   /**
    * Flag that informs the UI when a player is able to perform a roll action.
    */
   public canRoll: boolean = false;
+
   /**
    * Numbers used for the table summarizing what has occurred in the game.
    */
   public numbers: number[];
 
-  public suitMapping = {};
-
-  public valueMapping = {};
+  /**
+   * Collection of cards drawn in the current hand.
+   */
+  public currentHandCards: CardModel[] = [] as CardModel[];
 
   constructor(
     private apiConfiguration: ApiConfiguration,
@@ -59,23 +62,6 @@ export class PlayComponent implements OnInit {
     private apiInterceptor: ApiInterceptor,
     private authService: AuthService,
     private toastService: ToastService) {
-    this.suitMapping[CardSuit.Spades] = 'S';
-    this.suitMapping[CardSuit.Hearts] = 'H';
-    this.suitMapping[CardSuit.Clubs] = 'C';
-    this.suitMapping[CardSuit.Diamonds] = 'D';
-    this.valueMapping[CardValue.Ace] = 'A';
-    this.valueMapping[CardValue.King] = 'K';
-    this.valueMapping[CardValue.Queen] = 'Q';
-    this.valueMapping[CardValue.Jack] = 'J';
-    this.valueMapping[CardValue.Ten] = '10';
-    this.valueMapping[CardValue.Nine] = '9';
-    this.valueMapping[CardValue.Eight] = '8';
-    this.valueMapping[CardValue.Seven] = '7';
-    this.valueMapping[CardValue.Six] = '6';
-    this.valueMapping[CardValue.Five] = '5';
-    this.valueMapping[CardValue.Four] = '4';
-    this.valueMapping[CardValue.Three] = '3';
-    this.valueMapping[CardValue.Two] = '2';
   }
 
   /**
@@ -153,15 +139,19 @@ export class PlayComponent implements OnInit {
    * Updates game data so the summary displayed is accurate.
    */
   private updateGameData(): void {
+    const currentHandPrev = this.currentHand;
     this.currentHand = this.gameModel.hands.length - 1;
+    if (this.currentHand !== currentHandPrev) {
+      this.currentHandCards = [] as CardModel[];
+    }
 
     if (this.hand.actions.length > 0) {
       const lastActingPlayer = this.hand.actions[this.hand.actions.length - 1].player;
       const lastActingIndex = this.gameModel.players.findIndex(p => p.id === lastActingPlayer.id);
       const card: CardModel = this.hand.actions[this.hand.actions.length - 1].drawnCard;
+      this.currentHandCards.push(card);
       this.gameData[lastActingIndex].rolls[this.currentHand] = {
-        // value: this.hand.actions[this.hand.actions.length - 1].value,
-        value: `${this.valueMapping[card.value]}${this.suitMapping[card.suit]}`,
+        value: card,
         winner: false,
         acting: false
       } as RollModel;
@@ -229,7 +219,7 @@ export class PlayComponent implements OnInit {
         acting: false
       } as PlayerStatModel);
       for (let i = 0; i < this.gameModel.totalHands; i++) {
-        this.gameData[this.gameData.length - 1].rolls[i] = {winner: false, acting: false, value: '-1'} as RollModel;
+        this.gameData[this.gameData.length - 1].rolls[i] = {winner: false, acting: false, value: null} as RollModel;
       }
     }
   }
@@ -248,7 +238,7 @@ export interface PlayerStatModel {
  * Another model that is most likely temporary, so I will let this one live here for now as well.
  */
 export interface RollModel {
-  value: string;
+  value: CardModel;
   winner: boolean;
   acting: boolean;
 }

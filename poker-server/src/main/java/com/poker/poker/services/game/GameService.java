@@ -1,5 +1,6 @@
 package com.poker.poker.services.game;
 
+import com.poker.poker.config.AppConfig;
 import com.poker.poker.config.constants.GameConstants;
 import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.HandDocument;
@@ -37,6 +38,8 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class GameService {
+
+  private final AppConfig appConfig;
 
   /** Mapping of user Id to game Id. */
   private final Map<UUID, UUID> userIdToGameIdMap;
@@ -97,8 +100,8 @@ public class GameService {
             new ArrayList<>(), // List of player models is only updated after game begins.
             new ArrayList<>(),
             null, // List of hands is empty until the game starts.
-            gameConstants.getNumRoundsInRollGame(),
-            (int) (gameConstants.getTimeToActInMillis() / 1000));
+            appConfig.getNumRoundsInRollGame(),
+            appConfig.getTimeToActInMillis() / 1000);
 
     userIdToGameIdMap.put(user.getId(), gameDocument.getId());
     games.put(gameDocument.getId(), gameDocument);
