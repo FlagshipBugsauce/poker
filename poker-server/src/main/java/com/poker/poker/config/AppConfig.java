@@ -22,5 +22,4 @@ public class AppConfig {
 
   @Value("${time-to-act-in-millis}")
   private int timeToActInMillis;
-
 }
