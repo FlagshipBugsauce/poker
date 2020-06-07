@@ -14,6 +14,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RegisterComponent} from './register/register.component';
 import {PopupComponent} from './popup/popup.component';
 import {ToastContainerComponent} from './toast-container/toast-container.component';
+import { CardComponent } from './card/card.component';
 
 export const API_INTERCEPTOR_PROVIDER: Provider = {
   provide: HTTP_INTERCEPTORS,
@@ -29,7 +30,8 @@ export const API_INTERCEPTOR_PROVIDER: Provider = {
     LoginComponent,
     RegisterComponent,
     PopupComponent,
-    ToastContainerComponent
+    ToastContainerComponent,
+    CardComponent
   ],
   imports: [
     CommonModule,
@@ -50,7 +52,8 @@ export const API_INTERCEPTOR_PROVIDER: Provider = {
     ReactiveFormsModule,
     FormsModule,
     PopupComponent,
-    RouterModule
+    RouterModule,
+    CardComponent
   ]
 })
 export class SharedModule {

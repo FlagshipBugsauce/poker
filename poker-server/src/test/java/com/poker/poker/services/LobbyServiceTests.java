@@ -1,6 +1,7 @@
 package com.poker.poker.services;
 
 import com.poker.poker.common.TestBaseClass;
+import com.poker.poker.config.AppConfig;
 import com.poker.poker.config.constants.GameConstants;
 import com.poker.poker.documents.LobbyDocument;
 import com.poker.poker.documents.UserDocument;
@@ -32,7 +33,7 @@ import org.mockito.quality.Strictness;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class LobbyServiceTests extends TestBaseClass {
-
+  @Spy private AppConfig appConfig;
   @Mock private SseService sseService;
   @Spy private Map<UUID, LobbyDocument> activeGames;
   @Spy private Map<UUID, UUID> userIdToGameIdMap;
@@ -71,7 +72,7 @@ public class LobbyServiceTests extends TestBaseClass {
     final CreateGameModel newGame =
         new CreateGameModel(
             "TestGame_" + randomLetterString(25),
-            gameConstants.getMaxNumberOfPlayers(),
+            appConfig.getMaxNumberOfPlayers(),
             new BigDecimal(420));
     withSpecifiedGame(actions, newGame);
   }

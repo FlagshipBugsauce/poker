@@ -10,15 +10,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class GameConstants extends AppConstants {
-
-  private final int minNumberOfPlayers = 2;
-
-  private final int maxNumberOfPlayers = 10;
-
-  private final long timeToActInMillis = 1000 * 10;
-
-  private final int numRoundsInRollGame = 10;
-
   // Exceptions
   private final BadRequestException lobbyNotFoundException =
       new BadRequestException(

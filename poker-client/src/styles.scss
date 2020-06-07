@@ -4,7 +4,8 @@
 @import '~bootstrap/scss/bootstrap';
 
 $button-width: 130px;
-$roll-cell-width: 80px;
+$roll-cell-width: 64px;
+$roll-cell-height: 80px;
 $button-size-md: 100px;
 $toast-xs: 100px;
 $toast-sm: 200px;
@@ -18,6 +19,7 @@ $toast-xl: 500px;
 
 .roll-cell {
   width: $roll-cell-width;
+  height: $roll-cell-height;
 }
 
 .toast-xs {

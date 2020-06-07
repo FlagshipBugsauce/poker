@@ -1,5 +1,6 @@
 package com.poker.poker.services.game;
 
+import com.poker.poker.config.AppConfig;
 import com.poker.poker.config.constants.HandConstants;
 import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.HandDocument;
@@ -37,6 +38,8 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class HandService {
+
+  private final AppConfig appConfig;
 
   private HandConstants handConstants;
 
@@ -249,7 +252,7 @@ public class HandService {
     final int numActions = hand.getActions().size();
 
     try {
-      Thread.sleep(handConstants.getTimeToActInMillis());
+      Thread.sleep(appConfig.getTimeToActInMillis());
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
@@ -259,7 +262,7 @@ public class HandService {
 
     log.debug(
         "Waited for {} ms, did not detect any action from {}.",
-        handConstants.getTimeToActInMillis(),
+        appConfig.getTimeToActInMillis(),
         userId);
     log.debug("Performing default action for {}.", userId);
 
