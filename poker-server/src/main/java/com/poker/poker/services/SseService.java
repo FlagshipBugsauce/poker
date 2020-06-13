@@ -117,8 +117,7 @@ public class SseService {
    * @return An emitter model of the specified type, associated with the specified user.
    * @throws BadRequestException If no emitter model matching the parameters is found.
    */
-  public EmitterModel getEmitterModel(EmitterType type, UUID userId)
-      throws BadRequestException {
+  public EmitterModel getEmitterModel(EmitterType type, UUID userId) throws BadRequestException {
     final Map<UUID, EmitterModel> map = getEmitterMap(type);
     final EmitterModel emitterModel = map.get(userId);
     if (emitterModel == null) {
@@ -254,8 +253,7 @@ public class SseService {
    * @param userId The ID of the user the data should be sent to.
    * @param data The data that should be sent to the client.
    */
-  public ApiSuccessModel sendUpdate(
-      final EmitterType type, final UUID userId, final Object data) {
+  public ApiSuccessModel sendUpdate(final EmitterType type, final UUID userId, final Object data) {
     try {
       getEmitter(type, userId).send(data);
       log.debug("{} data was sent to {}.", type, userId);
