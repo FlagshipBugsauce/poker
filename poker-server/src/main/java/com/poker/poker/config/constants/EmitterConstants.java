@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-public final class EmitterConstants {
+public class EmitterConstants {
 
   private final long gameEmitterDuration = 1000 * 60 * 60 * 24;
 
