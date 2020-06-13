@@ -2,9 +2,13 @@ package com.poker.poker.services;
 
 import com.poker.poker.common.TestBaseClass;
 import com.poker.poker.config.constants.AppConstants;
+import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.AuthResponseModel;
+import com.poker.poker.models.enums.UserGroup;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.validation.exceptions.BadRequestException;
+import com.poker.poker.validation.exceptions.ForbiddenException;
+import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -91,5 +95,78 @@ public class UserServiceTests extends TestBaseClass {
     // When/Then
     Assertions.assertThrows(
         BadRequestException.class, () -> userService.register(getSampleNewAccountModel()));
+  }
+
+  /**
+   * Testing that validation works correctly when a user is a member of the Client group.
+   */
+  @Test
+  public void testUserGroupValidation01() {
+    // Given
+    final String jwt = "token";
+    Mockito.when(jwtService.extractEmail(jwt)).thenReturn(getSampleEmail());
+    Mockito
+        .when(userRepository.findUserDocumentByEmail(getSampleEmail()))
+        .thenReturn(getUserDocument());
+
+    // When/Then
+    Assertions.assertThrows(
+        ForbiddenException.class, () -> userService.validate(jwt, appConstants.getAdminGroups()));
+    Assertions.assertDoesNotThrow(() -> userService.validate(jwt, appConstants.getClientGroups()));
+    Assertions.assertDoesNotThrow(() -> userService.validate(jwt, appConstants.getAllUsers()));
+  }
+
+  /**
+   * Testing that validation works correctly when a user is a member of the Guest group.
+   */
+  @Test
+  public void testUserGroupValidation02() {
+    // Given
+    final String jwt = "token";
+    final UserDocument guestUser = new UserDocument(
+        UUID.randomUUID(),
+        getSampleEmail(),
+        passwordEncoder.encode(getSamplePassword()),
+        UserGroup.Guest,
+        getSampleFirstName(),
+        getSampleLastName()
+    );
+    Mockito.when(jwtService.extractEmail(jwt)).thenReturn(getSampleEmail());
+    Mockito
+        .when(userRepository.findUserDocumentByEmail(getSampleEmail()))
+        .thenReturn(guestUser);
+
+    // When/Then
+    Assertions.assertThrows(
+        ForbiddenException.class, () -> userService.validate(jwt, appConstants.getAdminGroups()));
+    Assertions.assertThrows(
+        ForbiddenException.class, () -> userService.validate(jwt, appConstants.getClientGroups()));
+    Assertions.assertDoesNotThrow(() -> userService.validate(jwt, appConstants.getAllUsers()));
+  }
+
+  /**
+   * Testing that validation works correctly when a user is a member of the Administrator group.
+   */
+  @Test
+  public void testUserGroupValidation03() {
+    // Given
+    final String jwt = "token";
+    final UserDocument adminUser = new UserDocument(
+        UUID.randomUUID(),
+        getSampleEmail(),
+        passwordEncoder.encode(getSamplePassword()),
+        UserGroup.Administrator,
+        getSampleFirstName(),
+        getSampleLastName()
+    );
+    Mockito.when(jwtService.extractEmail(jwt)).thenReturn(getSampleEmail());
+    Mockito
+        .when(userRepository.findUserDocumentByEmail(getSampleEmail()))
+        .thenReturn(adminUser);
+
+    // When/Then
+    Assertions.assertDoesNotThrow(() -> userService.validate(jwt, appConstants.getAdminGroups()));
+    Assertions.assertDoesNotThrow(() -> userService.validate(jwt, appConstants.getClientGroups()));
+    Assertions.assertDoesNotThrow(() -> userService.validate(jwt, appConstants.getAllUsers()));
   }
 }

@@ -44,7 +44,7 @@ public class UserService {
    * @param authRequestModel A model containing an email and a password.
    * @return An AuthResponseModel containing a JWT which can be used to access secured endpoints.
    */
-  public AuthResponseModel authenticate(AuthRequestModel authRequestModel) {
+  public AuthResponseModel authenticate(final AuthRequestModel authRequestModel) {
     try {
       log.debug("Attempting to authenticate user with email: {}.", authRequestModel.getEmail());
       authenticationManager.authenticate(
@@ -62,7 +62,8 @@ public class UserService {
         customUserDetailsService.loadUserByUsername(authRequestModel.getEmail());
     final String jwt = jwtService.generateToken(userDetails);
 
-    UserDocument userDocument = userRepository.findUserDocumentByEmail(authRequestModel.getEmail());
+    final UserDocument userDocument =
+        userRepository.findUserDocumentByEmail(authRequestModel.getEmail());
 
     return new AuthResponseModel(
         jwt,
@@ -82,7 +83,8 @@ public class UserService {
    * @return An ApiSuccessModel, if the account is created successfully.
    * @throws BadRequestException If the account is not created successfully.
    */
-  public ApiSuccessModel register(NewAccountModel newAccountModel) throws BadRequestException {
+  public ApiSuccessModel register(final NewAccountModel newAccountModel)
+      throws BadRequestException {
     // Log
     log.debug("Attempting to create account for user with email: {}.", newAccountModel.getEmail());
 
@@ -112,8 +114,9 @@ public class UserService {
    * @param jwt A string that contains the Authentication information of a user.
    * @param groupsAllowed a list of user groups desired to validate a user against.
    */
-  public void validate(String jwt, List<UserGroup> groupsAllowed) throws ForbiddenException {
-    UserDocument userDocument =
+  public void validate(final String jwt, final List<UserGroup> groupsAllowed)
+      throws ForbiddenException {
+    final UserDocument userDocument =
         userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt));
     // User is not in the correct group.
     if (!groupsAllowed.contains(userDocument.getGroup())) {
@@ -139,12 +142,12 @@ public class UserService {
    * @param userId The UUID of the user.
    * @return A UserModel associated to the ID provided.
    */
-  public UserModel getUserInfo(String userId) {
+  public UserModel getUserInfo(final String userId) {
     // Check if the string provided is a valid UUID.
     uuidService.checkIfValidAndThrowBadRequest(userId);
     // We know the UUID is valid.
-    UUID id = UUID.fromString(userId);
-    UserDocument userDocument = userRepository.findUserDocumentById(id);
+    final UUID id = UUID.fromString(userId);
+    final UserDocument userDocument = userRepository.findUserDocumentById(id);
     if (userDocument == null) {
       log.error("Could not find user with ID of {}.", userId);
       throw appConstants.getUserInfoNotFoundException();

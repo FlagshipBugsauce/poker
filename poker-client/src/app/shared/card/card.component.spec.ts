@@ -1,6 +1,7 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { CardComponent } from './card.component';
+import {CardComponent} from './card.component';
+import {SharedModule} from '../shared.module';
 
 describe('CardComponent', () => {
   let component: CardComponent;
@@ -8,7 +9,8 @@ describe('CardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CardComponent ]
+      declarations: [CardComponent],
+      imports: [SharedModule]
     })
     .compileComponents();
   }));

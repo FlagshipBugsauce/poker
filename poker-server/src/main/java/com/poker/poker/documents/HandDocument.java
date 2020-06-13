@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Document(collection = "hands") // TODO: Refactor to be HandDocument
+@Document(collection = "hands")
 public class HandDocument {
   @Schema(
       description = "Hand ID.",

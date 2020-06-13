@@ -65,6 +65,7 @@ public class TestBaseClass {
   private final BigDecimal sampleBuyIn = new BigDecimal("69");
   private final CreateGameModel sampleCreateGameModel =
       new CreateGameModel(sampleGameName, sampleMaxPlayers, sampleBuyIn);
+  @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
   private final LobbyDocument sampleLobbyDocument =
       new LobbyDocument(
           UUID.randomUUID(),

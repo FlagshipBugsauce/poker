@@ -50,4 +50,9 @@ public class GameConstants extends AppConstants {
   private final BadRequestException deckNotFoundException =
       new BadRequestException(
           "Error Retrieving Deck", "There is no deck associated with the specified game.");
+
+  private final BadRequestException playerNotReadyException =
+      new BadRequestException(
+          "Error Starting Game",
+          "Status of all players must be set to ready before the game can begin.");
 }

@@ -1,7 +1,6 @@
 package com.poker.poker.controllers;
 
 import com.poker.poker.config.constants.GameConstants;
-import com.poker.poker.documents.GameDocument;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.game.CreateGameModel;
 import com.poker.poker.models.game.GetGameModel;
@@ -44,7 +43,7 @@ public class GameController {
   private GameService gameService;
   private LobbyService lobbyService;
   private UserService userService;
-  private GameConstants constants;
+  private GameConstants gameConstants;
   private JwtService jwtService;
   private UserRepository userRepository;
 
@@ -74,15 +73,10 @@ public class GameController {
   public ResponseEntity<ApiSuccessModel> createGame(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
       @Valid @RequestBody CreateGameModel createGameModel) {
-    userService.validate(jwt, constants.getClientGroups());
+    userService.validate(jwt, gameConstants.getClientGroups());
     return ResponseEntity.ok(
         gameService.createGame(
             createGameModel, userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
-  }
-  // TODO: CLEAN UP
-  @RequestMapping(value = "/get-game-document", method = RequestMethod.POST)
-  public ResponseEntity<GameDocument> getGameDocument() {
-    return ResponseEntity.ok(new GameDocument());
   }
 
   /**
@@ -110,7 +104,7 @@ public class GameController {
   @RequestMapping(value = "/get-list", method = RequestMethod.GET)
   public ResponseEntity<List<GetGameModel>> getGameList(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
-    userService.validate(jwt, constants.getClientGroups());
+    userService.validate(jwt, gameConstants.getClientGroups());
     return ResponseEntity.ok(lobbyService.getLobbyList());
   }
 
@@ -140,7 +134,7 @@ public class GameController {
   public ResponseEntity<ApiSuccessModel> joinGame(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
       @PathVariable String gameId) {
-    userService.validate(jwt, constants.getClientGroups());
+    userService.validate(jwt, gameConstants.getClientGroups());
     return ResponseEntity.ok(
         gameService.joinLobby(
             gameId, userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
@@ -163,6 +157,7 @@ public class GameController {
   @RequestMapping(value = "/ready", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> ready(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
+    userService.validate(jwt, gameConstants.getClientGroups());
     return ResponseEntity.ok(
         lobbyService.ready(userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
   }
@@ -184,6 +179,7 @@ public class GameController {
   @RequestMapping(value = "/leave-lobby", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> leaveLobby(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
+    userService.validate(jwt, gameConstants.getClientGroups());
     return ResponseEntity.ok(
         gameService.removePlayerFromLobby(
             userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
@@ -206,6 +202,7 @@ public class GameController {
   @RequestMapping(value = "/start", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> startGame(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
+    userService.validate(jwt, gameConstants.getClientGroups());
     return ResponseEntity.ok(
         gameService.startGame(
             userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));

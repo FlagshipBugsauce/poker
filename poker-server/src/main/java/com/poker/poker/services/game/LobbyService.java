@@ -86,6 +86,16 @@ public class LobbyService {
     if (lobbyDocument == null) {
       throw gameConstants.getGameNotFoundException();
     }
+
+    // Check if all players are ready.
+    for (LobbyPlayerModel player : lobbyDocument.getPlayers()) {
+      if (!player.isReady()) {
+        log.error("Host attempted to start the game, but all players were not ready.");
+        lobbys.put(gameDocument.getId(), lobbyDocument);  // Add the mapping back.
+        throw gameConstants.getPlayerNotReadyException();
+      }
+    }
+
     // Remove players from userIdToLobbyIdMap
     lobbyDocument.getPlayers().forEach(player -> userIdToLobbyIdMap.remove(player.getId()));
 
