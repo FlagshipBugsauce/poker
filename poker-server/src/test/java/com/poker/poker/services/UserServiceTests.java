@@ -97,16 +97,13 @@ public class UserServiceTests extends TestBaseClass {
         BadRequestException.class, () -> userService.register(getSampleNewAccountModel()));
   }
 
-  /**
-   * Testing that validation works correctly when a user is a member of the Client group.
-   */
+  /** Testing that validation works correctly when a user is a member of the Client group. */
   @Test
   public void testUserGroupValidation01() {
     // Given
     final String jwt = "token";
     Mockito.when(jwtService.extractEmail(jwt)).thenReturn(getSampleEmail());
-    Mockito
-        .when(userRepository.findUserDocumentByEmail(getSampleEmail()))
+    Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail()))
         .thenReturn(getUserDocument());
 
     // When/Then
@@ -116,25 +113,21 @@ public class UserServiceTests extends TestBaseClass {
     Assertions.assertDoesNotThrow(() -> userService.validate(jwt, appConstants.getAllUsers()));
   }
 
-  /**
-   * Testing that validation works correctly when a user is a member of the Guest group.
-   */
+  /** Testing that validation works correctly when a user is a member of the Guest group. */
   @Test
   public void testUserGroupValidation02() {
     // Given
     final String jwt = "token";
-    final UserDocument guestUser = new UserDocument(
-        UUID.randomUUID(),
-        getSampleEmail(),
-        passwordEncoder.encode(getSamplePassword()),
-        UserGroup.Guest,
-        getSampleFirstName(),
-        getSampleLastName()
-    );
+    final UserDocument guestUser =
+        new UserDocument(
+            UUID.randomUUID(),
+            getSampleEmail(),
+            passwordEncoder.encode(getSamplePassword()),
+            UserGroup.Guest,
+            getSampleFirstName(),
+            getSampleLastName());
     Mockito.when(jwtService.extractEmail(jwt)).thenReturn(getSampleEmail());
-    Mockito
-        .when(userRepository.findUserDocumentByEmail(getSampleEmail()))
-        .thenReturn(guestUser);
+    Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail())).thenReturn(guestUser);
 
     // When/Then
     Assertions.assertThrows(
@@ -144,25 +137,21 @@ public class UserServiceTests extends TestBaseClass {
     Assertions.assertDoesNotThrow(() -> userService.validate(jwt, appConstants.getAllUsers()));
   }
 
-  /**
-   * Testing that validation works correctly when a user is a member of the Administrator group.
-   */
+  /** Testing that validation works correctly when a user is a member of the Administrator group. */
   @Test
   public void testUserGroupValidation03() {
     // Given
     final String jwt = "token";
-    final UserDocument adminUser = new UserDocument(
-        UUID.randomUUID(),
-        getSampleEmail(),
-        passwordEncoder.encode(getSamplePassword()),
-        UserGroup.Administrator,
-        getSampleFirstName(),
-        getSampleLastName()
-    );
+    final UserDocument adminUser =
+        new UserDocument(
+            UUID.randomUUID(),
+            getSampleEmail(),
+            passwordEncoder.encode(getSamplePassword()),
+            UserGroup.Administrator,
+            getSampleFirstName(),
+            getSampleLastName());
     Mockito.when(jwtService.extractEmail(jwt)).thenReturn(getSampleEmail());
-    Mockito
-        .when(userRepository.findUserDocumentByEmail(getSampleEmail()))
-        .thenReturn(adminUser);
+    Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail())).thenReturn(adminUser);
 
     // When/Then
     Assertions.assertDoesNotThrow(() -> userService.validate(jwt, appConstants.getAdminGroups()));

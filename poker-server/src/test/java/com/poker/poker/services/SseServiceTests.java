@@ -21,11 +21,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class SseServiceTests {
 
-  @Spy
-  private EmitterConstants emitterConstants;
+  @Spy private EmitterConstants emitterConstants;
 
-  @InjectMocks
-  private SseService sseService;
+  @InjectMocks private SseService sseService;
 
   @BeforeEach
   private void setup() {
@@ -51,83 +49,83 @@ public class SseServiceTests {
     test.accept(emitterTypeToUuidMap);
   }
 
-  /**
-   * Ensures that each emitter type can be created successfully.
-   */
+  /** Ensures that each emitter type can be created successfully. */
   @Test
   public void createEmitter_createsEmitters_whenArgumentsAreValid() {
-    withEachEmitterType((emitters) -> {
-      for (final EmitterType type : emitters.keySet()) {
-        final UUID uuid = emitters.get(type);
-        final EmitterModel[] model = new EmitterModel[1];
-        Assertions.assertDoesNotThrow(() -> model[0] = sseService.getEmitterModel(type, uuid));
-        Assertions.assertNotNull(sseService.getEmitter(type, uuid));
-        Assertions.assertEquals(model[0].getEmitter(), sseService.getEmitter(type, uuid));
-      }
-    });
+    withEachEmitterType(
+        (emitters) -> {
+          for (final EmitterType type : emitters.keySet()) {
+            final UUID uuid = emitters.get(type);
+            final EmitterModel[] model = new EmitterModel[1];
+            Assertions.assertDoesNotThrow(() -> model[0] = sseService.getEmitterModel(type, uuid));
+            Assertions.assertNotNull(sseService.getEmitter(type, uuid));
+            Assertions.assertEquals(model[0].getEmitter(), sseService.getEmitter(type, uuid));
+          }
+        });
   }
 
-  /**
-   * Ensures that only the correct emitters are created (i.e. no extra emitters).
-   */
+  /** Ensures that only the correct emitters are created (i.e. no extra emitters). */
   @Test
   public void createEmitter_createsProperEmitters_whenArgumentsAreValid() {
-    withEachEmitterType((emitters) -> {
-      for (final EmitterType type : emitters.keySet()) {
-        Assertions.assertDoesNotThrow(() -> sseService.getEmitterModel(type, emitters.get(type)));
-        Assertions.assertDoesNotThrow(() -> sseService.getEmitter(type, emitters.get(type)));
-        // Create a list of UUIDs for the emitters for types that are not 'type'
-        final List<UUID> uuids = emitters
-            .values()
-            .stream()
-            .filter(uuid -> !emitters.get(type).equals(uuid))
-            .collect(Collectors.toList());
-        // Ensure that the proper exception is thrown when trying to get these emitters.
-        for (final UUID uuid : uuids) {
-          Assertions.assertThrows(
-              BadRequestException.class, () -> sseService.getEmitterModel(type, uuid));
-          Assertions.assertThrows(
-              BadRequestException.class, () -> sseService.getEmitter(type, uuid));
-        }
-      }
-    });
+    withEachEmitterType(
+        (emitters) -> {
+          for (final EmitterType type : emitters.keySet()) {
+            Assertions.assertDoesNotThrow(
+                () -> sseService.getEmitterModel(type, emitters.get(type)));
+            Assertions.assertDoesNotThrow(() -> sseService.getEmitter(type, emitters.get(type)));
+            // Create a list of UUIDs for the emitters for types that are not 'type'
+            final List<UUID> uuids =
+                emitters.values().stream()
+                    .filter(uuid -> !emitters.get(type).equals(uuid))
+                    .collect(Collectors.toList());
+            // Ensure that the proper exception is thrown when trying to get these emitters.
+            for (final UUID uuid : uuids) {
+              Assertions.assertThrows(
+                  BadRequestException.class, () -> sseService.getEmitterModel(type, uuid));
+              Assertions.assertThrows(
+                  BadRequestException.class, () -> sseService.getEmitter(type, uuid));
+            }
+          }
+        });
   }
 
-  /**
-   * Ensures that data can be sent and that the last sent data is stored in the emitter model.
-   */
+  /** Ensures that data can be sent and that the last sent data is stored in the emitter model. */
   @Test
   public void sendUpdate_succeeds_whenEmittersExist() {
-    withEachEmitterType((emitters) -> {
-      for (final EmitterType type : emitters.keySet()) {
-        final String data1 = "data1";
-        // Ensure data is sent without throwing.
-        Assertions.assertDoesNotThrow(() -> sseService.sendUpdate(type, emitters.get(type), data1));
-        // Ensure that the emitter model recorded the last piece of data that was sent.
-        Assertions.assertEquals(
-            data1, sseService.getEmitterModel(type, emitters.get(type)).getLastSent());
+    withEachEmitterType(
+        (emitters) -> {
+          for (final EmitterType type : emitters.keySet()) {
+            final String data1 = "data1";
+            // Ensure data is sent without throwing.
+            Assertions.assertDoesNotThrow(
+                () -> sseService.sendUpdate(type, emitters.get(type), data1));
+            // Ensure that the emitter model recorded the last piece of data that was sent.
+            Assertions.assertEquals(
+                data1, sseService.getEmitterModel(type, emitters.get(type)).getLastSent());
 
-        final String data2 = "data2";
-        // Ensure data is sent without throwing.
-        Assertions.assertDoesNotThrow(() -> sseService.sendUpdate(type, emitters.get(type), data2));
-        // Ensure that the emitter model recorded the last piece of data that was sent.
-        Assertions.assertEquals(
-            data2, sseService.getEmitterModel(type, emitters.get(type)).getLastSent());
-      }
-    });
+            final String data2 = "data2";
+            // Ensure data is sent without throwing.
+            Assertions.assertDoesNotThrow(
+                () -> sseService.sendUpdate(type, emitters.get(type), data2));
+            // Ensure that the emitter model recorded the last piece of data that was sent.
+            Assertions.assertEquals(
+                data2, sseService.getEmitterModel(type, emitters.get(type)).getLastSent());
+          }
+        });
   }
 
   /**
    * Ensures that destroying an emitter does not throw exceptions (exceptions are actually caught,
-   * so this needs to be modified in the future).
-   * TODO: Update this test.
+   * so this needs to be modified in the future). TODO: Update this test.
    */
   @Test
   public void completeEmitter_destroysEmitters_whenEmittersExist() {
-    withEachEmitterType((emitters) -> {
-      for (final EmitterType type : emitters.keySet()) {
-        Assertions.assertDoesNotThrow(() -> sseService.completeEmitter(type, emitters.get(type)));
-      }
-    });
+    withEachEmitterType(
+        (emitters) -> {
+          for (final EmitterType type : emitters.keySet()) {
+            Assertions.assertDoesNotThrow(
+                () -> sseService.completeEmitter(type, emitters.get(type)));
+          }
+        });
   }
 }

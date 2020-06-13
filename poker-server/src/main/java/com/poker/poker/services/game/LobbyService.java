@@ -91,7 +91,7 @@ public class LobbyService {
     for (LobbyPlayerModel player : lobbyDocument.getPlayers()) {
       if (!player.isReady()) {
         log.error("Host attempted to start the game, but all players were not ready.");
-        lobbys.put(gameDocument.getId(), lobbyDocument);  // Add the mapping back.
+        lobbys.put(gameDocument.getId(), lobbyDocument); // Add the mapping back.
         throw gameConstants.getPlayerNotReadyException();
       }
     }
