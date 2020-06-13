@@ -212,11 +212,7 @@ export class PlayComponent implements OnInit {
    */
   private initializeGameData(): void {
     this.numbers = Array(this.gameModel.totalHands).fill('').map((v, i) => i + 1);
-    // tslint:disable-next-line:prefer-for-of
-    for (let j = 0; j < this.gameModel.players.length; j++) {
-      const player = this.gameModel.players[j];
-    // }
-    // for (const player of this.gameModel.players) {
+    for (const player of this.gameModel.players) {
       this.gameData.push({
         player,
         rolls: Array(this.gameModel.totalHands),
