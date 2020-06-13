@@ -8,10 +8,6 @@ on:
     paths:
       - 'poker-client**'
       - '.github/workflows/node.yml'
-  pull_request:
-    paths:
-      - 'poker-client**'
-      - '.github/workflows/node.yml'
 
 jobs:
   build:

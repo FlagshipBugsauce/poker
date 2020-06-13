@@ -1,10 +1,6 @@
 name: Google Formatter
 
 on:
-  pull_request:
-    paths: 
-      - 'poker-server**'
-      - '.github/workflows/server-formatting.yml'
   push:
     paths: 
       - 'poker-server**'
