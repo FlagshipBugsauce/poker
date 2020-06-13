@@ -28,9 +28,14 @@ export class LoginComponent implements OnInit {
   //   email: "test.account2@domain.com",
   //   password: "admin!@#"
   // }
+  // private quickCredentials: AuthRequestModel = {
+  //   email: 'jon@domain.com',
+  //   password: 'jonathan'
+  // } as AuthRequestModel;
+
   private quickCredentials: AuthRequestModel = {
-    email: 'jon@domain.com',
-    password: 'jonathan'
+    email: '',
+    password: ''
   } as AuthRequestModel;
 
   constructor(
@@ -47,12 +52,12 @@ export class LoginComponent implements OnInit {
     });
 
     // DEV HELPER: AUTOMATICALLY AUTHORIZES AND NAVIGATES TO PAGE BEING WORKED ON
-    this.authService.authorize(this.quickCredentials.email, this.quickCredentials.password).then((success: boolean) => {
-      // if (success) this.router.navigate(['/game/0a7d95ef-94ba-47bc-b591-febb365bc543']);
-      if (success) {
-        this.router.navigate(['/join']).then();
-      }
-    });
+    // this.authService.authorize(this.quickCredentials.email, this.quickCredentials.password).then((success: boolean) => {
+    //   // if (success) this.router.navigate(['/game/0a7d95ef-94ba-47bc-b591-febb365bc543']);
+    //   if (success) {
+    //     this.router.navigate(['/join']).then();
+    //   }
+    // });
   }
 
   /**

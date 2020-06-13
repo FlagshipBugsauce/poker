@@ -9,7 +9,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EmitterModel {
+public final class EmitterModel {
   /** The emitter. */
   private SseEmitter emitter;
 

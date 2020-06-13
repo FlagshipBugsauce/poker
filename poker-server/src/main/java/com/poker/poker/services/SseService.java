@@ -31,14 +31,14 @@ public class SseService {
    * associated to a specific user. The getEmitterMap method can be used to retrieve the appropriate
    * map and a UUID can be used to send data to a specific user.
    */
-  private Map<EmitterType, Map<UUID, EmitterModel>> emitterMaps;
+  private final Map<EmitterType, Map<UUID, EmitterModel>> emitterMaps;
 
   /**
    * Constructor that injects game constants and sets up the emitter map appropriately.
    *
    * @param emitterConstants Constants required for events which occur in the game.
    */
-  public SseService(EmitterConstants emitterConstants) {
+  public SseService(final EmitterConstants emitterConstants) {
     this.emitterConstants = emitterConstants;
     emitterMaps = new HashMap<>();
     emitterMaps.put(EmitterType.GameList, new HashMap<>());
@@ -55,7 +55,7 @@ public class SseService {
    * @return Emitter map with the specified type.
    * @throws BadRequestException If no emitter map for the specified type exists.
    */
-  private Map<UUID, EmitterModel> getEmitterMap(EmitterType type) throws BadRequestException {
+  private Map<UUID, EmitterModel> getEmitterMap(final EmitterType type) throws BadRequestException {
     final Map<UUID, EmitterModel> emitterMap = emitterMaps.get(type);
     if (emitterMaps.get(type) == null) {
       log.error("Invalid emitter type specified.");
@@ -72,7 +72,7 @@ public class SseService {
    * @return The appropriate timeout value for the emitter type specified.
    * @throws BadRequestException If no emitter of the specified type exists.
    */
-  private long getEmitterTimeout(EmitterType type) throws BadRequestException {
+  private long getEmitterTimeout(final EmitterType type) throws BadRequestException {
     final long timeout;
     switch (type) {
       case GameList:
@@ -99,7 +99,7 @@ public class SseService {
    * @return An SseEmitter of the specified type, associated with the specified user.
    * @throws BadRequestException If no emitter of the specified type for the specified user exists.
    */
-  private SseEmitter getEmitter(EmitterType type, UUID userId) throws BadRequestException {
+  public SseEmitter getEmitter(EmitterType type, UUID userId) throws BadRequestException {
     final SseEmitter emitter = getEmitterModel(type, userId).getEmitter();
     if (emitter == null) {
       throw emitterConstants.getNoEmitterForIdException();
@@ -117,7 +117,7 @@ public class SseService {
    * @return An emitter model of the specified type, associated with the specified user.
    * @throws BadRequestException If no emitter model matching the parameters is found.
    */
-  private EmitterModel getEmitterModel(EmitterType type, UUID userId) throws BadRequestException {
+  public EmitterModel getEmitterModel(EmitterType type, UUID userId) throws BadRequestException {
     final Map<UUID, EmitterModel> map = getEmitterMap(type);
     final EmitterModel emitterModel = map.get(userId);
     if (emitterModel == null) {
@@ -237,7 +237,7 @@ public class SseService {
         });
 
     // Save the emitter to the map.
-    DateTime now = DateTime.now();
+    final DateTime now = DateTime.now();
     emitterMap.put(userId, new EmitterModel(emitter, now, now, now));
 
     // Return the emitter.
@@ -253,7 +253,7 @@ public class SseService {
    * @param userId The ID of the user the data should be sent to.
    * @param data The data that should be sent to the client.
    */
-  public ApiSuccessModel sendUpdate(EmitterType type, UUID userId, Object data) {
+  public ApiSuccessModel sendUpdate(final EmitterType type, final UUID userId, final Object data) {
     try {
       getEmitter(type, userId).send(data);
       log.debug("{} data was sent to {}.", type, userId);
@@ -274,7 +274,7 @@ public class SseService {
    * @param type The type of emitter to broadcast to.
    * @param data The data to send.
    */
-  public void sendToAll(EmitterType type, Object data) {
+  public void sendToAll(final EmitterType type, final Object data) {
     getEmitterMap(type).keySet().forEach(id -> sendUpdate(type, id, data));
   }
 
@@ -285,10 +285,14 @@ public class SseService {
    * @param type The type of emitter being destroyed.
    * @param userId The user ID of the user the emitter is associated with.
    */
-  public ApiSuccessModel completeEmitter(EmitterType type, UUID userId) {
+  public ApiSuccessModel completeEmitter(final EmitterType type, final UUID userId) {
     try {
       getEmitter(type, userId).complete();
-    } catch (Exception e) {
+      // TODO: Investigate why the onComplete() lambda doesn't run (at least during unit tests).
+      if (emitterMaps.get(type).get(userId) != null) {
+        emitterMaps.get(type).remove(userId);
+      }
+    } catch (final Exception e) {
       log.error("Something went wrong removing {} emitter for {}.", type, userId);
     }
     return new ApiSuccessModel("Emitter has been removed.");

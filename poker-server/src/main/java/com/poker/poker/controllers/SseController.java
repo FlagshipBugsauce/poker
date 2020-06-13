@@ -5,6 +5,7 @@ import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.services.JwtService;
 import com.poker.poker.services.SseService;
+import com.poker.poker.services.UserService;
 import com.poker.poker.services.game.GameService;
 import com.poker.poker.services.game.HandService;
 import com.poker.poker.services.game.LobbyService;
@@ -41,6 +42,7 @@ public class SseController {
   private final LobbyService lobbyService;
   private final GameService gameService;
   private final HandService handService;
+  private final UserService userService;
 
   @Operation(
       summary = "Request SSE Emitter",
@@ -58,7 +60,7 @@ public class SseController {
       })
   @RequestMapping(value = "/request/{type}/{jwt}", method = RequestMethod.GET)
   public SseEmitter requestEmitter(@PathVariable String jwt, @PathVariable EmitterType type) {
-    //    userService.validate(jwt, appConstants.getAllUsers());
+    userService.validate(jwt, appConstants.getClientGroups());
     log.debug("User {} requested {} emitter.", jwtService.getUserId(jwt), type);
     final UUID userId = jwtService.getUserId(jwt);
     final Runnable validator;
@@ -95,6 +97,7 @@ public class SseController {
   public ResponseEntity<ApiSuccessModel> requestUpdate(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
       @PathVariable EmitterType type) {
+    userService.validate(jwt, appConstants.getClientGroups());
     final UUID userId = jwtService.getUserId(jwt);
     Object data = null;
     switch (type) {
@@ -132,6 +135,7 @@ public class SseController {
   public ResponseEntity<ApiSuccessModel> destroyEmitter(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
       @PathVariable EmitterType type) {
+    userService.validate(jwt, appConstants.getClientGroups());
     return ResponseEntity.ok(sseService.completeEmitter(type, jwtService.getUserId(jwt)));
   }
 }

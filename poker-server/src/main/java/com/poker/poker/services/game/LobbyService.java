@@ -36,21 +36,21 @@ import org.springframework.stereotype.Service;
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class LobbyService {
 
-  private SseService sseService;
+  private final SseService sseService;
 
   /** A map of active games, keyed by the games ID. */
-  private Map<UUID, LobbyDocument> lobbys;
+  private final Map<UUID, LobbyDocument> lobbys;
 
   /**
    * A map of game UUID's, keyed by user UUID's, to identify which game a user is currently in, and
    * also to identify whether a user is currently in a game, in order to impose a one game limit at
    * any given time.
    */
-  private Map<UUID, UUID> userIdToLobbyIdMap;
+  private final Map<UUID, UUID> userIdToLobbyIdMap;
 
-  private GameConstants gameConstants;
+  private final GameConstants gameConstants;
 
-  private LobbyRepository lobbyRepository;
+  private final LobbyRepository lobbyRepository;
 
   public Runnable getEmitterValidator(UUID userId) {
     return () -> {
@@ -86,6 +86,16 @@ public class LobbyService {
     if (lobbyDocument == null) {
       throw gameConstants.getGameNotFoundException();
     }
+
+    // Check if all players are ready.
+    for (LobbyPlayerModel player : lobbyDocument.getPlayers()) {
+      if (!player.isReady()) {
+        log.error("Host attempted to start the game, but all players were not ready.");
+        lobbys.put(gameDocument.getId(), lobbyDocument); // Add the mapping back.
+        throw gameConstants.getPlayerNotReadyException();
+      }
+    }
+
     // Remove players from userIdToLobbyIdMap
     lobbyDocument.getPlayers().forEach(player -> userIdToLobbyIdMap.remove(player.getId()));
 

@@ -4,24 +4,18 @@ import com.poker.poker.common.TestBaseClass;
 import com.poker.poker.config.constants.AppConstants;
 import java.util.Date;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class JwtServiceTests extends TestBaseClass {
-  @Mock private AppConstants appConstants;
+  @Spy private AppConstants appConstants;
 
   @InjectMocks private JwtService jwtService;
-
-  @BeforeEach
-  public void setup() {
-    Mockito.when(appConstants.getJwtSecretKey()).thenReturn("SECRET");
-  }
 
   @Test
   public void testExtractEmail() {

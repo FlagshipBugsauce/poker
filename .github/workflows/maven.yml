@@ -1,10 +1,6 @@
 name: Java CI with Maven
 
 on:
-  pull_request:
-    paths: 
-      - 'poker-server**'
-      - '.github/workflows/maven.yml'
   push:
     paths: 
       - 'poker-server**'

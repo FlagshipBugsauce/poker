@@ -119,7 +119,6 @@ public class LobbyServiceTests extends TestBaseClass {
     lobbyService =
         new LobbyService(
             sseService, activeGames, userIdToGameIdMap, gameConstants, lobbyRepository);
-
     //    Mockito.when(uuidService.isValidUuidString(Mockito.anyString())).thenCallRealMethod();
     //    Mockito.doAnswer(
     //            (invocation) -> {
