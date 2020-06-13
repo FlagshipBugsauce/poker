@@ -22,7 +22,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Slf4j
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-public final class SseService {
+public class SseService {
 
   private final EmitterConstants emitterConstants;
 
@@ -99,7 +99,7 @@ public final class SseService {
    * @return An SseEmitter of the specified type, associated with the specified user.
    * @throws BadRequestException If no emitter of the specified type for the specified user exists.
    */
-  public final SseEmitter getEmitter(EmitterType type, UUID userId) throws BadRequestException {
+  public SseEmitter getEmitter(EmitterType type, UUID userId) throws BadRequestException {
     final SseEmitter emitter = getEmitterModel(type, userId).getEmitter();
     if (emitter == null) {
       throw emitterConstants.getNoEmitterForIdException();
@@ -117,7 +117,7 @@ public final class SseService {
    * @return An emitter model of the specified type, associated with the specified user.
    * @throws BadRequestException If no emitter model matching the parameters is found.
    */
-  public final EmitterModel getEmitterModel(EmitterType type, UUID userId)
+  public EmitterModel getEmitterModel(EmitterType type, UUID userId)
       throws BadRequestException {
     final Map<UUID, EmitterModel> map = getEmitterMap(type);
     final EmitterModel emitterModel = map.get(userId);
@@ -254,7 +254,7 @@ public final class SseService {
    * @param userId The ID of the user the data should be sent to.
    * @param data The data that should be sent to the client.
    */
-  public final ApiSuccessModel sendUpdate(
+  public ApiSuccessModel sendUpdate(
       final EmitterType type, final UUID userId, final Object data) {
     try {
       getEmitter(type, userId).send(data);
@@ -276,7 +276,7 @@ public final class SseService {
    * @param type The type of emitter to broadcast to.
    * @param data The data to send.
    */
-  public final void sendToAll(final EmitterType type, final Object data) {
+  public void sendToAll(final EmitterType type, final Object data) {
     getEmitterMap(type).keySet().forEach(id -> sendUpdate(type, id, data));
   }
 
@@ -287,7 +287,7 @@ public final class SseService {
    * @param type The type of emitter being destroyed.
    * @param userId The user ID of the user the emitter is associated with.
    */
-  public final ApiSuccessModel completeEmitter(final EmitterType type, final UUID userId) {
+  public ApiSuccessModel completeEmitter(final EmitterType type, final UUID userId) {
     try {
       getEmitter(type, userId).complete();
       // TODO: Investigate why the onComplete() lambda doesn't run (at least during unit tests).

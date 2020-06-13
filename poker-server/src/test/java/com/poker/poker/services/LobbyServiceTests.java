@@ -6,6 +6,7 @@ import com.poker.poker.config.constants.GameConstants;
 import com.poker.poker.documents.LobbyDocument;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.ApiSuccessModel;
+import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.enums.GameAction;
 import com.poker.poker.models.enums.UserGroup;
 import com.poker.poker.models.game.CreateGameModel;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -119,7 +121,6 @@ public class LobbyServiceTests extends TestBaseClass {
     lobbyService =
         new LobbyService(
             sseService, activeGames, userIdToGameIdMap, gameConstants, lobbyRepository);
-
     //    Mockito.when(uuidService.isValidUuidString(Mockito.anyString())).thenCallRealMethod();
     //    Mockito.doAnswer(
     //            (invocation) -> {
