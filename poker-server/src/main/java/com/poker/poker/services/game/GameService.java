@@ -14,6 +14,7 @@ import com.poker.poker.models.enums.GameState;
 import com.poker.poker.models.game.CardModel;
 import com.poker.poker.models.game.CreateGameModel;
 import com.poker.poker.models.game.DeckModel;
+import com.poker.poker.models.game.DrawGameDataContainerModel;
 import com.poker.poker.models.game.DrawGameDataModel;
 import com.poker.poker.models.game.DrawGameDrawModel;
 import com.poker.poker.models.game.GamePlayerModel;
@@ -53,7 +54,7 @@ public class GameService {
   private final Map<UUID, GameDocument> games;
 
   /** Mapping of game Id to game data. */
-  private final Map<UUID, List<DrawGameDataModel>> gameIdToGameDataMap;
+  private final Map<UUID, DrawGameDataContainerModel> gameIdToGameDataMap;
 
   private final GameConstants gameConstants;
 
@@ -75,7 +76,7 @@ public class GameService {
    * @param gameDocument The specified game.
    * @return Data representing what has occurred in the game.
    */
-  public List<DrawGameDataModel> getGameData(final GameDocument gameDocument) {
+  public DrawGameDataContainerModel getGameData(final GameDocument gameDocument) {
     return getGameData(gameDocument.getId());
   }
 
@@ -85,7 +86,7 @@ public class GameService {
    * @param gameId The specified game.
    * @return Data representing what has occurred in the game.
    */
-  public List<DrawGameDataModel> getGameData(final UUID gameId) {
+  public DrawGameDataContainerModel getGameData(final UUID gameId) {
     if (gameIdToGameDataMap.get(gameId) == null) {
       throw gameConstants.getGameDataNotFoundException();
     }
@@ -116,7 +117,7 @@ public class GameService {
     gameData.get(0).setActing(true);
     // Set the first draw to acting so it is highlighted.
     gameData.get(0).getDraws().get(0).setActing(true);
-    gameIdToGameDataMap.put(gameDocument.getId(), gameData);
+    gameIdToGameDataMap.put(gameDocument.getId(), new DrawGameDataContainerModel(gameData, 1));
   }
 
   /**
@@ -130,7 +131,9 @@ public class GameService {
       final UUID gameId,
       final PlayerModel player,
       final int hand) {
+    getGameData(gameId).incrementHand(appConfig.getNumRoundsInRollGame());
     getGameData(gameId)
+        .getGameData()
         .stream()
         .filter(data -> data.getPlayer().getId().equals(player.getId()))
         .findFirst()
@@ -149,7 +152,7 @@ public class GameService {
       final GamePlayerModel player,
       final CardModel card,
       final int hand) {
-    final List<DrawGameDataModel> gameData = getGameData(gameId);
+    final List<DrawGameDataModel> gameData = getGameData(gameId).getGameData();
     int playerIndex = -1;
     for (int i = 0; i < gameData.size(); i++) {
       if (gameData.get(i).getPlayer().getId().equals(player.getId())) {
@@ -381,10 +384,10 @@ public class GameService {
         gameDocument.getPlayers().get(playerThatActed),
         hand.getActions().get(hand.getActions().size() - 1).getDrawnCard(),
         gameDocument.getHands().size());
-    broadcastGameDataUpdate(gameDocument);
 
     if (!handOver) {
       applicationEventPublisher.publishEvent(new WaitForPlayerEvent(this, nextPlayerToAct));
+      broadcastGameDataUpdate(gameDocument);
     } else if (currentRound <= gameDocument.getTotalHands()) {
       log.debug("Hand ended. Beginning new hand.");
       // Update game data

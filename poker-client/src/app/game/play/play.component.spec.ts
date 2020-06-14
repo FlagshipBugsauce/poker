@@ -6,11 +6,16 @@ import {SharedModule} from '../../shared/shared.module';
 import {SseService} from '../../shared/sse.service';
 import {GameDocument} from '../../api/models/game-document';
 import {EmitterType} from '../../shared/models/emitter-type.model';
+import {DrawGameDataContainerModel} from '../../api/models/draw-game-data-container-model';
+import {DrawGameDataModel} from '../../api/models/draw-game-data-model';
 
 class MockSseService {
   public gameDocument: GameDocument = {
     players: []
   } as GameDocument;
+  public gameData: DrawGameDataContainerModel = {
+    gameData: [] as DrawGameDataModel[]
+  };
   public closeEvent(type: EmitterType): void {}
   public addCallback(type: EmitterType, callback: () => void): void {}
   public openEvent(type: EmitterType, callback: () => void = null): void {}

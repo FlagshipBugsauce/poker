@@ -4,6 +4,7 @@ import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.HandDocument;
 import com.poker.poker.documents.LobbyDocument;
 import com.poker.poker.models.enums.EmitterType;
+import com.poker.poker.models.game.DrawGameDataContainerModel;
 import com.poker.poker.models.game.DrawGameDataModel;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +48,8 @@ public class TestController {
     return ResponseEntity.ok(new ArrayList<>());
   }
 
-  @GetMapping("/test/emitterTypes")
-  public ResponseEntity<EmitterType> getEmitterType() {
-    return ResponseEntity.ok(EmitterType.Game);
+  @GetMapping("/test/gameDataContainer")
+  public ResponseEntity<DrawGameDataContainerModel> gameDataContainer() {
+    return ResponseEntity.ok(new DrawGameDataContainerModel());
   }
 }
