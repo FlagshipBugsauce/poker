@@ -54,6 +54,7 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
         this.sseService.closeEvent(EmitterType.Game);
         this.sseService.closeEvent(EmitterType.Lobby);
         this.sseService.closeEvent(EmitterType.Hand);
+        this.sseService.closeEvent(EmitterType.GameData);
 
         if (this.sseService.gameDocument.state != null && this.sseService.gameDocument.state === GameState.Lobby) {
           this.gameService.leaveLobby().subscribe(() => {

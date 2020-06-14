@@ -1,9 +1,8 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {GameDocument} from 'src/app/api/models';
+import {DrawGameDataModel, GameDocument} from 'src/app/api/models';
 import {EmittersService, GameService} from 'src/app/api/services';
 import {SseService} from 'src/app/shared/sse.service';
 import {EmitterType} from 'src/app/shared/models/emitter-type.model';
-import {PlayerStatModel} from '../play/play.component';
 
 @Component({
   selector: 'pkr-end',
@@ -14,7 +13,7 @@ export class EndComponent implements OnInit {
   /**
    * Game data that is used to display a summary of what occurred in the game.
    */
-  @Input() gameData: PlayerStatModel[] = [] as PlayerStatModel[];
+  @Input() gameData: DrawGameDataModel[] = [] as DrawGameDataModel[];
 
   /**
    * Array of numbers used for the game summary.

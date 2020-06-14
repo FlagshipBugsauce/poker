@@ -3,6 +3,10 @@ package com.poker.poker.controllers;
 import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.HandDocument;
 import com.poker.poker.documents.LobbyDocument;
+import com.poker.poker.models.game.DrawGameDataContainerModel;
+import com.poker.poker.models.game.DrawGameDataModel;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -36,5 +40,15 @@ public class TestController {
   @GetMapping("/test/gameDoc")
   public ResponseEntity<GameDocument> gameDocument() {
     return ResponseEntity.ok(new GameDocument());
+  }
+
+  @GetMapping("/test/gameData")
+  public ResponseEntity<List<DrawGameDataModel>> gameData() {
+    return ResponseEntity.ok(new ArrayList<>());
+  }
+
+  @GetMapping("/test/gameDataContainer")
+  public ResponseEntity<DrawGameDataContainerModel> gameDataContainer() {
+    return ResponseEntity.ok(new DrawGameDataContainerModel());
   }
 }

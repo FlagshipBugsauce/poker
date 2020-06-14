@@ -318,7 +318,7 @@ public class HandService {
    *
    * @param gameDocument The specified game document.
    */
-  public void determineWinner(GameDocument gameDocument) {
+  public void determineWinner(final GameDocument gameDocument) {
     final HandDocument hand = getHand(gameDocument);
     determineWinner(hand);
   }
@@ -345,8 +345,7 @@ public class HandService {
    * @param gameDocument The game associated with the hand being ended.
    * @throws BadRequestException If there is no active hand associated with the game specified.
    */
-  public void endHand(GameDocument gameDocument) throws BadRequestException {
-    determineWinner(gameDocument);
+  public void endHand(final GameDocument gameDocument) throws BadRequestException {
     // Get the ID of the most recent hand in the game.
     final UUID handId = gameDocument.getHands().get(gameDocument.getHands().size() - 1);
 

@@ -7,11 +7,9 @@ import {ApiInterceptor} from 'src/app/api-interceptor.service';
 import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 import {AuthService} from 'src/app/shared/auth.service';
 import {
-  CardModel,
+  CardModel, DrawGameDataModel,
   GameDocument,
-  GamePlayerModel,
   HandDocument,
-  PlayerModel
 } from '../../api/models';
 import {ToastService} from '../../shared/toast.service';
 import {GameState} from '../../shared/models/game-state.enum';
@@ -22,16 +20,6 @@ import {GameState} from '../../shared/models/game-state.enum';
   styleUrls: ['./play.component.scss']
 })
 export class PlayComponent implements OnInit {
-  /**
-   * Data representing a summary of the game.
-   */
-  public gameData: PlayerStatModel[] = [] as PlayerStatModel[];
-
-  /**
-   * Current hand being played in the game.
-   */
-  public currentHand: number = 0;
-
   /**
    * Time remaining for a player to act (when applicable).
    */
@@ -45,12 +33,14 @@ export class PlayComponent implements OnInit {
   /**
    * Numbers used for the table summarizing what has occurred in the game.
    */
-  public numbers: number[];
+  public numbers: number[] = Array(this.gameModel.totalHands).fill('').map((v, i) => i + 1);
 
   /**
    * Collection of cards drawn in the current hand.
    */
   public currentHandCards: CardModel[] = [] as CardModel[];
+
+  private lastHand: number = 0;
 
   constructor(
     private apiConfiguration: ApiConfiguration,
@@ -78,6 +68,17 @@ export class PlayComponent implements OnInit {
     return this.sseService.gameDocument;
   }
 
+  /**
+   * Getter for the data representing the current game.
+   */
+  public get gameData(): DrawGameDataModel[] {
+    return this.sseService.gameData.gameData;
+  }
+
+  public get currentHand(): number {
+    return this.sseService.gameData.currentHand;
+  }
+
   ngOnInit(): void {
     this.sseService.closeEvent(EmitterType.Lobby);
     this.sseService.addCallback(EmitterType.Game, () => {
@@ -85,38 +86,42 @@ export class PlayComponent implements OnInit {
         this.gameModel.hands.push('');
         this.canRoll = false;
       }
-      this.updateScore();
-      this.highlightBestScore();
     });
 
     this.sseService.openEvent(EmitterType.Hand, () => {
       if (this.hand.playerToAct != null && this.hand.playerToAct.id != null) {
         this.canRoll = this.hand.playerToAct.id === this.authService.userModel.id && this.gameModel.state === GameState.Play;
-        // Add the message to
+        // Display toast
         const lastAction = this.hand.actions != null ? this.hand.actions[this.hand.actions.length - 1] : null;
         if (lastAction != null) {
           this.toastService.show(lastAction.message, {classname: 'bg-light toast-lg', delay: 5000});
         }
-        this.updateGameData();
         if (this.gameModel.state !== 'Over') {
-          this.highlightWaitingToAct();
           this.startTurnTimer().then();
         }
       }
     });
-    this.initializeGameData();
-  }
 
-  public draw(): void {
-    this.handService.draw().subscribe();
+    // TODO: Refactor this ridiculous crap.
+    let counter = -1;
+    this.sseService.openEvent(EmitterType.GameData, () => {
+      if (counter === -1) {
+        counter++;
+      } else {
+        this.currentHandCards = this.currentHandCards.length === this.gameData.length ?
+          [] as CardModel[] : this.currentHandCards;
+        this.currentHandCards
+        .push(this.gameData[counter].draws[counter === this.gameData.length - 1 ? this.currentHand - 2 : this.currentHand - 1].card);
+        counter = (counter + 1) % this.gameData.length;
+      }
+    });
   }
 
   /**
-   * Performs a roll action, provided it is the player's turn to act.
+   * Draws a card from the deck.
    */
-  public roll(): void {
-    this.handService.roll().subscribe(() => {
-    });
+  public draw(): void {
+    this.handService.draw().subscribe();
   }
 
   /**
@@ -134,111 +139,4 @@ export class PlayComponent implements OnInit {
       this.timeToAct = --currentTime;
     }
   }
-
-  /**
-   * Updates game data so the summary displayed is accurate.
-   */
-  private updateGameData(): void {
-    const currentHandPrev = this.currentHand;
-    this.currentHand = this.gameModel.hands.length - 1;
-    if (this.currentHand !== currentHandPrev) {
-      this.currentHandCards = [] as CardModel[];
-    }
-
-    if (this.hand.actions.length > 0) {
-      const lastActingPlayer = this.hand.actions[this.hand.actions.length - 1].player;
-      const lastActingIndex = this.gameModel.players.findIndex(p => p.id === lastActingPlayer.id);
-      const card: CardModel = this.hand.actions[this.hand.actions.length - 1].drawnCard;
-      this.currentHandCards.push(card);
-      this.gameData[lastActingIndex].rolls[this.currentHand] = {
-        value: card,
-        winner: false,
-        acting: false
-      } as RollModel;
-    }
-  }
-
-  /**
-   * Highlights the cell in the game summary that will be filled next. This helps to indicate who needs to act.
-   */
-  private highlightWaitingToAct(): void {
-    let flag = false;
-    for (let i = 0; i < this.gameData[0].rolls.length; i++) {
-      for (const row of this.gameData) {
-        row.rolls[i].acting = false;
-      }
-    }
-    for (let i = 0; i < this.gameData[0].rolls.length; i++) {
-      for (const row of this.gameData) {
-        if (!flag && row.rolls[i].value === '-1') {
-          row.rolls[i].acting = true;
-          flag = true;
-        }
-      }
-    }
-  }
-
-  /**
-   * When a hand is over, the best roll is highlighted in green so it is easy to see who won the hand.
-   */
-  private highlightBestScore(): void {
-    // After the last roll of the hand, we highlight the best score by setting the winner property to true
-    if (this.gameModel.hands != null) {
-      const lastRound = this.gameModel.hands.length - 2;
-      if (lastRound >= 0) {
-        this.handService
-        .determineWinner({handId: this.gameModel.hands[this.gameModel.hands.length - 2]})
-        .subscribe((player: PlayerModel) => {
-          // tslint:disable-next-line:prefer-for-of
-          for (let i = 0; i < this.gameData.length; i++) {
-            this.gameData[i].rolls[lastRound].winner = this.gameData[i].player.id === player.id;
-          }
-        });
-      }
-    }
-  }
-
-  /**
-   * When a hand ends, updates the score column of the game summary.
-   */
-  private updateScore(): void {
-    for (const row of this.gameData) {
-      row.player = this.gameModel.players.find(p => p.id === row.player.id);
-    }
-  }
-
-  /**
-   * Filling the game data array with empty strings.
-   */
-  private initializeGameData(): void {
-    this.numbers = Array(this.gameModel.totalHands).fill('').map((v, i) => i + 1);
-    for (const player of this.gameModel.players) {
-      this.gameData.push({
-        player,
-        rolls: Array(this.gameModel.totalHands),
-        acting: false
-      } as PlayerStatModel);
-      for (let i = 0; i < this.gameModel.totalHands; i++) {
-        this.gameData[this.gameData.length - 1].rolls[i] = {winner: false, acting: false, value: null} as RollModel;
-      }
-    }
-  }
-}
-
-/**
- * This will most likely only be a temporary model, so I will leave it in this file for now.
- */
-export interface PlayerStatModel {
-  player: GamePlayerModel;
-  rolls: RollModel[];
-  acting: boolean;
-}
-
-/**
- * Another model that is most likely temporary, so I will let this one live here for now as well.
- */
-export interface RollModel {
-  value: CardModel;
-  winner: boolean;
-  acting: boolean;
 }

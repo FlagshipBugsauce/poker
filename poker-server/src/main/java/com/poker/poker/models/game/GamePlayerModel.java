@@ -13,6 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@Schema(description = "Model representing a player in a game.")
 public class GamePlayerModel extends PlayerModel {
 
   @Schema(description = "The players current score.", example = "69")

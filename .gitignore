@@ -33,6 +33,8 @@ build/
 
 ### Logging ###
 /logs/*
+/poker-server/logs/*
+/poker-server/logs/
 
 # poker-client ignore
 
@@ -47,8 +49,8 @@ build/
 /poker-client/node_modules
 
 # profiling files
-/poker-clientchrome-profiler-events*.json
-/poker-clientspeed-measure-plugin*.json
+/poker-client/chrome-profiler-events*.json
+/poker-client/speed-measure-plugin*.json
 
 # IDEs and editors
 /.idea
@@ -70,9 +72,9 @@ build/
 /poker-client/connect.lock
 /poker-client/coverage
 /poker-client/libpeerconnection.log
-/poker-clientnpm-debug.log
-/poker-clientyarn-error.log
-/poker-clienttestem.log
+/poker-client/npm-debug.log
+/poker-client/yarn-error.log
+/poker-client/testem.log
 /poker-client/typings
 
 # System Files
