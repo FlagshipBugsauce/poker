@@ -11,8 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DrawGameDataModel {
-  @Schema(
-      implementation = GamePlayerModel.class)
+  @Schema(implementation = GamePlayerModel.class)
   private GamePlayerModel player;
 
   @Schema(description = "Flag that is true if this draw is next.", example = "true")
