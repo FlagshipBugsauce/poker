@@ -3,7 +3,6 @@ package com.poker.poker.controllers;
 import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.HandDocument;
 import com.poker.poker.documents.LobbyDocument;
-import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.game.DrawGameDataContainerModel;
 import com.poker.poker.models.game.DrawGameDataModel;
 import java.util.ArrayList;

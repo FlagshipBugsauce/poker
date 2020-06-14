@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -73,6 +72,7 @@ public class GameService {
   /**
    * Retrieves the game data needed for the client to display a summary of what has occurred in the
    * specified game.
+   *
    * @param gameDocument The specified game.
    * @return Data representing what has occurred in the game.
    */
@@ -83,6 +83,7 @@ public class GameService {
   /**
    * Retrieves the game data needed for the client to display a summary of what has occurred in the
    * specified game.
+   *
    * @param gameId The specified game.
    * @return Data representing what has occurred in the game.
    */
@@ -95,6 +96,7 @@ public class GameService {
 
   /**
    * Initializes game data for the specified game, so the client can parse it easily.
+   *
    * @param gameDocument The specified game.
    */
   private void initializeGameData(final GameDocument gameDocument) {
@@ -103,11 +105,8 @@ public class GameService {
     }
     final List<DrawGameDataModel> gameData = new ArrayList<>(gameDocument.getPlayers().size());
     for (final GamePlayerModel player : gameDocument.getPlayers()) {
-      final DrawGameDataModel drawGameDataModel = new DrawGameDataModel(
-          player,
-          false,
-          new ArrayList<>(appConfig.getNumRoundsInRollGame())
-      );
+      final DrawGameDataModel drawGameDataModel =
+          new DrawGameDataModel(player, false, new ArrayList<>(appConfig.getNumRoundsInRollGame()));
       for (int i = 0; i < appConfig.getNumRoundsInRollGame(); i++) {
         drawGameDataModel.getDraws().add(new DrawGameDrawModel(null, false, false));
       }
@@ -123,18 +122,14 @@ public class GameService {
   /**
    * Helper that updates game data for the specified game. Specifically, sets the winner so the
    * player can be highlighted in some way.
+   *
    * @param gameId The ID of the specified game.
    * @param player The player who won.
    * @param hand The hand the player won in.
    */
-  private void setWinnerInGameData(
-      final UUID gameId,
-      final PlayerModel player,
-      final int hand) {
+  private void setWinnerInGameData(final UUID gameId, final PlayerModel player, final int hand) {
     getGameData(gameId).incrementHand(appConfig.getNumRoundsInRollGame());
-    getGameData(gameId)
-        .getGameData()
-        .stream()
+    getGameData(gameId).getGameData().stream()
         .filter(data -> data.getPlayer().getId().equals(player.getId()))
         .findFirst()
         .ifPresent(data -> data.getDraws().get(hand - 1).setWinner(true));
@@ -142,16 +137,14 @@ public class GameService {
 
   /**
    * Helper that updates game data for a specified game, after a player performs an action.
+   *
    * @param gameId The ID of the specified game.
    * @param player The player that acted.
    * @param card The card the player drew.
    * @param hand The current hand of the game.
    */
   private void updateGameData(
-      final UUID gameId,
-      final GamePlayerModel player,
-      final CardModel card,
-      final int hand) {
+      final UUID gameId, final GamePlayerModel player, final CardModel card, final int hand) {
     final List<DrawGameDataModel> gameData = getGameData(gameId).getGameData();
     int playerIndex = -1;
     for (int i = 0; i < gameData.size(); i++) {
@@ -162,7 +155,7 @@ public class GameService {
     }
 
     // Make sure playerIndex was set.
-    assert(playerIndex != -1);
+    assert (playerIndex != -1);
 
     // The player has acted, so acting should be false and the card they drew should be filled in.
     gameData.get(playerIndex).setActing(false);
@@ -330,10 +323,10 @@ public class GameService {
   public void broadcastGameDataUpdate(final GameDocument gameDocument) {
     gameDocument
         .getPlayers()
-        .forEach(player -> sseService.sendUpdate(
-            EmitterType.GameData,
-            player.getId(),
-            getGameData(gameDocument)));
+        .forEach(
+            player ->
+                sseService.sendUpdate(
+                    EmitterType.GameData, player.getId(), getGameData(gameDocument)));
   }
 
   /**
@@ -392,9 +385,7 @@ public class GameService {
       log.debug("Hand ended. Beginning new hand.");
       // Update game data
       setWinnerInGameData(
-          gameDocument.getId(),
-          handService.determineWinner(hand),
-          gameDocument.getHands().size());
+          gameDocument.getId(), handService.determineWinner(hand), gameDocument.getHands().size());
 
       // Update scores
       handService.endHand(gameDocument);
@@ -405,9 +396,7 @@ public class GameService {
       // If the round is over and the current round > total rounds, then the game must be over.
       log.debug("The game has ended.");
       setWinnerInGameData(
-          gameDocument.getId(),
-          handService.determineWinner(hand),
-          gameDocument.getHands().size());
+          gameDocument.getId(), handService.determineWinner(hand), gameDocument.getHands().size());
       endGame(gameDocument);
     }
   }
@@ -473,7 +462,7 @@ public class GameService {
     games.remove(gameDocument.getId()); // Remove mapping.
     gameDocument.getPlayers().forEach(p -> userIdToGameIdMap.remove(p.getId())); // Remove mappings.
     broadcastGameUpdate(gameDocument); // Broadcast final update.
-    broadcastGameDataUpdate(gameDocument);  // Broadcast final update.
+    broadcastGameDataUpdate(gameDocument); // Broadcast final update.
     gameIdToGameDataMap.remove(gameDocument.getId()); // Remove mapping.
   }
 }
