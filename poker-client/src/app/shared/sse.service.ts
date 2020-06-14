@@ -10,6 +10,7 @@ import {GameDocument} from '../api/models/game-document';
 import {LobbyDocument} from '../api/models/lobby-document';
 import {HandDocument} from '../api/models/hand-document';
 import {DrawGameDataModel} from '../api/models/draw-game-data-model';
+import {DrawGameDataContainerModel} from "../api/models/draw-game-data-container-model";
 
 @Injectable({
   providedIn: 'root'
@@ -60,7 +61,10 @@ export class SseService {
     this.lobbyDocument = this.defaultData[EmitterType.Lobby] = {} as LobbyDocument;
     this.gameDocument = this.defaultData[EmitterType.Game] = {} as GameDocument;
     this.handDocument = this.defaultData[EmitterType.Hand] = {} as HandDocument;
-    this.gameData = this.defaultData[EmitterType.GameData] = [] as DrawGameDataModel[];
+    this.gameData = this.defaultData[EmitterType.GameData] = {
+      gameData: [] as DrawGameDataModel[],
+      currentHand: 1
+    } as DrawGameDataContainerModel;
   }
 
   /**
@@ -126,7 +130,7 @@ export class SseService {
   /**
    * Getter for game data.
    */
-  public get gameData(): DrawGameDataModel[] {
+  public get gameData(): DrawGameDataContainerModel {
     return this.data[EmitterType.GameData];
   }
 
@@ -134,7 +138,7 @@ export class SseService {
    * Setter for game data.
    * @param gameData Hand model.
    */
-  public set gameData(gameData: DrawGameDataModel[]) {
+  public set gameData(gameData: DrawGameDataContainerModel) {
     this.data[EmitterType.GameData] = gameData;
   }
 

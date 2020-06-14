@@ -27,62 +27,59 @@ export class EmittersService extends BaseService {
   }
 
   /**
-   * Path part for operation requestEmitter
+   * Path part for operation destroyEmitter
    */
-  static readonly RequestEmitterPath = '/emitters/request/{type}/{jwt}';
+  static readonly DestroyEmitterPath = '/emitters/destroy/{type}';
 
   /**
-   * Request SSE Emitter.
+   * Destroy Emitter.
    *
-   * Request an SSE emitter of the specified type.
+   * Destroy the emitter that is sending updated game lists.
    *
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `requestEmitter()` instead.
+   * To access only the response body, use `destroyEmitter()` instead.
    *
    * This method doesn't expect any request body.
    */
-  requestEmitter$Response(params: {
-    jwt: string;
+  destroyEmitter$Response(params: {
     type: 'GameList' | 'Game' | 'Lobby' | 'Hand' | 'GameData';
 
-  }): Observable<StrictHttpResponse<SseEmitter>> {
+  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
 
-    const rb = new RequestBuilder(this.rootUrl, EmittersService.RequestEmitterPath, 'get');
+    const rb = new RequestBuilder(this.rootUrl, EmittersService.DestroyEmitterPath, 'post');
     if (params) {
 
-      rb.path('jwt', params.jwt);
       rb.path('type', params.type);
 
     }
     return this.http.request(rb.build({
-      responseType: 'text',
-      accept: 'text/event-stream'
+      responseType: 'json',
+      accept: 'application/json'
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<SseEmitter>;
+        return r as StrictHttpResponse<ApiSuccessModel>;
       })
     );
   }
 
   /**
-   * Request SSE Emitter.
+   * Destroy Emitter.
    *
-   * Request an SSE emitter of the specified type.
+   * Destroy the emitter that is sending updated game lists.
    *
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `requestEmitter$Response()` instead.
+   * To access the full response (for headers, for example), `destroyEmitter$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  requestEmitter(params: {
-    jwt: string;
+  destroyEmitter(params: {
     type: 'GameList' | 'Game' | 'Lobby' | 'Hand' | 'GameData';
 
-  }): Observable<SseEmitter> {
+  }): Observable<ApiSuccessModel> {
 
-    return this.requestEmitter$Response(params).pipe(
-      map((r: StrictHttpResponse<SseEmitter>) => r.body as SseEmitter)
+    return this.destroyEmitter$Response(params).pipe(
+      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
     );
   }
 
@@ -144,59 +141,62 @@ export class EmittersService extends BaseService {
   }
 
   /**
-   * Path part for operation destroyEmitter
+   * Path part for operation requestEmitter
    */
-  static readonly DestroyEmitterPath = '/emitters/destroy/{type}';
+  static readonly RequestEmitterPath = '/emitters/request/{type}/{jwt}';
 
   /**
-   * Destroy Emitter.
+   * Request SSE Emitter.
    *
-   * Destroy the emitter that is sending updated game lists.
+   * Request an SSE emitter of the specified type.
    *
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `destroyEmitter()` instead.
+   * To access only the response body, use `requestEmitter()` instead.
    *
    * This method doesn't expect any request body.
    */
-  destroyEmitter$Response(params: {
+  requestEmitter$Response(params: {
+    jwt: string;
     type: 'GameList' | 'Game' | 'Lobby' | 'Hand' | 'GameData';
 
-  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
+  }): Observable<StrictHttpResponse<SseEmitter>> {
 
-    const rb = new RequestBuilder(this.rootUrl, EmittersService.DestroyEmitterPath, 'post');
+    const rb = new RequestBuilder(this.rootUrl, EmittersService.RequestEmitterPath, 'get');
     if (params) {
 
+      rb.path('jwt', params.jwt);
       rb.path('type', params.type);
 
     }
     return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
+      responseType: 'text',
+      accept: 'text/event-stream'
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<ApiSuccessModel>;
+        return r as StrictHttpResponse<SseEmitter>;
       })
     );
   }
 
   /**
-   * Destroy Emitter.
+   * Request SSE Emitter.
    *
-   * Destroy the emitter that is sending updated game lists.
+   * Request an SSE emitter of the specified type.
    *
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `destroyEmitter$Response()` instead.
+   * To access the full response (for headers, for example), `requestEmitter$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  destroyEmitter(params: {
+  requestEmitter(params: {
+    jwt: string;
     type: 'GameList' | 'Game' | 'Lobby' | 'Hand' | 'GameData';
 
-  }): Observable<ApiSuccessModel> {
+  }): Observable<SseEmitter> {
 
-    return this.destroyEmitter$Response(params).pipe(
-      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
+    return this.requestEmitter$Response(params).pipe(
+      map((r: StrictHttpResponse<SseEmitter>) => r.body as SseEmitter)
     );
   }
 

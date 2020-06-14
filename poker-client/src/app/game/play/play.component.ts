@@ -40,6 +40,8 @@ export class PlayComponent implements OnInit {
    */
   public currentHandCards: CardModel[] = [] as CardModel[];
 
+  private lastHand: number = 0;
+
   constructor(
     private apiConfiguration: ApiConfiguration,
     private router: Router,
@@ -70,7 +72,11 @@ export class PlayComponent implements OnInit {
    * Getter for the data representing the current game.
    */
   public get gameData(): DrawGameDataModel[] {
-    return this.sseService.gameData;
+    return this.sseService.gameData.gameData;
+  }
+
+  public get currentHand(): number {
+    return this.sseService.gameData.currentHand;
   }
 
   ngOnInit(): void {
@@ -95,7 +101,20 @@ export class PlayComponent implements OnInit {
         }
       }
     });
-    this.sseService.openEvent(EmitterType.GameData);
+
+    // TODO: Refactor this ridiculous crap.
+    let counter = -1;
+    this.sseService.openEvent(EmitterType.GameData, () => {
+      if (counter === -1) {
+        counter++;
+      } else {
+        this.currentHandCards = this.currentHandCards.length === this.gameData.length ?
+          [] as CardModel[] : this.currentHandCards;
+        this.currentHandCards
+        .push(this.gameData[counter].draws[counter === this.gameData.length - 1 ? this.currentHand - 2 : this.currentHand - 1].card);
+        counter = (counter + 1) % this.gameData.length;
+      }
+    });
   }
 
   /**

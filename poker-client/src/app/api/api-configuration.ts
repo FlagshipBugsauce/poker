@@ -8,7 +8,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class ApiConfiguration {
-  rootUrl: string = 'http://383ce815fc27.ngrok.io';
+  rootUrl: string = 'http://poker-testing.ngrok.io';
 }
 
 /**
