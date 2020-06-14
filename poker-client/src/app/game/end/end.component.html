@@ -25,7 +25,7 @@
             <tr *ngFor="let row of gameData">
               <td class="align-middle">{{ row.player.firstName }} {{ row.player.lastName }}</td>
               <td
-                *ngFor="let roll of row.rolls"
+                *ngFor="let roll of row.draws"
                 [ngClass]="{
                 'roll-cell': true,
                 'table-success': roll.winner,
@@ -33,8 +33,8 @@
                 'text-center': true,
                 'align-middle': true
               }">
-                <pkr-card *ngIf="roll.value != null" [card]="roll.value" [size]="'xs'"></pkr-card>
-                {{ roll.value == null ? ' ' : '' }}
+                <pkr-card *ngIf="roll.card != null" [card]="roll.card" [size]="'xs'"></pkr-card>
+                {{ roll.card == null ? ' ' : '' }}
               </td>
               <td class="text-center align-middle">
                 {{ row.player.score }}

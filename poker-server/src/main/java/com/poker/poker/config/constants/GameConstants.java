@@ -55,4 +55,8 @@ public class GameConstants extends AppConstants {
       new BadRequestException(
           "Error Starting Game",
           "Status of all players must be set to ready before the game can begin.");
+
+  private final BadRequestException gameDataNotFoundException =
+      new BadRequestException(
+          "Game Data Not Found", "Could not find game data for the ID provided.");
 }

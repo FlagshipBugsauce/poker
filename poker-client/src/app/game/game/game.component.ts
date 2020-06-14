@@ -1,14 +1,14 @@
 import {AfterViewInit, Component, HostListener, OnInit, ViewChild} from '@angular/core';
 import {EmittersService, GameService} from 'src/app/api/services';
 import {SseService} from 'src/app/shared/sse.service';
-import {ApiSuccessModel, GameDocument} from 'src/app/api/models';
+import {ApiSuccessModel, DrawGameDataModel, GameDocument} from 'src/app/api/models';
 import {LobbyComponent} from '../lobby/lobby.component';
 import {ApiConfiguration} from 'src/app/api/api-configuration';
 import {LeaveGameGuardService} from './leave-game-guard.service';
 import {PopupComponent, PopupContentModel} from 'src/app/shared/popup/popup.component';
 import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 import {GameState} from 'src/app/shared/models/game-state.enum';
-import {PlayComponent, PlayerStatModel} from '../play/play.component';
+import {PlayComponent} from '../play/play.component';
 
 @Component({
   selector: 'pkr-game',
@@ -45,7 +45,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   /**
    * A summary of what occurred in the game.
    */
-  public gameData: PlayerStatModel[] = [] as PlayerStatModel[];
+  public gameData: DrawGameDataModel[] = [] as DrawGameDataModel[];
   /**
    * Content for the popup that appears when leaving the page (except when refreshing or going to external site).
    */
@@ -93,6 +93,7 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.sseService.closeEvent(EmitterType.Game);
     this.sseService.closeEvent(EmitterType.Lobby);
     this.sseService.closeEvent(EmitterType.Hand);
+    this.sseService.closeEvent(EmitterType.GameData);
     if (this.gameModel.state === GameState.Lobby) {
       this.gameService.leaveLobby().subscribe((result: ApiSuccessModel) => {
       });

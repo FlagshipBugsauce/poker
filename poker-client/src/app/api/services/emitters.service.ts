@@ -27,63 +27,6 @@ export class EmittersService extends BaseService {
   }
 
   /**
-   * Path part for operation requestUpdate
-   */
-  static readonly RequestUpdatePath = '/emitters/update/{type}';
-
-  /**
-   * Request Update.
-   *
-   * Requests an update from the SSE emitter specified.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `requestUpdate()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  requestUpdate$Response(params: {
-    type: 'GameList' | 'Game' | 'Lobby' | 'Hand';
-
-  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
-
-    const rb = new RequestBuilder(this.rootUrl, EmittersService.RequestUpdatePath, 'post');
-    if (params) {
-
-      rb.path('type', params.type);
-
-    }
-    return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<ApiSuccessModel>;
-      })
-    );
-  }
-
-  /**
-   * Request Update.
-   *
-   * Requests an update from the SSE emitter specified.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `requestUpdate$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  requestUpdate(params: {
-    type: 'GameList' | 'Game' | 'Lobby' | 'Hand';
-
-  }): Observable<ApiSuccessModel> {
-
-    return this.requestUpdate$Response(params).pipe(
-      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
-    );
-  }
-
-  /**
    * Path part for operation requestEmitter
    */
   static readonly RequestEmitterPath = '/emitters/request/{type}/{jwt}';
@@ -100,7 +43,7 @@ export class EmittersService extends BaseService {
    */
   requestEmitter$Response(params: {
     jwt: string;
-    type: 'GameList' | 'Game' | 'Lobby' | 'Hand';
+    type: 'GameList' | 'Game' | 'Lobby' | 'Hand' | 'GameData';
 
   }): Observable<StrictHttpResponse<SseEmitter>> {
 
@@ -134,12 +77,69 @@ export class EmittersService extends BaseService {
    */
   requestEmitter(params: {
     jwt: string;
-    type: 'GameList' | 'Game' | 'Lobby' | 'Hand';
+    type: 'GameList' | 'Game' | 'Lobby' | 'Hand' | 'GameData';
 
   }): Observable<SseEmitter> {
 
     return this.requestEmitter$Response(params).pipe(
       map((r: StrictHttpResponse<SseEmitter>) => r.body as SseEmitter)
+    );
+  }
+
+  /**
+   * Path part for operation requestUpdate
+   */
+  static readonly RequestUpdatePath = '/emitters/update/{type}';
+
+  /**
+   * Request Update.
+   *
+   * Requests an update from the SSE emitter specified.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `requestUpdate()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  requestUpdate$Response(params: {
+    type: 'GameList' | 'Game' | 'Lobby' | 'Hand' | 'GameData';
+
+  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
+
+    const rb = new RequestBuilder(this.rootUrl, EmittersService.RequestUpdatePath, 'post');
+    if (params) {
+
+      rb.path('type', params.type);
+
+    }
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<ApiSuccessModel>;
+      })
+    );
+  }
+
+  /**
+   * Request Update.
+   *
+   * Requests an update from the SSE emitter specified.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `requestUpdate$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  requestUpdate(params: {
+    type: 'GameList' | 'Game' | 'Lobby' | 'Hand' | 'GameData';
+
+  }): Observable<ApiSuccessModel> {
+
+    return this.requestUpdate$Response(params).pipe(
+      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
     );
   }
 
@@ -159,7 +159,7 @@ export class EmittersService extends BaseService {
    * This method doesn't expect any request body.
    */
   destroyEmitter$Response(params: {
-    type: 'GameList' | 'Game' | 'Lobby' | 'Hand';
+    type: 'GameList' | 'Game' | 'Lobby' | 'Hand' | 'GameData';
 
   }): Observable<StrictHttpResponse<ApiSuccessModel>> {
 
@@ -191,7 +191,7 @@ export class EmittersService extends BaseService {
    * This method doesn't expect any request body.
    */
   destroyEmitter(params: {
-    type: 'GameList' | 'Game' | 'Lobby' | 'Hand';
+    type: 'GameList' | 'Game' | 'Lobby' | 'Hand' | 'GameData';
 
   }): Observable<ApiSuccessModel> {
 

@@ -21,22 +21,22 @@
             </tr>
             </thead>
             <tbody>
-            <tr *ngFor="let row of gameData">
-              <td class="align-middle">{{ row.player.firstName }} {{ row.player.lastName }}</td>
+            <tr *ngFor="let dataRow of gameData">
+              <td class="align-middle">{{ dataRow.player.firstName }} {{ dataRow.player.lastName }}</td>
               <td
-                *ngFor="let roll of row.rolls"
+                *ngFor="let draw of dataRow.draws"
                 [ngClass]="{
                 'roll-cell': true,
-                'table-success': roll.winner,
-                'table-active': roll.acting,
+                'table-success': draw.winner,
+                'table-active': draw.acting,
                 'text-center': true,
                 'align-middle': true
               }">
-                <pkr-card *ngIf="roll.value != null" [card]="roll.value" size="xs"></pkr-card>
-                {{ roll.value == null ? ' ' : '' }}
+                <pkr-card *ngIf="draw.card != null" [card]="draw.card" size="xs"></pkr-card>
+                {{ draw.card == null ? ' ' : '' }}
               </td>
               <td class="text-center align-middle">
-                {{ row.player.score }}
+                {{ dataRow.player.score }}
               </td>
             </tr>
             </tbody>

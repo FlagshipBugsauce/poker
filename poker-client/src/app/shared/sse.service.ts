@@ -9,6 +9,7 @@ import {GetGameModel} from '../api/models/get-game-model';
 import {GameDocument} from '../api/models/game-document';
 import {LobbyDocument} from '../api/models/lobby-document';
 import {HandDocument} from '../api/models/hand-document';
+import {DrawGameDataModel} from '../api/models/draw-game-data-model';
 
 @Injectable({
   providedIn: 'root'
@@ -49,14 +50,17 @@ export class SseService {
     this.openEvents[EmitterType.Lobby] = false;
     this.openEvents[EmitterType.Game] = false;
     this.openEvents[EmitterType.Hand] = false;
+    this.openEvents[EmitterType.GameData] = false;
     this.callbacks[EmitterType.GameList] = [] as Array<() => void>;
     this.callbacks[EmitterType.Lobby] = [] as Array<() => void>;
     this.callbacks[EmitterType.Game] = [] as Array<() => void>;
     this.callbacks[EmitterType.Hand] = [] as Array<() => void>;
+    this.callbacks[EmitterType.GameData] = [] as Array<() => void>;
     this.gameList = this.defaultData[EmitterType.GameList] = [] as GetGameModel[];
     this.lobbyDocument = this.defaultData[EmitterType.Lobby] = {} as LobbyDocument;
     this.gameDocument = this.defaultData[EmitterType.Game] = {} as GameDocument;
     this.handDocument = this.defaultData[EmitterType.Hand] = {} as HandDocument;
+    this.gameData = this.defaultData[EmitterType.GameData] = [] as DrawGameDataModel[];
   }
 
   /**
@@ -117,6 +121,21 @@ export class SseService {
    */
   public set handDocument(handDocument: HandDocument) {
     this.data[EmitterType.Hand] = handDocument;
+  }
+
+  /**
+   * Getter for game data.
+   */
+  public get gameData(): DrawGameDataModel[] {
+    return this.data[EmitterType.GameData];
+  }
+
+  /**
+   * Setter for game data.
+   * @param gameData Hand model.
+   */
+  public set gameData(gameData: DrawGameDataModel[]) {
+    this.data[EmitterType.GameData] = gameData;
   }
 
   /**

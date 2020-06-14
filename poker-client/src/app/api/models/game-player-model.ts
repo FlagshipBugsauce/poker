@@ -1,4 +1,8 @@
 /* tslint:disable */
+
+/**
+ * Model representing a player in a game.
+ */
 export interface GamePlayerModel {
 
   /**
