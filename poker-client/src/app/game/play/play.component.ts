@@ -97,8 +97,6 @@ export class PlayComponent implements OnInit {
       }
     });
 
-    // TODO: Refactor this ridiculous crap.
-    // let counter = -1;
     this.sseService.openEvent(EmitterType.GameData, null);
   }
 
