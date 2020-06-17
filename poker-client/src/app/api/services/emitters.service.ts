@@ -27,6 +27,66 @@ export class EmittersService extends BaseService {
   }
 
   /**
+   * Path part for operation requestEmitter
+   */
+  static readonly RequestEmitterPath = '/emitters/request/{type}/{jwt}';
+
+  /**
+   * Request SSE Emitter.
+   *
+   * Request an SSE emitter of the specified type.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `requestEmitter()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  requestEmitter$Response(params: {
+    jwt: string;
+    type: 'GameList' | 'Game' | 'Lobby' | 'Hand' | 'GameData';
+
+  }): Observable<StrictHttpResponse<SseEmitter>> {
+
+    const rb = new RequestBuilder(this.rootUrl, EmittersService.RequestEmitterPath, 'get');
+    if (params) {
+
+      rb.path('jwt', params.jwt);
+      rb.path('type', params.type);
+
+    }
+    return this.http.request(rb.build({
+      responseType: 'text',
+      accept: 'text/event-stream'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<SseEmitter>;
+      })
+    );
+  }
+
+  /**
+   * Request SSE Emitter.
+   *
+   * Request an SSE emitter of the specified type.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `requestEmitter$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  requestEmitter(params: {
+    jwt: string;
+    type: 'GameList' | 'Game' | 'Lobby' | 'Hand' | 'GameData';
+
+  }): Observable<SseEmitter> {
+
+    return this.requestEmitter$Response(params).pipe(
+      map((r: StrictHttpResponse<SseEmitter>) => r.body as SseEmitter)
+    );
+  }
+
+  /**
    * Path part for operation destroyEmitter
    */
   static readonly DestroyEmitterPath = '/emitters/destroy/{type}';
@@ -137,66 +197,6 @@ export class EmittersService extends BaseService {
 
     return this.requestUpdate$Response(params).pipe(
       map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
-    );
-  }
-
-  /**
-   * Path part for operation requestEmitter
-   */
-  static readonly RequestEmitterPath = '/emitters/request/{type}/{jwt}';
-
-  /**
-   * Request SSE Emitter.
-   *
-   * Request an SSE emitter of the specified type.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `requestEmitter()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  requestEmitter$Response(params: {
-    jwt: string;
-    type: 'GameList' | 'Game' | 'Lobby' | 'Hand' | 'GameData';
-
-  }): Observable<StrictHttpResponse<SseEmitter>> {
-
-    const rb = new RequestBuilder(this.rootUrl, EmittersService.RequestEmitterPath, 'get');
-    if (params) {
-
-      rb.path('jwt', params.jwt);
-      rb.path('type', params.type);
-
-    }
-    return this.http.request(rb.build({
-      responseType: 'text',
-      accept: 'text/event-stream'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<SseEmitter>;
-      })
-    );
-  }
-
-  /**
-   * Request SSE Emitter.
-   *
-   * Request an SSE emitter of the specified type.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `requestEmitter$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  requestEmitter(params: {
-    jwt: string;
-    type: 'GameList' | 'Game' | 'Lobby' | 'Hand' | 'GameData';
-
-  }): Observable<SseEmitter> {
-
-    return this.requestEmitter$Response(params).pipe(
-      map((r: StrictHttpResponse<SseEmitter>) => r.body as SseEmitter)
     );
   }
 

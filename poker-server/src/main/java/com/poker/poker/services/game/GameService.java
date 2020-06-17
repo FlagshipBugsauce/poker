@@ -347,7 +347,7 @@ public class GameService {
    */
   @Async
   @EventListener
-  public void handleHandActionEvent(HandActionEvent handActionEvent) {
+  public void handleHandActionEvent(final HandActionEvent handActionEvent) {
     log.debug("{} event detected by game service.", handActionEvent.getType());
     final GameDocument gameDocument = games.get(handActionEvent.getGameId());
     final HandDocument hand = handService.getHand(handActionEvent.getHandId());
@@ -371,7 +371,7 @@ public class GameService {
     final int currentRound =
         handOver ? 1 + gameDocument.getHands().size() : gameDocument.getHands().size();
 
-    // Update game data
+    // Update game data needed for UI.
     updateGameData(
         gameDocument.getId(),
         gameDocument.getPlayers().get(playerThatActed),
@@ -461,8 +461,8 @@ public class GameService {
     gameRepository.save(gameDocument); // Save game document.
     games.remove(gameDocument.getId()); // Remove mapping.
     gameDocument.getPlayers().forEach(p -> userIdToGameIdMap.remove(p.getId())); // Remove mappings.
-    broadcastGameUpdate(gameDocument); // Broadcast final update.
     broadcastGameDataUpdate(gameDocument); // Broadcast final update.
+    broadcastGameUpdate(gameDocument); // Broadcast final update.
     gameIdToGameDataMap.remove(gameDocument.getId()); // Remove mapping.
   }
 }

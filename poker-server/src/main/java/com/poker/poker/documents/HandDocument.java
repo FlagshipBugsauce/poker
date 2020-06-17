@@ -1,5 +1,6 @@
 package com.poker.poker.documents;
 
+import com.poker.poker.models.game.CardModel;
 import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.hand.HandActionModel;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -40,6 +41,10 @@ public class HandDocument {
   @ArraySchema(schema = @Schema(implementation = HandActionModel.class))
   private List<HandActionModel> actions;
 
-  @Schema(description = "Player whose turn it is.", implementation = GamePlayerModel.class)
+  @Schema(implementation = GamePlayerModel.class)
   private GamePlayerModel playerToAct;
+
+  // TODO: Remove once we evolve past the card drawing game.
+  @ArraySchema(schema = @Schema(implementation = CardModel.class))
+  private List<CardModel> drawnCards;
 }

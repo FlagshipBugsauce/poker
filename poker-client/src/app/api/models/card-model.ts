@@ -1,7 +1,7 @@
 /* tslint:disable */
 
 /**
- * Card that was drawn.
+ * Model of a card.
  */
 export interface CardModel {
 
