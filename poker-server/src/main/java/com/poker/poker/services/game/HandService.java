@@ -226,7 +226,7 @@ public class HandService {
 
     hand.setPlayerToAct(gameDocument.getPlayers().get(0)); // First in the list acts first.
     // TODO: Remove if it's really not needed. Temporarily removed for now.
-//    broadcastHandUpdate(gameDocument); // Broadcast the new hand.
+    //    broadcastHandUpdate(gameDocument); // Broadcast the new hand.
     restoreAndShuffle(gameDocument); // Restore the deck and shuffle it.
     applicationEventPublisher.publishEvent(new WaitForPlayerEvent(this, hand.getPlayerToAct()));
   }
