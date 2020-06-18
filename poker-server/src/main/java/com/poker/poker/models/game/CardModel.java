@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Model of a card.")
 public class CardModel {
   @Schema(
       description = "The suit of the card.",

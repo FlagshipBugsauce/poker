@@ -208,7 +208,13 @@ public class HandService {
   public void newHand(final GameDocument gameDocument) {
     log.debug("Creating new hand for game {}.", gameDocument.getId());
     final HandDocument hand =
-        new HandDocument(UUID.randomUUID(), gameDocument.getId(), null, new ArrayList<>(), null);
+        new HandDocument(
+            UUID.randomUUID(),
+            gameDocument.getId(),
+            null,
+            new ArrayList<>(),
+            null,
+            new ArrayList<>());
 
     // Adding hand to list of hands in game document.
     gameDocument.getHands().add(hand.getId());
@@ -219,7 +225,8 @@ public class HandService {
     gameDocument.getPlayers().forEach(p -> userIdToGameIdMap.put(p.getId(), gameDocument.getId()));
 
     hand.setPlayerToAct(gameDocument.getPlayers().get(0)); // First in the list acts first.
-    broadcastHandUpdate(gameDocument); // Broadcast the new hand.
+    // TODO: Remove if it's really not needed. Temporarily removed for now.
+    //    broadcastHandUpdate(gameDocument); // Broadcast the new hand.
     restoreAndShuffle(gameDocument); // Restore the deck and shuffle it.
     applicationEventPublisher.publishEvent(new WaitForPlayerEvent(this, hand.getPlayerToAct()));
   }
@@ -307,6 +314,8 @@ public class HandService {
                 hand.getPlayerToAct(),
                 -1,
                 card));
+
+    hand.getDrawnCards().add(card);
 
     applicationEventPublisher.publishEvent(
         new HandActionEvent(this, hand.getGameId(), hand.getId(), HandAction.Draw));

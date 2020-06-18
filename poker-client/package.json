@@ -8,7 +8,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "generate": "ng-openapi-gen --input api-docs.yaml --output src/app/api"
+    "generate": "ng-openapi-gen --input api-docs.yaml --output src/app/api",
+    "deploy": "ng deploy"
   },
   "private": true,
   "dependencies": {
