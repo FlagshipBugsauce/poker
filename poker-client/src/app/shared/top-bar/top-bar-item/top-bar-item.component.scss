@@ -1,0 +1,15 @@
+.top-bar-item {
+  position: relative;
+  top: 6px;
+  cursor: pointer;
+
+
+  :hover {
+    color: black;
+  }
+
+  .pointer {
+    cursor: pointer;
+  }
+}
+

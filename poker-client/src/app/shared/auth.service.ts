@@ -3,6 +3,9 @@ import {ApiInterceptor} from '../api-interceptor.service';
 import {UsersService} from '../api/services';
 import {AuthRequestModel, AuthResponseModel, UserModel} from '../api/models';
 import {Router} from '@angular/router';
+import {Store} from '@ngrx/store';
+import {AppState} from './models/app-state.model';
+import {signIn, signOut} from '../state/app.actions';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +21,11 @@ export class AuthService {
    */
   private userModelInternal: UserModel = {} as UserModel;
 
-  constructor(private apiInterceptor: ApiInterceptor, private usersService: UsersService, private router: Router) {
+  constructor(
+    private apiInterceptor: ApiInterceptor,
+    private usersService: UsersService,
+    private router: Router,
+    private store: Store<{appState: AppState}>) {
   }
 
   /**
@@ -47,6 +54,7 @@ export class AuthService {
         this.apiInterceptor.jwt = authResponseModel.jwt;
         this.loggedIn = true;
         this.userModelInternal = authResponseModel.userDetails;
+        this.store.dispatch(signIn());  // Update the state of the app.
       }, (error: any) => console.log(error.error));
     return this.loggedIn;
   }
@@ -57,5 +65,6 @@ export class AuthService {
   public logout() {
     this.apiInterceptor.jwt = '';   // Delete the JWT stored in memory.
     this.loggedIn = false;          // Set loggedIn to false.
+    this.store.dispatch(signOut());
   }
 }

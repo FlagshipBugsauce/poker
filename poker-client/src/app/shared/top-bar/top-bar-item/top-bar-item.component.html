@@ -1,0 +1,20 @@
+<span *ngIf="!menuItem.dropDown" class="top-bar-item text-light">
+  <a class="btn btn-outline-success text-light" [routerLink]="menuItem.anchor">
+    {{menuItem.text}}
+  </a>
+</span>
+
+<div *ngIf="menuItem.dropDown" ngbDropdown class="d-inline-block top-bar-item">
+  <a class="btn btn-outline-success text-light" role="button" ngbDropdownToggle>
+    {{menuItem.text}}
+  </a>
+  <div ngbDropdownMenu>
+    <a
+      *ngFor="let dropDownItem of menuItem.dropDown"
+      class="pointer"
+      [routerLink]="dropDownItem.anchor"
+      ngbDropdownItem>
+      {{dropDownItem.text}}
+    </a>
+  </div>
+</div>

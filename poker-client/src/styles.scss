@@ -3,6 +3,8 @@
 /* Importing Bootstrap SCSS file. */
 @import '~bootstrap/scss/bootstrap';
 
+$top-bar-height: 70px;
+
 $button-width: 130px;
 $roll-cell-width: 64px;
 $roll-cell-height: 80px;
@@ -12,6 +14,10 @@ $toast-sm: 200px;
 $toast-md: 300px;
 $toast-lg: 400px;
 $toast-xl: 500px;
+
+.top-bar {
+  height: $top-bar-height;
+}
 
 .btn-size-md {
   width: $button-size-md;
