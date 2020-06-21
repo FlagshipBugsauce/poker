@@ -1,18 +1,25 @@
 import {Injectable} from '@angular/core';
 import {DropDownMenuItem} from '../models/menu-item.model';
 import {Store} from '@ngrx/store';
-import {AppState, AppStateContainer} from '../models/app-state.model';
+import {AppStateContainer} from '../models/app-state.model';
 import {initialState} from '../../state/app.reducer';
 import {APP_ROUTES} from '../../app-routes';
+import {selectAuthenticated, selectLobbyInfo} from '../../state/app.selector';
+import {TopBarLobbyModel} from '../models/top-bar-lobby.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TopBarService {
   /**
-   * The state of the application. Used to determine what should be presented in the top bar.
+   * Flag selected from the application state which indicates whether a user is logged in.
    */
-  private state: AppState = initialState;
+  private authenticated = initialState ? initialState.authenticated : false;
+
+  /**
+   * Lobby information selected from the application state to help with display in the top bar.
+   */
+  private lobbyInfo: TopBarLobbyModel = initialState ? initialState.lobbyInfo : null;
 
   /**
    * Getter for the path to the icon on the top bar.
@@ -102,11 +109,15 @@ export class TopBarService {
    */
   public topBarMenuItems: DropDownMenuItem[] = [];
 
-  constructor(private store: Store<{appState: AppState}>) {
+  constructor(private store: Store<AppStateContainer>) {
     this.updateMenuItems();
-    store.subscribe((state: AppStateContainer) => {
-      this.state = state.appState;
+    store.select(selectAuthenticated).subscribe((authenticated: boolean) => {
+      this.authenticated = authenticated;
       this.updateMenuItems();
+    });
+    store.select(selectLobbyInfo).subscribe((lobbyInfo: TopBarLobbyModel) => {
+      console.log(lobbyInfo);
+      this.lobbyInfo = lobbyInfo;
     });
   }
 
@@ -117,7 +128,7 @@ export class TopBarService {
     this.topBarMenuItems = [];
     this.topBarMenuItems.push(this.homeMenuItem);
     // TODO: Figure out why I need a null check to pass unit tests.
-    if (this.state && this.state.authenticated) {
+    if (this.authenticated) {
       this.topBarMenuItems.push(this.gameMenuItems);
       this.topBarMenuItems.push(this.authenticatedAccountMenuItems);
     } else {

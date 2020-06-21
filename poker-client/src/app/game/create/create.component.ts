@@ -3,7 +3,12 @@ import {Router} from '@angular/router';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {ToastService} from 'src/app/shared/toast.service';
 import {GameService} from 'src/app/api/services';
-import {ApiSuccessModel, CreateGameModel} from 'src/app/api/models';
+import {ApiSuccessModel, CreateGameModel, UserModel} from 'src/app/api/models';
+import {AppStateContainer} from '../../shared/models/app-state.model';
+import {Store} from '@ngrx/store';
+import {joinLobby} from '../../state/app.actions';
+import {selectLoggedInUser} from '../../state/app.selector';
+import {take, takeLast} from 'rxjs/operators';
 
 @Component({
   selector: 'pkr-create',
@@ -18,7 +23,8 @@ export class CreateComponent implements OnInit {
     private router: Router,
     private formBuilder: FormBuilder,
     public toastService: ToastService,
-    private gameService: GameService) {
+    private gameService: GameService,
+    private store: Store<AppStateContainer>) {
   }
 
   public ngOnInit(): void {
@@ -45,7 +51,15 @@ export class CreateComponent implements OnInit {
         name: values.name
       } as CreateGameModel
     }).subscribe((response: ApiSuccessModel) => {
-      this.router.navigate([`/game/${response.message}`]);
+      this.router.navigate([`/game/${response.message}`]).then();
+      // Select loggedInUser from store and then dispatch the joinLobby action.
+      this.store.select(selectLoggedInUser).pipe(take(1)).subscribe(val => {
+        this.store.dispatch(joinLobby({
+          id: response.message,
+          name: values.name,
+          host: ({...val})
+        }));
+      });
     });
   }
 }

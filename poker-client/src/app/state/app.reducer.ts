@@ -10,6 +10,8 @@ import {
   leaveGame
 } from './app.actions';
 import {AppState} from '../shared/models/app-state.model';
+import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
+import {UserModel} from '../api/models';
 
 export const initialState: AppState = {
   currentPage: '',
@@ -20,8 +22,11 @@ export const initialState: AppState = {
 
 const appReducerLocal = createReducer(
   initialState,
-  on(signIn, (state: AppState) => ({...state, authenticated: true})),
-  on(signOut, (state: AppState) => ({...state, authenticated: false})));
+  on(signIn,
+    (state: AppState, loggedInUser: UserModel) => ({...state, authenticated: true, loggedInUser})),
+  on(signOut, (state: AppState) => ({...state, authenticated: false, loggedInUser: null})),
+  on(joinLobby,
+    (state: AppState, lobbyInfo: TopBarLobbyModel) => ({...state, inLobby: true, lobbyInfo})));
 
 export function appReducer(state: AppState, action) {
   return appReducerLocal(state, action);

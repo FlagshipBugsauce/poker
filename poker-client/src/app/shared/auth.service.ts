@@ -54,7 +54,7 @@ export class AuthService {
         this.apiInterceptor.jwt = authResponseModel.jwt;
         this.loggedIn = true;
         this.userModelInternal = authResponseModel.userDetails;
-        this.store.dispatch(signIn());  // Update the state of the app.
+        this.store.dispatch(signIn(authResponseModel.userDetails));  // Update the state of the app.
       }, (error: any) => console.log(error.error));
     return this.loggedIn;
   }

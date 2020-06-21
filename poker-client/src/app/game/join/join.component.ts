@@ -2,10 +2,13 @@ import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
 import {PopupComponent, PopupContentModel} from 'src/app/shared/popup/popup.component';
 import {Router} from '@angular/router';
 import {EmittersService, GameService} from 'src/app/api/services';
-import {ApiSuccessModel} from 'src/app/api/models';
+import {ApiSuccessModel, GetGameModel} from 'src/app/api/models';
 import {SseService} from 'src/app/shared/sse.service';
 import {ApiConfiguration} from 'src/app/api/api-configuration';
 import {EmitterType} from 'src/app/shared/models/emitter-type.model';
+import {AppStateContainer} from '../../shared/models/app-state.model';
+import {Store} from '@ngrx/store';
+import {joinLobby} from '../../state/app.actions';
 
 @Component({
   selector: 'pkr-join',
@@ -51,13 +54,14 @@ export class JoinComponent implements OnInit {
     private router: Router,
     private gameService: GameService,
     private emittersService: EmittersService,
-    private sseService: SseService) {
+    private sseService: SseService,
+    private store: Store<AppStateContainer>) {
   }
 
   /** Returns a slice of the list of games for pagination. */
-  public get games(): any[] {
+  public get games(): GetGameModel[] {
     return this.sseService.gameList
-      .map((game: any) => ({...game}))
+      .map((game: GetGameModel) => ({...game}))
       .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize);
   }
 
@@ -78,12 +82,13 @@ export class JoinComponent implements OnInit {
    * Shows the confirmation popup that will take a player to the game they clicked on.
    * @param game GetGameModel with based information about the game.
    */
-  public showConfirmationPopup(game: any): void {
+  public showConfirmationPopup(game: GetGameModel): void {
     this.popupContent[0].body = `Attempting to join game "${game.name}".`;
     this.popupOkCloseProcedure = () => {
       // Join the lobby.
-      this.gameService.joinGame({gameId: game.id}).subscribe((response: ApiSuccessModel) => {
+      this.gameService.joinGame({gameId: game.id}).subscribe(() => {
         this.router.navigate([`/game/${game.id}`]).then();
+        this.store.dispatch(joinLobby({id: game.id, name: game.name, host: game.host}));
       });
     };
     this.confirmationPopup.open();
