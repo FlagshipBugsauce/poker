@@ -43,12 +43,20 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
       import('@angular/router').UrlTree> |
     Promise<boolean |
       import('@angular/router').UrlTree> {
-    if (this.sseService.gameDocument.state != null && this.sseService.gameDocument.state === GameState.Over) {
-      this.sseService.closeEvent(EmitterType.Game);
-      this.sseService.gameDocument = {} as GameDocument;
+    // If state is null or the game is over, then we should just let the player leave the page.
+    if (!this.sseService.gameDocument.state ||
+      this.sseService.gameDocument.state === GameState.Over) {
       return true;
     }
-    if (!this.canLeave && this.confirmationPopup != null) {
+
+    /*
+        If canLeave is false and the confirmationPopup reference is non-null, then we want to set
+        the okCloseProcedure on the popup to set the canLeave flag to true, close any events which
+        are potentially open and finally, navigate to wherever the user attempted to go. This will
+        direct the user off the current page only after they confirm this is what they want, to
+        avoid inadvertently leaving a game.
+     */
+    if (!this.canLeave && this.confirmationPopup) {
       this.confirmationPopup.okCloseProcedure = () => {
         this.canLeave = true;
         this.sseService.closeEvent(EmitterType.Game);
@@ -56,9 +64,8 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
         this.sseService.closeEvent(EmitterType.Hand);
         this.sseService.closeEvent(EmitterType.GameData);
 
-        if (this.sseService.gameDocument.state != null && this.sseService.gameDocument.state === GameState.Lobby) {
-          this.gameService.leaveLobby().subscribe(() => {
-          });
+        if (this.sseService.gameDocument.state && this.sseService.gameDocument.state === GameState.Lobby) {
+          this.gameService.leaveLobby().subscribe();
         }
 
         this.router.navigate([this.link]).then();

@@ -34,7 +34,7 @@ export class SseService {
   /**
    * Default data (typically empty object/list) to be placed in data dictionary to avoid null pointer exceptions.
    */
-  private defaultData = {};
+  public defaultData = {};
 
   /**
    * Dictionary of callbacks to be executed when data is received. Callbacks are mapped to specific emitter type. Each type has a list of
@@ -197,6 +197,7 @@ export class SseService {
           this.eventReferences[type] = null;                // Remove the event reference.
           this.openEvents[type] = false;                    // Set open event map to false.
           this.callbacks[type] = [] as Array<() => void>;   // Reset callbacks.
+          this.data[type] = this.defaultData[type];
         });
       } catch (err) {
         console.log(`Something went wrong trying to close the ${type} emitter.`);
