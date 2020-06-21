@@ -28,15 +28,15 @@ export class LoginComponent implements OnInit {
   //   email: "test.account2@domain.com",
   //   password: "admin!@#"
   // }
-  private quickCredentials: AuthRequestModel = {
-    email: 'jon@domain.com',
-    password: 'jonathan'
-  } as AuthRequestModel;
-
   // private quickCredentials: AuthRequestModel = {
-  //   email: '',
-  //   password: ''
+  //   email: 'jon@domain.com',
+  //   password: 'jonathan'
   // } as AuthRequestModel;
+
+  private quickCredentials: AuthRequestModel = {
+    email: '',
+    password: ''
+  } as AuthRequestModel;
 
   constructor(
     private authService: AuthService,
