@@ -462,6 +462,13 @@ public class GameService {
     games.remove(gameDocument.getId()); // Remove mapping.
     gameDocument.getPlayers().forEach(p -> userIdToGameIdMap.remove(p.getId())); // Remove mappings.
     broadcastGameDataUpdate(gameDocument); // Broadcast final update.
+    // TODO: Time for client to get final game data update. Get rid of this once a better workaround
+    // is found.
+    try {
+      Thread.sleep(3000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
     broadcastGameUpdate(gameDocument); // Broadcast final update.
     gameIdToGameDataMap.remove(gameDocument.getId()); // Remove mapping.
   }

@@ -8,6 +8,7 @@ import {GameDocument} from '../../api/models/game-document';
 import {EmitterType} from '../../shared/models/emitter-type.model';
 import {DrawGameDataContainerModel} from '../../api/models/draw-game-data-container-model';
 import {DrawGameDataModel} from '../../api/models/draw-game-data-model';
+import {provideMockStore} from '@ngrx/store/testing';
 
 class MockSseService {
   public gameDocument: GameDocument = {
@@ -28,10 +29,13 @@ describe('PlayComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [PlayComponent],
-      providers: [{
-        provide: SseService,
-        useClass: MockSseService
-      }],
+      providers: [
+        {
+          provide: SseService,
+          useClass: MockSseService
+        },
+        provideMockStore()
+      ],
       imports: [RouterTestingModule, SharedModule]
     })
       .compileComponents();

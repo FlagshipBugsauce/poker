@@ -55,7 +55,7 @@ export class LoginComponent implements OnInit {
     // this.authService.authorize(this.quickCredentials.email, this.quickCredentials.password).then((success: boolean) => {
     //   // if (success) this.router.navigate(['/game/0a7d95ef-94ba-47bc-b591-febb365bc543']);
     //   if (success) {
-    //     this.router.navigate(['/join']).then();
+    //     this.router.navigate(['/home']).then();
     //   }
     // });
   }
@@ -67,7 +67,7 @@ export class LoginComponent implements OnInit {
   public async authorize(formValues: any): Promise<void> {
     if (await this.authService.authorize(formValues.email, formValues.password)) {
       this.toastService.show('Login Successful!', {classname: 'bg-light toast-md', delay: 5000});
-      this.router.navigate(['/home']);
+      this.router.navigate(['/home']).then();
     } else {
       this.showFailAlert = true;
     }

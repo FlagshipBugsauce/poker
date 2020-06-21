@@ -15,6 +15,8 @@ import {RegisterComponent} from './register/register.component';
 import {PopupComponent} from './popup/popup.component';
 import {ToastContainerComponent} from './toast-container/toast-container.component';
 import { CardComponent } from './card/card.component';
+import { TopBarComponent } from './top-bar/top-bar.component';
+import { TopBarItemComponent } from './top-bar/top-bar-item/top-bar-item.component';
 
 export const API_INTERCEPTOR_PROVIDER: Provider = {
   provide: HTTP_INTERCEPTORS,
@@ -31,7 +33,9 @@ export const API_INTERCEPTOR_PROVIDER: Provider = {
     RegisterComponent,
     PopupComponent,
     ToastContainerComponent,
-    CardComponent
+    CardComponent,
+    TopBarComponent,
+    TopBarItemComponent
   ],
   imports: [
     CommonModule,

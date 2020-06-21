@@ -9,15 +9,27 @@ import {JoinComponent} from './game/join/join.component';
 import {GameComponent} from './game/game/game.component';
 import {LeaveGameGuardService} from './game/game/leave-game-guard.service';
 import {LeaveJoinPageGuardService} from './game/join/leave-join-page-guard.service';
+import {APP_ROUTES} from './app-routes';
 
 const routes: Routes = [
-  {path: 'login', component: LoginComponent},
-  {path: 'register', component: RegisterComponent},
-  {path: 'home', component: HomeComponent},
-  {path: 'create', component: CreateComponent, canActivate: [AuthGuardService]},
-  {path: 'join', component: JoinComponent, canActivate: [AuthGuardService], canDeactivate: [LeaveJoinPageGuardService]},
-  {path: 'game/:gameId', component: GameComponent, canActivate: [AuthGuardService], canDeactivate: [LeaveGameGuardService]},
-  {path: '', redirectTo: 'home', pathMatch: 'full'}
+  {path: 'logout', component: LoginComponent, canActivate: [AuthGuardService]},
+  {path: APP_ROUTES.LOGIN.path, component: LoginComponent},
+  {path: APP_ROUTES.REGISTER.path, component: RegisterComponent},
+  {path: APP_ROUTES.CREATE_GAME.path, component: CreateComponent, canActivate: [AuthGuardService]},
+  {
+    path: APP_ROUTES.JOIN_GAME.path,
+    component: JoinComponent,
+    canActivate: [AuthGuardService],
+    canDeactivate: [LeaveJoinPageGuardService]
+  },
+  {
+    path: `${APP_ROUTES.GAME_PREFIX.path}/:${APP_ROUTES.GAME_ID.path}`,
+    component: GameComponent,
+    canActivate: [AuthGuardService],
+    canDeactivate: [LeaveGameGuardService]
+  },
+  {path: APP_ROUTES.HOME.path, component: HomeComponent, pathMatch: 'full'},
+  {path: '**', redirectTo: APP_ROUTES.HOME.path}
 ];
 
 @NgModule({

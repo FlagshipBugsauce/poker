@@ -22,9 +22,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @AllArgsConstructor
 @EnableWebSecurity
 public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
-  private CustomUserDetailsService customUserDetailsService;
-  private JwtRequestFilter jwtRequestFilter;
-  private AppConstants appConstants;
+  private final CustomUserDetailsService customUserDetailsService;
+  private final JwtRequestFilter jwtRequestFilter;
+  private final AppConstants appConstants;
 
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {

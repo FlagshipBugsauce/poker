@@ -36,5 +36,6 @@ export class EndComponent implements OnInit {
   ngOnInit(): void {
     this.sseService.closeEvent(EmitterType.Hand);
     this.sseService.closeEvent(EmitterType.Game);
+    this.sseService.closeEvent(EmitterType.GameData);
   }
 }
