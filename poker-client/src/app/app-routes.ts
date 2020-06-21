@@ -1,3 +1,6 @@
+/**
+ * Source of truth for all route paths and labels.
+ */
 export const APP_ROUTES = {
   LOGIN: {path: 'login', label: 'Log In'},
   LOGOUT: {path: 'logout', label: 'Log Out'},

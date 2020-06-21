@@ -1,22 +1,29 @@
-/* tslint:disable */
 import {Injectable} from '@angular/core';
 import {DropDownMenuItem} from '../models/menu-item.model';
-import {Store} from "@ngrx/store";
-import {AppState, AppStateContainer} from "../models/app-state.model";
-import {initialState} from "../../state/app.reducer";
-import {AuthService} from "../auth.service";
-import {APP_ROUTES} from "../../app-routes";
+import {Store} from '@ngrx/store';
+import {AppState, AppStateContainer} from '../models/app-state.model';
+import {initialState} from '../../state/app.reducer';
+import {APP_ROUTES} from '../../app-routes';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TopBarService {
+  /**
+   * The state of the application. Used to determine what should be presented in the top bar.
+   */
   private state: AppState = initialState;
 
+  /**
+   * Getter for the path to the icon on the top bar.
+   */
   public get topBarIcon(): string {
     return 'assets/icons/aces.svg';
   }
 
+  /**
+   * Getter for the home menu item.
+   */
   public get homeMenuItem(): DropDownMenuItem {
     return {
       text: APP_ROUTES.HOME.label,
@@ -24,6 +31,9 @@ export class TopBarService {
     };
   }
 
+  /**
+   * Getter for the game menu item dropdown.
+   */
   public get gameMenuItems(): DropDownMenuItem {
     return {
       text: APP_ROUTES.GAME_PREFIX.label,
@@ -41,6 +51,10 @@ export class TopBarService {
     };
   }
 
+  /**
+   * Getter for the account menu item dropdown that should be presented when a user is not
+   * authenticated.
+   */
   public get unauthenticatedAccountMenuItems(): DropDownMenuItem {
     return {
       text: 'Account',
@@ -58,6 +72,10 @@ export class TopBarService {
     };
   }
 
+  /**
+   * Getter for the account menu item dropdown that should be presented when a user is
+   * authenticated.
+   */
   public get authenticatedAccountMenuItems(): DropDownMenuItem {
     return {
       text: 'Account', // TODO: Change this to parameter and add general account page.
@@ -65,23 +83,26 @@ export class TopBarService {
       dropDown: [
         {
           text: 'Edit Profile',
-          anchor: ''
+          anchor: 'edit-profile'
         },
         {
           text: 'View Statistics',
-          anchor: '',
+          anchor: 'view-statistics',
         },
         {
           text: APP_ROUTES.LOGOUT.label,
           anchor: APP_ROUTES.LOGOUT.path
         }
       ]
-    }
+    };
   }
 
+  /**
+   * Top bar menu items that is generated anew each time the application state changes.
+   */
   public topBarMenuItems: DropDownMenuItem[] = [];
 
-  constructor(private authService: AuthService, private store: Store<{appState: AppState}>) {
+  constructor(private store: Store<{appState: AppState}>) {
     this.updateMenuItems();
     store.subscribe((state: AppStateContainer) => {
       this.state = state.appState;
@@ -89,10 +110,14 @@ export class TopBarService {
     });
   }
 
+  /**
+   * Helper to update menu items whenever a state change is detected.
+   */
   private updateMenuItems(): void {
     this.topBarMenuItems = [];
     this.topBarMenuItems.push(this.homeMenuItem);
-    if (this.state.authenticated) {
+    // TODO: Figure out why I need a null check to pass unit tests.
+    if (this.state && this.state.authenticated) {
       this.topBarMenuItems.push(this.gameMenuItems);
       this.topBarMenuItems.push(this.authenticatedAccountMenuItems);
     } else {

@@ -9,9 +9,7 @@ import {JoinComponent} from './game/join/join.component';
 import {GameComponent} from './game/game/game.component';
 import {LeaveGameGuardService} from './game/game/leave-game-guard.service';
 import {LeaveJoinPageGuardService} from './game/join/leave-join-page-guard.service';
-import {APP_ROUTES} from "./app-routes";
-
-
+import {APP_ROUTES} from './app-routes';
 
 const routes: Routes = [
   {path: 'logout', component: LoginComponent, canActivate: [AuthGuardService]},

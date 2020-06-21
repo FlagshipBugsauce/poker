@@ -1,6 +1,5 @@
-/* tslint:disable */
 import { Component, OnInit } from '@angular/core';
-import {TopBarService} from "./top-bar.service";
+import {TopBarService} from './top-bar.service';
 
 @Component({
   selector: 'pkr-top-bar',

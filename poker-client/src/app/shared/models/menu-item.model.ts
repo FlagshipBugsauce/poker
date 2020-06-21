@@ -8,11 +8,6 @@ export interface MenuItem {
    * Router link.
    */
   anchor: string;
-
-  /**
-   * Optional function to run.
-   */
-  run?: any;
 }
 
 export interface DropDownMenuItem extends MenuItem {

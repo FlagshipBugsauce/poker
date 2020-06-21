@@ -1,17 +1,35 @@
 <span *ngIf="!menuItem.dropDown" class="top-bar-item text-light">
-  <a class="btn btn-outline-success text-light" [routerLink]="menuItem.anchor">
+  <a
+    [ngClass]="{
+      'btn': 'true',
+      'btn-outline-success': 'true',
+      'top-bar-button': !active,
+      'top-bar-button-active': active
+    }"
+    [routerLink]="menuItem.anchor">
     {{menuItem.text}}
   </a>
 </span>
-
 <div *ngIf="menuItem.dropDown" ngbDropdown class="d-inline-block top-bar-item">
-  <a class="btn btn-outline-success text-light" role="button" ngbDropdownToggle>
+  <a
+     [ngClass]="{
+       'btn': 'true',
+       'btn-outline-success': 'true',
+       'top-bar-button': !active,
+       'top-bar-button-active': active
+     }"
+     role="button"
+     ngbDropdownToggle>
     {{menuItem.text}}
   </a>
   <div ngbDropdownMenu>
     <a
       *ngFor="let dropDownItem of menuItem.dropDown"
-      class="pointer"
+      [ngClass]="{
+        'pointer': 'true',
+        'top-bar-dropdown-button': !activeDropdown(dropDownItem.anchor),
+        'top-bar-dropdown-button-active': activeDropdown(dropDownItem.anchor)
+      }"
       [routerLink]="dropDownItem.anchor"
       ngbDropdownItem>
       {{dropDownItem.text}}

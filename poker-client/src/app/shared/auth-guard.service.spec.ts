@@ -3,6 +3,7 @@ import {TestBed} from '@angular/core/testing';
 import {AuthGuardService} from './auth-guard.service';
 import {RouterTestingModule} from '@angular/router/testing';
 import {SharedModule} from './shared.module';
+import {provideMockStore} from '@ngrx/store/testing';
 
 describe('AuthGuardService', () => {
   let service: AuthGuardService;
@@ -10,7 +11,8 @@ describe('AuthGuardService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       // providers: [ApiInterceptor],
-      imports: [RouterTestingModule, SharedModule]
+      imports: [RouterTestingModule, SharedModule],
+      providers: [provideMockStore()]
     });
     service = TestBed.inject(AuthGuardService);
   });
