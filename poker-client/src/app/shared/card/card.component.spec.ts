@@ -1,7 +1,6 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
-
 import {CardComponent} from './card.component';
-import {SharedModule} from '../shared.module';
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 
 describe('CardComponent', () => {
   let component: CardComponent;
@@ -10,7 +9,9 @@ describe('CardComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CardComponent],
-      imports: [SharedModule]
+      imports: [
+        NgbModule
+      ]
     })
     .compileComponents();
   }));

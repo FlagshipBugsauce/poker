@@ -1,9 +1,10 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {HeaderComponent} from './header.component';
 import {RouterTestingModule} from '@angular/router/testing';
-import {SharedModule} from '../shared.module';
 import {MockStore, provideMockStore} from '@ngrx/store/testing';
 import {AppState} from '../models/app-state.model';
+import {TopBarComponent} from '../top-bar/top-bar.component';
+import {TopBarItemComponent} from '../top-bar/top-bar-item/top-bar-item.component';
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
@@ -18,8 +19,12 @@ describe('HeaderComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [HeaderComponent],
-      imports: [RouterTestingModule, SharedModule],
+      declarations: [
+        HeaderComponent,
+        TopBarComponent,
+        TopBarItemComponent
+      ],
+      imports: [RouterTestingModule],
       providers: [
         provideMockStore(),
       ]

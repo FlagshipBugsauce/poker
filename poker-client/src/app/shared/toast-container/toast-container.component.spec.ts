@@ -1,6 +1,6 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
-
 import {ToastContainerComponent} from './toast-container.component';
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 
 describe('ToastContainerComponent', () => {
   let component: ToastContainerComponent;
@@ -8,7 +8,10 @@ describe('ToastContainerComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ToastContainerComponent]
+      declarations: [ToastContainerComponent],
+      imports: [
+        NgbModule
+      ]
     })
       .compileComponents();
   }));
