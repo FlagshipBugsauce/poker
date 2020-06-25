@@ -1,8 +1,17 @@
 <div class="container-fluid m-0 p-0">
   <nav class="top-bar bg-success text-nowrap">
-    <img [src]="icon" class="image mx-3" alt="Poker Icon">
-    <pkr-top-bar-item
-      *ngFor="let menuItem of topBarService.topBarMenuItems"
-      [menuItem]="menuItem"></pkr-top-bar-item>
+    <div class="grid-container">
+      <div>
+        <img [src]="icon" class="image" alt="Poker Icon">
+      </div>
+      <div>
+        <pkr-top-bar-item
+          *ngFor="let menuItem of topBarService.topBarMenuItems"
+          [menuItem]="menuItem"></pkr-top-bar-item>
+      </div>
+      <div>
+        <pkr-top-bar-info></pkr-top-bar-info>
+      </div>
+    </div>
   </nav>
 </div>

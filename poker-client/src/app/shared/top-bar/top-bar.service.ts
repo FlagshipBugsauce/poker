@@ -4,8 +4,7 @@ import {Store} from '@ngrx/store';
 import {AppStateContainer} from '../models/app-state.model';
 import {initialState} from '../../state/app.reducer';
 import {APP_ROUTES} from '../../app-routes';
-import {selectAuthenticated, selectLobbyInfo} from '../../state/app.selector';
-import {TopBarLobbyModel} from '../models/top-bar-lobby.model';
+import {selectAuthenticated} from '../../state/app.selector';
 
 @Injectable({
   providedIn: 'root'
@@ -14,12 +13,7 @@ export class TopBarService {
   /**
    * Flag selected from the application state which indicates whether a user is logged in.
    */
-  private authenticated = initialState ? initialState.authenticated : false;
-
-  /**
-   * Lobby information selected from the application state to help with display in the top bar.
-   */
-  private lobbyInfo: TopBarLobbyModel = initialState ? initialState.lobbyInfo : null;
+  private authenticated = initialState.authenticated;
 
   /**
    * Getter for the path to the icon on the top bar.
@@ -114,10 +108,6 @@ export class TopBarService {
     store.select(selectAuthenticated).subscribe((authenticated: boolean) => {
       this.authenticated = authenticated;
       this.updateMenuItems();
-    });
-    store.select(selectLobbyInfo).subscribe((lobbyInfo: TopBarLobbyModel) => {
-      console.log(lobbyInfo);
-      this.lobbyInfo = lobbyInfo;
     });
   }
 

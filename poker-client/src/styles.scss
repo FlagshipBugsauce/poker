@@ -15,6 +15,10 @@ $toast-md: 300px;
 $toast-lg: 400px;
 $toast-xl: 500px;
 
+html, body {
+  height: 100%;
+}
+
 .top-bar {
   height: $top-bar-height;
 }
@@ -31,24 +35,30 @@ $toast-xl: 500px;
 .toast-xs {
   width: $toast-xs;
   text-align: center;
+  transform: scaleY(-1);
 }
 
 .toast-sm {
   width: $toast-sm;
   text-align: center;
+  transform: scaleY(-1);
 }
 
 .toast-md {
   width: $toast-md;
   text-align: center;
+  transform: scaleY(-1);
+  // TODO: Add this transformation to general purpose toast class
 }
 
 .toast-lg {
   width: $toast-lg;
   text-align: center;
+  transform: scaleY(-1);
 }
 
 .toast-xl {
   width: $toast-xl;
   text-align: center;
+  transform: scaleY(-1);
 }

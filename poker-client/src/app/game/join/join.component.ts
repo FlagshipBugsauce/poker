@@ -1,8 +1,7 @@
 import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
 import {PopupComponent, PopupContentModel} from 'src/app/shared/popup/popup.component';
-import {Router} from '@angular/router';
-import {EmittersService, GameService} from 'src/app/api/services';
-import {ApiSuccessModel, GetGameModel} from 'src/app/api/models';
+import {EmittersService} from 'src/app/api/services';
+import {GetGameModel} from 'src/app/api/models';
 import {SseService} from 'src/app/shared/sse.service';
 import {ApiConfiguration} from 'src/app/api/api-configuration';
 import {EmitterType} from 'src/app/shared/models/emitter-type.model';
@@ -51,8 +50,6 @@ export class JoinComponent implements OnInit {
 
   constructor(
     private apiConfiguration: ApiConfiguration,
-    private router: Router,
-    private gameService: GameService,
     private emittersService: EmittersService,
     private sseService: SseService,
     private store: Store<AppStateContainer>) {
@@ -86,10 +83,7 @@ export class JoinComponent implements OnInit {
     this.popupContent[0].body = `Attempting to join game "${game.name}".`;
     this.popupOkCloseProcedure = () => {
       // Join the lobby.
-      this.gameService.joinGame({gameId: game.id}).subscribe(() => {
-        this.router.navigate([`/game/${game.id}`]).then();
-        this.store.dispatch(joinLobby({id: game.id, name: game.name, host: game.host}));
-      });
+      this.store.dispatch(joinLobby({id: game.id, name: game.name, host: game.host}));
     };
     this.confirmationPopup.open();
   }

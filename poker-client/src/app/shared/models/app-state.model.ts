@@ -4,8 +4,8 @@ import {UserModel} from '../../api/models';
 export interface AppState {
   currentPage: string;
   authenticated: boolean;
-  inLobby: boolean;
   lobbyInfo?: TopBarLobbyModel;
+  lastLobbyInfo?: TopBarLobbyModel;
   loggedInUser?: UserModel;
   inGame: boolean;
 }

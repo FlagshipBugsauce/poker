@@ -7,6 +7,8 @@ import {HomeModule} from './home/home.module';
 import {GameModule} from './game/game.module';
 import {StoreModule} from '@ngrx/store';
 import {appReducer} from './state/app.reducer';
+import { EffectsModule } from '@ngrx/effects';
+import {GameEffects} from './state/game.effects';
 
 @NgModule({
   declarations: [],
@@ -16,7 +18,8 @@ import {appReducer} from './state/app.reducer';
     SharedModule,
     HomeModule,
     GameModule,
-    StoreModule.forRoot({appState: appReducer})
+    StoreModule.forRoot({appState: appReducer}),
+    EffectsModule.forRoot([GameEffects])
   ],
   exports: [
     SharedModule

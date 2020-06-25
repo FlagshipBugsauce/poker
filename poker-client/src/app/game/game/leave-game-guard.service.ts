@@ -6,7 +6,9 @@ import {GameService} from 'src/app/api/services';
 import {GameComponent} from './game.component';
 import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 import {GameState} from 'src/app/shared/models/game-state.enum';
-import {GameDocument} from '../../api/models/game-document';
+import {AppStateContainer} from '../../shared/models/app-state.model';
+import {Store} from '@ngrx/store';
+import {leaveLobby} from '../../state/app.actions';
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +32,8 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
   constructor(
     private router: Router,
     private sseService: SseService,
-    private gameService: GameService) {
+    private gameService: GameService,
+    private store: Store<AppStateContainer>) {
   }
 
   canDeactivate(
@@ -65,7 +68,7 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
         this.sseService.closeEvent(EmitterType.GameData);
 
         if (this.sseService.gameDocument.state && this.sseService.gameDocument.state === GameState.Lobby) {
-          this.gameService.leaveLobby().subscribe();
+          this.store.dispatch(leaveLobby());  // Leave the lobby.
         }
 
         this.router.navigate([this.link]).then();

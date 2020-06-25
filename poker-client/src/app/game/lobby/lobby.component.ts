@@ -9,6 +9,9 @@ import {ApiConfiguration} from 'src/app/api/api-configuration';
 import {ApiInterceptor} from 'src/app/api-interceptor.service';
 import {LobbyDocument} from 'src/app/api/models/lobby-document';
 import {EmitterType} from 'src/app/shared/models/emitter-type.model';
+import {AppStateContainer} from '../../shared/models/app-state.model';
+import {Store} from '@ngrx/store';
+import {startGame} from '../../state/app.actions';
 
 @Component({
   selector: 'pkr-lobby',
@@ -59,7 +62,8 @@ export class LobbyComponent implements OnInit {
     private router: Router,
     private sseService: SseService,
     public authService: AuthService,
-    private toastService: ToastService) {
+    private toastService: ToastService,
+    private store: Store<AppStateContainer>) {
   }
 
   /**
@@ -128,6 +132,7 @@ export class LobbyComponent implements OnInit {
   public leaveGame(): void {
     // Only need to leave the page, the leave game guard will handle making the leave game call.
     this.router.navigate(['/join']).then();
+    // TODO: See if we can handle this in a more elegant fashion.
   }
 
   /**
@@ -135,8 +140,7 @@ export class LobbyComponent implements OnInit {
    */
   public startGame(): void {
     this.sseService.closeEvent(EmitterType.Lobby);
-    this.gameService.startGame().subscribe(() => {
-    });
+    this.store.dispatch(startGame());
   }
 
   /**

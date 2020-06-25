@@ -14,3 +14,8 @@ export const leaveLobby = createAction('[Lobby Component] LeaveLobby');
 export const createGame = createAction('[Lobby Component] CreateGame');
 export const rejoinGame = createAction('[Lobby Component] RejoinGame');
 export const leaveGame = createAction('[Game Component] LeaveGame');
+export const startGame = createAction('[Game Component] StartGame');
+
+export const leaveLobbySuccess = createAction('[Lobby Component] LeaveLobbySuccess');
+export const joinLobbySuccess = createAction('[Lobby Component] JoinLobbySuccess');
+export const startGameSuccess = createAction('[Game Component] StartGameSuccess');
