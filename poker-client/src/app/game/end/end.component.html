@@ -3,7 +3,7 @@
     <h3 class="card-header bg-success text-light">Game Over!</h3>
     <div class="card-body">
       <p>The game is over!</p>
-      <p>{{ this.gameModel.summary != undefined ? this.gameModel.summary.message : "" }}</p>
+      <p>{{ this.gameModel.summary ? this.gameModel.summary.message : "" }}</p>
     </div>
   </div>
   <div class="card m-3">
@@ -33,8 +33,8 @@
                 'text-center': true,
                 'align-middle': true
               }">
-                <pkr-card *ngIf="roll.card != null" [card]="roll.card" size="xs"></pkr-card>
-                {{ roll.card == null ? ' ' : '' }}
+                <pkr-card *ngIf="roll.card" [card]="roll.card" size="xs"></pkr-card>
+                {{ roll.card ? '' : ' ' }}
               </td>
               <td class="text-center align-middle">
                 {{ row.player.score }}

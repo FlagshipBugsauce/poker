@@ -1,6 +1,6 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { TopBarInfoComponent } from './top-bar-info.component';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {TopBarInfoComponent} from './top-bar-info.component';
+import {provideMockStore} from '@ngrx/store/testing';
 
 describe('TopBarInfoComponent', () => {
   let component: TopBarInfoComponent;
@@ -8,7 +8,8 @@ describe('TopBarInfoComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TopBarInfoComponent ]
+      declarations: [TopBarInfoComponent],
+      providers: [provideMockStore()]
     })
     .compileComponents();
   }));

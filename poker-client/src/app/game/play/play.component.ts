@@ -1,17 +1,14 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {SseService} from 'src/app/shared/sse.service';
 import {EmitterType} from 'src/app/shared/models/emitter-type.model';
-import {
-  DrawGameDataModel,
-  GameDocument,
-  HandDocument, UserModel,
-} from '../../api/models';
+import {DrawGameDataModel, GameDocument, HandDocument, UserModel,} from '../../api/models';
 import {ToastService} from '../../shared/toast.service';
 import {GameState} from '../../shared/models/game-state.enum';
 import {
   AppStateContainer,
   GameDataStateContainer,
-  GameStateContainer, HandStateContainer
+  GameStateContainer,
+  HandStateContainer
 } from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {drawCard} from '../../state/app.actions';
@@ -79,14 +76,6 @@ export class PlayComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.appStore.select(selectLoggedInUser).subscribe(user => this.user = user);
     this.sseService.closeEvent(EmitterType.Lobby);
-
-    // this.sseService.addCallback(EmitterType.Game, () => {
-    //   if (this.gameModel.state === 'Over') {
-    //     this.gameModel.hands.push('');
-    //     this.canRoll = false;
-    //   }
-    // });
-
     this.sseService.openEvent(EmitterType.Hand);
     this.sseService.openEvent(EmitterType.GameData);
     this.gameDataStore.select(selectGameData)
@@ -106,7 +95,6 @@ export class PlayComponent implements OnInit, OnDestroy {
       .subscribe((gameDocument: GameDocument) => {
         this.gameModel = gameDocument;
         if (this.gameModel.state === 'Over') {
-          // this.gameModel.hands.push(''); TODO: Do I need this?
           this.canRoll = false;
         }
       });

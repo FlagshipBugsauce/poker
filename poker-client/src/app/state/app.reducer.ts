@@ -1,23 +1,21 @@
 import {createReducer, on} from '@ngrx/store';
 import {
-  navigate,
-  signIn,
-  signOut,
-  joinLobby,
-  leaveLobby,
-  createGame,
-  rejoinGame,
-  leaveGame,
-  readyUp,
+  gameDataUpdated,
   gameDocumentUpdated,
   gameListUpdated,
+  handDocumentUpdated,
+  joinLobby,
+  leaveLobby,
   lobbyDocumentUpdated,
-  handDocumentUpdated, gameDataUpdated, notReady
+  notReady,
+  readyUp,
+  signIn,
+  signOut
 } from './app.actions';
 import {AppState} from '../shared/models/app-state.model';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
-  DrawGameDataContainerModel, DrawGameDataModel, DrawGameDrawModel,
+  DrawGameDataContainerModel,
   GameDocument,
   HandDocument,
   LobbyDocument,
@@ -34,7 +32,7 @@ export const initialState: AppState = {
   inGame: false,
   ready: false
 };
-const appReducerLocal = createReducer(
+const appReducerLocal = createReducer<AppState>(
   initialState,
   on(signIn,
     (state: AppState, loggedInUser: UserModel) =>
@@ -59,7 +57,7 @@ export const gameDataInitialState: DrawGameDataContainerModel = {
   currentHand: 0,
   gameData: []
 };
-const gameDataReducerInternal = createReducer(
+const gameDataReducerInternal = createReducer<DrawGameDataContainerModel>(
   gameDataInitialState,
   on(gameDataUpdated,
     (state: DrawGameDataContainerModel, newState: DrawGameDataContainerModel) => newState));
@@ -71,7 +69,7 @@ export function gameDataReducer(state: DrawGameDataContainerModel, action) {
  * GameDocument reducer and initial state.
  */
 export const gameDocumentInitialState: GameDocument = {} as GameDocument;
-const gameDocumentReducerInternal = createReducer(
+const gameDocumentReducerInternal = createReducer<GameDocument>(
   gameDocumentInitialState,
   on(gameDocumentUpdated, (state: GameDocument, newState: GameDocument) => newState));
 export function gameDocumentReducer(state: GameDocument, action) {
@@ -82,7 +80,7 @@ export function gameDocumentReducer(state: GameDocument, action) {
  * LobbyDocument reducer and initial state.
  */
 export const lobbyDocumentInitialState: LobbyDocument = {} as LobbyDocument;
-const lobbyDocumentReducerInternal = createReducer(
+const lobbyDocumentReducerInternal = createReducer<LobbyDocument>(
   lobbyDocumentInitialState,
   on(lobbyDocumentUpdated, (state: LobbyDocument, newState: LobbyDocument) => newState));
 export function lobbyDocumentReducer(state: LobbyDocument, action) {
@@ -93,7 +91,7 @@ export function lobbyDocumentReducer(state: LobbyDocument, action) {
  * HandDocument reducer and initial state.
  */
 export const handDocumentInitialState: HandDocument = {} as HandDocument;
-const handDocumentReducerInternal = createReducer(
+const handDocumentReducerInternal = createReducer<HandDocument>(
   handDocumentInitialState,
   on(handDocumentUpdated, (state: HandDocument, newState: HandDocument) => newState));
 export function handDocumentReducer(state: HandDocument, action) {
@@ -104,7 +102,7 @@ export function handDocumentReducer(state: HandDocument, action) {
  * GameList reducer and initial state.
  */
 export const gameListInitialState: GameListContainerModel = {gameList: []};
-const gameListReducerInternal = createReducer(
+const gameListReducerInternal = createReducer<GameListContainerModel>(
   gameListInitialState,
   on(gameListUpdated,
     (state: GameListContainerModel, newState: GameListContainerModel) => newState));

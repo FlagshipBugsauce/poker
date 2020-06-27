@@ -5,8 +5,10 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {LobbyComponent} from '../lobby/lobby.component';
 import {PlayComponent} from '../play/play.component';
 import {EndComponent} from '../end/end.component';
+import {MockStore, provideMockStore} from '@ngrx/store/testing';
 
 describe('GameComponent', () => {
+  let mockStore: MockStore;
   let component: GameComponent;
   let fixture: ComponentFixture<GameComponent>;
 
@@ -18,9 +20,11 @@ describe('GameComponent', () => {
         PlayComponent,
         EndComponent
       ],
-      imports: [SharedModule, RouterTestingModule]
-    })
-      .compileComponents();
+      imports: [SharedModule, RouterTestingModule],
+      providers: [provideMockStore()]
+    });
+    fixture = TestBed.createComponent(GameComponent);
+    mockStore = TestBed.inject(MockStore);
   }));
 
   beforeEach(() => {

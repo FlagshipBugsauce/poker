@@ -5,15 +5,16 @@ import {MockStore, provideMockStore} from '@ngrx/store/testing';
 import {AppState} from '../models/app-state.model';
 import {TopBarComponent} from '../top-bar/top-bar.component';
 import {TopBarItemComponent} from '../top-bar/top-bar-item/top-bar-item.component';
+import {TopBarInfoComponent} from '../top-bar/top-bar-info/top-bar-info.component';
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
   let store: MockStore;
   const initialState: AppState = {
+    ready: false,
     currentPage: '',
     authenticated: false,
-    inLobby: false,
     inGame: false
   };
 
@@ -22,7 +23,8 @@ describe('HeaderComponent', () => {
       declarations: [
         HeaderComponent,
         TopBarComponent,
-        TopBarItemComponent
+        TopBarItemComponent,
+        TopBarInfoComponent
       ],
       imports: [RouterTestingModule],
       providers: [
@@ -31,7 +33,6 @@ describe('HeaderComponent', () => {
     })
       .compileComponents();
     store = TestBed.inject(MockStore);
-    // store.setState(initialState);
   }));
 
   beforeEach(() => {

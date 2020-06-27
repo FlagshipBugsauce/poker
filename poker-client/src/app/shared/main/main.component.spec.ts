@@ -8,6 +8,7 @@ import {TopBarComponent} from '../top-bar/top-bar.component';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import {TopBarItemComponent} from '../top-bar/top-bar-item/top-bar-item.component';
 import {provideMockStore} from '@ngrx/store/testing';
+import {TopBarInfoComponent} from '../top-bar/top-bar-info/top-bar-info.component';
 
 describe('MainComponent', () => {
   const initialState = {
@@ -27,7 +28,8 @@ describe('MainComponent', () => {
         FooterComponent,
         ToastContainerComponent,
         TopBarComponent,
-        TopBarItemComponent
+        TopBarItemComponent,
+        TopBarInfoComponent
       ],
       imports: [
         RouterTestingModule,

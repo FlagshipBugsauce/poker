@@ -1,17 +1,14 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {GameActionModel, LobbyPlayerModel} from 'src/app/api/models';
+import {GameActionModel, LobbyPlayerModel, UserModel} from 'src/app/api/models';
 import {SseService} from 'src/app/shared/sse.service';
-import {AuthService} from 'src/app/shared/auth.service';
 import {ToastService} from 'src/app/shared/toast.service';
-import {ApiConfiguration} from 'src/app/api/api-configuration';
-import {ApiInterceptor} from 'src/app/api-interceptor.service';
 import {LobbyDocument} from 'src/app/api/models/lobby-document';
 import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 import {AppStateContainer, LobbyStateContainer} from '../../shared/models/app-state.model';
-import {select, Store} from '@ngrx/store';
+import {Store} from '@ngrx/store';
 import {notReady, readyUp, startGame} from '../../state/app.actions';
-import {selectLobbyDocument, selectReadyStatus} from '../../state/app.selector';
+import {selectLobbyDocument, selectLoggedInUser, selectReadyStatus} from '../../state/app.selector';
 import {Observable, Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 
@@ -63,15 +60,17 @@ export class LobbyComponent implements OnInit, OnDestroy {
    */
   public ready$: Observable<boolean>;
 
+  /**
+   * Observable of the model for the user currently logged in.
+   */
+  public userModel$: Observable<UserModel>;
+
   constructor(
-    private apiConfiguration: ApiConfiguration,
-    private apiInterceptor: ApiInterceptor,
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private sseService: SseService,
-    public authService: AuthService,
     private toastService: ToastService,
-    private store: Store<AppStateContainer>,
+    private appStore: Store<AppStateContainer>,
     private lobbyStore: Store<LobbyStateContainer>) {
   }
 
@@ -122,25 +121,26 @@ export class LobbyComponent implements OnInit, OnDestroy {
   public ngDestroyed$ = new Subject();
   public ngOnDestroy() {
     this.ngDestroyed$.next();
-    this.store.dispatch(notReady());
+    this.appStore.dispatch(notReady());
   }
 
   ngOnInit(): void {
     this.sseService.openEvent(EmitterType.Lobby);
-    this.ready$ = this.store.select(selectReadyStatus);
+    this.ready$ = this.appStore.select(selectReadyStatus);
     this.lobbyStore.select(selectLobbyDocument)
-      .pipe(takeUntil(this.ngDestroyed$))
-      .subscribe((lobbyDocument: LobbyDocument) => {
-        this.lobbyModel = lobbyDocument;
-        this.displayToast();
-      });
+    .pipe(takeUntil(this.ngDestroyed$))
+    .subscribe((lobbyDocument: LobbyDocument) => {
+      this.lobbyModel = lobbyDocument;
+      this.displayToast();
+    });
+    this.userModel$ = this.appStore.select(selectLoggedInUser);
   }
 
   /**
    * Called when a player is ready for the game to start.
    */
   public sendReadyRequest(): void {
-    this.store.dispatch(readyUp()); // TODO: Fix this so ready is false after game starts.
+    this.appStore.dispatch(readyUp()); // TODO: Fix this so ready is false after game starts.
   }
 
   /**
@@ -157,7 +157,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
    */
   public startGame(): void {
     this.sseService.closeEvent(EmitterType.Lobby);
-    this.store.dispatch(startGame());
+    this.appStore.dispatch(startGame());
   }
 
   /**

@@ -92,7 +92,7 @@
             type="submit">{{(ready$ | async) ? "Un-Ready" : "Ready"}}</button>
           <button
             (click)="startGame()"
-            *ngIf="authService.userModel.id == lobbyModel.host"
+            *ngIf="(userModel$ | async).id === lobbyModel.host"
             [disabled]="!canStart"
             class="btn btn-warning button ml-3 text-light mt-3"
             ngbTooltip="Start the game!"
@@ -103,7 +103,7 @@
     </div>
   </div>
   <div
-    *ngIf="displayCanStartAlert && canStart && authService.userModel.id == hostModel.id"
+    *ngIf="displayCanStartAlert && canStart && (userModel$ | async).id  === hostModel.id"
     class="container-fluid mt-3">
     <ngb-alert (close)="displayCanStartAlert = false" [type]="'success'">
       Note: All players are ready, you can start the game.
