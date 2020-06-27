@@ -1,20 +1,23 @@
-import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
+import {Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {PopupComponent, PopupContentModel} from 'src/app/shared/popup/popup.component';
 import {EmittersService} from 'src/app/api/services';
 import {GetGameModel} from 'src/app/api/models';
 import {SseService} from 'src/app/shared/sse.service';
 import {ApiConfiguration} from 'src/app/api/api-configuration';
 import {EmitterType} from 'src/app/shared/models/emitter-type.model';
-import {AppStateContainer} from '../../shared/models/app-state.model';
+import {AppStateContainer, GameListStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {joinLobby} from '../../state/app.actions';
+import {selectGameList} from '../../state/app.selector';
+import {Subject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
 
 @Component({
   selector: 'pkr-join',
   templateUrl: './join.component.html',
   styleUrls: ['./join.component.scss']
 })
-export class JoinComponent implements OnInit {
+export class JoinComponent implements OnInit, OnDestroy {
   /**
    * The current page of the game list being displayed.
    */
@@ -28,7 +31,10 @@ export class JoinComponent implements OnInit {
   /**
    * The total games in the list of games.
    */
-  public totalGames: number = this.sseService.gameList.length;
+  // public totalGames: number = this.sseService.gameList.length;
+  public get totalGames(): number {
+    return this.games ? this.games.length : 0;
+  }
 
   /**
    * Popup to confirm player wishes to join the game they clicked on.
@@ -48,22 +54,33 @@ export class JoinComponent implements OnInit {
    */
   public popupOkCloseProcedure: () => void;
 
+  /** Returns a slice of the list of games for pagination. */
+    // public get games(): GetGameModel[] {
+    //   return this.sseService.gameList
+    //     .map((game: GetGameModel) => ({...game}))
+    //     .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize);
+    // }
+  public games: GetGameModel[];
+
   constructor(
     private apiConfiguration: ApiConfiguration,
     private emittersService: EmittersService,
     private sseService: SseService,
-    private store: Store<AppStateContainer>) {
+    private appStore: Store<AppStateContainer>,
+    private gameListStore: Store<GameListStateContainer>) {
   }
 
-  /** Returns a slice of the list of games for pagination. */
-  public get games(): GetGameModel[] {
-    return this.sseService.gameList
-      .map((game: GetGameModel) => ({...game}))
-      .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize);
+  public ngDestroyed$ = new Subject();
+
+  public ngOnDestroy() {
+    this.ngDestroyed$.next();
   }
 
   ngOnInit(): void {
     this.sseService.openEvent(EmitterType.GameList);
+    this.gameListStore.select(selectGameList)
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((games: GetGameModel[]) => this.games = games);
   }
 
   /**
@@ -83,7 +100,7 @@ export class JoinComponent implements OnInit {
     this.popupContent[0].body = `Attempting to join game "${game.name}".`;
     this.popupOkCloseProcedure = () => {
       // Join the lobby.
-      this.store.dispatch(joinLobby({id: game.id, name: game.name, host: game.host}));
+      this.appStore.dispatch(joinLobby({id: game.id, name: game.name, host: game.host}));
     };
     this.confirmationPopup.open();
   }

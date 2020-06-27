@@ -1,25 +1,45 @@
-import {Component, OnInit} from '@angular/core';
-import {ApiConfiguration} from 'src/app/api/api-configuration';
-import {Router} from '@angular/router';
-import {EmittersService, GameService, HandService} from 'src/app/api/services';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {SseService} from 'src/app/shared/sse.service';
-import {ApiInterceptor} from 'src/app/api-interceptor.service';
 import {EmitterType} from 'src/app/shared/models/emitter-type.model';
-import {AuthService} from 'src/app/shared/auth.service';
 import {
-  CardModel, DrawGameDataModel,
+  DrawGameDataModel,
   GameDocument,
-  HandDocument,
+  HandDocument, UserModel,
 } from '../../api/models';
 import {ToastService} from '../../shared/toast.service';
 import {GameState} from '../../shared/models/game-state.enum';
+import {
+  AppStateContainer,
+  GameDataStateContainer,
+  GameStateContainer, HandStateContainer
+} from '../../shared/models/app-state.model';
+import {Store} from '@ngrx/store';
+import {drawCard} from '../../state/app.actions';
+import {
+  selectGameData,
+  selectGameDocument,
+  selectHandDocument,
+  selectLoggedInUser
+} from '../../state/app.selector';
+import {Subject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
 
 @Component({
   selector: 'pkr-play',
   templateUrl: './play.component.html',
   styleUrls: ['./play.component.scss']
 })
-export class PlayComponent implements OnInit {
+export class PlayComponent implements OnInit, OnDestroy {
+
+  constructor(
+    private appStore: Store<AppStateContainer>,
+    private gameDataStore: Store<GameDataStateContainer>,
+    private gameStore: Store<GameStateContainer>,
+    private handStore: Store<HandStateContainer>,
+    private sseService: SseService,
+    private toastService: ToastService) {}
+  private user: UserModel;
+
   /**
    * Time remaining for a player to act (when applicable).
    */
@@ -33,78 +53,89 @@ export class PlayComponent implements OnInit {
   /**
    * Numbers used for the table summarizing what has occurred in the game.
    */
-  public numbers: number[] = Array(this.gameModel.totalHands).fill('').map((v, i) => i + 1);
+  public numbers: number[] = [];
 
-  /**
-   * Collection of cards drawn in the current hand.
-   */
-  public currentHandCards: CardModel[] = [] as CardModel[];
-
-  constructor(
-    private apiConfiguration: ApiConfiguration,
-    private router: Router,
-    private gameService: GameService,
-    private emittersService: EmittersService,
-    private handService: HandService,
-    private sseService: SseService,
-    private apiInterceptor: ApiInterceptor,
-    private authService: AuthService,
-    private toastService: ToastService) {
-  }
+  public ngDestroyed$ = new Subject();
 
   /**
    * Getter for the model representing the current hand.
    */
-  public get hand(): HandDocument {
-    return this.sseService.handDocument;
-  }
+  public hand: HandDocument;
 
   /**
    * Getter for the model representing the current game.
    */
-  public get gameModel(): GameDocument {
-    return this.sseService.gameDocument;
-  }
+  public gameModel: GameDocument;
 
   /**
    * Getter for the data representing the current game.
    */
-  public get gameData(): DrawGameDataModel[] {
-    return this.sseService.gameData.gameData;
+  public gameData: DrawGameDataModel[];
+
+  public ngOnDestroy() {
+    this.ngDestroyed$.next();
   }
 
   ngOnInit(): void {
+    this.appStore.select(selectLoggedInUser).subscribe(user => this.user = user);
     this.sseService.closeEvent(EmitterType.Lobby);
-    this.sseService.addCallback(EmitterType.Game, () => {
-      if (this.gameModel.state === 'Over') {
-        this.gameModel.hands.push('');
-        this.canRoll = false;
-      }
-    });
 
-    this.sseService.openEvent(EmitterType.Hand, () => {
-      if (this.hand.playerToAct != null && this.hand.playerToAct.id != null) {
-        this.canRoll = this.hand.playerToAct.id === this.authService.userModel.id && this.gameModel.state === GameState.Play;
-        // Display toast
-        const lastAction = this.hand.actions != null ? this.hand.actions[this.hand.actions.length - 1] : null;
-        if (lastAction != null) {
-          this.toastService.show(lastAction.message, {classname: 'bg-light toast-lg', delay: 5000});
-        }
-        if (this.gameModel.state !== 'Over') {
-          this.startTurnTimer().then();
-        }
-        this.currentHandCards = this.hand.drawnCards;
-      }
-    });
+    // this.sseService.addCallback(EmitterType.Game, () => {
+    //   if (this.gameModel.state === 'Over') {
+    //     this.gameModel.hands.push('');
+    //     this.canRoll = false;
+    //   }
+    // });
 
-    this.sseService.openEvent(EmitterType.GameData, null);
+    this.sseService.openEvent(EmitterType.Hand);
+    this.sseService.openEvent(EmitterType.GameData);
+    this.gameDataStore.select(selectGameData)
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((data: DrawGameDataModel[]) => {
+        // TODO: Probably can remove this check now that GameDoc issue is resolved.
+        if (data) {
+          this.gameData = data;
+          if (this.numbers.length === 0 && data[0] && data[0].draws) {
+            this.numbers = Array(data[0].draws.length).fill('').map((v, i) => i + 1);
+          }
+        }
+      });
+
+    this.gameStore.select(selectGameDocument)
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((gameDocument: GameDocument) => {
+        this.gameModel = gameDocument;
+        if (this.gameModel.state === 'Over') {
+          // this.gameModel.hands.push(''); TODO: Do I need this?
+          this.canRoll = false;
+        }
+      });
+
+    this.handStore.select(selectHandDocument)
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((handDocument: HandDocument) => {
+        this.hand = handDocument;
+
+        if (this.hand.playerToAct && this.hand.playerToAct.id) {
+          this.canRoll = this.hand.playerToAct.id === this.user.id && this.gameModel.state === GameState.Play;
+
+          // Display toast
+          const lastAction = this.hand.actions != null ? this.hand.actions[this.hand.actions.length - 1] : null;
+          if (lastAction != null) {
+            this.toastService.show(lastAction.message, {classname: 'bg-light toast-lg', delay: 5000});
+          }
+          if (this.gameModel.state !== 'Over') {
+            this.startTurnTimer().then();
+          }
+        }
+      });
   }
 
   /**
    * Draws a card from the deck.
    */
   public draw(): void {
-    this.handService.draw().subscribe();
+    this.appStore.dispatch(drawCard());
   }
 
   /**
@@ -116,7 +147,7 @@ export class PlayComponent implements OnInit {
     while (currentTime >= 0) {
       this.timeToAct = currentTime;
       await new Promise(resolve => setTimeout(resolve, 1000));
-      if (this.hand.actions.length !== numHandActions) {
+      if (this.hand && this.hand.actions && this.hand.actions.length !== numHandActions) {
         break;
       }
       this.timeToAct = --currentTime;

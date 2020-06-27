@@ -1,15 +1,17 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {DrawGameDataModel, GameDocument} from 'src/app/api/models';
-import {EmittersService, GameService} from 'src/app/api/services';
-import {SseService} from 'src/app/shared/sse.service';
-import {EmitterType} from 'src/app/shared/models/emitter-type.model';
+import {GameStateContainer} from '../../shared/models/app-state.model';
+import {Store} from '@ngrx/store';
+import {selectGameDocument} from '../../state/app.selector';
+import {Subject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
 
 @Component({
   selector: 'pkr-end',
   templateUrl: './end.component.html',
   styleUrls: ['./end.component.scss']
 })
-export class EndComponent implements OnInit {
+export class EndComponent implements OnInit, OnDestroy {
   /**
    * Game data that is used to display a summary of what occurred in the game.
    */
@@ -18,24 +20,27 @@ export class EndComponent implements OnInit {
   /**
    * Array of numbers used for the game summary.
    */
-  public numbers: number[] = Array(this.sseService.gameDocument.totalHands).fill('').map((v, i) => i + 1);
+  public numbers: number[] = [];
 
-  constructor(
-    private gameService: GameService,
-    private emittersService: EmittersService,
-    private sseService: SseService) {
-  }
+  constructor(private gameStore: Store<GameStateContainer>) {}
 
   /**
    * Getter for the game model.
    */
-  public get gameModel(): GameDocument {
-    return this.sseService.gameDocument;
+  public gameModel: GameDocument;
+
+  public ngDestroyed$ = new Subject();
+
+  public ngOnDestroy() {
+    this.ngDestroyed$.next();
   }
 
   ngOnInit(): void {
-    this.sseService.closeEvent(EmitterType.Hand);
-    this.sseService.closeEvent(EmitterType.Game);
-    this.sseService.closeEvent(EmitterType.GameData);
+    this.gameStore.select(selectGameDocument)
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((gameDocument: GameDocument) => {
+        this.gameModel = gameDocument;
+        this.numbers = Array(gameDocument.totalHands).fill('').map((v, i) => i + 1);
+      });
   }
 }

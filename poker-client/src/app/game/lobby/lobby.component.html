@@ -89,7 +89,7 @@
             (click)="sendReadyRequest()"
             class="btn btn-success button ml-3 mt-3"
             ngbTooltip="Ready to start"
-            type="submit">{{ready ? "Un-Ready" : "Ready"}}</button>
+            type="submit">{{(ready$ | async) ? "Un-Ready" : "Ready"}}</button>
           <button
             (click)="startGame()"
             *ngIf="authService.userModel.id == lobbyModel.host"
