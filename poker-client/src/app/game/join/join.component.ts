@@ -55,12 +55,12 @@ export class JoinComponent implements OnInit, OnDestroy {
   public popupOkCloseProcedure: () => void;
 
   /** Returns a slice of the list of games for pagination. */
-    // public get games(): GetGameModel[] {
-    //   return this.sseService.gameList
-    //     .map((game: GetGameModel) => ({...game}))
-    //     .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize);
-    // }
-  public games: GetGameModel[];
+    public get games(): GetGameModel[] {
+      return this.gamesInternal
+        .map((game: GetGameModel) => ({...game}))
+        .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize);
+    }
+  private gamesInternal: GetGameModel[];
 
   constructor(
     private apiConfiguration: ApiConfiguration,
@@ -80,7 +80,7 @@ export class JoinComponent implements OnInit, OnDestroy {
     this.sseService.openEvent(EmitterType.GameList);
     this.gameListStore.select(selectGameList)
       .pipe(takeUntil(this.ngDestroyed$))
-      .subscribe((games: GetGameModel[]) => this.games = games);
+      .subscribe((games: GetGameModel[]) => this.gamesInternal = games);
   }
 
   /**
