@@ -16,6 +16,7 @@ import {
 } from './state/app.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import {GameEffects} from './state/game.effects';
+import {AppEffects} from './state/app.effects';
 
 @NgModule({
   declarations: [],
@@ -34,7 +35,7 @@ import {GameEffects} from './state/game.effects';
         handDocument: handDocumentReducer,
         gameList: gameListReducer
     }),
-    EffectsModule.forRoot([GameEffects])
+    EffectsModule.forRoot([AppEffects, GameEffects])
   ],
   exports: [
     SharedModule

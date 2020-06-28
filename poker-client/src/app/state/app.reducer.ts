@@ -3,18 +3,19 @@ import {
   gameDataUpdated,
   gameDocumentUpdated,
   gameListUpdated,
-  handDocumentUpdated,
+  handDocumentUpdated, hideFailedSignInWarning,
   joinLobby,
   leaveLobby,
   lobbyDocumentUpdated,
   notReady,
-  readyUp,
-  signIn,
+  readyUp, signInFail, signInSuccess,
+  signInSuccess2,
   signOut
 } from './app.actions';
 import {AppState} from '../shared/models/app-state.model';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
+  AuthResponseModel,
   DrawGameDataContainerModel,
   GameDocument,
   HandDocument,
@@ -27,24 +28,46 @@ import {GameListContainerModel} from '../shared/models/game-list-container.model
  * Reducer for general application state.
  */
 export const initialState: AppState = {
-  currentPage: '',
+  showSignInFail: false,
+  jwt: '',
   authenticated: false,
-  inGame: false,
   ready: false
 };
 const appReducerLocal = createReducer<AppState>(
   initialState,
-  on(signIn,
+  on(
+    signInSuccess2,
     (state: AppState, loggedInUser: UserModel) =>
-      ({...state, authenticated: true, loggedInUser})),
-  on(signOut, (state: AppState) => ({...state, authenticated: false, loggedInUser: null})),
-  on(joinLobby,
+      ({...state, authenticated: true, loggedInUser})
+  ),
+  on(signOut, (state: AppState) => ({
+    ...state, authenticated: false,
+    loggedInUser: null,
+    jwt: ''
+  })),
+  on(
+    joinLobby,
     (state: AppState, lobbyInfo: TopBarLobbyModel) =>
-      ({...state, lastLobbyInfo: null, lobbyInfo})),
-  on(leaveLobby,
-    (state: AppState) => ({...state, lastLobbyInfo: state.lobbyInfo, lobbyInfo: null})),
+      ({...state, lastLobbyInfo: null, lobbyInfo})
+  ),
+  on(
+    leaveLobby,
+    (state: AppState) => ({...state, lastLobbyInfo: state.lobbyInfo, lobbyInfo: null})
+  ),
   on(readyUp, (state: AppState) => ({...state, ready: !state.ready})),
-  on(notReady, (state: AppState) => ({...state, ready: false}))
+  on(notReady, (state: AppState) => ({...state, ready: false})),
+  on(
+    signInSuccess,
+    (state: AppState, response: AuthResponseModel) =>
+      ({
+        ...state,
+        jwt: response.jwt,
+        authenticated: true,
+        loggedInUser: response.userDetails
+      })
+  ),
+  on(signInFail, (state: AppState) => ({...state, showSignInFail: true})),
+  on(hideFailedSignInWarning, (state: AppState) => ({...state, showSignInFail: false}))
 );
 export function appReducer(state: AppState, action) {
   return appReducerLocal(state, action);

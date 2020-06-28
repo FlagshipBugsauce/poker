@@ -28,7 +28,7 @@
             </button>
           </div>
         </div>
-        <div *ngIf="showFailAlert" class="row mt-3">
+        <div *ngIf="showFailedSignIn$ | async" class="row mt-3">
           <div class="col-sm-12">
             <ngb-alert (close)="hideFailAlert()" type="danger">
               Login attempt was unsuccessful because the credentials provided are invalid. Please

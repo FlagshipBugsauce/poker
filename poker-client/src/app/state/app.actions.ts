@@ -1,6 +1,7 @@
 import {createAction, props} from '@ngrx/store';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
+  AuthRequestModel, AuthResponseModel,
   CreateGameModel,
   DrawGameDataContainerModel,
   GameDocument,
@@ -11,8 +12,18 @@ import {
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
 
 export const navigate = createAction('[Router Service] Navigate');
-export const signIn = createAction(
-  '[Auth Service] SignIn',
+export const signIn = createAction('[Auth Service] SignIn', props<AuthRequestModel>());
+
+export const signInSuccess = createAction(
+  '[Auth Service] SignInSuccess',
+  props<AuthResponseModel>()
+);
+
+export const signInFail = createAction('[Auth Service] SignInFail');
+export const hideFailedSignInWarning = createAction('[Login Component] HideFailWarning');
+
+export const signInSuccess2 = createAction(
+  '[Auth Service] SignInSuccess2',
   props<UserModel>()
 );
 export const signOut = createAction('[Auth Service] SignOut');

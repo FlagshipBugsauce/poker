@@ -34,12 +34,20 @@ export const selectReadyStatus = createSelector(
   (state: AppState) => state.ready
 );
 
+export const jwtFeature = createFeatureSelector<AppStateContainer, AppState>('appState');
+/** JWT selector. */
+export const selectJwt = createSelector(jwtFeature, (state: AppState) => state.jwt);
+
+export const signInFailFeature = createFeatureSelector<AppStateContainer, AppState>('appState');
+/** SignInFail selector. */
+export const selectSignInFail = createSelector(
+  signInFailFeature,
+  (state: AppState) => state.showSignInFail
+);
 
 export const gameListFeature =
   createFeatureSelector<GameListStateContainer, GameListContainerModel>('gameList');
-/**
- * Game list selector.
- */
+/** Game list selector. */
 export const selectGameList = createSelector(
   gameListFeature,
   (state: GameListContainerModel) => state.gameList
@@ -47,9 +55,7 @@ export const selectGameList = createSelector(
 
 export const lobbyFeature =
   createFeatureSelector<LobbyStateContainer, LobbyDocument>('lobbyDocument');
-/**
- * Lobby document selector.
- */
+/** Lobby document selector. */
 export const selectLobbyDocument = createSelector(
   lobbyFeature,
   (state: LobbyDocument) => state
@@ -57,9 +63,7 @@ export const selectLobbyDocument = createSelector(
 
 export const gameFeature =
   createFeatureSelector<GameStateContainer, GameDocument>('gameDocument');
-/**
- * Game document selector.
- */
+/** Game document selector. */
 export const selectGameDocument = createSelector(
   gameFeature,
   (state: GameDocument) => state
@@ -67,9 +71,7 @@ export const selectGameDocument = createSelector(
 
 export const handFeature =
   createFeatureSelector<HandStateContainer, HandDocument>('handDocument');
-/**
- * Hand document selector.
- */
+/** Hand document selector. */
 export const selectHandDocument = createSelector(
   handFeature,
   (state: HandDocument) => state
@@ -77,9 +79,7 @@ export const selectHandDocument = createSelector(
 
 export const gameDataFeature =
   createFeatureSelector<GameDataStateContainer, DrawGameDataContainerModel>('gameData');
-/**
- * Game data selector.
- */
+/** Game data selector. */
 export const selectGameData = createSelector(
   gameDataFeature,
   (state: DrawGameDataContainerModel) => state.gameData

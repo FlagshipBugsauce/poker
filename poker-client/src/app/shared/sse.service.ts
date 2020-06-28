@@ -4,7 +4,6 @@ import * as _ from 'lodash';
 import {EmitterType} from './models/emitter-type.model';
 import {EmittersService} from '../api/services';
 import {ApiConfiguration} from '../api/api-configuration';
-import {ApiInterceptor} from '../api-interceptor.service';
 import {Store} from '@ngrx/store';
 import {
   gameDataUpdated,
@@ -14,12 +13,14 @@ import {
   lobbyDocumentUpdated
 } from '../state/app.actions';
 import {
+  AppStateContainer,
   GameDataStateContainer,
   GameListStateContainer,
   GameStateContainer,
   HandStateContainer,
   LobbyStateContainer
 } from './models/app-state.model';
+import {selectJwt} from '../state/app.selector';
 
 export interface SseTrackerModel {
   open: boolean;
@@ -37,17 +38,20 @@ const getTracker = (defaultValue: any, action: any, store: any) =>
 })
 export class SseService {
   private sseTracker = {};
+  private jwt: string = '';
 
   constructor(
     private zone: NgZone,
     private emittersService: EmittersService,
     private apiConfiguration: ApiConfiguration,
-    private apiInterceptor: ApiInterceptor,
+    private appStore: Store<AppStateContainer>,
     private gameDataStore: Store<GameDataStateContainer>,
     private gameStore: Store<GameStateContainer>,
     private handStore: Store<HandStateContainer>,
     private lobbyStore: Store<LobbyStateContainer>,
     private gameListStore: Store<GameListStateContainer>) {
+
+    this.appStore.select(selectJwt).subscribe(jwt => this.jwt = jwt);
 
     this.sseTracker[EmitterType.GameList] =
       getTracker({gameList: []}, gameListUpdated, this.gameListStore);
@@ -145,7 +149,7 @@ export class SseService {
    */
   private getUrl(type: EmitterType): string {
     // TODO: Get this URL  from store
-    return `${this.apiConfiguration.rootUrl}/emitters/request/${type}/${this.apiInterceptor.jwt}`;
+    return `${this.apiConfiguration.rootUrl}/emitters/request/${type}/${this.jwt}`;
   }
 
   /**

@@ -1,19 +1,28 @@
-import {Component, OnInit} from '@angular/core';
-import {AuthService} from '../auth.service';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {AuthRequestModel} from 'src/app/api/models';
-import {ToastService} from '../toast.service';
+import {AppStateContainer} from '../models/app-state.model';
+import {Store} from '@ngrx/store';
+import {hideFailedSignInWarning, signIn} from '../../state/app.actions';
+import {selectSignInFail} from '../../state/app.selector';
+import {Observable, Subject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
 
 @Component({
   selector: 'pkr-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
+
+  constructor(
+    private router: Router,
+    private formBuilder: FormBuilder,
+    private appStore: Store<AppStateContainer>) {
+  }
 
   public loginForm: FormGroup;
-  public showFailAlert: boolean = false;
 
   // TODO: Only for development! Remove later! These are local accounts that will not exist in production.
   // private quickCredentials: AuthRequestModel = <AuthRequestModel> {
@@ -38,11 +47,12 @@ export class LoginComponent implements OnInit {
     password: ''
   } as AuthRequestModel;
 
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private formBuilder: FormBuilder,
-    public toastService: ToastService) {
+  public ngDestroyed$ = new Subject();
+
+  public showFailedSignIn$: Observable<boolean>;
+
+  public ngOnDestroy() {
+    this.ngDestroyed$.next();
   }
 
   public ngOnInit(): void {
@@ -58,6 +68,8 @@ export class LoginComponent implements OnInit {
     //     this.router.navigate(['/home']).then();
     //   }
     // });
+
+    this.showFailedSignIn$ = this.appStore.select(selectSignInFail).pipe(takeUntil(this.ngDestroyed$));
   }
 
   /**
@@ -65,18 +77,13 @@ export class LoginComponent implements OnInit {
    * @param formValues The values of the login form.
    */
   public async authorize(formValues: any): Promise<void> {
-    if (await this.authService.authorize(formValues.email, formValues.password)) {
-      this.toastService.show('Login Successful!', {classname: 'bg-light toast-md', delay: 5000});
-      this.router.navigate(['/home']).then();
-    } else {
-      this.showFailAlert = true;
-    }
+    this.appStore.dispatch(signIn({email: formValues.email, password: formValues.password}));
   }
 
   /**
    * Hides the alert that is produced when a login attempt fails.
    */
   public hideFailAlert(): void {
-    this.showFailAlert = false;
+    this.appStore.dispatch(hideFailedSignInWarning());
   }
 }
