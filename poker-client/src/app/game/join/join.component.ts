@@ -56,9 +56,10 @@ export class JoinComponent implements OnInit, OnDestroy {
 
   /** Returns a slice of the list of games for pagination. */
     public get games(): GetGameModel[] {
-      return this.gamesInternal
+      return this.gamesInternal ? this.gamesInternal
         .map((game: GetGameModel) => ({...game}))
-        .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize);
+        .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize) :
+        [];
     }
   private gamesInternal: GetGameModel[];
 
