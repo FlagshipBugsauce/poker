@@ -1,14 +1,24 @@
 import {Injectable} from '@angular/core';
 import {CanActivate, Router} from '@angular/router';
-import {AuthService} from './auth.service';
 import {APP_ROUTES} from '../app-routes';
+import {AppStateContainer} from './models/app-state.model';
+import {Store} from '@ngrx/store';
+import {selectAuthenticated} from '../state/app.selector';
+import {signOut} from '../state/app.actions';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthGuardService implements CanActivate {
 
-  constructor(private authService: AuthService, private router: Router) {
+  private authenticated: boolean = false;
+
+  constructor(
+    private router: Router,
+    private appStore: Store<AppStateContainer>) {
+
+    this.appStore.select(selectAuthenticated)
+      .subscribe(authenticated => this.authenticated = authenticated);
   }
 
   canActivate(
@@ -16,14 +26,14 @@ export class AuthGuardService implements CanActivate {
     state: import('@angular/router').RouterStateSnapshot): boolean {
     // If we are linked to "/logout", then call logout() method and redirect to login.
     if (state.url === `/${APP_ROUTES.LOGOUT.path}`) {
-      this.authService.logout();
+      this.appStore.dispatch(signOut());
       this.router.navigate([`/${APP_ROUTES.LOGIN.path}`]).then();
       return true;
     }
 
-    if (!this.authService.authenticated) {
+    if (!this.authenticated) {
       this.router.navigate([`/${APP_ROUTES.LOGIN.path}`]).then();
     } // Navigate to login page if user is not logged in
-    return this.authService.authenticated;
+    return this.authenticated;
   }
 }

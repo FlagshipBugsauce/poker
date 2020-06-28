@@ -81,12 +81,9 @@ export class PlayComponent implements OnInit, OnDestroy {
     this.gameDataStore.select(selectGameData)
       .pipe(takeUntil(this.ngDestroyed$))
       .subscribe((data: DrawGameDataModel[]) => {
-        // TODO: Probably can remove this check now that GameDoc issue is resolved.
-        if (data) {
-          this.gameData = data;
-          if (this.numbers.length === 0 && data[0] && data[0].draws) {
-            this.numbers = Array(data[0].draws.length).fill('').map((v, i) => i + 1);
-          }
+        this.gameData = data;
+        if (this.numbers.length === 0 && data[0] && data[0].draws) {
+          this.numbers = Array(data[0].draws.length).fill('').map((v, i) => i + 1);
         }
       });
 

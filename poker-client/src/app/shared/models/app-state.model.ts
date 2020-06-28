@@ -9,12 +9,12 @@ import {
 import {GameListContainerModel} from './game-list-container.model';
 
 export interface AppState {
-  currentPage: string;
+  showSignInFail: boolean;
   authenticated: boolean;
+  jwt?: string;
   lobbyInfo?: TopBarLobbyModel;
   lastLobbyInfo?: TopBarLobbyModel;
   loggedInUser?: UserModel;
-  inGame: boolean;
   ready: boolean;
 }
 

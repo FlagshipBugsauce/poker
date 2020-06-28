@@ -25,7 +25,6 @@ import {CreateGameModel} from '../api/models/create-game-model';
 export class GameEffects {
   /**
    * Leaves the game lobby. Does not redirect because there is a confirmation that handles this.
-   * TODO: Investigate if we can have the route here.
    */
   leaveLobby$ = createEffect(() => this.actions$.pipe(
     ofType(leaveLobby().type),
