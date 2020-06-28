@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'poker-client**'
-      - '.github/workflows/node.yml'
+      - '.github/workflows/client-deploy-to-s3.yml'
     branches:
       - develop
 jobs:
