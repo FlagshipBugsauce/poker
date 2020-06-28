@@ -12,14 +12,7 @@ import {UserModel} from '../../api/models/user-model';
 import {EmitterType} from '../../shared/models/emitter-type.model';
 import {SseService} from '../../shared/sse.service';
 import {By} from '@angular/platform-browser';
-
-class MockSseService {
-  public closeEvent(type: EmitterType): void {
-  }
-
-  public openEvent(type: EmitterType, callback: () => void = null): void {
-  }
-}
+import {MockSseService} from '../../testing/mock-services';
 
 describe('LobbyComponent', () => {
   let mockStore: MockStore;

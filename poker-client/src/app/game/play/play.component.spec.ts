@@ -3,7 +3,6 @@ import {PlayComponent} from './play.component';
 import {RouterTestingModule} from '@angular/router/testing';
 import {SharedModule} from '../../shared/shared.module';
 import {SseService} from '../../shared/sse.service';
-import {EmitterType} from '../../shared/models/emitter-type.model';
 import {DrawGameDataModel} from '../../api/models/draw-game-data-model';
 import {MockStore, provideMockStore} from '@ngrx/store/testing';
 import {MemoizedSelector} from '@ngrx/store';
@@ -21,14 +20,7 @@ import {
   mockHandDocument,
   mockUser
 } from '../../testing/mock-models';
-
-class MockSseService {
-  public closeEvent(type: EmitterType): void {
-  }
-
-  public openEvent(type: EmitterType, callback: () => void = null): void {
-  }
-}
+import {MockSseService} from '../../testing/mock-services';
 
 describe('PlayComponent', () => {
   let mockStore: MockStore;
