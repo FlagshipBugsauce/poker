@@ -4,17 +4,22 @@ import {EMPTY} from 'rxjs';
 import {GameService} from '../api/services/game.service';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {
-  drawCard, drawCardSuccess,
+  createGame, createGameSuccess,
+  drawCard,
+  drawCardSuccess,
   joinLobby,
   joinLobbySuccess,
   leaveLobby,
-  leaveLobbySuccess, readyUp, readyUpSuccess,
+  leaveLobbySuccess,
+  readyUp,
+  readyUpSuccess,
   startGame,
   startGameSuccess
 } from './app.actions';
 import {Router} from '@angular/router';
 import {APP_ROUTES} from '../app-routes';
 import {HandService} from '../api/services/hand.service';
+import {CreateGameModel} from '../api/models/create-game-model';
 
 @Injectable()
 export class GameEffects {
@@ -82,6 +87,23 @@ export class GameEffects {
     exhaustMap(() => this.handService.draw()
       .pipe(
         map(response => ({type: drawCardSuccess().type, payload: response})),
+        catchError(() => EMPTY)
+      )
+    ))
+  );
+
+  /**
+   * Creates a game.
+   */
+  createGame$ = createEffect(() => this.actions$.pipe(
+    ofType(createGame),
+    mergeMap((action: CreateGameModel) => this.gameService.createGame({body: action})
+      .pipe(
+        map(response => {
+          // TODO: Figure out how to set the top bar info
+          this.router.navigate([`/${APP_ROUTES.GAME_PREFIX.path}/${response.message}`]).then();
+          return {type: createGameSuccess().type, payload: response};
+        }),
         catchError(() => EMPTY)
       )
     ))
