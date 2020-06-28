@@ -1,8 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {ToastService} from 'src/app/shared/toast.service';
-import {GameService} from 'src/app/api/services';
 import {CreateGameModel} from 'src/app/api/models';
 import {AppStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
@@ -20,8 +18,6 @@ export class CreateComponent implements OnInit {
   constructor(
     private router: Router,
     private formBuilder: FormBuilder,
-    public toastService: ToastService,
-    private gameService: GameService,
     private store: Store<AppStateContainer>) {
   }
 
