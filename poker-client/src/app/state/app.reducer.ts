@@ -3,13 +3,15 @@ import {
   gameDataUpdated,
   gameDocumentUpdated,
   gameListUpdated,
-  handDocumentUpdated, hideFailedSignInWarning,
+  handDocumentUpdated,
+  hideFailedSignInWarning,
   joinLobby,
   leaveLobby,
   lobbyDocumentUpdated,
   notReady,
-  readyUp, signInFail, signInSuccess,
-  signInSuccess2,
+  readyUp,
+  signInFail,
+  signInSuccess,
   signOut
 } from './app.actions';
 import {AppState} from '../shared/models/app-state.model';
@@ -19,8 +21,7 @@ import {
   DrawGameDataContainerModel,
   GameDocument,
   HandDocument,
-  LobbyDocument,
-  UserModel
+  LobbyDocument
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
 
@@ -35,11 +36,6 @@ export const initialState: AppState = {
 };
 const appReducerLocal = createReducer<AppState>(
   initialState,
-  on(
-    signInSuccess2,
-    (state: AppState, loggedInUser: UserModel) =>
-      ({...state, authenticated: true, loggedInUser})
-  ),
   on(signOut, (state: AppState) => ({
     ...state, authenticated: false,
     loggedInUser: null,

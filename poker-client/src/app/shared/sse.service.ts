@@ -148,7 +148,6 @@ export class SseService {
    * @param type The specified type of emitter.
    */
   private getUrl(type: EmitterType): string {
-    // TODO: Get this URL  from store
     return `${this.apiConfiguration.rootUrl}/emitters/request/${type}/${this.jwt}`;
   }
 

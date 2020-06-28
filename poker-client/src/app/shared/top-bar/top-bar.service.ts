@@ -117,7 +117,6 @@ export class TopBarService {
   private updateMenuItems(): void {
     this.topBarMenuItems = [];
     this.topBarMenuItems.push(this.homeMenuItem);
-    // TODO: Figure out why I need a null check to pass unit tests.
     if (this.authenticated) {
       this.topBarMenuItems.push(this.gameMenuItems);
       this.topBarMenuItems.push(this.authenticatedAccountMenuItems);

@@ -11,6 +11,7 @@ import {notReady, readyUp, startGame} from '../../state/app.actions';
 import {selectLobbyDocument, selectLoggedInUser, selectReadyStatus} from '../../state/app.selector';
 import {Observable, Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
+import {APP_ROUTES} from "../../app-routes";
 
 @Component({
   selector: 'pkr-lobby',
@@ -140,7 +141,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
    * Called when a player is ready for the game to start.
    */
   public sendReadyRequest(): void {
-    this.appStore.dispatch(readyUp()); // TODO: Fix this so ready is false after game starts.
+    this.appStore.dispatch(readyUp());
   }
 
   /**
@@ -148,7 +149,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
    */
   public leaveGame(): void {
     // Only need to leave the page, the leave game guard will handle making the leave game call.
-    this.router.navigate(['/join']).then();
+    this.router.navigate([`/${APP_ROUTES.JOIN_GAME}`]).then();
     // TODO: See if we can handle this in a more elegant fashion.
   }
 
