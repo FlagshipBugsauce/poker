@@ -2,12 +2,13 @@ name: Client S3 Deployment
 
 on:
   push:
+    paths:
+      - 'poker-client**'
+      - '.github/workflows/node.yml'
     branches:
       - develop
-      - refactor-to-use-store
-
 jobs:
-  deploy:
+  deploy-client-to-s3:
     runs-on: ubuntu-latest
     env:
       working-directory: ./poker-client
@@ -21,9 +22,6 @@ jobs:
       - name: Install Dependencies
         run: npm ci
         working-directory: ${{env.working-directory}}
-#      - name: Run Unit Tests
-#       run: npm run test
-#       working-directory: ${{env.working-directory}}
       - name: Deploy to S3
         run: npm run deploy
         working-directory: ${{env.working-directory}}
