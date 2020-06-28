@@ -16,7 +16,7 @@ describe('TopBarItemComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [TopBarItemComponent, TopBarItemComponentContainer],
-      imports: [RouterTestingModule, SharedModule]
+      imports: [RouterTestingModule]
     })
     .compileComponents();
   }));

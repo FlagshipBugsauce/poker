@@ -61,7 +61,7 @@
     <h3 class="card-header bg-success text-light">Hand Summary</h3>
     <div class="row">
       <div class="col-sm-12 text-center p-3">
-        <span class="m-1" *ngFor="let card of currentHandCards">
+        <span class="m-1" *ngFor="let card of hand.drawnCards">
           <pkr-card [card]="card" size="xl"></pkr-card>
         </span>
       </div>

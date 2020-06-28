@@ -1,8 +1,8 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
-
 import {JoinComponent} from './join.component';
 import {RouterTestingModule} from '@angular/router/testing';
 import {SharedModule} from '../../shared/shared.module';
+import {provideMockStore} from '@ngrx/store/testing';
 
 describe('JoinComponent', () => {
   let component: JoinComponent;
@@ -11,7 +11,10 @@ describe('JoinComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [JoinComponent],
-      imports: [RouterTestingModule, SharedModule]
+      imports: [RouterTestingModule, SharedModule],
+      providers: [
+        provideMockStore()
+      ]
     })
       .compileComponents();
   }));

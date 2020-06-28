@@ -1,0 +1,20 @@
+<!-- TODO: Re-visit this at some point, may want some info in the top-bar -->
+<!--<div *ngIf="lobbyInfo" class="info-box text-right mr-3">-->
+<!--  <div>-->
+<!--    Currently in Game Lobby-->
+<!--  </div>-->
+<!--  <div>-->
+<!--    Name: {{lobbyInfo.name}}-->
+<!--  </div>-->
+<!--  <div>-->
+<!--    Host: {{lobbyInfo.host.firstName}} {{lobbyInfo.host.lastName}}-->
+<!--  </div>-->
+<!--</div>-->
+<div *ngIf="lastLobbyInfo" class="info-box text-right mr-3 mt-3">
+  <div>
+    <button
+      (click)="rejoin()"
+      ngbTooltip="Rejoin game you just left."
+      class="btn btn-light btn-sm">&rarr;</button>
+  </div>
+</div>

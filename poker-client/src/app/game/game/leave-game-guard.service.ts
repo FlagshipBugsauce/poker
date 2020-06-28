@@ -6,7 +6,12 @@ import {GameService} from 'src/app/api/services';
 import {GameComponent} from './game.component';
 import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 import {GameState} from 'src/app/shared/models/game-state.enum';
+import {AppStateContainer, GameStateContainer} from '../../shared/models/app-state.model';
+import {Store} from '@ngrx/store';
+import {leaveLobby} from '../../state/app.actions';
 import {GameDocument} from '../../api/models/game-document';
+import {selectGameDocument} from '../../state/app.selector';
+import {gameDocumentInitialState} from '../../state/app.reducer';
 
 @Injectable({
   providedIn: 'root'
@@ -27,10 +32,16 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
    */
   public link: string;
 
+  public gameModel: GameDocument;
+
   constructor(
     private router: Router,
     private sseService: SseService,
-    private gameService: GameService) {
+    private gameService: GameService,
+    private store: Store<AppStateContainer>,
+    private gameStore: Store<GameStateContainer>) {
+    this.gameStore.select(selectGameDocument)
+      .subscribe((gameDocument: GameDocument) => this.gameModel = gameDocument);
   }
 
   canDeactivate(
@@ -44,8 +55,11 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
     Promise<boolean |
       import('@angular/router').UrlTree> {
     // If state is null or the game is over, then we should just let the player leave the page.
-    if (!this.sseService.gameDocument.state ||
-      this.sseService.gameDocument.state === GameState.Over) {
+    if (!this.gameModel.state || this.gameModel.state === GameState.Over) {
+      this.sseService.closeEvent(EmitterType.Game);
+      this.sseService.closeEvent(EmitterType.Lobby);
+      this.sseService.closeEvent(EmitterType.Hand);
+      this.sseService.closeEvent(EmitterType.GameData);
       return true;
     }
 
@@ -64,8 +78,8 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
         this.sseService.closeEvent(EmitterType.Hand);
         this.sseService.closeEvent(EmitterType.GameData);
 
-        if (this.sseService.gameDocument.state && this.sseService.gameDocument.state === GameState.Lobby) {
-          this.gameService.leaveLobby().subscribe();
+        if (this.gameModel.state && this.gameModel.state === GameState.Lobby) {
+          this.store.dispatch(leaveLobby());  // Leave the lobby.
         }
 
         this.router.navigate([this.link]).then();

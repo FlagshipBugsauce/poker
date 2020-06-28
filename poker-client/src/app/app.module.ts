@@ -6,7 +6,16 @@ import {MainComponent} from './shared/main/main.component';
 import {HomeModule} from './home/home.module';
 import {GameModule} from './game/game.module';
 import {StoreModule} from '@ngrx/store';
-import {appReducer} from './state/app.reducer';
+import {
+  appReducer,
+  gameDataReducer,
+  gameDocumentReducer,
+  gameListReducer,
+  handDocumentReducer,
+  lobbyDocumentReducer
+} from './state/app.reducer';
+import { EffectsModule } from '@ngrx/effects';
+import {GameEffects} from './state/game.effects';
 
 @NgModule({
   declarations: [],
@@ -16,7 +25,16 @@ import {appReducer} from './state/app.reducer';
     SharedModule,
     HomeModule,
     GameModule,
-    StoreModule.forRoot({appState: appReducer})
+    StoreModule.forRoot(
+      {
+        appState: appReducer,
+        gameData: gameDataReducer,
+        lobbyDocument: lobbyDocumentReducer,
+        gameDocument: gameDocumentReducer,
+        handDocument: handDocumentReducer,
+        gameList: gameListReducer
+    }),
+    EffectsModule.forRoot([GameEffects])
   ],
   exports: [
     SharedModule

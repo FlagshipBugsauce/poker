@@ -17,6 +17,7 @@ import {ToastContainerComponent} from './toast-container/toast-container.compone
 import { CardComponent } from './card/card.component';
 import { TopBarComponent } from './top-bar/top-bar.component';
 import { TopBarItemComponent } from './top-bar/top-bar-item/top-bar-item.component';
+import { TopBarInfoComponent } from './top-bar/top-bar-info/top-bar-info.component';
 
 export const API_INTERCEPTOR_PROVIDER: Provider = {
   provide: HTTP_INTERCEPTORS,
@@ -35,7 +36,8 @@ export const API_INTERCEPTOR_PROVIDER: Provider = {
     ToastContainerComponent,
     CardComponent,
     TopBarComponent,
-    TopBarItemComponent
+    TopBarItemComponent,
+    TopBarInfoComponent
   ],
   imports: [
     CommonModule,

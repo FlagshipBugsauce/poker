@@ -1,9 +1,15 @@
 .top-bar {
+  .grid-container {
+    display: grid;
+    grid-template-columns: 70px auto 300px;
+    grid-template-rows: 70px;
+    grid-column-gap: 15px;
+  }
+
   .image {
     height: 40px;
     width: 40px;
     margin-top: 15px;
-    margin-bottom: auto;
-    overflow: hidden;
+    margin-left: 15px;
   }
 }

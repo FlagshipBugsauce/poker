@@ -1,10 +1,43 @@
+import {TopBarLobbyModel} from './top-bar-lobby.model';
+import {
+  DrawGameDataContainerModel,
+  GameDocument,
+  HandDocument,
+  LobbyDocument,
+  UserModel
+} from '../../api/models';
+import {GameListContainerModel} from './game-list-container.model';
+
 export interface AppState {
   currentPage: string;
   authenticated: boolean;
-  inLobby: boolean;
+  lobbyInfo?: TopBarLobbyModel;
+  lastLobbyInfo?: TopBarLobbyModel;
+  loggedInUser?: UserModel;
   inGame: boolean;
+  ready: boolean;
 }
 
 export interface AppStateContainer {
   appState: AppState;
+}
+
+export interface GameDataStateContainer {
+  gameData: DrawGameDataContainerModel;
+}
+
+export interface LobbyStateContainer {
+  lobbyDocument: LobbyDocument;
+}
+
+export interface GameStateContainer {
+  gameDocument: GameDocument;
+}
+
+export interface GameListStateContainer {
+  gameList: GameListContainerModel;
+}
+
+export interface HandStateContainer {
+  handDocument: HandDocument;
 }

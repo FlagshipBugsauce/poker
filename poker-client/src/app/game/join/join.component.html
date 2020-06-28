@@ -11,7 +11,7 @@
   </div>
   <div class="card m-3">
     <h3 class="card-header bg-success text-light">Available Games</h3>
-    <div *ngIf="games.length > 0" class="card-body">
+    <div *ngIf="totalGames > 0" class="card-body">
       <table class="table table-hover table-striped small">
         <thead>
         <tr>
@@ -45,7 +45,7 @@
         </select>
       </div>
     </div>
-    <div *ngIf="games.length == 0" class="card-body">
+    <div *ngIf="totalGames === 0" class="card-body">
       <p>There are no games available right now. Perhaps you would like to <a routerLink="/create">create</a>
         one?</p>
     </div>
