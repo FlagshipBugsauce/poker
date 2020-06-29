@@ -4,7 +4,8 @@ import {EMPTY, of} from 'rxjs';
 import {GameService} from '../api/services/game.service';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {
-  createGame, createGameSuccess,
+  createGame,
+  createGameSuccess,
   drawCard,
   drawCardSuccess,
   joinLobby,
@@ -12,9 +13,12 @@ import {
   leaveLobby,
   leaveLobbySuccess,
   readyUp,
-  readyUpSuccess, setActiveStatus, setActiveStatusFail,
+  readyUpSuccess,
+  setAwayStatus,
+  setActiveStatusFail,
   startGame,
-  startGameSuccess, updateActiveStatus
+  startGameSuccess,
+  updateAwayStatus
 } from './app.actions';
 import {Router} from '@angular/router';
 import {APP_ROUTES} from '../app-routes';
@@ -110,14 +114,14 @@ export class GameEffects {
   );
 
   /**
-   * Sets the active status of the player.
+   * Sets the away status of the player.
    */
-  setActiveStatus$ = createEffect(() => this.actions$.pipe(
-    ofType(setActiveStatus),
+  setAwayStatus$ = createEffect(() => this.actions$.pipe(
+    ofType(setAwayStatus),
     exhaustMap((action: ActiveStatusModel) => this.gameService.setActiveStatus({body: action})
       .pipe(
         map(
-          response => updateActiveStatus(action),
+          response => updateAwayStatus(action),
           catchError(() => of({type: setActiveStatusFail().type}))
         )
       )

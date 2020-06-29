@@ -4,7 +4,6 @@ import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 import {
   DrawGameDataModel,
   GameDocument,
-  GamePlayerModel,
   HandDocument,
   UserModel,
 } from '../../api/models';
@@ -16,15 +15,15 @@ import {
   HandStateContainer, PlayerDataStateContainer
 } from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
-import {drawCard, setActiveStatus} from '../../state/app.actions';
+import {drawCard, setAwayStatus} from '../../state/app.actions';
 import {
   selectActingStatus, selectAwayStatus,
   selectGameData,
   selectGameDocument,
   selectHandDocument,
-  selectLoggedInUser, selectPlayerData
+  selectLoggedInUser,
 } from '../../state/app.selector';
-import {Observable, Subject} from 'rxjs';
+import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 
@@ -66,6 +65,9 @@ export class PlayComponent implements OnInit, OnDestroy {
    */
   public numbers: number[] = [];
 
+  /**
+   * Used to ensure we're not maintaining multiple subscriptions.
+   */
   public ngDestroyed$ = new Subject();
 
   /**
@@ -97,7 +99,7 @@ export class PlayComponent implements OnInit, OnDestroy {
     this.ngDestroyed$.next();
   }
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.appStore.select(selectLoggedInUser).subscribe(user => this.user = user);
     this.sseService.closeEvent(EmitterType.Lobby);
     this.sseService.openEvent(EmitterType.Hand);
@@ -148,8 +150,11 @@ export class PlayComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Toggles the players away status.
+   */
   public toggleStatus(): void {
-    this.playerDataStore.dispatch(setActiveStatus({away: !this.awayStatus}));
+    this.playerDataStore.dispatch(setAwayStatus({away: !this.awayStatus}));
     if (this.canRoll) {
       this.draw();
     }

@@ -8,16 +8,16 @@ import {
   joinLobby,
   leaveLobby,
   lobbyDocumentUpdated,
-  notReady, playerDataUpdated,
+  notReady,
+  playerDataUpdated,
   readyUp,
   signInFail,
   signInSuccess,
-  signOut, updateActiveStatus
+  signOut
 } from './app.actions';
 import {AppState} from '../shared/models/app-state.model';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
-  ActiveStatusModel,
   AuthResponseModel,
   DrawGameDataContainerModel,
   GameDocument, GamePlayerModel,

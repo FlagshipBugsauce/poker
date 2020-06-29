@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {NgbActiveModal, NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import {GameStateContainer, PlayerDataStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
-import {setActiveStatus} from '../../state/app.actions';
+import {setAwayStatus} from '../../state/app.actions';
 import {Subject} from 'rxjs';
 import {selectGameDocument} from '../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
@@ -43,7 +43,7 @@ export class PopupAfkComponent implements OnInit, OnDestroy {
 
   public back(): void {
     if (this.gameModel.state === 'Play') {
-      this.playerDataStore.dispatch(setActiveStatus({away: false}));
+      this.playerDataStore.dispatch(setAwayStatus({away: false}));
     }
     this.ngbModalRef.close();
   }

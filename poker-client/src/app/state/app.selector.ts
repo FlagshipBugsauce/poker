@@ -5,7 +5,8 @@ import {
   GameListStateContainer,
   GameStateContainer,
   HandStateContainer,
-  LobbyStateContainer, PlayerDataStateContainer
+  LobbyStateContainer,
+  PlayerDataStateContainer
 } from '../shared/models/app-state.model';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {HandDocument} from '../api/models/hand-document';
