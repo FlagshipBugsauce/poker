@@ -3,5 +3,6 @@ export enum EmitterType {
   Lobby = 'Lobby',
   Game = 'Game',
   Hand = 'Hand',
-  GameData = 'GameData'
+  GameData = 'GameData',
+  PlayerData = 'PlayerData'
 }

@@ -69,6 +69,7 @@ public class SseController {
       case Game:
       case Hand:
       case GameData:
+      case PlayerData:
         validator = null;
         break;
       case Lobby:
@@ -116,6 +117,9 @@ public class SseController {
         break;
       case GameData:
         data = gameService.getGameData(gameService.getUsersGameDocument(userId));
+        break;
+      case PlayerData:
+        data = gameService.getPlayerData(userId);
     }
     return ResponseEntity.ok(sseService.sendUpdate(type, userId, data));
   }

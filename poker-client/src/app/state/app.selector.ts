@@ -5,11 +5,17 @@ import {
   GameListStateContainer,
   GameStateContainer,
   HandStateContainer,
-  LobbyStateContainer
+  LobbyStateContainer,
+  PlayerDataStateContainer
 } from '../shared/models/app-state.model';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {HandDocument} from '../api/models/hand-document';
-import {DrawGameDataContainerModel, GameDocument, LobbyDocument} from '../api/models';
+import {
+  DrawGameDataContainerModel,
+  GameDocument,
+  GamePlayerModel,
+  LobbyDocument
+} from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
 
 export const selectAuthenticated = (state: AppStateContainer) => state.appState.authenticated;
@@ -25,10 +31,9 @@ export const selectLobbyInfo = (state: AppStateContainer) => state.appState.lobb
 
 export const selectLastLobbyInfo = (state: AppStateContainer) => state.appState.lastLobbyInfo;
 
-// export const selectReadyStatus = (state: AppStateContainer) => state.appState.ready;
-
 export const readyStatusFeature =
   createFeatureSelector<AppStateContainer, AppState>('appState');
+/** Ready status selector. */
 export const selectReadyStatus = createSelector(
   readyStatusFeature,
   (state: AppState) => state.ready
@@ -83,4 +88,26 @@ export const gameDataFeature =
 export const selectGameData = createSelector(
   gameDataFeature,
   (state: DrawGameDataContainerModel) => state.gameData
+);
+
+export const playerDataFeature =
+  createFeatureSelector<PlayerDataStateContainer, GamePlayerModel>('playerData');
+/** Game data selector. */
+export const selectPlayerData = createSelector(
+  playerDataFeature,
+  (state: GamePlayerModel) => state
+);
+
+export const awayStatusFeature = createFeatureSelector<PlayerDataStateContainer, GamePlayerModel>('playerData');
+/** Away status selector. */
+export const selectAwayStatus = createSelector(
+  awayStatusFeature,
+  (state: GamePlayerModel) => state.away
+);
+
+export const actingStatusFeature = createFeatureSelector<PlayerDataStateContainer, GamePlayerModel>('playerData');
+/** Acting status selector. */
+export const selectActingStatus = createSelector(
+  actingStatusFeature,
+  (state: GamePlayerModel) => state.acting
 );

@@ -11,7 +11,6 @@ import {Store} from '@ngrx/store';
 import {leaveLobby} from '../../state/app.actions';
 import {GameDocument} from '../../api/models/game-document';
 import {selectGameDocument} from '../../state/app.selector';
-import {gameDocumentInitialState} from '../../state/app.reducer';
 
 @Injectable({
   providedIn: 'root'
@@ -60,6 +59,7 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
       this.sseService.closeEvent(EmitterType.Lobby);
       this.sseService.closeEvent(EmitterType.Hand);
       this.sseService.closeEvent(EmitterType.GameData);
+      this.sseService.closeEvent(EmitterType.PlayerData);
       return true;
     }
 
@@ -77,6 +77,7 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
         this.sseService.closeEvent(EmitterType.Lobby);
         this.sseService.closeEvent(EmitterType.Hand);
         this.sseService.closeEvent(EmitterType.GameData);
+        this.sseService.closeEvent(EmitterType.PlayerData);
 
         if (this.gameModel.state && this.gameModel.state === GameState.Lobby) {
           this.store.dispatch(leaveLobby());  // Leave the lobby.

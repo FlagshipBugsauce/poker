@@ -6,6 +6,7 @@ import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.HandDocument;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.HandActionEvent;
+import com.poker.poker.events.PlayerAfkEvent;
 import com.poker.poker.events.WaitForPlayerEvent;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.enums.EmitterType;
@@ -259,7 +260,9 @@ public class HandService {
     final int numActions = hand.getActions().size();
 
     try {
-      Thread.sleep(appConfig.getTimeToActInMillis());
+      // Wait for time defined in config if player's status is active, otherwise wait for 500 ms.
+      Thread.sleep(
+          waitForPlayerEvent.getPlayer().isAway() ? 500 : appConfig.getTimeToActInMillis());
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
@@ -271,8 +274,13 @@ public class HandService {
         "Waited for {} ms, did not detect any action from {}.",
         appConfig.getTimeToActInMillis(),
         userId);
-    log.debug("Performing default action for {}.", userId);
+    log.debug("Performing default action for {} and setting active status to 'false'.", userId);
 
+    // Transition player's active status.
+    if (!waitForPlayerEvent.getPlayer().isAway()) {
+      applicationEventPublisher.publishEvent(
+          new PlayerAfkEvent(this, waitForPlayerEvent.getPlayer()));
+    }
     draw(userRepository.findUserDocumentById(userId)); // draw card
   }
 

@@ -1,10 +1,11 @@
 import {Injectable} from '@angular/core';
 import {catchError, exhaustMap, map, mergeMap} from 'rxjs/operators';
-import {EMPTY} from 'rxjs';
+import {EMPTY, of} from 'rxjs';
 import {GameService} from '../api/services/game.service';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {
-  createGame, createGameSuccess,
+  createGame,
+  createGameSuccess,
   drawCard,
   drawCardSuccess,
   joinLobby,
@@ -13,13 +14,17 @@ import {
   leaveLobbySuccess,
   readyUp,
   readyUpSuccess,
+  setAwayStatus,
+  setActiveStatusFail,
   startGame,
-  startGameSuccess
+  startGameSuccess,
+  updateAwayStatus
 } from './app.actions';
 import {Router} from '@angular/router';
 import {APP_ROUTES} from '../app-routes';
 import {HandService} from '../api/services/hand.service';
 import {CreateGameModel} from '../api/models/create-game-model';
+import {ActiveStatusModel} from '../api/models/active-status-model';
 
 @Injectable()
 export class GameEffects {
@@ -104,6 +109,21 @@ export class GameEffects {
           return {type: createGameSuccess().type, payload: response};
         }),
         catchError(() => EMPTY)
+      )
+    ))
+  );
+
+  /**
+   * Sets the away status of the player.
+   */
+  setAwayStatus$ = createEffect(() => this.actions$.pipe(
+    ofType(setAwayStatus),
+    exhaustMap((action: ActiveStatusModel) => this.gameService.setActiveStatus({body: action})
+      .pipe(
+        map(
+          response => updateAwayStatus(action),
+          catchError(() => of({type: setActiveStatusFail().type}))
+        )
       )
     ))
   );

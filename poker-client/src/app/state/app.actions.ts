@@ -1,13 +1,15 @@
 import {createAction, props} from '@ngrx/store';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
-  AuthRequestModel, AuthResponseModel,
+  ActiveStatusModel,
+  AuthRequestModel,
+  AuthResponseModel,
   CreateGameModel,
   DrawGameDataContainerModel,
   GameDocument,
+  GamePlayerModel,
   HandDocument,
-  LobbyDocument,
-  UserModel
+  LobbyDocument
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
 
@@ -36,6 +38,8 @@ export const leaveLobbySuccess = createAction('[Lobby Component] LeaveLobbySucce
 export const joinLobbySuccess = createAction('[Lobby Component] JoinLobbySuccess');
 export const startGameSuccess = createAction('[Game Component] StartGameSuccess');
 export const readyUpSuccess = createAction('[Lobby Component] ReadyUpSuccess');
+
+/* Game data actions */
 export const gameDocumentUpdated = createAction(
   '[SSE Service] GameDocumentUpdated', props<GameDocument>());
 export const gameListUpdated = createAction(
@@ -46,5 +50,18 @@ export const handDocumentUpdated = createAction(
   '[SSE Service] HandDocumentUpdated', props<HandDocument>());
 export const gameDataUpdated = createAction(
   '[SSE Service] GameDataUpdated', props<DrawGameDataContainerModel>());
+export const playerDataUpdated = createAction(
+  '[SSE Service] PlayerDataUpdated', props<GamePlayerModel>());
+
 export const drawCard = createAction('[Play Component] DrawCard');
 export const drawCardSuccess = createAction('[Play Component] DrawCardSuccess');
+
+export const setAwayStatus = createAction(
+  '[Play Component] SetActiveStatus',
+  props<ActiveStatusModel>()
+);
+export const updateAwayStatus = createAction(
+  '[Play Component] UpdateActiveStatus',
+  props<ActiveStatusModel>()
+);
+export const setActiveStatusFail = createAction('[Play Component] SetActiveStatusFail');

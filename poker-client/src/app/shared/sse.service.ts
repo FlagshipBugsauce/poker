@@ -10,7 +10,7 @@ import {
   gameDocumentUpdated,
   gameListUpdated,
   handDocumentUpdated,
-  lobbyDocumentUpdated
+  lobbyDocumentUpdated, playerDataUpdated
 } from '../state/app.actions';
 import {
   AppStateContainer,
@@ -18,7 +18,7 @@ import {
   GameListStateContainer,
   GameStateContainer,
   HandStateContainer,
-  LobbyStateContainer
+  LobbyStateContainer, PlayerDataStateContainer
 } from './models/app-state.model';
 import {selectJwt} from '../state/app.selector';
 
@@ -49,7 +49,8 @@ export class SseService {
     private gameStore: Store<GameStateContainer>,
     private handStore: Store<HandStateContainer>,
     private lobbyStore: Store<LobbyStateContainer>,
-    private gameListStore: Store<GameListStateContainer>) {
+    private gameListStore: Store<GameListStateContainer>,
+    private playerDataStore: Store<PlayerDataStateContainer>) {
 
     this.appStore.select(selectJwt).subscribe(jwt => this.jwt = jwt);
 
@@ -63,6 +64,8 @@ export class SseService {
       getTracker({}, handDocumentUpdated, this.handStore);
     this.sseTracker[EmitterType.GameData] =
       getTracker({gameData: [], currentHand: 1}, gameDataUpdated, this.gameDataStore);
+    this.sseTracker[EmitterType.PlayerData] =
+      getTracker({}, playerDataUpdated, this.playerDataStore);
   }
 
   /**

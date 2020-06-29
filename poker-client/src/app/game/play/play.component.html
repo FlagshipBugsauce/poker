@@ -15,14 +15,21 @@
             <tr>
               <th>Player</th>
               <th *ngFor="let number of numbers" class="text-center">
-                {{ number }}
+                {{number}}
               </th>
               <th class="text-center">Score</th>
             </tr>
             </thead>
             <tbody>
             <tr *ngFor="let dataRow of gameData">
-              <td class="align-middle">{{ dataRow.player.firstName }} {{ dataRow.player.lastName }}</td>
+              <td class="align-middle">
+                {{dataRow.player.firstName}} {{dataRow.player.lastName}}
+                <img
+                  *ngIf="isPlayerAway(dataRow.player.id)"
+                  [src]="activeIcon"
+                  class="afk-icon"
+                  alt="Icon to indicate whether a player is active or AFK">
+              </td>
               <td
                 *ngFor="let draw of dataRow.draws"
                 [ngClass]="{
@@ -32,11 +39,11 @@
                 'text-center': true,
                 'align-middle': true
               }">
-                <pkr-card *ngIf="draw.card != null" [card]="draw.card" size="xs"></pkr-card>
-                {{ draw.card == null ? ' ' : '' }}
+                <pkr-card *ngIf="draw.card" [card]="draw.card" size="xs"></pkr-card>
+                {{draw.card ? '' : ' '}}
               </td>
               <td class="text-center align-middle">
-                {{ dataRow.player.score }}
+                {{dataRow.player.score}}
               </td>
             </tr>
             </tbody>
@@ -44,10 +51,20 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-sm-6">
-          Time to act: {{ timeToAct }}
+        <div class="col-sm-8">
+          Time to act: {{timeToAct}}
         </div>
-        <div class="col-sm-6 text-right">
+        <div class="col-sm-2 text-right">
+          <label class="form-check-label">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              [checked]="awayStatus"
+              (click)="toggleStatus()">
+            Away
+          </label>
+        </div>
+        <div class="col-sm-2 text-right">
           <button
             (click)="draw()"
             [disabled]="!canRoll"
@@ -68,3 +85,4 @@
     </div>
   </div>
 </div>
+<pkr-popup-afk #afkPopup></pkr-popup-afk>

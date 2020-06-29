@@ -2,6 +2,7 @@ package com.poker.poker.controllers;
 
 import com.poker.poker.config.constants.GameConstants;
 import com.poker.poker.models.ApiSuccessModel;
+import com.poker.poker.models.game.ActiveStatusModel;
 import com.poker.poker.models.game.CreateGameModel;
 import com.poker.poker.models.game.GetGameModel;
 import com.poker.poker.repositories.UserRepository;
@@ -40,12 +41,12 @@ import org.springframework.web.bind.annotation.RestController;
         "Games API handles all game requests, like creating a game, joining a game, etc...")
 public class GameController {
 
-  private GameService gameService;
-  private LobbyService lobbyService;
-  private UserService userService;
-  private GameConstants gameConstants;
-  private JwtService jwtService;
-  private UserRepository userRepository;
+  private final GameService gameService;
+  private final LobbyService lobbyService;
+  private final UserService userService;
+  private final GameConstants gameConstants;
+  private final JwtService jwtService;
+  private final UserRepository userRepository;
 
   /**
    * Creates a game.
@@ -185,6 +186,12 @@ public class GameController {
             userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
   }
 
+  /**
+   * Starts a game.
+   *
+   * @param jwt JWT.
+   * @return ApiSuccessModel with 200 status if the request is successful, throws otherwise.
+   */
   @Operation(
       summary = "Start Game",
       description = "Starts the game, provided all preconditions are satisfied..",
@@ -206,5 +213,37 @@ public class GameController {
     return ResponseEntity.ok(
         gameService.startGame(
             userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
+  }
+
+  /**
+   * Sets the status that indicates whether a player is active or not.
+   *
+   * @param jwt JWT.
+   * @param activeStatusModel Model containing the active status.
+   * @return ApiSuccessModel with 200 status if the request is successful, throws otherwise.
+   */
+  @Operation(
+      summary = "Set Active Status",
+      description = "Sets the status that indicates whether a player is active or not.",
+      tags = "game")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Creation of game was successful.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiSuccessModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
+      })
+  @RequestMapping(value = "/active", method = RequestMethod.POST)
+  public ResponseEntity<ApiSuccessModel> setActiveStatus(
+      @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+      @Valid @RequestBody ActiveStatusModel activeStatusModel) {
+    userService.validate(jwt, gameConstants.getClientGroups());
+    return ResponseEntity.ok(
+        gameService.setPlayerActiveStatus(
+            userRepository.findUserDocumentById(jwtService.getUserId(jwt)).getId(),
+            activeStatusModel.isAway()));
   }
 }

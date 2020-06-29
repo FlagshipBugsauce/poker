@@ -9,6 +9,7 @@ import {
   leaveLobby,
   lobbyDocumentUpdated,
   notReady,
+  playerDataUpdated,
   readyUp,
   signInFail,
   signInSuccess,
@@ -19,7 +20,7 @@ import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
   AuthResponseModel,
   DrawGameDataContainerModel,
-  GameDocument,
+  GameDocument, GamePlayerModel,
   HandDocument,
   LobbyDocument
 } from '../api/models';
@@ -32,7 +33,7 @@ export const initialState: AppState = {
   showSignInFail: false,
   jwt: '',
   authenticated: false,
-  ready: false
+  ready: false,
 };
 const appReducerLocal = createReducer<AppState>(
   initialState,
@@ -127,4 +128,16 @@ const gameListReducerInternal = createReducer<GameListContainerModel>(
     (state: GameListContainerModel, newState: GameListContainerModel) => newState));
 export function gameListReducer(state: GameListContainerModel, action) {
   return gameListReducerInternal(state, action);
+}
+
+/**
+ * GameList reducer and initial state.
+ */
+export const playerDataInitialState: GamePlayerModel = {} as GamePlayerModel;
+const playerDataReducerInternal = createReducer<GamePlayerModel>(
+  playerDataInitialState,
+  on(playerDataUpdated,
+    (state: GamePlayerModel, newState: GamePlayerModel) => newState));
+export function playerDataReducer(state: GamePlayerModel, action) {
+  return playerDataReducerInternal(state, action);
 }

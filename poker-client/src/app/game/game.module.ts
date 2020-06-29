@@ -8,6 +8,7 @@ import {GameComponent} from './game/game.component';
 import {HandComponent} from './hand/hand.component';
 import {PlayComponent} from './play/play.component';
 import {EndComponent} from './end/end.component';
+import { PopupAfkComponent } from './popup-afk/popup-afk.component';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import {EndComponent} from './end/end.component';
     GameComponent,
     HandComponent,
     PlayComponent,
-    EndComponent
+    EndComponent,
+    PopupAfkComponent
   ],
   imports: [
     CommonModule,
