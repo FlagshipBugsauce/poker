@@ -6,9 +6,19 @@
 export interface GamePlayerModel {
 
   /**
+   * Specifies whether a player needs to act.
+   */
+  acting?: boolean;
+
+  /**
    * Specifies whether a player is active.
    */
-  active?: boolean;
+  away?: boolean;
+
+  /**
+   * Size of the players bank roll.
+   */
+  bankRoll?: number;
 
   /**
    * User's email address.

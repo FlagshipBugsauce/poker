@@ -70,7 +70,7 @@ public class LobbyService {
     for (LobbyPlayerModel player : lobbyDocument.getPlayers()) {
       try {
         sseService.sendUpdate(EmitterType.Lobby, player.getId(), lobbyDocument);
-      } catch (BadRequestException ignored) { // Exception already logged.
+      } catch (BadRequestException | NullPointerException ignored) { // Exception already logged.
       }
     }
   }
@@ -103,6 +103,7 @@ public class LobbyService {
     gameDocument.setPlayers(
         lobbyDocument.getPlayers().stream().map(GamePlayerModel::new).collect(Collectors.toList()));
     Collections.shuffle(gameDocument.getPlayers());
+    gameDocument.getPlayers().get(0).setActing(true);
 
     // Update game list.
     sseService.sendToAll(EmitterType.GameList, getLobbyList());

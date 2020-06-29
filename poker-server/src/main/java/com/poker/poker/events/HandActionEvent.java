@@ -8,11 +8,15 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class HandActionEvent extends ApplicationEvent {
 
-  private UUID gameId;
-  private UUID handId;
-  private HandAction type;
+  private final UUID gameId;
+  private final UUID handId;
+  private final HandAction type;
 
-  public HandActionEvent(Object source, UUID gameId, UUID handId, HandAction type) {
+  public HandActionEvent(
+      Object source,
+      final UUID gameId,
+      final UUID handId,
+      final HandAction type) {
     super(source);
     this.gameId = gameId;
     this.handId = handId;

@@ -59,4 +59,13 @@ public class GameConstants extends AppConstants {
   private final BadRequestException gameDataNotFoundException =
       new BadRequestException(
           "Game Data Not Found", "Could not find game data for the ID provided.");
+
+  private final BadRequestException playerNotInGameException =
+      new BadRequestException(
+          "Error Changing AFK Status",
+          "Player with ID provided was not in the list of players of the specified game.");
+
+  private final BadRequestException playerDataNotFoundException =
+      new BadRequestException(
+          "Error Retrieving Player Data", "Player data for the ID provided was not found.");
 }

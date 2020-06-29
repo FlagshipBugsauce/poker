@@ -10,7 +10,8 @@ import {
   AppStateContainer,
   GameDataStateContainer,
   GameStateContainer,
-  HandStateContainer
+  HandStateContainer,
+  PlayerDataStateContainer
 } from '../../shared/models/app-state.model';
 import * as selectors from '../../state/app.selector';
 import {GameDocument, HandDocument, UserModel} from '../../api/models';
@@ -21,6 +22,7 @@ import {
   mockUser
 } from '../../testing/mock-models';
 import {MockSseService} from '../../testing/mock-services';
+import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 
 describe('PlayComponent', () => {
   let mockStore: MockStore;
@@ -28,12 +30,14 @@ describe('PlayComponent', () => {
   let mockUserSelector: MemoizedSelector<AppStateContainer, UserModel>;
   let mockGameDataSelector: MemoizedSelector<GameDataStateContainer, DrawGameDataModel[]>;
   let mockGameSelector: MemoizedSelector<GameStateContainer, GameDocument>;
+  let mockAwayStatusSelector: MemoizedSelector<PlayerDataStateContainer, boolean>;
+  let mockActingStatusSelector: MemoizedSelector<PlayerDataStateContainer, boolean>;
   let component: PlayComponent;
   let fixture: ComponentFixture<PlayComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [PlayComponent],
+      declarations: [PlayComponent, PopupAfkComponent],
       providers: [
         {
           provide: SseService,
@@ -50,6 +54,8 @@ describe('PlayComponent', () => {
     mockUserSelector = mockStore.overrideSelector(selectors.selectLoggedInUser, mockUser);
     mockGameDataSelector = mockStore.overrideSelector(selectors.selectGameData, mockGameData);
     mockGameSelector = mockStore.overrideSelector(selectors.selectGameDocument, mockGameDocument);
+    mockAwayStatusSelector = mockStore.overrideSelector(selectors.selectAwayStatus, false);
+    mockActingStatusSelector = mockStore.overrideSelector(selectors.selectActingStatus, false);
     fixture.detectChanges();
   }));
 

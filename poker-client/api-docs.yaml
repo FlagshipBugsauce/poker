@@ -77,6 +77,64 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessModel'
+  /game/active:
+    post:
+      tags:
+        - game
+      summary: Set Active Status
+      description: Sets the status that indicates whether a player is active or not.
+      operationId: setActiveStatus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActiveStatusModel'
+        required: true
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Creation of game was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
+  /game/leave-lobby:
+    post:
+      tags:
+        - game
+      summary: Leave Game Lobby
+      description: Request sent when a player leaves a game lobby.
+      operationId: leaveLobby
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Request handled successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
   /game/join/{gameId}:
     post:
       tags:
@@ -164,58 +222,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessModel'
-  /game/leave-lobby:
-    post:
-      tags:
-        - game
-      summary: Leave Game Lobby
-      description: Request sent when a player leaves a game lobby.
-      operationId: leaveLobby
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: Request handled successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessModel'
-  /game/hand/draw:
-    post:
-      tags:
-        - hand
-      summary: Draws a card.
-      description: Draws a card from the top of the deck.
-      operationId: draw
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: Draw was successful.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessModel'
   /game/hand/determine-winner/{handId}:
     post:
       tags:
@@ -249,6 +255,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlayerModel'
+  /game/hand/draw:
+    post:
+      tags:
+        - hand
+      summary: Draws a card.
+      description: Draws a card from the top of the deck.
+      operationId: draw
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Draw was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
   /emitters/request/{type}/{jwt}:
     get:
       tags:
@@ -273,6 +305,7 @@ paths:
               - Lobby
               - Hand
               - GameData
+              - PlayerData
       responses:
         "400":
           description: Bad request.
@@ -292,44 +325,6 @@ paths:
             text/event-stream:
               schema:
                 $ref: '#/components/schemas/SseEmitter'
-  /emitters/destroy/{type}:
-    post:
-      tags:
-        - emitters
-      summary: Destroy Emitter
-      description: Destroy the emitter that is sending updated game lists.
-      operationId: destroyEmitter
-      parameters:
-        - name: type
-          in: path
-          required: true
-          schema:
-            type: string
-            enum:
-              - GameList
-              - Game
-              - Lobby
-              - Hand
-              - GameData
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: Request handled successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessModel'
   /emitters/update/{type}:
     post:
       tags:
@@ -349,6 +344,7 @@ paths:
               - Lobby
               - Hand
               - GameData
+              - PlayerData
       responses:
         "400":
           description: Bad request.
@@ -368,6 +364,93 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessModel'
+  /emitters/destroy/{type}:
+    post:
+      tags:
+        - emitters
+      summary: Destroy Emitter
+      description: Destroy the emitter that is sending updated game lists.
+      operationId: destroyEmitter
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - GameList
+              - Game
+              - Lobby
+              - Hand
+              - GameData
+              - PlayerData
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Request handled successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
+  /test/test/gameDataContainer:
+    get:
+      tags:
+        - test-controller
+      operationId: gameDataContainer
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: default response
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/DrawGameDataContainerModel'
+  /test/test/gameDoc:
+    get:
+      tags:
+        - test-controller
+      operationId: gameDocument
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: default response
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/GameDocument'
   /test/test/lobbyDoc:
     get:
       tags:
@@ -392,30 +475,6 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/LobbyDocument'
-  /test/test/handDoc:
-    get:
-      tags:
-        - test-controller
-      operationId: handDocument
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: default response
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/HandDocument'
   /test/test/gameData:
     get:
       tags:
@@ -442,11 +501,11 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DrawGameDataModel'
-  /test/test/gameDoc:
+  /test/test/handDoc:
     get:
       tags:
         - test-controller
-      operationId: gameDocument
+      operationId: handDocument
       responses:
         "400":
           description: Bad request.
@@ -465,31 +524,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/GameDocument'
-  /test/test/gameDataContainer:
-    get:
-      tags:
-        - test-controller
-      operationId: gameDataContainer
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: default response
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/DrawGameDataContainerModel'
+                $ref: '#/components/schemas/HandDocument'
   /user/register:
     post:
       tags:
@@ -634,6 +669,15 @@ components:
           minimum: 0
           type: number
           description: Buy-in required to play in the game.
+    ActiveStatusModel:
+      required:
+        - away
+      type: object
+      properties:
+        away:
+          type: boolean
+          description: Flag to determine what to set the player's active status to.
+          example: true
     GetGameModel:
       type: object
       properties:
@@ -734,6 +778,168 @@ components:
         timeout:
           type: integer
           format: int64
+    CardModel:
+      type: object
+      properties:
+        suit:
+          type: string
+          description: The suit of the card.
+          example: Spades
+          enum:
+            - Spades
+            - Hearts
+            - Clubs
+            - Diamonds
+        value:
+          type: string
+          description: The value of the card.
+          example: Ace
+          enum:
+            - Ace
+            - King
+            - Queen
+            - Jack
+            - Ten
+            - Nine
+            - Eight
+            - Seven
+            - Six
+            - Five
+            - Four
+            - Three
+            - Two
+      description: Model of a card.
+    DrawGameDataContainerModel:
+      type: object
+      properties:
+        gameData:
+          type: array
+          items:
+            $ref: '#/components/schemas/DrawGameDataModel'
+        currentHand:
+          type: integer
+          description: The current hand.
+          format: int32
+          example: 3
+      description: Container for a list of game data, plus some other useful information.
+    DrawGameDataModel:
+      type: object
+      properties:
+        player:
+          $ref: '#/components/schemas/GamePlayerModel'
+        acting:
+          type: boolean
+          description: Flag that is true if this draw is next.
+          example: true
+        draws:
+          type: array
+          items:
+            $ref: '#/components/schemas/DrawGameDrawModel'
+      description: Model representing player data in a game, i.e. cards drawn, etc...
+    DrawGameDrawModel:
+      type: object
+      properties:
+        card:
+          $ref: '#/components/schemas/CardModel'
+        winner:
+          type: boolean
+          description: Flag that is true if this draw won the hand.
+          example: true
+        acting:
+          type: boolean
+          description: Flag that is true if this draw is next.
+          example: true
+      description: Model representing data in the draw game.
+    GamePlayerModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: User's ID.
+          format: uuid
+          example: 0a7d95ef-94ba-47bc-b591-febb365bc543
+        email:
+          type: string
+          description: User's email address.
+          example: user@domain.com
+        group:
+          type: string
+          description: User's user group.
+          example: Administrator
+          enum:
+            - Administrator
+            - Client
+            - Guest
+        firstName:
+          type: string
+          description: User's first name.
+          example: Fred
+        lastName:
+          type: string
+          description: User's last name.
+          example: Flintstone
+        score:
+          type: integer
+          description: The players current score.
+          format: int32
+          example: 69
+        away:
+          type: boolean
+          description: Specifies whether a player is active.
+          example: true
+        acting:
+          type: boolean
+          description: Specifies whether a player needs to act.
+          example: true
+        bankRoll:
+          type: number
+          description: Size of the players bank roll.
+      description: Model representing a player in a game.
+    GameDocument:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Game ID (same as game lobby ID).
+          format: uuid
+          example: 0a7d95ef-94ba-47bc-b591-febb365bc543
+        state:
+          type: string
+          description: Game state.
+          example: Lobby
+          enum:
+            - Lobby
+            - Play
+            - Over
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/GamePlayerModel'
+        hands:
+          type: array
+          items:
+            type: string
+            format: uuid
+        summary:
+          $ref: '#/components/schemas/GameSummaryModel'
+        totalHands:
+          type: integer
+          description: Total number of hands in the game.
+          format: int32
+          example: 5
+        timeToAct:
+          type: integer
+          description: Amount of time each player has to act.
+          format: int32
+          example: 17
+    GameSummaryModel:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Placeholder message.
+          example: This is a message.
+      description: Model representing summary of a game.
     GameActionModel:
       type: object
       properties:
@@ -797,75 +1003,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GameActionModel'
-    CardModel:
-      type: object
-      properties:
-        suit:
-          type: string
-          description: The suit of the card.
-          example: Spades
-          enum:
-            - Spades
-            - Hearts
-            - Clubs
-            - Diamonds
-        value:
-          type: string
-          description: The value of the card.
-          example: Ace
-          enum:
-            - Ace
-            - King
-            - Queen
-            - Jack
-            - Ten
-            - Nine
-            - Eight
-            - Seven
-            - Six
-            - Five
-            - Four
-            - Three
-            - Two
-      description: Model of a card.
-    GamePlayerModel:
-      type: object
-      properties:
-        id:
-          type: string
-          description: User's ID.
-          format: uuid
-          example: 0a7d95ef-94ba-47bc-b591-febb365bc543
-        email:
-          type: string
-          description: User's email address.
-          example: user@domain.com
-        group:
-          type: string
-          description: User's user group.
-          example: Administrator
-          enum:
-            - Administrator
-            - Client
-            - Guest
-        firstName:
-          type: string
-          description: User's first name.
-          example: Fred
-        lastName:
-          type: string
-          description: User's last name.
-          example: Flintstone
-        score:
-          type: integer
-          description: The players current score.
-          format: int32
-          example: 69
-        active:
-          type: boolean
-          description: Specifies whether a player is active.
-          example: true
-      description: Model representing a player in a game.
     HandActionModel:
       type: object
       properties:
@@ -921,92 +1058,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CardModel'
-    DrawGameDataModel:
-      type: object
-      properties:
-        player:
-          $ref: '#/components/schemas/GamePlayerModel'
-        acting:
-          type: boolean
-          description: Flag that is true if this draw is next.
-          example: true
-        draws:
-          type: array
-          items:
-            $ref: '#/components/schemas/DrawGameDrawModel'
-      description: Model representing player data in a game, i.e. cards drawn, etc...
-    DrawGameDrawModel:
-      type: object
-      properties:
-        card:
-          $ref: '#/components/schemas/CardModel'
-        winner:
-          type: boolean
-          description: Flag that is true if this draw won the hand.
-          example: true
-        acting:
-          type: boolean
-          description: Flag that is true if this draw is next.
-          example: true
-      description: Model representing data in the draw game.
-    GameDocument:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Game ID (same as game lobby ID).
-          format: uuid
-          example: 0a7d95ef-94ba-47bc-b591-febb365bc543
-        state:
-          type: string
-          description: Game state.
-          example: Lobby
-          enum:
-            - Lobby
-            - Play
-            - Over
-        players:
-          type: array
-          items:
-            $ref: '#/components/schemas/GamePlayerModel'
-        hands:
-          type: array
-          items:
-            type: string
-            format: uuid
-        summary:
-          $ref: '#/components/schemas/GameSummaryModel'
-        totalHands:
-          type: integer
-          description: Total number of hands in the game.
-          format: int32
-          example: 5
-        timeToAct:
-          type: integer
-          description: Amount of time each player has to act.
-          format: int32
-          example: 17
-    GameSummaryModel:
-      type: object
-      properties:
-        message:
-          type: string
-          description: Placeholder message.
-          example: This is a message.
-      description: Model representing summary of a game.
-    DrawGameDataContainerModel:
-      type: object
-      properties:
-        gameData:
-          type: array
-          items:
-            $ref: '#/components/schemas/DrawGameDataModel'
-        currentHand:
-          type: integer
-          description: The current hand.
-          format: int32
-          example: 3
-      description: Container for a list of game data, plus some other useful information.
     NewAccountModel:
       type: object
       properties:

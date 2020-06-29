@@ -12,7 +12,8 @@ import {
   gameDocumentReducer,
   gameListReducer,
   handDocumentReducer,
-  lobbyDocumentReducer
+  lobbyDocumentReducer,
+  playerDataReducer
 } from './state/app.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import {GameEffects} from './state/game.effects';
@@ -33,7 +34,8 @@ import {AppEffects} from './state/app.effects';
         lobbyDocument: lobbyDocumentReducer,
         gameDocument: gameDocumentReducer,
         handDocument: handDocumentReducer,
-        gameList: gameListReducer
+        gameList: gameListReducer,
+        playerData: playerDataReducer
     }),
     EffectsModule.forRoot([AppEffects, GameEffects])
   ],

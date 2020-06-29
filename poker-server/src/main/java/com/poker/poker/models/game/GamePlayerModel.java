@@ -2,6 +2,7 @@ package com.poker.poker.models.game;
 
 import com.poker.poker.documents.UserDocument;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,10 +21,18 @@ public class GamePlayerModel extends PlayerModel {
   protected int score = 0;
 
   @Schema(description = "Specifies whether a player is active.", example = "true")
-  protected boolean active = true;
+  protected boolean away;
+
+  @Schema(description = "Specifies whether a player needs to act.", example = "true")
+  protected boolean acting;
+
+  @Schema(description = "Size of the players bank roll.", implementation = BigDecimal.class)
+  protected BigDecimal bankRoll;
 
   public GamePlayerModel(PlayerModel playerModel) {
     super(playerModel);
+    this.away = false;
+    this.acting = false;
   }
 
   public GamePlayerModel(UserDocument userDocument) {

@@ -10,5 +10,6 @@ public enum EmitterType {
   Game,
   Lobby,
   Hand,
-  GameData
+  GameData,
+  PlayerData
 }

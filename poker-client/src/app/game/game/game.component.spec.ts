@@ -13,6 +13,7 @@ import {SseService} from '../../shared/sse.service';
 import {MockSseService} from '../../testing/mock-services';
 import {DrawGameDataModel} from '../../api/models/draw-game-data-model';
 import {mockGameData} from '../../testing/mock-models';
+import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 
 describe('GameComponent', () => {
   let mockStore: MockStore;
@@ -26,7 +27,8 @@ describe('GameComponent', () => {
         GameComponent,
         LobbyComponent,
         PlayComponent,
-        EndComponent
+        EndComponent,
+        PopupAfkComponent
       ],
       imports: [SharedModule, RouterTestingModule],
       providers: [

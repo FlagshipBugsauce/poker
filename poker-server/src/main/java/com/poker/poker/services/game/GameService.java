@@ -6,6 +6,7 @@ import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.HandDocument;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.HandActionEvent;
+import com.poker.poker.events.PlayerAfkEvent;
 import com.poker.poker.events.WaitForPlayerEvent;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.GameSummaryModel;
@@ -92,6 +93,20 @@ public class GameService {
       throw gameConstants.getGameDataNotFoundException();
     }
     return gameIdToGameDataMap.get(gameId);
+  }
+
+  /**
+   * Returns information about a player.
+   * @param userId The ID of the player.
+   * @return Model representing the player.
+   */
+  public GamePlayerModel getPlayerData(final UUID userId) {
+    return getUsersGameDocument(userId)
+        .getPlayers()
+        .stream()
+        .filter(player -> player.getId().equals(userId))
+        .findFirst()
+        .orElseThrow(gameConstants::getPlayerDataNotFoundException);
   }
 
   /**
@@ -223,6 +238,57 @@ public class GameService {
   }
 
   /**
+   * Event listener to handle an event triggered in HandService. Need an event listener here to
+   * avoid circular dependency.
+   * @param playerAfkEvent Event being handled (contains reference to AFK player).
+   */
+  @Async
+  @EventListener
+  public void handlePlayerAfkEvent(final PlayerAfkEvent playerAfkEvent) {
+    setPlayerActiveStatusInternal(playerAfkEvent.getPlayer().getId(), true);
+  }
+
+  /**
+   * Transitions the specified player's "active" status to the value provided. When a player is
+   * inactive, their moves are made for them as soon as it is their turn to act, rather than
+   * waiting until the timer has elapsed.
+   * @param playerId The ID of the player whose status is being transitioned.
+   */
+  public ApiSuccessModel setPlayerActiveStatus(final UUID playerId, final boolean status) {
+    setPlayerActiveStatusInternal(playerId, status);
+    return new ApiSuccessModel("PLayers status changed successfully.");
+  }
+
+  /**
+   * Internal implementation with no return value.
+   * @param playerId The ID of the player whose status is being transitioned.
+   */
+  private void setPlayerActiveStatusInternal(final UUID playerId, final boolean status) {
+    getUsersGameDocument(playerId)
+        .getPlayers()
+        .stream()
+        .filter(player -> player.getId().equals(playerId))
+        .findFirst()
+        .orElseThrow(gameConstants::getPlayerNotInGameException)
+        .setAway(status);
+    broadcastGameUpdate(getUsersGameDocument(playerId));
+    sseService.sendUpdate(EmitterType.PlayerData, playerId, getPlayerData(playerId));
+    log.debug("Updating active status to {} for player {}.", status, playerId);
+  }
+
+  /**
+   * Once a game has started, a player can't be removed like they are when they leave a lobby.
+   * Instead, their status is set to AFK mode. If the player rejoins, their status will be
+   * transitioned from AFK mode to normal.
+   * @param gameId The ID of the game the player is leaving.
+   * @param userDocument Model associated with the player leaving the game.
+   * @return ApiSuccessModel indicating the request to leave the game was successful.
+   */
+  public ApiSuccessModel leaveGame(final UUID gameId, final UserDocument userDocument) {
+    return setPlayerActiveStatus(userDocument.getId(), false);
+  }
+
+  /**
    * If a player leaves a game that has started, they may be able to rejoin in. This method
    * determines whether the player can still rejoin and will perform the appropriate steps to add
    * them back into the game if they can.
@@ -312,6 +378,10 @@ public class GameService {
     handService.newHand(gameDocument); // Create the hand.
     initializeGameData(gameDocument); // Initialize game data for client.
     broadcastGameUpdate(gameDocument); // Broadcast the game document.
+    sseService.sendUpdate(  // Send player data
+        EmitterType.PlayerData,
+        gameDocument.getPlayers().get(0).getId(),
+        getPlayerData(gameDocument.getPlayers().get(0).getId()));
     return new ApiSuccessModel("The game has been started successfully.");
   }
 
@@ -354,6 +424,18 @@ public class GameService {
     final int playerThatActed = gameDocument.getPlayers().indexOf(hand.getPlayerToAct());
     final GamePlayerModel nextPlayerToAct =
         gameDocument.getPlayers().get((playerThatActed + 1) % gameDocument.getPlayers().size());
+
+    // Update acting field and update players
+    gameDocument.getPlayers().get(playerThatActed).setActing(false);
+    sseService.sendUpdate(
+        EmitterType.PlayerData,
+        gameDocument.getPlayers().get(playerThatActed).getId(),
+        getPlayerData(gameDocument.getPlayers().get(playerThatActed).getId()));
+    nextPlayerToAct.setActing(true);
+    sseService.sendUpdate(
+        EmitterType.PlayerData,
+        nextPlayerToAct.getId(),
+        getPlayerData(nextPlayerToAct.getId()));
 
     // Set player to act:
     log.debug("Next player to act is {}.", nextPlayerToAct.getId());

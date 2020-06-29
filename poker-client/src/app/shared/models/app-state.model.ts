@@ -2,6 +2,7 @@ import {TopBarLobbyModel} from './top-bar-lobby.model';
 import {
   DrawGameDataContainerModel,
   GameDocument,
+  GamePlayerModel,
   HandDocument,
   LobbyDocument,
   UserModel
@@ -40,4 +41,8 @@ export interface GameListStateContainer {
 
 export interface HandStateContainer {
   handDocument: HandDocument;
+}
+
+export interface PlayerDataStateContainer {
+  playerData: GamePlayerModel;
 }

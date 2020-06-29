@@ -46,6 +46,7 @@ public class SseService {
     emitterMaps.put(EmitterType.Game, new HashMap<>());
     emitterMaps.put(EmitterType.Hand, new HashMap<>());
     emitterMaps.put(EmitterType.GameData, new HashMap<>());
+    emitterMaps.put(EmitterType.PlayerData, new HashMap<>());
   }
 
   /**
@@ -83,6 +84,7 @@ public class SseService {
       case Game:
       case Hand:
       case GameData:
+      case PlayerData:
         timeout = emitterConstants.getGameEmitterDuration();
         break;
       default:
