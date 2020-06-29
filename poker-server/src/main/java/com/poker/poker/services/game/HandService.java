@@ -261,8 +261,8 @@ public class HandService {
 
     try {
       // Wait for time defined in config if player's status is active, otherwise wait for 500 ms.
-      Thread.sleep(waitForPlayerEvent.getPlayer().isAway() ?
-          500 : appConfig.getTimeToActInMillis());
+      Thread.sleep(
+          waitForPlayerEvent.getPlayer().isAway() ? 500 : appConfig.getTimeToActInMillis());
     } catch (InterruptedException e) {
       e.printStackTrace();
     }

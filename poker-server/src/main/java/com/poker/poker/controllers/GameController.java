@@ -188,6 +188,7 @@ public class GameController {
 
   /**
    * Starts a game.
+   *
    * @param jwt JWT.
    * @return ApiSuccessModel with 200 status if the request is successful, throws otherwise.
    */
@@ -216,6 +217,7 @@ public class GameController {
 
   /**
    * Sets the status that indicates whether a player is active or not.
+   *
    * @param jwt JWT.
    * @param activeStatusModel Model containing the active status.
    * @return ApiSuccessModel with 200 status if the request is successful, throws otherwise.
@@ -226,20 +228,22 @@ public class GameController {
       tags = "game")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Creation of game was successful.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = ApiSuccessModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Creation of game was successful.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiSuccessModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/active", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> setActiveStatus(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
       @Valid @RequestBody ActiveStatusModel activeStatusModel) {
     userService.validate(jwt, gameConstants.getClientGroups());
-    return ResponseEntity.ok(gameService.setPlayerActiveStatus(userRepository
-        .findUserDocumentById(jwtService.getUserId(jwt)).getId(), activeStatusModel.isAway()));
+    return ResponseEntity.ok(
+        gameService.setPlayerActiveStatus(
+            userRepository.findUserDocumentById(jwtService.getUserId(jwt)).getId(),
+            activeStatusModel.isAway()));
   }
 }

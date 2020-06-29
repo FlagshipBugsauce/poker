@@ -97,13 +97,12 @@ public class GameService {
 
   /**
    * Returns information about a player.
+   *
    * @param userId The ID of the player.
    * @return Model representing the player.
    */
   public GamePlayerModel getPlayerData(final UUID userId) {
-    return getUsersGameDocument(userId)
-        .getPlayers()
-        .stream()
+    return getUsersGameDocument(userId).getPlayers().stream()
         .filter(player -> player.getId().equals(userId))
         .findFirst()
         .orElseThrow(gameConstants::getPlayerDataNotFoundException);
@@ -240,6 +239,7 @@ public class GameService {
   /**
    * Event listener to handle an event triggered in HandService. Need an event listener here to
    * avoid circular dependency.
+   *
    * @param playerAfkEvent Event being handled (contains reference to AFK player).
    */
   @Async
@@ -250,8 +250,9 @@ public class GameService {
 
   /**
    * Transitions the specified player's "active" status to the value provided. When a player is
-   * inactive, their moves are made for them as soon as it is their turn to act, rather than
-   * waiting until the timer has elapsed.
+   * inactive, their moves are made for them as soon as it is their turn to act, rather than waiting
+   * until the timer has elapsed.
+   *
    * @param playerId The ID of the player whose status is being transitioned.
    */
   public ApiSuccessModel setPlayerActiveStatus(final UUID playerId, final boolean status) {
@@ -261,12 +262,11 @@ public class GameService {
 
   /**
    * Internal implementation with no return value.
+   *
    * @param playerId The ID of the player whose status is being transitioned.
    */
   private void setPlayerActiveStatusInternal(final UUID playerId, final boolean status) {
-    getUsersGameDocument(playerId)
-        .getPlayers()
-        .stream()
+    getUsersGameDocument(playerId).getPlayers().stream()
         .filter(player -> player.getId().equals(playerId))
         .findFirst()
         .orElseThrow(gameConstants::getPlayerNotInGameException)
@@ -280,6 +280,7 @@ public class GameService {
    * Once a game has started, a player can't be removed like they are when they leave a lobby.
    * Instead, their status is set to AFK mode. If the player rejoins, their status will be
    * transitioned from AFK mode to normal.
+   *
    * @param gameId The ID of the game the player is leaving.
    * @param userDocument Model associated with the player leaving the game.
    * @return ApiSuccessModel indicating the request to leave the game was successful.
@@ -378,7 +379,7 @@ public class GameService {
     handService.newHand(gameDocument); // Create the hand.
     initializeGameData(gameDocument); // Initialize game data for client.
     broadcastGameUpdate(gameDocument); // Broadcast the game document.
-    sseService.sendUpdate(  // Send player data
+    sseService.sendUpdate( // Send player data
         EmitterType.PlayerData,
         gameDocument.getPlayers().get(0).getId(),
         getPlayerData(gameDocument.getPlayers().get(0).getId()));
@@ -433,9 +434,7 @@ public class GameService {
         getPlayerData(gameDocument.getPlayers().get(playerThatActed).getId()));
     nextPlayerToAct.setActing(true);
     sseService.sendUpdate(
-        EmitterType.PlayerData,
-        nextPlayerToAct.getId(),
-        getPlayerData(nextPlayerToAct.getId()));
+        EmitterType.PlayerData, nextPlayerToAct.getId(), getPlayerData(nextPlayerToAct.getId()));
 
     // Set player to act:
     log.debug("Next player to act is {}.", nextPlayerToAct.getId());
