@@ -20,14 +20,10 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
    */
   public confirmationPopup: PopupComponent;
 
-  /**
-   * Flag that is used to determine whether the user has clicked OK on the popup.
-   */
+  /** Flag that is used to determine whether the user has clicked OK on the popup. */
   public canLeave: boolean = false;
 
-  /**
-   * The page the user is attempting to access.
-   */
+  /** The page the user is attempting to access. */
   public link: string;
 
   public gameModel: GameDocument;
@@ -42,7 +38,7 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
       .subscribe((gameDocument: GameDocument) => this.gameModel = gameDocument);
   }
 
-  canDeactivate(
+  public canDeactivate(
     component: GameComponent,
     currentRoute: import('@angular/router').ActivatedRouteSnapshot,
     currentState: import('@angular/router').RouterStateSnapshot,
@@ -83,6 +79,7 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
     return true;
   }
 
+  /** Helper which will unsubscribe from websocket topics when they aren't needed. */
   private unsubscribe(): void {
     this.webSocketService.gameTopicUnsubscribe();
     this.webSocketService.playerDataTopicUnsubscribe();

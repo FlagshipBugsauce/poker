@@ -36,6 +36,30 @@ export enum SocketClientState {
 })
 export class WebSocketService implements OnDestroy {
 
+  /** SockJS client. */
+  private readonly client: Client;
+
+  /** Socket state. */
+  private state: BehaviorSubject<SocketClientState>;
+
+  /** Model for the logged in user. */
+  private user: UserModel;
+
+  /** Stores game ID when user is in a game. */
+  public gameId: string = '';
+
+  /** Subject to unsubscribe from game topic. */
+  public gameTopicUnsubscribe$: Subject<any>;
+
+  /** Subject to unsubscribe from game list topic. */
+  public gameListTopicUnsubscribe$: Subject<any>;
+
+  /** Subject to unsubscribe from player data topic. */
+  public playerDataTopicUnsubscribe$: Subject<any>;
+
+  /** Subject to disconnect. */
+  public ngDestroyed$ = new Subject<any>();
+
   constructor(
     private appStore: Store<AppStateContainer>,
     private gameDataStore: Store<GameDataStateContainer>,
@@ -56,17 +80,8 @@ export class WebSocketService implements OnDestroy {
       .pipe(takeUntil(this.ngDestroyed$))
       .subscribe((user: UserModel) => this.user = user);
   }
-  private readonly client: Client;
-  private state: BehaviorSubject<SocketClientState>;
-  public ngDestroyed$ = new Subject();
-  private user: UserModel;
 
-  public gameId: string = '';
-  public gameTopicUnsubscribe$: Subject<any>;
-
-  public gameListTopicUnsubscribe$: Subject<any>;
-  public playerDataTopicUnsubscribe$: Subject<any>;
-
+  /** Connects to the server. */
   private connect(): Observable<Client> {
     return new Observable<Client>(observer => {
       this.state.pipe(filter(state => state === SocketClientState.CONNECTED)).subscribe(() => {
@@ -80,6 +95,11 @@ export class WebSocketService implements OnDestroy {
     this.ngDestroyed$.next();
   }
 
+  /**
+   * Creates and returns an observable that can be subscribed to to receive messages from the
+   * provided topic.
+   * @param topic The provided topic.
+   */
   public onMessage(topic: string): Observable<any> {
     return this.connect().pipe(first(), switchMap(client => {
       return new Observable<any>(observer => {
@@ -91,11 +111,21 @@ export class WebSocketService implements OnDestroy {
     }));
   }
 
-  send(topic: string, payload: any): void {
+  /**
+   * Sends data to the provided topic.
+   * @param topic The provided topic.
+   * @param payload The data being sent.
+   */
+  public send(topic: string, payload: any): void {
     this.connect()
     .pipe(first())
     .subscribe(client => client.send(topic, {}, JSON.stringify(payload)));
   }
+
+  /**
+   * Subscribes to the game topic, which broadcasts game related updates.
+   * @param gameId The ID of the game.
+   */
   public subscribeToGameTopic(gameId: string): void {
     this.gameId = gameId;
     this.gameTopicUnsubscribe$ = new Subject<any>();
@@ -116,6 +146,8 @@ export class WebSocketService implements OnDestroy {
       }
     });
   }
+
+  /** Unsubscribes from the game topic. */
   public gameTopicUnsubscribe(): void {
     if (this.gameTopicUnsubscribe$) {
       this.gameTopicUnsubscribe$.next();
@@ -123,15 +155,29 @@ export class WebSocketService implements OnDestroy {
     }
   }
 
+  /**
+   * Requests an update of the specified type from the game topic.
+   * @param type The type of data being requested.
+   */
   public requestGameTopicUpdate(type: MessageType): void {
     this.requestUpdate(type, `/topic/game/${this.gameId}`, this.gameId).then();
   }
 
+  /**
+   * Requests an update from the specified topic, of the specified type and optionally specifies
+   * an ID (could be a game ID or user ID, etc...) that may be needed by the backend to retrieve
+   * the desired data.
+   * @param type The type of data being requested.
+   * @param topic The topic the data is being broadcast to.
+   * @param id Optional ID parameter that may be needed by the backend to retrieve the desired data.
+   */
   public async requestUpdate(type: MessageType, topic: string, id: string = null): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, 100));
     this.send(`/topic/game/update`, {type, topic, id} as WebSocketUpdateModel);
     return null;
   }
+
+  /** Subscribes to the game list topic. */
   public subscribeToGameListTopic(): void {
     this.gameListTopicUnsubscribe$ = new Subject<any>();
     this.onMessage(`/topic/games`)
@@ -141,6 +187,8 @@ export class WebSocketService implements OnDestroy {
       });
     this.requestUpdate(MessageType.GameList, '/topic/games').then();
   }
+
+  /** Unsubscribes from the game list topic. */
   public gameListTopicUnsubscribe() {
     if (this.gameListTopicUnsubscribe$) {
       this.gameListTopicUnsubscribe$.next();
@@ -148,9 +196,15 @@ export class WebSocketService implements OnDestroy {
     }
   }
 
+  /**
+   * Requests a player data update. This method uses the user field to retrieve the correct player
+   * information.
+   */
   public requestPlayerDataUpdate(): void {
     this.requestUpdate(MessageType.PlayerData, `/topic/game/${this.user.id}`, this.user.id).then();
   }
+
+  /** Subscribes to player data topic. */
   public subscribeToPlayerDataTopic() {
     this.playerDataTopicUnsubscribe$ = new Subject<any>();
     this.onMessage(`/topic/game/${this.user.id}`)
@@ -158,7 +212,10 @@ export class WebSocketService implements OnDestroy {
       .subscribe(data => {
         this.playerDataStore.dispatch(playerDataUpdated(data.data));
       });
+    this.requestPlayerDataUpdate();
   }
+
+  /** Unsubscribes from the player data topic. */
   public playerDataTopicUnsubscribe(): void {
     if (this.playerDataTopicUnsubscribe$) {
       this.playerDataTopicUnsubscribe$.next();

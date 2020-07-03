@@ -12,7 +12,7 @@ export class LeaveJoinPageGuardService implements CanDeactivate<JoinComponent> {
     private webSocketService: WebSocketService) {
   }
 
-  canDeactivate(
+  public canDeactivate(
     component: JoinComponent,
     currentRoute: import('@angular/router').ActivatedRouteSnapshot,
     currentState: import('@angular/router').RouterStateSnapshot,

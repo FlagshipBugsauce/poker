@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {DrawGameDataModel, GameDocument, UserModel} from 'src/app/api/models';
+import {DrawGameDataModel, GameDocument} from 'src/app/api/models';
 import {LobbyComponent} from '../lobby/lobby.component';
 import {LeaveGameGuardService} from './leave-game-guard.service';
 import {PopupComponent, PopupContentModel} from 'src/app/shared/popup/popup.component';
@@ -14,8 +14,7 @@ import {Store} from '@ngrx/store';
 import {
   selectGameData,
   selectGameDocument,
-  selectGameState,
-  selectLoggedInUser
+  selectGameState
 } from '../../state/app.selector';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
@@ -37,14 +36,11 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     private gameDataStore: Store<GameDataStateContainer>,
     private webSocketService: WebSocketService) {
   }
-  /**
-   * Reference to the lobby component.
-   */
+
+  /** Reference to the lobby component. */
   @ViewChild(LobbyComponent) lobbyComponent: LobbyComponent;
 
-  /**
-   * Reference to the play component.
-   */
+  /** Reference to the play component. */
   @ViewChild(PlayComponent) playComponent: PlayComponent;
 
   /**
@@ -53,9 +49,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   @ViewChild('popup') public confirmationPopup: PopupComponent;
 
-  /**
-   * A summary of what occurred in the game.
-   */
+  /** A summary of what occurred in the game. */
   public gameData: DrawGameDataModel[] = [] as DrawGameDataModel[];
   /**
    * Content for the popup that appears when leaving the page (except when refreshing or going to
@@ -66,16 +60,16 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     {body: 'Click Ok to continue.'} as PopupContentModel
   ] as PopupContentModel[];
 
+  /** Helper subject which assists in terminating subscriptions. */
   public ngDestroyed$ = new Subject();
 
   /** The model representing the state of the game at any given point in time. */
   public gameModel: GameDocument;
 
-  public user: UserModel;
-
+  /** The last state the game was in. */
   private lastState: string = '';
 
-  ngAfterViewInit(): void {
+  public ngAfterViewInit(): void {
     this.leaveGameGuardService.confirmationPopup = this.confirmationPopup;
   }
 
@@ -83,7 +77,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     this.ngDestroyed$.next();
   }
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.leaveGameGuardService.canLeave = false;  // Need to set this to false when page loads.
     this.gameStore.select(selectGameDocument).pipe(takeUntil(this.ngDestroyed$)).subscribe(
       (game: GameDocument) => this.gameModel = game);
@@ -92,14 +86,9 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(takeUntil(this.ngDestroyed$))
       .subscribe(state => {
         if (state !== this.lastState && state === 'Play') {
-          // const game = this.gameModel;
           this.webSocketService.subscribeToPlayerDataTopic();
-          // this.webSocketService.requestUpdate(MessageType.GameData, `/topic/game/${game.id}`, game.id).then();
-          // this.webSocketService.requestUpdate(MessageType.Hand, `/topic/game/${game.id}`, game.id).then();
-          // this.webSocketService.requestUpdate(MessageType.PlayerData, `/topic/game/${this.user.id}`, this.user.id).then();
           this.webSocketService.requestGameTopicUpdate(MessageType.GameData);
           this.webSocketService.requestGameTopicUpdate(MessageType.Hand);
-          this.webSocketService.requestPlayerDataUpdate();
         }
         this.lastState = state;
       });
@@ -107,9 +96,6 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     this.gameDataStore.select(selectGameData).pipe(takeUntil(this.ngDestroyed$)).subscribe(
       (data: DrawGameDataModel[]) => this.gameData = data
     );
-    this.appStore.select(selectLoggedInUser)
-      .pipe(takeUntil(this.ngDestroyed$))
-      .subscribe((user: UserModel) => this.user = user);
   }
 
   /**

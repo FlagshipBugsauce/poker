@@ -1,4 +1,4 @@
-import {Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {PopupComponent, PopupContentModel} from 'src/app/shared/popup/popup.component';
 import {EmittersService} from 'src/app/api/services';
 import {GetGameModel} from 'src/app/api/models';
@@ -17,49 +17,42 @@ import {WebSocketService} from '../../shared/web-socket.service';
   styleUrls: ['./join.component.scss']
 })
 export class JoinComponent implements OnInit, OnDestroy {
-  /**
-   * The current page of the game list being displayed.
-   */
+  /** The current page of the game list being displayed. */
   public page: number = 1;
 
-  /**
-   * The current number of games being displayed per page.
-   */
+  /** The current number of games being displayed per page. */
   public pageSize: number = 5;
 
-  /**
-   * The total games in the list of games.
-   */
+  /** The total games in the list of games. */
   public get totalGames(): number {
     return this.games ? this.games.length : 0;
   }
 
-  /**
-   * Popup to confirm player wishes to join the game they clicked on.
-   */
+  /** Popup to confirm player wishes to join the game they clicked on. */
   @ViewChild('popup') public confirmationPopup: PopupComponent;
 
-  /**
-   * Content that will appear on the confirmation popup.
-   */
+  /** Content that will appear on the confirmation popup. */
   public popupContent: PopupContentModel[] = [
     {body: ''} as PopupContentModel,
     {body: 'Click cancel if you do not wish to proceed.'} as PopupContentModel
   ] as PopupContentModel[];
 
-  /**
-   * Procedure to be executed when the OK button is clicked on the popup.
-   */
+  /** Procedure to be executed when the OK button is clicked on the popup. */
   public popupOkCloseProcedure: () => void;
 
   /** Returns a slice of the list of games for pagination. */
-    public get games(): GetGameModel[] {
-      return this.gamesInternal ? this.gamesInternal
-        .map((game: GetGameModel) => ({...game}))
-        .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize) :
-        [];
-    }
+  public get games(): GetGameModel[] {
+    return this.gamesInternal ? this.gamesInternal
+      .map((game: GetGameModel) => ({...game}))
+      .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize) :
+      [];
+  }
+
+  /** List of games used internally. */
   private gamesInternal: GetGameModel[];
+
+  /** Helper subject which assists in terminating subscriptions. */
+  public ngDestroyed$ = new Subject();
 
   constructor(
     private apiConfiguration: ApiConfiguration,
@@ -68,8 +61,6 @@ export class JoinComponent implements OnInit, OnDestroy {
     private gameListStore: Store<GameListStateContainer>,
     private webSocketService: WebSocketService) {
   }
-
-  public ngDestroyed$ = new Subject();
 
   public ngOnDestroy() {
     this.ngDestroyed$.next();

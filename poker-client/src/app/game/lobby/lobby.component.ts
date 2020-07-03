@@ -17,14 +17,10 @@ import {APP_ROUTES} from '../../app-routes';
   styleUrls: ['./lobby.component.scss']
 })
 export class LobbyComponent implements OnInit, OnDestroy {
-  /**
-   * Flag that lets the UI know whether the leave game warning should be displayed.
-   */
+  /** Flag that lets the UI know whether the leave game warning should be displayed. */
   public displayLeaveWarning: boolean = true;
 
-  /**
-   * Flag that lets the UI know whether the can start alert should be displayed.
-   */
+  /** Flag that lets the UI know whether the can start alert should be displayed. */
   public displayCanStartAlert: boolean = true;
 
   /**
@@ -36,9 +32,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
     notReady: 'assets/icons/red_x.svg'
   };
 
-  /**
-   * Path to the crown icon used to communicate who is the host of the game.
-   */
+  /** Path to the crown icon used to communicate who is the host of the game. */
   public crownIcon = 'assets/icons/crown.svg';
 
   /**
@@ -54,15 +48,17 @@ export class LobbyComponent implements OnInit, OnDestroy {
    */
   private lastAction: GameActionModel;
 
-  /**
-   * Observable used to determine whether a player is ready or not.
-   */
+  /** Observable used to determine whether a player is ready or not. */
   public ready$: Observable<boolean>;
 
-  /**
-   * Observable of the model for the user currently logged in.
-   */
+  /** Observable of the model for the user currently logged in. */
   public userModel$: Observable<UserModel>;
+
+  /** Model representing the lobby. */
+  public lobbyModel: LobbyDocument;
+
+  /** Helper subject which assists in terminating subscriptions. */
+  public ngDestroyed$ = new Subject();
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -72,14 +68,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
     private lobbyStore: Store<LobbyStateContainer>) {
   }
 
-  /**
-   * Model representing the lobby.
-   */
-  public lobbyModel: LobbyDocument;
-
-  /**
-   * Flag that lets the UI know whether the game can be started or not.
-   */
+  /** Flag that lets the UI know whether the game can be started or not. */
   public get canStart(): boolean {
     if (this.lobbyModel.players !== undefined) {
       const canStart: boolean = this.lobbyModel.players
@@ -94,18 +83,14 @@ export class LobbyComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  /**
-   * Getter for the model representing the host of the game.
-   */
+  /** Getter for the model representing the host of the game. */
   public get hostModel(): LobbyPlayerModel {
     return this.lobbyModel && this.lobbyModel.players ?
       this.lobbyModel.players.find(player => player.id === this.lobbyModel.host) :
       {host: false} as LobbyPlayerModel;
   }
 
-  /**
-   * Getter for the name of the host. Format is '{First Name} {Last Name}'.
-   */
+  /** Getter for the name of the host. Format is '{First Name} {Last Name}'. */
   public get host(): string {
     if (this.lobbyModel && this.lobbyModel.players) {
       const hostModel: LobbyPlayerModel =
@@ -116,13 +101,12 @@ export class LobbyComponent implements OnInit, OnDestroy {
     }
   }
 
-  public ngDestroyed$ = new Subject();
   public ngOnDestroy() {
     this.ngDestroyed$.next();
     this.appStore.dispatch(notReady());
   }
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.ready$ = this.appStore.select(selectReadyStatus);
     this.lobbyStore.select(selectLobbyDocument)
       .pipe(takeUntil(this.ngDestroyed$))
@@ -133,25 +117,18 @@ export class LobbyComponent implements OnInit, OnDestroy {
     this.userModel$ = this.appStore.select(selectLoggedInUser);
   }
 
-  /**
-   * Called when a player is ready for the game to start.
-   */
+  /** Called when a player is ready for the game to start. */
   public sendReadyRequest(): void {
     this.appStore.dispatch(readyUp());
   }
 
-  /**
-   * Leaves the game by attempting to navigate away from the current page.
-   */
+  /** Leaves the game by attempting to navigate away from the current page. */
   public leaveGame(): void {
     // Only need to leave the page, the leave game guard will handle making the leave game call.
     this.router.navigate([`/${APP_ROUTES.JOIN_GAME}`]).then();
-    // TODO: See if we can handle this in a more elegant fashion.
   }
 
-  /**
-   * Starts the game.
-   */
+  /** Starts the game. */
   public startGame(): void {
     this.appStore.dispatch(startGame());
   }
