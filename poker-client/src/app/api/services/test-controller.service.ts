@@ -13,6 +13,7 @@ import { DrawGameDataModel } from '../models/draw-game-data-model';
 import { GameDocument } from '../models/game-document';
 import { HandDocument } from '../models/hand-document';
 import { LobbyDocument } from '../models/lobby-document';
+import { WebSocketUpdateModel } from '../models/web-socket-update-model';
 
 @Injectable({
   providedIn: 'root',
@@ -72,21 +73,21 @@ export class TestControllerService extends BaseService {
   }
 
   /**
-   * Path part for operation gameDocument
+   * Path part for operation webSocketUpdateModel
    */
-  static readonly GameDocumentPath = '/test/test/gameDoc';
+  static readonly WebSocketUpdateModelPath = '/test/test/websocketUpdateModel';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `gameDocument()` instead.
+   * To access only the response body, use `webSocketUpdateModel()` instead.
    *
    * This method doesn't expect any request body.
    */
-  gameDocument$Response(params?: {
+  webSocketUpdateModel$Response(params?: {
 
-  }): Observable<StrictHttpResponse<GameDocument>> {
+  }): Observable<StrictHttpResponse<WebSocketUpdateModel>> {
 
-    const rb = new RequestBuilder(this.rootUrl, TestControllerService.GameDocumentPath, 'get');
+    const rb = new RequestBuilder(this.rootUrl, TestControllerService.WebSocketUpdateModelPath, 'get');
     if (params) {
 
 
@@ -97,23 +98,23 @@ export class TestControllerService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<GameDocument>;
+        return r as StrictHttpResponse<WebSocketUpdateModel>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `gameDocument$Response()` instead.
+   * To access the full response (for headers, for example), `webSocketUpdateModel$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  gameDocument(params?: {
+  webSocketUpdateModel(params?: {
 
-  }): Observable<GameDocument> {
+  }): Observable<WebSocketUpdateModel> {
 
-    return this.gameDocument$Response(params).pipe(
-      map((r: StrictHttpResponse<GameDocument>) => r.body as GameDocument)
+    return this.webSocketUpdateModel$Response(params).pipe(
+      map((r: StrictHttpResponse<WebSocketUpdateModel>) => r.body as WebSocketUpdateModel)
     );
   }
 
@@ -164,21 +165,21 @@ export class TestControllerService extends BaseService {
   }
 
   /**
-   * Path part for operation gameData
+   * Path part for operation gameDocument
    */
-  static readonly GameDataPath = '/test/test/gameData';
+  static readonly GameDocumentPath = '/test/test/gameDoc';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `gameData()` instead.
+   * To access only the response body, use `gameDocument()` instead.
    *
    * This method doesn't expect any request body.
    */
-  gameData$Response(params?: {
+  gameDocument$Response(params?: {
 
-  }): Observable<StrictHttpResponse<Array<DrawGameDataModel>>> {
+  }): Observable<StrictHttpResponse<GameDocument>> {
 
-    const rb = new RequestBuilder(this.rootUrl, TestControllerService.GameDataPath, 'get');
+    const rb = new RequestBuilder(this.rootUrl, TestControllerService.GameDocumentPath, 'get');
     if (params) {
 
 
@@ -189,23 +190,23 @@ export class TestControllerService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<Array<DrawGameDataModel>>;
+        return r as StrictHttpResponse<GameDocument>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `gameData$Response()` instead.
+   * To access the full response (for headers, for example), `gameDocument$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  gameData(params?: {
+  gameDocument(params?: {
 
-  }): Observable<Array<DrawGameDataModel>> {
+  }): Observable<GameDocument> {
 
-    return this.gameData$Response(params).pipe(
-      map((r: StrictHttpResponse<Array<DrawGameDataModel>>) => r.body as Array<DrawGameDataModel>)
+    return this.gameDocument$Response(params).pipe(
+      map((r: StrictHttpResponse<GameDocument>) => r.body as GameDocument)
     );
   }
 
@@ -252,6 +253,52 @@ export class TestControllerService extends BaseService {
 
     return this.handDocument$Response(params).pipe(
       map((r: StrictHttpResponse<HandDocument>) => r.body as HandDocument)
+    );
+  }
+
+  /**
+   * Path part for operation gameData
+   */
+  static readonly GameDataPath = '/test/test/gameData';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `gameData()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  gameData$Response(params?: {
+
+  }): Observable<StrictHttpResponse<Array<DrawGameDataModel>>> {
+
+    const rb = new RequestBuilder(this.rootUrl, TestControllerService.GameDataPath, 'get');
+    if (params) {
+
+
+    }
+    return this.http.request(rb.build({
+      responseType: 'blob',
+      accept: '*/*'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<Array<DrawGameDataModel>>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `gameData$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  gameData(params?: {
+
+  }): Observable<Array<DrawGameDataModel>> {
+
+    return this.gameData$Response(params).pipe(
+      map((r: StrictHttpResponse<Array<DrawGameDataModel>>) => r.body as Array<DrawGameDataModel>)
     );
   }
 

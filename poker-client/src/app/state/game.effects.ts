@@ -14,8 +14,8 @@ import {
   leaveLobbySuccess,
   readyUp,
   readyUpSuccess,
-  setAwayStatus,
   setActiveStatusFail,
+  setAwayStatus,
   startGame,
   startGameSuccess,
   updateAwayStatus
@@ -25,6 +25,8 @@ import {APP_ROUTES} from '../app-routes';
 import {HandService} from '../api/services/hand.service';
 import {CreateGameModel} from '../api/models/create-game-model';
 import {ActiveStatusModel} from '../api/models/active-status-model';
+import {WebSocketService} from '../shared/web-socket.service';
+import {MessageType} from '../shared/models/message-types.enum';
 
 @Injectable()
 export class GameEffects {
@@ -51,6 +53,7 @@ export class GameEffects {
       .pipe(
         map(response => {
           this.router.navigate([`/${APP_ROUTES.GAME_PREFIX.path}/${action.id}`]).then();
+          this.gameJoined(action.id);
           return {type: joinLobbySuccess().type, payload: response};
         })
       )
@@ -77,8 +80,9 @@ export class GameEffects {
     ofType(startGame().type),
     mergeMap(() => this.gameService.startGame()
       .pipe(
-        map(response => ({type: startGameSuccess().type, payload: response})),
-        catchError(() => EMPTY)
+        map(response => {
+          return {type: startGameSuccess().type, payload: response};
+        }), catchError(() => EMPTY)
       )
     ))
   );
@@ -106,9 +110,9 @@ export class GameEffects {
         map(response => {
           // TODO: Figure out how to set the top bar info
           this.router.navigate([`/${APP_ROUTES.GAME_PREFIX.path}/${response.message}`]).then();
+          this.gameJoined(response.message);
           return {type: createGameSuccess().type, payload: response};
-        }),
-        catchError(() => EMPTY)
+        }), catchError(() => EMPTY)
       )
     ))
   );
@@ -130,8 +134,16 @@ export class GameEffects {
 
   constructor(
     private actions$: Actions,
+    private webSocketService: WebSocketService,
     private gameService: GameService,
     private handService: HandService,
     private router: Router) {
+  }
+
+  private gameJoined(gameId: string): void {
+    this.webSocketService.subscribeToGameTopic(gameId);
+    this.webSocketService.requestGameTopicUpdate(MessageType.Game);
+    this.webSocketService.requestGameTopicUpdate(MessageType.Lobby);
+    this.webSocketService.gameListTopicUnsubscribe();
   }
 }

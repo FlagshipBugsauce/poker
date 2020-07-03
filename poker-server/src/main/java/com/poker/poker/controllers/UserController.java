@@ -34,8 +34,8 @@ import org.springframework.web.bind.annotation.RestController;
         "Users API handles all user account related requests, such as authentication, "
             + "registration, etc...")
 public class UserController {
-  private UserService userService;
-  private AppConstants appConstants;
+  private final UserService userService;
+  private final AppConstants appConstants;
 
   @Operation(
       summary = "Authenticate",

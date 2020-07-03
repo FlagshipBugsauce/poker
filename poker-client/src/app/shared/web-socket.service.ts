@@ -1,0 +1,225 @@
+import {Injectable, OnDestroy} from '@angular/core';
+import {Client, over, Subscription} from 'stompjs';
+import {BehaviorSubject, Observable, Subject} from 'rxjs';
+import * as SockJS from 'sockjs-client';
+import {filter, first, switchMap, takeUntil} from 'rxjs/operators';
+import {environment} from '../../environments/environment';
+import {Store} from '@ngrx/store';
+import {
+  AppStateContainer,
+  GameDataStateContainer,
+  GameListStateContainer,
+  GameStateContainer,
+  HandStateContainer,
+  LobbyStateContainer,
+  PlayerDataStateContainer
+} from './models/app-state.model';
+import {MessageType} from './models/message-types.enum';
+import {
+  gameDataUpdated,
+  gameDocumentUpdated,
+  gameListUpdated,
+  handDocumentUpdated,
+  lobbyDocumentUpdated,
+  playerDataUpdated
+} from '../state/app.actions';
+import {selectLoggedInUser} from '../state/app.selector';
+import {UserModel} from '../api/models/user-model';
+import {WebSocketUpdateModel} from '../api/models/web-socket-update-model';
+
+export enum SocketClientState {
+  ATTEMPTING, CONNECTED
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class WebSocketService implements OnDestroy {
+
+  /** SockJS client. */
+  private readonly client: Client;
+
+  /** Socket state. */
+  private state: BehaviorSubject<SocketClientState>;
+
+  /** Model for the logged in user. */
+  private user: UserModel;
+
+  /** Stores game ID when user is in a game. */
+  public gameId: string = '';
+
+  /** Subject to unsubscribe from game topic. */
+  public gameTopicUnsubscribe$: Subject<any>;
+
+  /** Subject to unsubscribe from game list topic. */
+  public gameListTopicUnsubscribe$: Subject<any>;
+
+  /** Subject to unsubscribe from player data topic. */
+  public playerDataTopicUnsubscribe$: Subject<any>;
+
+  /** Subject to disconnect. */
+  public ngDestroyed$ = new Subject<any>();
+
+  constructor(
+    private appStore: Store<AppStateContainer>,
+    private gameDataStore: Store<GameDataStateContainer>,
+    private gameStore: Store<GameStateContainer>,
+    private handStore: Store<HandStateContainer>,
+    private lobbyStore: Store<LobbyStateContainer>,
+    private gameListStore: Store<GameListStateContainer>,
+    private playerDataStore: Store<PlayerDataStateContainer>
+  ) {
+    this.client = over(new SockJS(environment.api));
+    this.client.debug = () => {}; // TODO: Gets rid of debugging messages in console
+    this.state = new BehaviorSubject<SocketClientState>(SocketClientState.ATTEMPTING);
+    this.client.connect({}, () => {
+      this.state.next(SocketClientState.CONNECTED);
+    });
+
+    this.appStore.select(selectLoggedInUser)
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((user: UserModel) => this.user = user);
+  }
+
+  /** Connects to the server. */
+  private connect(): Observable<Client> {
+    return new Observable<Client>(observer => {
+      this.state.pipe(filter(state => state === SocketClientState.CONNECTED)).subscribe(() => {
+        observer.next(this.client);
+      });
+    });
+  }
+
+  public ngOnDestroy(): void {
+    this.connect().pipe(first()).subscribe(client => client.disconnect(null));
+    this.ngDestroyed$.next();
+  }
+
+  /**
+   * Creates and returns an observable that can be subscribed to to receive messages from the
+   * provided topic.
+   * @param topic The provided topic.
+   */
+  public onMessage(topic: string): Observable<any> {
+    return this.connect().pipe(first(), switchMap(client => {
+      return new Observable<any>(observer => {
+        const subscription: Subscription = client.subscribe(topic, message => {
+          observer.next(JSON.parse(message.body));
+        });
+        return () => client.unsubscribe(subscription.id);
+      });
+    }));
+  }
+
+  /**
+   * Sends data to the provided topic.
+   * @param topic The provided topic.
+   * @param payload The data being sent.
+   */
+  public send(topic: string, payload: any): void {
+    this.connect()
+    .pipe(first())
+    .subscribe(client => client.send(topic, {}, JSON.stringify(payload)));
+  }
+
+  /**
+   * Subscribes to the game topic, which broadcasts game related updates.
+   * @param gameId The ID of the game.
+   */
+  public subscribeToGameTopic(gameId: string): void {
+    this.gameId = gameId;
+    this.gameTopicUnsubscribe$ = new Subject<any>();
+    this.onMessage(`/topic/game/${gameId}`).pipe(takeUntil(this.gameTopicUnsubscribe$)).subscribe(data => {
+      switch (data.type) {
+        case MessageType.Lobby:
+          this.lobbyStore.dispatch(lobbyDocumentUpdated(data.data));
+          break;
+        case MessageType.Game:
+          this.gameStore.dispatch(gameDocumentUpdated(data.data));
+          break;
+        case MessageType.Hand:
+          this.handStore.dispatch(handDocumentUpdated(data.data));
+          break;
+        case MessageType.GameData:
+          this.gameDataStore.dispatch(gameDataUpdated(data.data));
+          break;
+      }
+    });
+  }
+
+  /** Unsubscribes from the game topic. */
+  public gameTopicUnsubscribe(): void {
+    if (this.gameTopicUnsubscribe$) {
+      this.gameTopicUnsubscribe$.next();
+      this.gameTopicUnsubscribe$.complete();
+    }
+  }
+
+  /**
+   * Requests an update of the specified type from the game topic.
+   * @param type The type of data being requested.
+   */
+  public requestGameTopicUpdate(type: MessageType): void {
+    this.requestUpdate(type, `/topic/game/${this.gameId}`, this.gameId).then();
+  }
+
+  /**
+   * Requests an update from the specified topic, of the specified type and optionally specifies
+   * an ID (could be a game ID or user ID, etc...) that may be needed by the backend to retrieve
+   * the desired data.
+   * @param type The type of data being requested.
+   * @param topic The topic the data is being broadcast to.
+   * @param id Optional ID parameter that may be needed by the backend to retrieve the desired data.
+   */
+  public async requestUpdate(type: MessageType, topic: string, id: string = null): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    this.send(`/topic/game/update`, {type, topic, id} as WebSocketUpdateModel);
+    return null;
+  }
+
+  /** Subscribes to the game list topic. */
+  public subscribeToGameListTopic(): void {
+    this.gameListTopicUnsubscribe$ = new Subject<any>();
+    this.onMessage(`/topic/games`)
+      .pipe(takeUntil(this.gameListTopicUnsubscribe$))
+      .subscribe(data => {
+        this.gameListStore.dispatch(gameListUpdated({gameList: data.data}));
+      });
+    this.requestUpdate(MessageType.GameList, '/topic/games').then();
+  }
+
+  /** Unsubscribes from the game list topic. */
+  public gameListTopicUnsubscribe() {
+    if (this.gameListTopicUnsubscribe$) {
+      this.gameListTopicUnsubscribe$.next();
+      this.gameListTopicUnsubscribe$.complete();
+    }
+  }
+
+  /**
+   * Requests a player data update. This method uses the user field to retrieve the correct player
+   * information.
+   */
+  public requestPlayerDataUpdate(): void {
+    this.requestUpdate(MessageType.PlayerData, `/topic/game/${this.user.id}`, this.user.id).then();
+  }
+
+  /** Subscribes to player data topic. */
+  public subscribeToPlayerDataTopic() {
+    this.playerDataTopicUnsubscribe$ = new Subject<any>();
+    this.onMessage(`/topic/game/${this.user.id}`)
+      .pipe(takeUntil(this.playerDataTopicUnsubscribe$))
+      .subscribe(data => {
+        this.playerDataStore.dispatch(playerDataUpdated(data.data));
+      });
+    this.requestPlayerDataUpdate();
+  }
+
+  /** Unsubscribes from the player data topic. */
+  public playerDataTopicUnsubscribe(): void {
+    if (this.playerDataTopicUnsubscribe$) {
+      this.playerDataTopicUnsubscribe$.next();
+      this.playerDataTopicUnsubscribe$.complete();
+    }
+  }
+}

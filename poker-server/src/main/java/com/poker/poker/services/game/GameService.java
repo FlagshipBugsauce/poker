@@ -10,8 +10,9 @@ import com.poker.poker.events.PlayerAfkEvent;
 import com.poker.poker.events.WaitForPlayerEvent;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.GameSummaryModel;
-import com.poker.poker.models.enums.EmitterType;
+import com.poker.poker.models.SocketContainerModel;
 import com.poker.poker.models.enums.GameState;
+import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.game.CardModel;
 import com.poker.poker.models.game.CreateGameModel;
 import com.poker.poker.models.game.DeckModel;
@@ -21,8 +22,8 @@ import com.poker.poker.models.game.DrawGameDrawModel;
 import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.PlayerModel;
 import com.poker.poker.repositories.GameRepository;
-import com.poker.poker.services.SseService;
 import com.poker.poker.services.UuidService;
+import com.poker.poker.services.WebSocketService;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,8 +59,6 @@ public class GameService {
 
   private final GameConstants gameConstants;
 
-  private final SseService sseService;
-
   private final LobbyService lobbyService;
 
   private final UuidService uuidService;
@@ -69,6 +68,8 @@ public class GameService {
   private final GameRepository gameRepository;
 
   private final ApplicationEventPublisher applicationEventPublisher;
+
+  private final WebSocketService webSocketService;
 
   /**
    * Retrieves the game data needed for the client to display a summary of what has occurred in the
@@ -193,7 +194,7 @@ public class GameService {
    * @return The game document for the game the specified user.
    * @throws BadRequestException If there is no game document associated with the specified user.
    */
-  public GameDocument getUsersGameDocument(UUID userId) throws BadRequestException {
+  public GameDocument getUsersGameDocument(final UUID userId) throws BadRequestException {
     if (userIdToGameIdMap.get(userId) == null) {
       throw gameConstants.getNoUserIdToGameIdMappingFound();
     }
@@ -201,6 +202,20 @@ public class GameService {
       throw gameConstants.getGameNotFoundException();
     }
     return games.get(userIdToGameIdMap.get(userId));
+  }
+
+  /**
+   * Retrieves the game document associated with the specified ID. Throws if game can't be found.
+   *
+   * @param gameId The specified ID.
+   * @return GameDocument associated with the specified ID.
+   * @throws BadRequestException If there is no game with the specified ID.
+   */
+  public GameDocument getGameDocument(final UUID gameId) throws BadRequestException {
+    if (games.get(gameId) == null) {
+      throw gameConstants.getGameNotFoundException();
+    }
+    return games.get(gameId);
   }
 
   /**
@@ -271,9 +286,13 @@ public class GameService {
         .findFirst()
         .orElseThrow(gameConstants::getPlayerNotInGameException)
         .setAway(status);
+
     broadcastGameUpdate(getUsersGameDocument(playerId));
-    sseService.sendUpdate(EmitterType.PlayerData, playerId, getPlayerData(playerId));
-    log.debug("Updating active status to {} for player {}.", status, playerId);
+    webSocketService.sendPublicMessage(
+        "/topic/game/" + playerId,
+        new SocketContainerModel(MessageType.PlayerData, getPlayerData(playerId)));
+
+    log.debug("Updating away status to {} for player {}.", status, playerId);
   }
 
   /**
@@ -355,7 +374,6 @@ public class GameService {
    */
   public ApiSuccessModel removePlayerFromLobby(UserDocument user) throws BadRequestException {
     userIdToGameIdMap.remove(user.getId()); // Remove mapping.
-    sseService.completeEmitter(EmitterType.Game, user.getId()); // Destroy emitter.
     return lobbyService.removePlayerFromLobby(user); // Let LobbyService do the rest.
   }
 
@@ -379,10 +397,9 @@ public class GameService {
     handService.newHand(gameDocument); // Create the hand.
     initializeGameData(gameDocument); // Initialize game data for client.
     broadcastGameUpdate(gameDocument); // Broadcast the game document.
-    sseService.sendUpdate( // Send player data
-        EmitterType.PlayerData,
-        gameDocument.getPlayers().get(0).getId(),
-        getPlayerData(gameDocument.getPlayers().get(0).getId()));
+
+    /*    TODO: I had an SSE broadcast here sending out player data to players[0] for some reason.
+    Leaving this here in case this was actually needed. Will remove soon. */
     return new ApiSuccessModel("The game has been started successfully.");
   }
 
@@ -392,12 +409,10 @@ public class GameService {
    * @param gameDocument The specified game.
    */
   public void broadcastGameDataUpdate(final GameDocument gameDocument) {
-    gameDocument
-        .getPlayers()
-        .forEach(
-            player ->
-                sseService.sendUpdate(
-                    EmitterType.GameData, player.getId(), getGameData(gameDocument)));
+    // Broadcast to game topic
+    webSocketService.sendPublicMessage(
+        "/topic/game/" + gameDocument.getId(),
+        new SocketContainerModel(MessageType.GameData, getGameData(gameDocument)));
   }
 
   /**
@@ -406,9 +421,10 @@ public class GameService {
    * @param gameDocument The data being broadcast to players.
    */
   public void broadcastGameUpdate(final GameDocument gameDocument) {
-    gameDocument
-        .getPlayers()
-        .forEach(player -> sseService.sendUpdate(EmitterType.Game, player.getId(), gameDocument));
+    // Broadcast to game topic
+    webSocketService.sendPublicMessage(
+        "/topic/game/" + gameDocument.getId(),
+        new SocketContainerModel(MessageType.Game, gameDocument));
   }
 
   /**
@@ -428,20 +444,25 @@ public class GameService {
 
     // Update acting field and update players
     gameDocument.getPlayers().get(playerThatActed).setActing(false);
-    sseService.sendUpdate(
-        EmitterType.PlayerData,
-        gameDocument.getPlayers().get(playerThatActed).getId(),
-        getPlayerData(gameDocument.getPlayers().get(playerThatActed).getId()));
+    // Broadcast player data to game topic
+    webSocketService.sendPublicMessage(
+        "/topic/game/" + gameDocument.getPlayers().get(playerThatActed).getId(),
+        new SocketContainerModel(
+            MessageType.PlayerData,
+            getPlayerData(gameDocument.getPlayers().get(playerThatActed).getId())));
+
+    // Set acting to true for player who needs to act.
     nextPlayerToAct.setActing(true);
-    sseService.sendUpdate(
-        EmitterType.PlayerData, nextPlayerToAct.getId(), getPlayerData(nextPlayerToAct.getId()));
+    // Broadcast player data to game topic
+    webSocketService.sendPublicMessage(
+        "/topic/game/" + nextPlayerToAct.getId(),
+        new SocketContainerModel(MessageType.PlayerData, getPlayerData(nextPlayerToAct.getId())));
 
     // Set player to act:
     log.debug("Next player to act is {}.", nextPlayerToAct.getId());
     hand.setPlayerToAct(nextPlayerToAct);
 
     // Broadcast updated hand model
-    log.debug("Sending updated hand models to players in game {}.", gameDocument.getId());
     handService.broadcastHandUpdate(gameDocument);
 
     /*

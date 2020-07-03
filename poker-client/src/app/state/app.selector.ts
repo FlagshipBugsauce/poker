@@ -73,6 +73,13 @@ export const selectGameDocument = createSelector(
   gameFeature,
   (state: GameDocument) => state
 );
+export const gameStateFeature =
+  createFeatureSelector<GameStateContainer, GameDocument>('gameDocument');
+/** Game state selector. */
+export const selectGameState = createSelector(
+  gameStateFeature,
+  (state: GameDocument) => state.state
+);
 
 export const handFeature =
   createFeatureSelector<HandStateContainer, HandDocument>('handDocument');

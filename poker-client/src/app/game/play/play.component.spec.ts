@@ -2,7 +2,6 @@ import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {PlayComponent} from './play.component';
 import {RouterTestingModule} from '@angular/router/testing';
 import {SharedModule} from '../../shared/shared.module';
-import {SseService} from '../../shared/sse.service';
 import {DrawGameDataModel} from '../../api/models/draw-game-data-model';
 import {MockStore, provideMockStore} from '@ngrx/store/testing';
 import {MemoizedSelector} from '@ngrx/store';
@@ -21,8 +20,8 @@ import {
   mockHandDocument,
   mockUser
 } from '../../testing/mock-models';
-import {MockSseService} from '../../testing/mock-services';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
+import {WebSocketService} from '../../shared/web-socket.service';
 
 describe('PlayComponent', () => {
   let mockStore: MockStore;
@@ -39,11 +38,11 @@ describe('PlayComponent', () => {
     TestBed.configureTestingModule({
       declarations: [PlayComponent, PopupAfkComponent],
       providers: [
+        provideMockStore(),
         {
-          provide: SseService,
-          useClass: MockSseService
-        },
-        provideMockStore()
+          provide: WebSocketService,
+          useClass: jest.fn()
+        }
       ],
       imports: [RouterTestingModule, SharedModule]
     }).compileComponents();

@@ -5,7 +5,6 @@ import { ApiConfiguration, ApiConfigurationParams } from './api-configuration';
 
 import { GameService } from './services/game.service';
 import { HandService } from './services/hand.service';
-import { EmittersService } from './services/emitters.service';
 import { TestControllerService } from './services/test-controller.service';
 import { UsersService } from './services/users.service';
 
@@ -19,7 +18,6 @@ import { UsersService } from './services/users.service';
   providers: [
     GameService,
     HandService,
-    EmittersService,
     TestControllerService,
     UsersService,
     ApiConfiguration

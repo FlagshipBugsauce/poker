@@ -5,20 +5,19 @@ import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.LobbyDocument;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.ApiSuccessModel;
-import com.poker.poker.models.enums.EmitterType;
+import com.poker.poker.models.SocketContainerModel;
 import com.poker.poker.models.enums.GameAction;
+import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.game.CreateGameModel;
 import com.poker.poker.models.game.GameActionModel;
 import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.GetGameModel;
 import com.poker.poker.models.game.LobbyPlayerModel;
 import com.poker.poker.repositories.LobbyRepository;
-import com.poker.poker.services.SseService;
+import com.poker.poker.services.WebSocketService;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,8 +35,6 @@ import org.springframework.stereotype.Service;
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class LobbyService {
 
-  private final SseService sseService;
-
   /** A map of active games, keyed by the games ID. */
   private final Map<UUID, LobbyDocument> lobbys;
 
@@ -52,13 +49,7 @@ public class LobbyService {
 
   private final LobbyRepository lobbyRepository;
 
-  public Runnable getEmitterValidator(UUID userId) {
-    return () -> {
-      log.debug("Performing validation to ensure {} should receive an emitter.", userId);
-      checkWhetherUserIsInLobbyAndThrow(userId, true);
-      checkUserIsPlayerInLobby(userId);
-    };
-  }
+  private final WebSocketService webSocketService;
 
   /**
    * Sends out a game document to all players in the game associated with the game document
@@ -66,13 +57,17 @@ public class LobbyService {
    *
    * @param lobbyDocument GameDocument representing the game that is being updated.
    */
-  private void sendLobbyDocumentToAllPlayers(LobbyDocument lobbyDocument) {
-    for (LobbyPlayerModel player : lobbyDocument.getPlayers()) {
-      try {
-        sseService.sendUpdate(EmitterType.Lobby, player.getId(), lobbyDocument);
-      } catch (BadRequestException | NullPointerException ignored) { // Exception already logged.
-      }
-    }
+  private void broadcastLobbyDocument(LobbyDocument lobbyDocument) {
+    // Broadcast lobby document to lobby topic.
+    webSocketService.sendPublicMessage(
+        "/topic/game/" + lobbyDocument.getId(),
+        new SocketContainerModel(MessageType.Lobby, lobbyDocument));
+  }
+
+  /** Broadcasts the list of joinable games to the game list topic. */
+  public void broadcastGameList() {
+    webSocketService.sendPublicMessage(
+        "/topic/games", new SocketContainerModel(MessageType.GameList, getLobbyList()));
   }
 
   /**
@@ -105,8 +100,8 @@ public class LobbyService {
     Collections.shuffle(gameDocument.getPlayers());
     gameDocument.getPlayers().get(0).setActing(true);
 
-    // Update game list.
-    sseService.sendToAll(EmitterType.GameList, getLobbyList());
+    // Send to game list topic
+    broadcastGameList();
 
     lobbyRepository.save(lobbyDocument);
   }
@@ -206,7 +201,7 @@ public class LobbyService {
 
     log.debug("Player status set to ready (ID: {}).", user.getId().toString());
 
-    sendLobbyDocumentToAllPlayers(lobbyDocument);
+    broadcastLobbyDocument(lobbyDocument);
     return new ApiSuccessModel("Player ready status was toggled.");
   }
 
@@ -247,7 +242,8 @@ public class LobbyService {
     lobbys.put(lobbyDocument.getId(), lobbyDocument);
     userIdToLobbyIdMap.put(user.getId(), lobbyDocument.getId());
 
-    sseService.sendToAll(EmitterType.GameList, getLobbyList());
+    // Broadcast to game list topic
+    broadcastGameList();
   }
 
   /**
@@ -256,7 +252,8 @@ public class LobbyService {
    * @return An ActiveGameModel which is a subset of a game document.
    */
   public List<GetGameModel> getLobbyList() {
-    List<GetGameModel> lobbyListModels = new ArrayList<>();
+    // TODO: Think about refactoring this so the list doesn't need to be generated dynamically.
+    final List<GetGameModel> lobbyListModels = new ArrayList<>();
     for (LobbyDocument lobbyDocument : lobbys.values()) {
       lobbyListModels.add(
           new GetGameModel(
@@ -303,32 +300,10 @@ public class LobbyService {
                     lobbyPlayerModel.getFirstName(), lobbyPlayerModel.getLastName())));
     userIdToLobbyIdMap.put(user.getId(), lobbyDocument.getId());
 
-    // Update all players copy of gameDocument who are in the game via SSE
-    try {
-      for (LobbyPlayerModel player : lobbyDocument.getPlayers()) {
-        if (!player.getId().equals(user.getId())) {
-          sseService.sendUpdate(EmitterType.Lobby, player.getId(), lobbyDocument);
-        }
-      }
-    } catch (ConcurrentModificationException ex1) { // Exception is already logged.
-      log.error("ConcurrentModificationException exception occurred when {} joined.", user.getId());
-      // TODO: This is a sloppy fix and it might not have fixed the problem.
-      try {
-        // Try sending the updates again
-        Thread.sleep(500);
-        for (LobbyPlayerModel player : lobbyDocument.getPlayers()) {
-          if (!player.getId().equals(user.getId())) {
-            sseService.sendUpdate(EmitterType.Lobby, player.getId(), lobbyDocument);
-          }
-        }
-      } catch (Exception ex2) {
-        log.error("Another exception occurred after second attempt to join.");
-        log.error(ex2.getMessage());
-        log.error(Arrays.toString(ex2.getStackTrace()));
-      }
-    }
+    // Broadcast updated lobby document to lobby topic and game list to game list topic.
+    broadcastLobbyDocument(lobbyDocument);
+    broadcastGameList();
 
-    sseService.sendToAll(EmitterType.GameList, getLobbyList());
     return new ApiSuccessModel("User joined the game successfully.");
   }
 
@@ -374,13 +349,6 @@ public class LobbyService {
     userIdToLobbyIdMap.remove(user.getId());
     log.debug("Player with ID: {}, has left game with ID: {}.", user.getId(), game.getId());
 
-    // Destroy the emitter sending this user updates.
-    try {
-      sseService.completeEmitter(EmitterType.Lobby, user.getId());
-    } catch (Exception e) {
-      log.error("Issue removing the lobby emitter when player with ID: {}.", user.getId());
-    }
-
     // Add GameActionModel with the appropriate action.
     game.getGameActions()
         .add(
@@ -392,10 +360,10 @@ public class LobbyService {
                     "%s %s has left the game.",
                     player.get().getFirstName(), player.get().getLastName())));
 
-    // Update the players in the game, and players who are on the join game page.
-    sendLobbyDocumentToAllPlayers(game);
+    // Broadcast updated lobby document to lobby topic and game list to game list topic.
+    broadcastLobbyDocument(game);
+    broadcastGameList();
 
-    sseService.sendToAll(EmitterType.GameList, getLobbyList());
     return new ApiSuccessModel("Player has left the game.");
   }
 }

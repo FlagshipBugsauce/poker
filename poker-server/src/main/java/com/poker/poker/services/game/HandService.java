@@ -9,8 +9,9 @@ import com.poker.poker.events.HandActionEvent;
 import com.poker.poker.events.PlayerAfkEvent;
 import com.poker.poker.events.WaitForPlayerEvent;
 import com.poker.poker.models.ApiSuccessModel;
-import com.poker.poker.models.enums.EmitterType;
+import com.poker.poker.models.SocketContainerModel;
 import com.poker.poker.models.enums.HandAction;
+import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.game.CardModel;
 import com.poker.poker.models.game.DeckModel;
 import com.poker.poker.models.game.GamePlayerModel;
@@ -18,7 +19,7 @@ import com.poker.poker.models.game.PlayerModel;
 import com.poker.poker.models.game.hand.HandActionModel;
 import com.poker.poker.repositories.HandRepository;
 import com.poker.poker.repositories.UserRepository;
-import com.poker.poker.services.SseService;
+import com.poker.poker.services.WebSocketService;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,7 +43,7 @@ public class HandService {
 
   private final AppConfig appConfig;
 
-  private HandConstants handConstants;
+  private final HandConstants handConstants;
 
   /** Mapping of hand Id to HandDocument of active hand. */
   private final Map<UUID, HandDocument> hands;
@@ -54,17 +55,17 @@ public class HandService {
   private final Map<UUID, UUID> userIdToGameIdMap;
 
   /** Mapping of game Id to deck */
-  private Map<UUID, DeckModel> gameIdToDeckMap;
+  private final Map<UUID, DeckModel> gameIdToDeckMap;
 
   private final UserRepository userRepository;
 
   private final ApplicationEventPublisher applicationEventPublisher;
 
-  private final SseService sseService;
-
   private final CardService cardService;
 
   private final HandRepository handRepository;
+
+  private final WebSocketService webSocketService;
 
   /**
    * Checks if there is a hand associated with the ID provided, throws if not and returns the hand
@@ -239,9 +240,9 @@ public class HandService {
    */
   public void broadcastHandUpdate(final GameDocument gameDocument) {
     final HandDocument hand = getHand(gameDocument);
-    gameDocument
-        .getPlayers()
-        .forEach(p -> sseService.sendUpdate(EmitterType.Hand, p.getId(), hand));
+    // Broadcast to game topic
+    webSocketService.sendPublicMessage(
+        "/topic/game/" + gameDocument.getId(), new SocketContainerModel(MessageType.Hand, hand));
   }
 
   /**

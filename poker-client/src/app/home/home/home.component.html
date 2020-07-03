@@ -4,8 +4,10 @@
   </h3>
   <div class="card-body bg-light text-dark">
     <p>
-      This is an experimental online, multiplayer, poker application. This application was made using
-      Spring Boot, Angular, MongoDB and will be deployed to AWS (S3 for client, elastic beanstalk for
+      This is an experimental online, multiplayer, poker application. This application was made
+      using
+      Spring Boot, Angular, MongoDB and will be deployed to AWS (S3 for client, elastic beanstalk
+      for
       backend).
     </p>
     <p>
@@ -17,11 +19,11 @@
   </div>
 </div>
 <span class="align-middle">
-    <ngb-carousel *ngIf="images" class="m-3" style="outline: none;">
-        <ng-template *ngFor="let image of images" ngbSlide>
-            <div class="picsum-img-wrapper rounded" style="outline: none;">
-                <img [src]="image" alt="Random first slide" class="img-fluid rounded-lg">
-            </div>
-        </ng-template>
-    </ngb-carousel>
+  <ngb-carousel *ngIf="images" class="m-3" style="outline: none;">
+    <ng-template *ngFor="let image of images" ngbSlide>
+      <div class="picsum-img-wrapper rounded" style="outline: none;">
+          <img [src]="image" alt="Random first slide" class="img-fluid rounded-lg">
+      </div>
+    </ng-template>
+  </ngb-carousel>
 </span>

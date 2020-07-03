@@ -1,6 +1,4 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {SseService} from 'src/app/shared/sse.service';
-import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 import {
   DrawGameDataModel,
   GameDocument,
@@ -21,11 +19,12 @@ import {
   selectGameData,
   selectGameDocument,
   selectHandDocument,
-  selectLoggedInUser,
+  selectLoggedInUser, selectPlayerData,
 } from '../../state/app.selector';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
+import {WebSocketService} from '../../shared/web-socket.service';
 
 @Component({
   selector: 'pkr-play',
@@ -41,8 +40,8 @@ export class PlayComponent implements OnInit, OnDestroy {
     private gameStore: Store<GameStateContainer>,
     private handStore: Store<HandStateContainer>,
     private playerDataStore: Store<PlayerDataStateContainer>,
-    private sseService: SseService,
-    private toastService: ToastService) {
+    private toastService: ToastService,
+    private webSocketService: WebSocketService) {
   }
 
   /**
@@ -101,10 +100,6 @@ export class PlayComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.appStore.select(selectLoggedInUser).subscribe(user => this.user = user);
-    this.sseService.closeEvent(EmitterType.Lobby);
-    this.sseService.openEvent(EmitterType.Hand);
-    this.sseService.openEvent(EmitterType.GameData);
-    this.sseService.openEvent(EmitterType.PlayerData);
 
     this.gameDataStore.select(selectGameData)
       .pipe(takeUntil(this.ngDestroyed$))
@@ -140,11 +135,12 @@ export class PlayComponent implements OnInit, OnDestroy {
     this.playerDataStore.select(selectActingStatus)
       .pipe(takeUntil(this.ngDestroyed$))
       .subscribe((acting: boolean) => this.canRoll = acting);
+
     this.playerDataStore.select(selectAwayStatus)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((status: boolean) => {
       this.awayStatus = status;
-      if (this.awayStatus) {
+      if (this.awayStatus && this.afkPopup) {
         this.afkPopup.open();
       }
     });
