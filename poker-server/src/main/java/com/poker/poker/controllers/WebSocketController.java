@@ -18,10 +18,6 @@ import org.springframework.stereotype.Controller;
 @Tag(name = "websocket", description = "WebSocket controller.")
 public class WebSocketController {
 
-  //  private final List<ApiSuccessModel> data = new ArrayList<>();
-  //  private final UserRepository userRepository;
-  //  private final JwtService jwtService;
-  //  private final SimpMessagingTemplate template;
   private final WebSocketService webSocketService;
   private final LobbyService lobbyService;
   private final GameService gameService;

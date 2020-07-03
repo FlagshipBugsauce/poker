@@ -51,25 +51,25 @@ public class LobbyService {
 
   private final WebSocketService webSocketService;
 
-  public Runnable getEmitterValidator(UUID userId) {
-    return () -> {
-      log.debug("Performing validation to ensure {} should receive an emitter.", userId);
-      checkWhetherUserIsInLobbyAndThrow(userId, true);
-      checkUserIsPlayerInLobby(userId);
-    };
-  }
-
   /**
    * Sends out a game document to all players in the game associated with the game document
    * argument.
    *
    * @param lobbyDocument GameDocument representing the game that is being updated.
    */
-  private void sendLobbyDocumentToAllPlayers(LobbyDocument lobbyDocument) {
+  private void broadcastLobbyDocument(LobbyDocument lobbyDocument) {
     // Broadcast lobby document to lobby topic.
     webSocketService.sendPublicMessage(
         "/topic/game/" + lobbyDocument.getId(),
         new SocketContainerModel(MessageType.Lobby, lobbyDocument));
+  }
+
+  /**
+   * Broadcasts the list of joinable games to the game list topic.
+   */
+  public void broadcastGameList() {
+    webSocketService.sendPublicMessage(
+        "/topic/games", new SocketContainerModel(MessageType.GameList, getLobbyList()));
   }
 
   /**
@@ -103,8 +103,7 @@ public class LobbyService {
     gameDocument.getPlayers().get(0).setActing(true);
 
     // Send to game list topic
-    webSocketService.sendPublicMessage(
-        "/topic/games", new SocketContainerModel(MessageType.GameList, getLobbyList()));
+    broadcastGameList();
 
     lobbyRepository.save(lobbyDocument);
   }
@@ -204,7 +203,7 @@ public class LobbyService {
 
     log.debug("Player status set to ready (ID: {}).", user.getId().toString());
 
-    sendLobbyDocumentToAllPlayers(lobbyDocument);
+    broadcastLobbyDocument(lobbyDocument);
     return new ApiSuccessModel("Player ready status was toggled.");
   }
 
@@ -246,8 +245,7 @@ public class LobbyService {
     userIdToLobbyIdMap.put(user.getId(), lobbyDocument.getId());
 
     // Broadcast to game list topic
-    webSocketService.sendPublicMessage(
-        "/topic/games", new SocketContainerModel(MessageType.GameList, getLobbyList()));
+    broadcastGameList();
   }
 
   /**
@@ -256,7 +254,8 @@ public class LobbyService {
    * @return An ActiveGameModel which is a subset of a game document.
    */
   public List<GetGameModel> getLobbyList() {
-    List<GetGameModel> lobbyListModels = new ArrayList<>();
+    // TODO: Think about refactoring this so the list doesn't need to be generated dynamically.
+    final List<GetGameModel> lobbyListModels = new ArrayList<>();
     for (LobbyDocument lobbyDocument : lobbys.values()) {
       lobbyListModels.add(
           new GetGameModel(
@@ -303,14 +302,9 @@ public class LobbyService {
                     lobbyPlayerModel.getFirstName(), lobbyPlayerModel.getLastName())));
     userIdToLobbyIdMap.put(user.getId(), lobbyDocument.getId());
 
-    // Broadcast updated lobby document to lobby topic.
-    webSocketService.sendPublicMessage(
-        "/topic/game/" + lobbyDocument.getId(),
-        new SocketContainerModel(MessageType.Lobby, lobbyDocument));
-
-    // Broadcast updated game list to game list topic.
-    webSocketService.sendPublicMessage(
-        "/topic/games", new SocketContainerModel(MessageType.GameList, getLobbyList()));
+    // Broadcast updated lobby document to lobby topic and game list to game list topic.
+    broadcastLobbyDocument(lobbyDocument);
+    broadcastGameList();
 
     return new ApiSuccessModel("User joined the game successfully.");
   }
@@ -368,12 +362,9 @@ public class LobbyService {
                     "%s %s has left the game.",
                     player.get().getFirstName(), player.get().getLastName())));
 
-    // Update the players in the game, and players who are on the join game page.
-    sendLobbyDocumentToAllPlayers(game);
-
-    // Broadcast updated game list to game list topic.
-    webSocketService.sendPublicMessage(
-        "/topic/games", new SocketContainerModel(MessageType.GameList, getLobbyList()));
+    // Broadcast updated lobby document to lobby topic and game list to game list topic.
+    broadcastLobbyDocument(game);
+    broadcastGameList();
 
     return new ApiSuccessModel("Player has left the game.");
   }

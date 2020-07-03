@@ -1,6 +1,5 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {PopupComponent, PopupContentModel} from 'src/app/shared/popup/popup.component';
-import {EmittersService} from 'src/app/api/services';
 import {GetGameModel} from 'src/app/api/models';
 import {ApiConfiguration} from 'src/app/api/api-configuration';
 import {AppStateContainer, GameListStateContainer} from '../../shared/models/app-state.model';
@@ -56,7 +55,6 @@ export class JoinComponent implements OnInit, OnDestroy {
 
   constructor(
     private apiConfiguration: ApiConfiguration,
-    private emittersService: EmittersService,
     private appStore: Store<AppStateContainer>,
     private gameListStore: Store<GameListStateContainer>,
     private webSocketService: WebSocketService) {

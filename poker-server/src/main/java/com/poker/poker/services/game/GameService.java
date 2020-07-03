@@ -194,7 +194,7 @@ public class GameService {
    * @return The game document for the game the specified user.
    * @throws BadRequestException If there is no game document associated with the specified user.
    */
-  public GameDocument getUsersGameDocument(UUID userId) throws BadRequestException {
+  public GameDocument getUsersGameDocument(final UUID userId) throws BadRequestException {
     if (userIdToGameIdMap.get(userId) == null) {
       throw gameConstants.getNoUserIdToGameIdMappingFound();
     }
@@ -204,8 +204,16 @@ public class GameService {
     return games.get(userIdToGameIdMap.get(userId));
   }
 
-  // TODO: Add docs + validation
-  public GameDocument getGameDocument(UUID gameId) {
+  /**
+   * Retrieves the game document associated with the specified ID. Throws if game can't be found.
+   * @param gameId The specified ID.
+   * @return GameDocument associated with the specified ID.
+   * @throws BadRequestException If there is no game with the specified ID.
+   */
+  public GameDocument getGameDocument(final UUID gameId) throws BadRequestException {
+    if (games.get(gameId) == null) {
+      throw gameConstants.getGameNotFoundException();
+    }
     return games.get(gameId);
   }
 
@@ -335,15 +343,6 @@ public class GameService {
       throw gameConstants.getCanOnlyJoinLobbyException();
     }
 
-    /* TODO: Remove this temporary logging. */
-    log.debug("userIdToGameIdMap: {}", userIdToGameIdMap);
-    log.debug("userDocument: {}", userDocument);
-    log.debug("gameDocument: {}", gameDocument);
-    log.debug(
-        "userIdToGameIdMap.get(userDocument.getId()): {}",
-        userIdToGameIdMap.get(userDocument.getId()));
-    log.debug("gameDocument.getId(): {}", gameDocument.getId());
-
     // Check if user is trying to join a lobby they're already in.
     if (lobbyService.isUserInLobby(userDocument.getId())
         && userIdToGameIdMap.get(userDocument.getId()).equals(gameDocument.getId())) {
@@ -398,6 +397,8 @@ public class GameService {
     initializeGameData(gameDocument); // Initialize game data for client.
     broadcastGameUpdate(gameDocument); // Broadcast the game document.
 
+    /*    TODO: I had an SSE broadcast here sending out player data to players[0] for some reason.
+           Leaving this here in case this was actually needed. Will remove soon. */
     return new ApiSuccessModel("The game has been started successfully.");
   }
 
