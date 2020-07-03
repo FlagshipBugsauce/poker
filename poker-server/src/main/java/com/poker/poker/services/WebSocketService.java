@@ -60,6 +60,7 @@ public class WebSocketService {
    * Creates a UUID associated with a particular user that will be used to communicate private
    * information to that user, such as the player's cards in a hand of poker. Using a UUID instead
    * of a JWT since a JWT is needlessly long. The topic will be /topic/secure/{id}
+   *
    * @param user The user requesting a private topic.
    * @return The UUID component of the topic.
    */
@@ -71,6 +72,7 @@ public class WebSocketService {
 
   /**
    * Manually removes a private topic.
+   *
    * @param user The ID of the user the topic is used to communicate with.
    */
   public void removePrivateTopic(final UserDocument user) {
@@ -81,6 +83,7 @@ public class WebSocketService {
   /**
    * Sends a private message to the user with the specified ID, provided they have requested a
    * secure topic to communicate on.
+   *
    * @param recipient The ID of the user.
    * @param data The data to be sent to this user.
    */
@@ -92,8 +95,9 @@ public class WebSocketService {
   }
 
   /**
-   * Sends the providied data to the specified topic. This message is public and no attempt has
-   * been made to conceal the topic from anyone who wants to listen in.
+   * Sends the providied data to the specified topic. This message is public and no attempt has been
+   * made to conceal the topic from anyone who wants to listen in.
+   *
    * @param topic The topic to broadcast to.
    * @param data The data to broadcast.
    */

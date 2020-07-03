@@ -339,7 +339,9 @@ public class GameService {
     log.debug("userIdToGameIdMap: {}", userIdToGameIdMap);
     log.debug("userDocument: {}", userDocument);
     log.debug("gameDocument: {}", gameDocument);
-    log.debug("userIdToGameIdMap.get(userDocument.getId()): {}", userIdToGameIdMap.get(userDocument.getId()));
+    log.debug(
+        "userIdToGameIdMap.get(userDocument.getId()): {}",
+        userIdToGameIdMap.get(userDocument.getId()));
     log.debug("gameDocument.getId(): {}", gameDocument.getId());
 
     // Check if user is trying to join a lobby they're already in.
