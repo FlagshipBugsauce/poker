@@ -6,7 +6,6 @@ import com.poker.poker.documents.LobbyDocument;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.SocketContainerModel;
-import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.enums.GameAction;
 import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.game.CreateGameModel;
@@ -15,13 +14,10 @@ import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.GetGameModel;
 import com.poker.poker.models.game.LobbyPlayerModel;
 import com.poker.poker.repositories.LobbyRepository;
-import com.poker.poker.services.SseService;
 import com.poker.poker.services.WebSocketService;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,8 +34,6 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class LobbyService {
-
-  private final SseService sseService;
 
   /** A map of active games, keyed by the games ID. */
   private final Map<UUID, LobbyDocument> lobbys;
@@ -72,13 +66,6 @@ public class LobbyService {
    * @param lobbyDocument GameDocument representing the game that is being updated.
    */
   private void sendLobbyDocumentToAllPlayers(LobbyDocument lobbyDocument) {
-    for (LobbyPlayerModel player : lobbyDocument.getPlayers()) {
-      try {
-        sseService.sendUpdate(EmitterType.Lobby, player.getId(), lobbyDocument);
-      } catch (BadRequestException | NullPointerException ignored) { // Exception already logged.
-      }
-    }
-
     // Broadcast lobby document to lobby topic.
     webSocketService.sendPublicMessage(
         "/topic/game/" + lobbyDocument.getId(),
@@ -115,8 +102,6 @@ public class LobbyService {
     Collections.shuffle(gameDocument.getPlayers());
     gameDocument.getPlayers().get(0).setActing(true);
 
-    // Update game list.
-    sseService.sendToAll(EmitterType.GameList, getLobbyList());
     // Send to game list topic
     webSocketService.sendPublicMessage(
         "/topic/games", new SocketContainerModel(MessageType.GameList, getLobbyList()));
@@ -260,8 +245,7 @@ public class LobbyService {
     lobbys.put(lobbyDocument.getId(), lobbyDocument);
     userIdToLobbyIdMap.put(user.getId(), lobbyDocument.getId());
 
-    sseService.sendToAll(EmitterType.GameList, getLobbyList());
-    // Broadcast to gamelist topic
+    // Broadcast to game list topic
     webSocketService.sendPublicMessage(
         "/topic/games", new SocketContainerModel(MessageType.GameList, getLobbyList()));
   }
@@ -319,37 +303,11 @@ public class LobbyService {
                     lobbyPlayerModel.getFirstName(), lobbyPlayerModel.getLastName())));
     userIdToLobbyIdMap.put(user.getId(), lobbyDocument.getId());
 
-    // Update all players copy of gameDocument who are in the game via SSE
-    try {
-      for (LobbyPlayerModel player : lobbyDocument.getPlayers()) {
-        if (!player.getId().equals(user.getId())) {
-          sseService.sendUpdate(EmitterType.Lobby, player.getId(), lobbyDocument);
-        }
-      }
-    } catch (ConcurrentModificationException ex1) { // Exception is already logged.
-      log.error("ConcurrentModificationException exception occurred when {} joined.", user.getId());
-      // TODO: This is a sloppy fix and it might not have fixed the problem.
-      try {
-        // Try sending the updates again
-        Thread.sleep(500);
-        for (LobbyPlayerModel player : lobbyDocument.getPlayers()) {
-          if (!player.getId().equals(user.getId())) {
-            sseService.sendUpdate(EmitterType.Lobby, player.getId(), lobbyDocument);
-          }
-        }
-      } catch (Exception ex2) {
-        log.error("Another exception occurred after second attempt to join.");
-        log.error(ex2.getMessage());
-        log.error(Arrays.toString(ex2.getStackTrace()));
-      }
-    }
-
     // Broadcast updated lobby document to lobby topic.
     webSocketService.sendPublicMessage(
         "/topic/game/" + lobbyDocument.getId(),
         new SocketContainerModel(MessageType.Lobby, lobbyDocument));
 
-    sseService.sendToAll(EmitterType.GameList, getLobbyList());
     // Broadcast updated game list to game list topic.
     webSocketService.sendPublicMessage(
         "/topic/games", new SocketContainerModel(MessageType.GameList, getLobbyList()));
@@ -399,13 +357,6 @@ public class LobbyService {
     userIdToLobbyIdMap.remove(user.getId());
     log.debug("Player with ID: {}, has left game with ID: {}.", user.getId(), game.getId());
 
-    // Destroy the emitter sending this user updates.
-    try {
-      sseService.completeEmitter(EmitterType.Lobby, user.getId());
-    } catch (Exception e) {
-      log.error("Issue removing the lobby emitter when player with ID: {}.", user.getId());
-    }
-
     // Add GameActionModel with the appropriate action.
     game.getGameActions()
         .add(
@@ -420,7 +371,6 @@ public class LobbyService {
     // Update the players in the game, and players who are on the join game page.
     sendLobbyDocumentToAllPlayers(game);
 
-    sseService.sendToAll(EmitterType.GameList, getLobbyList());
     // Broadcast updated game list to game list topic.
     webSocketService.sendPublicMessage(
         "/topic/games", new SocketContainerModel(MessageType.GameList, getLobbyList()));

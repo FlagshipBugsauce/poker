@@ -22,4 +22,7 @@ public class AppConfig {
 
   @Value("${time-to-act-in-millis}")
   private int timeToActInMillis;
+
+  @Value("${web-socket.private-socket-timeout-hours}")
+  private int privateSocketTimeoutHours;
 }

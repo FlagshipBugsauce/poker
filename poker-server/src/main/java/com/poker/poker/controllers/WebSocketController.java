@@ -54,65 +54,7 @@ public class WebSocketController {
       default:
         data = null;
     }
-    //    log.debug("{}", data.toString());
     webSocketService.sendPublicMessage(
         updateModel.getTopic(), new SocketContainerModel(updateModel.getType(), data));
   }
-  //
-  //  @SubscribeMapping("/test01")
-  //  public List<ApiSuccessModel> webSocketTest002() {
-  //    return data;
-  //  }
-  //
-  //  @MessageMapping("/test02")
-  //  @SendTo("/topic/test03")
-  //  public ApiSuccessModel webSocketTest003(final ApiSuccessModel newData) {
-  //    data.add(newData);
-  //    log.debug("Data was sent: {}", newData.getMessage());
-  //    return newData;
-  //  }
-  //
-  //  @SendTo("/topic/{user}")
-  //  public ApiSuccessModel webSocketTest004(@DestinationVariable final String jwt) {
-  //    final UserDocument user = jwtService.getUserDocument(jwt);
-  //    return new ApiSuccessModel("This is a custom message for " + user.getEmail());
-  //  }
-  //
-  //  @MessageMapping("/test03")
-  //  public void webSocketTest005(final ApiSuccessModel newData) {
-  ////    webSocketTest004(newData.getMessage());
-  //    testFunction001(newData.getMessage());
-  //  }
-  //
-  //  private void testFunction001(final String jwt) {
-  //    final UserDocument user = jwtService.getUserDocument(jwt);
-  //    log.debug("Sending message to client with EMAIL: {}", user.getEmail());
-  //    template.convertAndSend("/topic/" + jwt, new ApiSuccessModel("This is a custom message for "
-  // + user.getEmail()));
-  //  }
-
-  /*
-     So, currently, we can send data to a custom topic with JWT in it (or some UUID associated with
-     a user) to send a message to only one user.
-
-     Should be able to refactor methods like broadcastGameDocument and the like to use this
-     "convertAndSend" method to send updated gameDocuments to people who are subscribed to a topic
-     with the game's UUID.
-
-     Should be able to wrap GameDocument's, LobbyDocument's, etc... in some kind of container with
-     an enum field that will indicate what type of data it is. The client can have a similar enum,
-     to determine what type of data is being sent.
-
-     We can have topics for the game list and for the game itself.
-
-  */
-
-  //
-  //  @RequestMapping(value = "/socket/private-topic", method = RequestMethod.GET)
-  //  public ResponseEntity<ApiSuccessModel> getPrivateTopic(
-  //      @Parameter(hidden = true) @RequestHeader("Authorization") final String jwt) {
-  //    return ResponseEntity.ok(
-  //        new ApiSuccessModel(
-  //            webSocketService.requestPrivateTopic(jwtService.getUserDocument(jwt)).toString()));
-  //  }
 }

@@ -10,7 +10,6 @@ import com.poker.poker.events.PlayerAfkEvent;
 import com.poker.poker.events.WaitForPlayerEvent;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.SocketContainerModel;
-import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.enums.HandAction;
 import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.game.CardModel;
@@ -20,7 +19,6 @@ import com.poker.poker.models.game.PlayerModel;
 import com.poker.poker.models.game.hand.HandActionModel;
 import com.poker.poker.repositories.HandRepository;
 import com.poker.poker.repositories.UserRepository;
-import com.poker.poker.services.SseService;
 import com.poker.poker.services.WebSocketService;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
@@ -62,8 +60,6 @@ public class HandService {
   private final UserRepository userRepository;
 
   private final ApplicationEventPublisher applicationEventPublisher;
-
-  private final SseService sseService;
 
   private final CardService cardService;
 
@@ -244,9 +240,6 @@ public class HandService {
    */
   public void broadcastHandUpdate(final GameDocument gameDocument) {
     final HandDocument hand = getHand(gameDocument);
-    gameDocument
-        .getPlayers()
-        .forEach(p -> sseService.sendUpdate(EmitterType.Hand, p.getId(), hand));
     // Broadcast to game topic
     webSocketService.sendPublicMessage(
         "/topic/game/" + gameDocument.getId(), new SocketContainerModel(MessageType.Hand, hand));
