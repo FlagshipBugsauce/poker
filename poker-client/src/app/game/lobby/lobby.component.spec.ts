@@ -9,10 +9,7 @@ import {LobbyDocument} from '../../api/models/lobby-document';
 import * as selectors from '../../state/app.selector';
 import {mockLobbyDocument, mockUser} from '../../testing/mock-models';
 import {UserModel} from '../../api/models/user-model';
-import {EmitterType} from '../../shared/models/emitter-type.model';
-import {SseService} from '../../shared/sse.service';
 import {By} from '@angular/platform-browser';
-import {MockSseService} from '../../testing/mock-services';
 
 describe('LobbyComponent', () => {
   let mockStore: MockStore;
@@ -27,11 +24,7 @@ describe('LobbyComponent', () => {
       declarations: [LobbyComponent],
       imports: [SharedModule, RouterTestingModule],
       providers: [
-        provideMockStore(),
-        {
-          provide: SseService,
-          useClass: MockSseService
-        }
+        provideMockStore()
       ]
     }).compileComponents();
 

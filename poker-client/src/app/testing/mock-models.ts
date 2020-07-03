@@ -3,7 +3,7 @@ import {CardSuit, CardValue} from '../shared/models/card.enum';
 import {UserModel} from '../api/models/user-model';
 import {DrawGameDataModel} from '../api/models/draw-game-data-model';
 import {GameDocument} from '../api/models/game-document';
-import {LobbyDocument} from "../api/models/lobby-document";
+import {LobbyDocument} from '../api/models/lobby-document';
 
 export const mockHandDocument: HandDocument = {
   drawnCards: [{suit: CardSuit.Spades, value: CardValue.Ace}]

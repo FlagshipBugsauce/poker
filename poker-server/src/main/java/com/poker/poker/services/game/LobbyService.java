@@ -5,8 +5,10 @@ import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.LobbyDocument;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.ApiSuccessModel;
+import com.poker.poker.models.SocketContainerModel;
 import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.enums.GameAction;
+import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.game.CreateGameModel;
 import com.poker.poker.models.game.GameActionModel;
 import com.poker.poker.models.game.GamePlayerModel;
@@ -14,6 +16,7 @@ import com.poker.poker.models.game.GetGameModel;
 import com.poker.poker.models.game.LobbyPlayerModel;
 import com.poker.poker.repositories.LobbyRepository;
 import com.poker.poker.services.SseService;
+import com.poker.poker.services.WebSocketService;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,6 +55,8 @@ public class LobbyService {
 
   private final LobbyRepository lobbyRepository;
 
+  private final WebSocketService webSocketService;
+
   public Runnable getEmitterValidator(UUID userId) {
     return () -> {
       log.debug("Performing validation to ensure {} should receive an emitter.", userId);
@@ -73,6 +78,11 @@ public class LobbyService {
       } catch (BadRequestException | NullPointerException ignored) { // Exception already logged.
       }
     }
+
+    // Broadcast lobby document to lobby topic.
+    webSocketService.sendPublicMessage(
+        "/topic/game/" + lobbyDocument.getId(),
+        new SocketContainerModel(MessageType.Lobby, lobbyDocument));
   }
 
   /**
@@ -107,6 +117,10 @@ public class LobbyService {
 
     // Update game list.
     sseService.sendToAll(EmitterType.GameList, getLobbyList());
+    // Send to game list topic
+    webSocketService.sendPublicMessage(
+        "/topic/games",
+        new SocketContainerModel(MessageType.GameList, getLobbyList()));
 
     lobbyRepository.save(lobbyDocument);
   }
@@ -248,6 +262,10 @@ public class LobbyService {
     userIdToLobbyIdMap.put(user.getId(), lobbyDocument.getId());
 
     sseService.sendToAll(EmitterType.GameList, getLobbyList());
+    // Broadcast to gamelist topic
+    webSocketService.sendPublicMessage(
+        "/topic/games",
+        new SocketContainerModel(MessageType.GameList, getLobbyList()));
   }
 
   /**
@@ -328,7 +346,17 @@ public class LobbyService {
       }
     }
 
+    // Broadcast updated lobby document to lobby topic.
+    webSocketService.sendPublicMessage(
+        "/topic/game/" + lobbyDocument.getId(),
+        new SocketContainerModel(MessageType.Lobby, lobbyDocument));
+
     sseService.sendToAll(EmitterType.GameList, getLobbyList());
+    // Broadcast updated game list to game list topic.
+    webSocketService.sendPublicMessage(
+        "/topic/games",
+        new SocketContainerModel(MessageType.GameList, getLobbyList()));
+
     return new ApiSuccessModel("User joined the game successfully.");
   }
 
@@ -396,6 +424,11 @@ public class LobbyService {
     sendLobbyDocumentToAllPlayers(game);
 
     sseService.sendToAll(EmitterType.GameList, getLobbyList());
+    // Broadcast updated game list to game list topic.
+    webSocketService.sendPublicMessage(
+        "/topic/games",
+        new SocketContainerModel(MessageType.GameList, getLobbyList()));
+
     return new ApiSuccessModel("Player has left the game.");
   }
 }

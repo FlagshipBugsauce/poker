@@ -3,6 +3,7 @@ import {LeaveGameGuardService} from './leave-game-guard.service';
 import {SharedModule} from '../../shared/shared.module';
 import {RouterTestingModule} from '@angular/router/testing';
 import {provideMockStore} from '@ngrx/store/testing';
+import {WebSocketService} from '../../shared/web-socket.service';
 
 describe('LeaveGameGuardService', () => {
   let service: LeaveGameGuardService;
@@ -10,7 +11,13 @@ describe('LeaveGameGuardService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [RouterTestingModule, SharedModule],
-      providers: [provideMockStore()]
+      providers: [
+        provideMockStore(),
+        {
+          provide: WebSocketService,
+          useClass: jest.fn()
+        }
+      ]
     });
     service = TestBed.inject(LeaveGameGuardService);
   });

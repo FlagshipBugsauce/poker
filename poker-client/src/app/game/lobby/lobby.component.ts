@@ -1,17 +1,15 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {GameActionModel, LobbyPlayerModel, UserModel} from 'src/app/api/models';
-import {SseService} from 'src/app/shared/sse.service';
 import {ToastService} from 'src/app/shared/toast.service';
 import {LobbyDocument} from 'src/app/api/models/lobby-document';
-import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 import {AppStateContainer, LobbyStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {notReady, readyUp, startGame} from '../../state/app.actions';
 import {selectLobbyDocument, selectLoggedInUser, selectReadyStatus} from '../../state/app.selector';
 import {Observable, Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
-import {APP_ROUTES} from "../../app-routes";
+import {APP_ROUTES} from '../../app-routes';
 
 @Component({
   selector: 'pkr-lobby',
@@ -69,7 +67,6 @@ export class LobbyComponent implements OnInit, OnDestroy {
   constructor(
     private activatedRoute: ActivatedRoute,
     private router: Router,
-    private sseService: SseService,
     private toastService: ToastService,
     private appStore: Store<AppStateContainer>,
     private lobbyStore: Store<LobbyStateContainer>) {
@@ -126,14 +123,13 @@ export class LobbyComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.sseService.openEvent(EmitterType.Lobby);
     this.ready$ = this.appStore.select(selectReadyStatus);
     this.lobbyStore.select(selectLobbyDocument)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((lobbyDocument: LobbyDocument) => {
-      this.lobbyModel = lobbyDocument;
-      this.displayToast();
-    });
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((lobbyDocument: LobbyDocument) => {
+        this.lobbyModel = lobbyDocument;
+        this.displayToast();
+      });
     this.userModel$ = this.appStore.select(selectLoggedInUser);
   }
 
@@ -157,7 +153,6 @@ export class LobbyComponent implements OnInit, OnDestroy {
    * Starts the game.
    */
   public startGame(): void {
-    this.sseService.closeEvent(EmitterType.Lobby);
     this.appStore.dispatch(startGame());
   }
 

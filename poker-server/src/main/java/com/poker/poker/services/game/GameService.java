@@ -10,8 +10,10 @@ import com.poker.poker.events.PlayerAfkEvent;
 import com.poker.poker.events.WaitForPlayerEvent;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.GameSummaryModel;
+import com.poker.poker.models.SocketContainerModel;
 import com.poker.poker.models.enums.EmitterType;
 import com.poker.poker.models.enums.GameState;
+import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.game.CardModel;
 import com.poker.poker.models.game.CreateGameModel;
 import com.poker.poker.models.game.DeckModel;
@@ -23,6 +25,7 @@ import com.poker.poker.models.game.PlayerModel;
 import com.poker.poker.repositories.GameRepository;
 import com.poker.poker.services.SseService;
 import com.poker.poker.services.UuidService;
+import com.poker.poker.services.WebSocketService;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,6 +72,8 @@ public class GameService {
   private final GameRepository gameRepository;
 
   private final ApplicationEventPublisher applicationEventPublisher;
+
+  private final WebSocketService webSocketService;
 
   /**
    * Retrieves the game data needed for the client to display a summary of what has occurred in the
@@ -203,6 +208,11 @@ public class GameService {
     return games.get(userIdToGameIdMap.get(userId));
   }
 
+  // TODO: Add docs + validation
+  public GameDocument getGameDocument(UUID gameId) {
+    return games.get(gameId);
+  }
+
   /**
    * Creates a new game.
    *
@@ -273,7 +283,12 @@ public class GameService {
         .setAway(status);
     broadcastGameUpdate(getUsersGameDocument(playerId));
     sseService.sendUpdate(EmitterType.PlayerData, playerId, getPlayerData(playerId));
-    log.debug("Updating active status to {} for player {}.", status, playerId);
+
+    webSocketService.sendPublicMessage(
+        "/topic/game/" + playerId,
+        new SocketContainerModel(MessageType.PlayerData, getPlayerData(playerId)));
+
+    log.debug("Updating away status to {} for player {}.", status, playerId);
   }
 
   /**
@@ -398,6 +413,10 @@ public class GameService {
             player ->
                 sseService.sendUpdate(
                     EmitterType.GameData, player.getId(), getGameData(gameDocument)));
+    // Broadcast to game topic
+    webSocketService.sendPublicMessage(
+        "/topic/game/" + gameDocument.getId(),
+        new SocketContainerModel(MessageType.GameData, getGameData(gameDocument)));
   }
 
   /**
@@ -409,6 +428,11 @@ public class GameService {
     gameDocument
         .getPlayers()
         .forEach(player -> sseService.sendUpdate(EmitterType.Game, player.getId(), gameDocument));
+
+    // Broadcast to game topic
+    webSocketService.sendPublicMessage(
+        "/topic/game/" + gameDocument.getId(),
+        new SocketContainerModel(MessageType.Game, gameDocument));
   }
 
   /**
@@ -432,9 +456,22 @@ public class GameService {
         EmitterType.PlayerData,
         gameDocument.getPlayers().get(playerThatActed).getId(),
         getPlayerData(gameDocument.getPlayers().get(playerThatActed).getId()));
+
+    // Broadcast player data to game topic
+    webSocketService.sendPublicMessage(
+        "/topic/game/" + gameDocument.getPlayers().get(playerThatActed).getId(),
+        new SocketContainerModel(
+            MessageType.PlayerData,
+            getPlayerData(gameDocument.getPlayers().get(playerThatActed).getId())));
+
     nextPlayerToAct.setActing(true);
     sseService.sendUpdate(
         EmitterType.PlayerData, nextPlayerToAct.getId(), getPlayerData(nextPlayerToAct.getId()));
+
+    // Broadcast player data to game topic
+    webSocketService.sendPublicMessage(
+        "/topic/game/" + nextPlayerToAct.getId(),
+        new SocketContainerModel(MessageType.PlayerData, getPlayerData(nextPlayerToAct.getId())));
 
     // Set player to act:
     log.debug("Next player to act is {}.", nextPlayerToAct.getId());

@@ -2,15 +2,14 @@ import {Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/co
 import {PopupComponent, PopupContentModel} from 'src/app/shared/popup/popup.component';
 import {EmittersService} from 'src/app/api/services';
 import {GetGameModel} from 'src/app/api/models';
-import {SseService} from 'src/app/shared/sse.service';
 import {ApiConfiguration} from 'src/app/api/api-configuration';
-import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 import {AppStateContainer, GameListStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {joinLobby} from '../../state/app.actions';
 import {selectGameList} from '../../state/app.selector';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
+import {WebSocketService} from '../../shared/web-socket.service';
 
 @Component({
   selector: 'pkr-join',
@@ -31,7 +30,6 @@ export class JoinComponent implements OnInit, OnDestroy {
   /**
    * The total games in the list of games.
    */
-  // public totalGames: number = this.sseService.gameList.length;
   public get totalGames(): number {
     return this.games ? this.games.length : 0;
   }
@@ -66,9 +64,9 @@ export class JoinComponent implements OnInit, OnDestroy {
   constructor(
     private apiConfiguration: ApiConfiguration,
     private emittersService: EmittersService,
-    private sseService: SseService,
     private appStore: Store<AppStateContainer>,
-    private gameListStore: Store<GameListStateContainer>) {
+    private gameListStore: Store<GameListStateContainer>,
+    private webSocketService: WebSocketService) {
   }
 
   public ngDestroyed$ = new Subject();
@@ -77,20 +75,13 @@ export class JoinComponent implements OnInit, OnDestroy {
     this.ngDestroyed$.next();
   }
 
-  ngOnInit(): void {
-    this.sseService.openEvent(EmitterType.GameList);
+  public ngOnInit(): void {
     this.gameListStore.select(selectGameList)
       .pipe(takeUntil(this.ngDestroyed$))
       .subscribe((games: GetGameModel[]) => this.gamesInternal = games);
-  }
 
-  /**
-   * Destroys the emitter that provides updated lists of games before leaving the page to avoid errors on the backend.
-   * @param $event Before unload event.
-   */
-  @HostListener('window:beforeunload', ['$event'])
-  public userLeftPage($event: any): void {
-    this.sseService.closeEvent(EmitterType.GameList);
+    // Subscribe to game list topic.
+    this.webSocketService.subscribeToGameListTopic();
   }
 
   /**

@@ -1,16 +1,15 @@
 import {Injectable} from '@angular/core';
 import {CanDeactivate, Router} from '@angular/router';
 import {PopupComponent} from 'src/app/shared/popup/popup.component';
-import {SseService} from 'src/app/shared/sse.service';
 import {GameService} from 'src/app/api/services';
 import {GameComponent} from './game.component';
-import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 import {GameState} from 'src/app/shared/models/game-state.enum';
 import {AppStateContainer, GameStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {leaveLobby} from '../../state/app.actions';
 import {GameDocument} from '../../api/models/game-document';
 import {selectGameDocument} from '../../state/app.selector';
+import {WebSocketService} from '../../shared/web-socket.service';
 
 @Injectable({
   providedIn: 'root'
@@ -34,8 +33,8 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
   public gameModel: GameDocument;
 
   constructor(
+    private webSocketService: WebSocketService,
     private router: Router,
-    private sseService: SseService,
     private gameService: GameService,
     private store: Store<AppStateContainer>,
     private gameStore: Store<GameStateContainer>) {
@@ -55,11 +54,7 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
       import('@angular/router').UrlTree> {
     // If state is null or the game is over, then we should just let the player leave the page.
     if (!this.gameModel.state || this.gameModel.state === GameState.Over) {
-      this.sseService.closeEvent(EmitterType.Game);
-      this.sseService.closeEvent(EmitterType.Lobby);
-      this.sseService.closeEvent(EmitterType.Hand);
-      this.sseService.closeEvent(EmitterType.GameData);
-      this.sseService.closeEvent(EmitterType.PlayerData);
+      this.unsubscribe();
       return true;
     }
 
@@ -73,11 +68,7 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
     if (!this.canLeave && this.confirmationPopup) {
       this.confirmationPopup.okCloseProcedure = () => {
         this.canLeave = true;
-        this.sseService.closeEvent(EmitterType.Game);
-        this.sseService.closeEvent(EmitterType.Lobby);
-        this.sseService.closeEvent(EmitterType.Hand);
-        this.sseService.closeEvent(EmitterType.GameData);
-        this.sseService.closeEvent(EmitterType.PlayerData);
+        this.unsubscribe();
 
         if (this.gameModel.state && this.gameModel.state === GameState.Lobby) {
           this.store.dispatch(leaveLobby());  // Leave the lobby.
@@ -90,5 +81,10 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
       return false;
     }
     return true;
+  }
+
+  private unsubscribe(): void {
+    this.webSocketService.gameTopicUnsubscribe();
+    this.webSocketService.playerDataTopicUnsubscribe();
   }
 }

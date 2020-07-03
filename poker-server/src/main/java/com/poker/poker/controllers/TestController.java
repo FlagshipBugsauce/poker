@@ -3,6 +3,7 @@ package com.poker.poker.controllers;
 import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.HandDocument;
 import com.poker.poker.documents.LobbyDocument;
+import com.poker.poker.models.WebSocketUpdateModel;
 import com.poker.poker.models.game.DrawGameDataContainerModel;
 import com.poker.poker.models.game.DrawGameDataModel;
 import java.util.ArrayList;
@@ -50,5 +51,10 @@ public class TestController {
   @GetMapping("/test/gameDataContainer")
   public ResponseEntity<DrawGameDataContainerModel> gameDataContainer() {
     return ResponseEntity.ok(new DrawGameDataContainerModel());
+  }
+
+  @GetMapping("/test/websocketUpdateModel")
+  public ResponseEntity<WebSocketUpdateModel> webSocketUpdateModel() {
+    return ResponseEntity.ok(new WebSocketUpdateModel());
   }
 }

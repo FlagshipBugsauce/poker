@@ -60,7 +60,7 @@ public class SseService {
   private Map<UUID, EmitterModel> getEmitterMap(final EmitterType type) throws BadRequestException {
     final Map<UUID, EmitterModel> emitterMap = emitterMaps.get(type);
     if (emitterMaps.get(type) == null) {
-      log.error("Invalid emitter type specified.");
+//      log.error("Invalid emitter type specified.");
       throw emitterConstants.getInvalidEmitterTypeException();
     }
     return emitterMap;
@@ -88,7 +88,7 @@ public class SseService {
         timeout = emitterConstants.getGameEmitterDuration();
         break;
       default:
-        log.error("Invalid emitter type specified.");
+//        log.error("Invalid emitter type specified.");
         throw emitterConstants.getInvalidEmitterTypeException();
     }
     return timeout;
@@ -125,7 +125,7 @@ public class SseService {
     final Map<UUID, EmitterModel> map = getEmitterMap(type);
     final EmitterModel emitterModel = map.get(userId);
     if (emitterModel == null) {
-      log.error("There is no {} emitter associated with the user ID: {}.", type, userId);
+//      log.error("There is no {} emitter associated with the user ID: {}.", type, userId);
       throw emitterConstants.getNoEmitterModelForIdException();
     }
     return emitterModel;
@@ -145,7 +145,7 @@ public class SseService {
     final EmitterModel emitterModel = getEmitterModel(type, userId);
     emitterModel.setLastSendTime(time);
     emitterModel.setLastSent(data);
-    log.debug("{} emitter model for user {} was updated successfully.", type, userId);
+//    log.debug("{} emitter model for user {} was updated successfully.", type, userId);
   }
 
   /**
@@ -168,19 +168,19 @@ public class SseService {
             // Re-send whatever was sent last.
             emitterModel.getEmitter().send(emitterModel.getLastSent());
           } catch (IOException e) {
-            log.error(
-                "Scheduled emitter updater failed to send to an emitter, calling complete() "
-                    + "on this emitter.");
+//            log.error(
+//                "Scheduled emitter updater failed to send to an emitter, calling complete() "
+//                    + "on this emitter.");
             emitterModel.getEmitter().complete();
           }
         }
         // Check if the emitter should be destroyed due to inactivity.
         t = DateTime.now().minusMinutes(emitterConstants.getEmitterInactiveExpirationInMinutes());
         if (emitterModel.getLastSendTime().isBefore(t)) {
-          log.info(
-              "Emitter for user {} was destroyed due to {} minutes of inactivity.",
-              userId,
-              emitterConstants.getEmitterInactiveExpirationInMinutes());
+//          log.info(
+//              "Emitter for user {} was destroyed due to {} minutes of inactivity.",
+//              userId,
+//              emitterConstants.getEmitterInactiveExpirationInMinutes());
           emitterModel.getEmitter().complete();
         }
       }
@@ -205,7 +205,7 @@ public class SseService {
    */
   public SseEmitter createEmitter(EmitterType type, UUID userId, Runnable validator)
       throws BadRequestException, ForbiddenException {
-    log.debug("Attempting to create {} emitter for {}.", type, userId);
+//    log.debug("Attempting to create {} emitter for {}.", type, userId);
     // Caller provides a lambda that will throw if pre-conditions are not satisfied.
     if (validator != null) {
       validator.run();
@@ -224,7 +224,7 @@ public class SseService {
     emitter = new SseEmitter(getEmitterTimeout(type));
     emitter.onCompletion(
         () -> {
-          log.debug("{} emitter for user {} is complete.", type, userId);
+//          log.debug("{} emitter for user {} is complete.", type, userId);
           emitterMap.remove(userId);
         });
     emitter.onTimeout(
@@ -245,7 +245,7 @@ public class SseService {
     emitterMap.put(userId, new EmitterModel(emitter, now, now, now));
 
     // Return the emitter.
-    log.debug("Sending {} emitter to {}.", type, userId);
+//    log.debug("Sending {} emitter to {}.", type, userId);
     return emitter;
   }
 
@@ -260,14 +260,14 @@ public class SseService {
   public ApiSuccessModel sendUpdate(final EmitterType type, final UUID userId, final Object data) {
     try {
       getEmitter(type, userId).send(data);
-      log.debug("{} data was sent to {}.", type, userId);
+//      log.debug("{} data was sent to {}.", type, userId);
       updateEmitterModel(type, userId, DateTime.now(), data);
     } catch (IOException e) {
-      log.error("{} emitter failed to send data to {} due to IOException.", type, userId);
+//      log.error("{} emitter failed to send data to {} due to IOException.", type, userId);
     } catch (BadRequestException e) {
-      log.error("{} emitter failed to send data to {} due to BadRequestException.", type, userId);
+//      log.error("{} emitter failed to send data to {} due to BadRequestException.", type, userId);
     } catch (ForbiddenException e) {
-      log.error("{} emitter failed to send data to {} due to ForbiddenException.", type, userId);
+//      log.error("{} emitter failed to send data to {} due to ForbiddenException.", type, userId);
     }
     return new ApiSuccessModel("Data sent successfully.");
   }
@@ -297,7 +297,7 @@ public class SseService {
         emitterMaps.get(type).remove(userId);
       }
     } catch (final Exception e) {
-      log.error("Something went wrong removing {} emitter for {}.", type, userId);
+//      log.error("Something went wrong removing {} emitter for {}.", type, userId);
     }
     return new ApiSuccessModel("Emitter has been removed.");
   }

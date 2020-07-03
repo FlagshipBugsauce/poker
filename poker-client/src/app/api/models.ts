@@ -6,6 +6,7 @@ export { GetGameModel } from './models/get-game-model';
 export { LobbyPlayerModel } from './models/lobby-player-model';
 export { PlayerModel } from './models/player-model';
 export { SseEmitter } from './models/sse-emitter';
+export { WebSocketUpdateModel } from './models/web-socket-update-model';
 export { CardModel } from './models/card-model';
 export { DrawGameDataContainerModel } from './models/draw-game-data-container-model';
 export { DrawGameDataModel } from './models/draw-game-data-model';

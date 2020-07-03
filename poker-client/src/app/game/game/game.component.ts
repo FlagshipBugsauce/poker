@@ -1,10 +1,8 @@
 import {AfterViewInit, Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {SseService} from 'src/app/shared/sse.service';
-import {DrawGameDataModel, GameDocument} from 'src/app/api/models';
+import {DrawGameDataModel, GameDocument, UserModel} from 'src/app/api/models';
 import {LobbyComponent} from '../lobby/lobby.component';
 import {LeaveGameGuardService} from './leave-game-guard.service';
 import {PopupComponent, PopupContentModel} from 'src/app/shared/popup/popup.component';
-import {EmitterType} from 'src/app/shared/models/emitter-type.model';
 import {GameState} from 'src/app/shared/models/game-state.enum';
 import {PlayComponent} from '../play/play.component';
 import {
@@ -13,10 +11,17 @@ import {
   GameStateContainer
 } from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
-import {selectGameData, selectGameDocument} from '../../state/app.selector';
+import {
+  selectGameData,
+  selectGameDocument,
+  selectGameState,
+  selectLoggedInUser
+} from '../../state/app.selector';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {leaveLobby} from '../../state/app.actions';
+import {WebSocketService} from '../../shared/web-socket.service';
+import {MessageType} from '../../shared/models/message-types.enum';
 
 @Component({
   selector: 'pkr-game',
@@ -24,6 +29,14 @@ import {leaveLobby} from '../../state/app.actions';
   styleUrls: ['./game.component.scss']
 })
 export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
+
+  constructor(
+    private leaveGameGuardService: LeaveGameGuardService,
+    private appStore: Store<AppStateContainer>,
+    private gameStore: Store<GameStateContainer>,
+    private gameDataStore: Store<GameDataStateContainer>,
+    private webSocketService: WebSocketService) {
+  }
   /**
    * Reference to the lobby component.
    */
@@ -53,18 +66,14 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     {body: 'Click Ok to continue.'} as PopupContentModel
   ] as PopupContentModel[];
 
-  constructor(
-    private leaveGameGuardService: LeaveGameGuardService,
-    private sseService: SseService,
-    private appStore: Store<AppStateContainer>,
-    private gameStore: Store<GameStateContainer>,
-    private gameDataStore: Store<GameDataStateContainer>) {
-  }
-
   public ngDestroyed$ = new Subject();
 
   /** The model representing the state of the game at any given point in time. */
   public gameModel: GameDocument;
+
+  public user: UserModel;
+
+  private lastState: string = '';
 
   ngAfterViewInit(): void {
     this.leaveGameGuardService.confirmationPopup = this.confirmationPopup;
@@ -76,12 +85,31 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.leaveGameGuardService.canLeave = false;  // Need to set this to false when page loads.
-    this.sseService.openEvent(EmitterType.Game);
     this.gameStore.select(selectGameDocument).pipe(takeUntil(this.ngDestroyed$)).subscribe(
-      (gameDocument: GameDocument) => this.gameModel = gameDocument);
+      (game: GameDocument) => this.gameModel = game);
+
+    this.gameStore.select(selectGameState)
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe(state => {
+        if (state !== this.lastState && state === 'Play') {
+          // const game = this.gameModel;
+          this.webSocketService.subscribeToPlayerDataTopic();
+          // this.webSocketService.requestUpdate(MessageType.GameData, `/topic/game/${game.id}`, game.id).then();
+          // this.webSocketService.requestUpdate(MessageType.Hand, `/topic/game/${game.id}`, game.id).then();
+          // this.webSocketService.requestUpdate(MessageType.PlayerData, `/topic/game/${this.user.id}`, this.user.id).then();
+          this.webSocketService.requestGameTopicUpdate(MessageType.GameData);
+          this.webSocketService.requestGameTopicUpdate(MessageType.Hand);
+          this.webSocketService.requestPlayerDataUpdate();
+        }
+        this.lastState = state;
+      });
+
     this.gameDataStore.select(selectGameData).pipe(takeUntil(this.ngDestroyed$)).subscribe(
       (data: DrawGameDataModel[]) => this.gameData = data
     );
+    this.appStore.select(selectLoggedInUser)
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((user: UserModel) => this.user = user);
   }
 
   /**
@@ -90,10 +118,6 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   @HostListener('window:beforeunload', ['$event'])
   public userLeftPage($event: any): void {
-    this.sseService.closeEvent(EmitterType.Game);
-    this.sseService.closeEvent(EmitterType.Lobby);
-    this.sseService.closeEvent(EmitterType.Hand);
-    this.sseService.closeEvent(EmitterType.GameData);
     if (this.gameModel.state === GameState.Lobby) {
       this.appStore.dispatch(leaveLobby());
     }

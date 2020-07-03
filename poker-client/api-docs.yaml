@@ -77,6 +77,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessModel'
+  /game/leave-lobby:
+    post:
+      tags:
+        - game
+      summary: Leave Game Lobby
+      description: Request sent when a player leaves a game lobby.
+      operationId: leaveLobby
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Request handled successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
   /game/active:
     post:
       tags:
@@ -105,32 +131,6 @@ paths:
                 $ref: '#/components/schemas/ApiErrorModel'
         "200":
           description: Creation of game was successful.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessModel'
-  /game/leave-lobby:
-    post:
-      tags:
-        - game
-      summary: Leave Game Lobby
-      description: Request sent when a player leaves a game lobby.
-      operationId: leaveLobby
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: Request handled successfully.
           content:
             application/json:
               schema:
@@ -167,6 +167,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessModel'
+  /game/start:
+    post:
+      tags:
+        - game
+      summary: Start Game
+      description: Starts the game, provided all preconditions are satisfied..
+      operationId: startGame
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Game started successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
   /game/get-list:
     get:
       tags:
@@ -196,13 +222,13 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/GetGameModel'
-  /game/start:
+  /game/hand/draw:
     post:
       tags:
-        - game
-      summary: Start Game
-      description: Starts the game, provided all preconditions are satisfied..
-      operationId: startGame
+        - hand
+      summary: Draws a card.
+      description: Draws a card from the top of the deck.
+      operationId: draw
       responses:
         "400":
           description: Bad request.
@@ -217,7 +243,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiErrorModel'
         "200":
-          description: Game started successfully.
+          description: Draw was successful.
           content:
             application/json:
               schema:
@@ -255,32 +281,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlayerModel'
-  /game/hand/draw:
-    post:
-      tags:
-        - hand
-      summary: Draws a card.
-      description: Draws a card from the top of the deck.
-      operationId: draw
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: Draw was successful.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessModel'
   /emitters/request/{type}/{jwt}:
     get:
       tags:
@@ -325,45 +325,6 @@ paths:
             text/event-stream:
               schema:
                 $ref: '#/components/schemas/SseEmitter'
-  /emitters/update/{type}:
-    post:
-      tags:
-        - emitters
-      summary: Request Update
-      description: Requests an update from the SSE emitter specified.
-      operationId: requestUpdate
-      parameters:
-        - name: type
-          in: path
-          required: true
-          schema:
-            type: string
-            enum:
-              - GameList
-              - Game
-              - Lobby
-              - Hand
-              - GameData
-              - PlayerData
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: Request handled successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessModel'
   /emitters/destroy/{type}:
     post:
       tags:
@@ -403,6 +364,69 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessModel'
+  /emitters/update/{type}:
+    post:
+      tags:
+        - emitters
+      summary: Request Update
+      description: Requests an update from the SSE emitter specified.
+      operationId: requestUpdate
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - GameList
+              - Game
+              - Lobby
+              - Hand
+              - GameData
+              - PlayerData
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Request handled successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
+  /test/test/websocketUpdateModel:
+    get:
+      tags:
+        - test-controller
+      operationId: webSocketUpdateModel
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: default response
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/WebSocketUpdateModel'
   /test/test/gameDataContainer:
     get:
       tags:
@@ -451,30 +475,6 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/GameDocument'
-  /test/test/lobbyDoc:
-    get:
-      tags:
-        - test-controller
-      operationId: lobbyDocument
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: default response
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/LobbyDocument'
   /test/test/gameData:
     get:
       tags:
@@ -501,6 +501,30 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DrawGameDataModel'
+  /test/test/lobbyDoc:
+    get:
+      tags:
+        - test-controller
+      operationId: lobbyDocument
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: default response
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/LobbyDocument'
   /test/test/handDoc:
     get:
       tags:
@@ -778,6 +802,29 @@ components:
         timeout:
           type: integer
           format: int64
+    WebSocketUpdateModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID component of the topic.
+          format: uuid
+        type:
+          type: string
+          description: Type of message.
+          enum:
+            - GameList
+            - Lobby
+            - Game
+            - Hand
+            - GameData
+            - PlayerData
+        topic:
+          type: string
+          description: Topic to broadcast to.
+          example: /topic/game/xxx
+      description: Contains fields needed to determine what topic to broadcast to
+        and what data to broadcast.
     CardModel:
       type: object
       properties:
