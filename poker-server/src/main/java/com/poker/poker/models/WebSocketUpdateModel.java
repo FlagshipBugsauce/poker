@@ -10,8 +10,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(description = "Contains fields needed to determine what topic to broadcast to and what " +
-  "data to broadcast.")
+@Schema(
+    description =
+        "Contains fields needed to determine what topic to broadcast to and what "
+            + "data to broadcast.")
 public class WebSocketUpdateModel {
   @Schema(description = "ID component of the topic.")
   private UUID id;

@@ -119,8 +119,7 @@ public class LobbyService {
     sseService.sendToAll(EmitterType.GameList, getLobbyList());
     // Send to game list topic
     webSocketService.sendPublicMessage(
-        "/topic/games",
-        new SocketContainerModel(MessageType.GameList, getLobbyList()));
+        "/topic/games", new SocketContainerModel(MessageType.GameList, getLobbyList()));
 
     lobbyRepository.save(lobbyDocument);
   }
@@ -264,8 +263,7 @@ public class LobbyService {
     sseService.sendToAll(EmitterType.GameList, getLobbyList());
     // Broadcast to gamelist topic
     webSocketService.sendPublicMessage(
-        "/topic/games",
-        new SocketContainerModel(MessageType.GameList, getLobbyList()));
+        "/topic/games", new SocketContainerModel(MessageType.GameList, getLobbyList()));
   }
 
   /**
@@ -354,8 +352,7 @@ public class LobbyService {
     sseService.sendToAll(EmitterType.GameList, getLobbyList());
     // Broadcast updated game list to game list topic.
     webSocketService.sendPublicMessage(
-        "/topic/games",
-        new SocketContainerModel(MessageType.GameList, getLobbyList()));
+        "/topic/games", new SocketContainerModel(MessageType.GameList, getLobbyList()));
 
     return new ApiSuccessModel("User joined the game successfully.");
   }
@@ -426,8 +423,7 @@ public class LobbyService {
     sseService.sendToAll(EmitterType.GameList, getLobbyList());
     // Broadcast updated game list to game list topic.
     webSocketService.sendPublicMessage(
-        "/topic/games",
-        new SocketContainerModel(MessageType.GameList, getLobbyList()));
+        "/topic/games", new SocketContainerModel(MessageType.GameList, getLobbyList()));
 
     return new ApiSuccessModel("Player has left the game.");
   }

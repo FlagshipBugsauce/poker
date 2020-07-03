@@ -249,8 +249,7 @@ public class HandService {
         .forEach(p -> sseService.sendUpdate(EmitterType.Hand, p.getId(), hand));
     // Broadcast to game topic
     webSocketService.sendPublicMessage(
-        "/topic/game/" + gameDocument.getId(),
-        new SocketContainerModel(MessageType.Hand, hand));
+        "/topic/game/" + gameDocument.getId(), new SocketContainerModel(MessageType.Hand, hand));
   }
 
   /**

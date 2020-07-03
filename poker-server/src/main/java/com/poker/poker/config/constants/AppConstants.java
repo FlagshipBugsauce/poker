@@ -32,9 +32,11 @@ public class AppConstants {
     "/test/sse/**",
     "/emitters/request/**",
     "/emitters/request-lobby/**",
-    "/websocket/**",  // TODO: Probably need to remove.
+    "/websocket/**", // TODO: Probably need to remove.
     "/websocket",
-    "/topic/**", "/live", "/live/**"
+    "/topic/**",
+    "/live",
+    "/live/**"
   };
 
   // AUTHORIZATION CONSTANTS
