@@ -64,9 +64,7 @@ public class LobbyService {
         new SocketContainerModel(MessageType.Lobby, lobbyDocument));
   }
 
-  /**
-   * Broadcasts the list of joinable games to the game list topic.
-   */
+  /** Broadcasts the list of joinable games to the game list topic. */
   public void broadcastGameList() {
     webSocketService.sendPublicMessage(
         "/topic/games", new SocketContainerModel(MessageType.GameList, getLobbyList()));

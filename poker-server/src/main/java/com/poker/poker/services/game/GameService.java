@@ -206,6 +206,7 @@ public class GameService {
 
   /**
    * Retrieves the game document associated with the specified ID. Throws if game can't be found.
+   *
    * @param gameId The specified ID.
    * @return GameDocument associated with the specified ID.
    * @throws BadRequestException If there is no game with the specified ID.
@@ -398,7 +399,7 @@ public class GameService {
     broadcastGameUpdate(gameDocument); // Broadcast the game document.
 
     /*    TODO: I had an SSE broadcast here sending out player data to players[0] for some reason.
-           Leaving this here in case this was actually needed. Will remove soon. */
+    Leaving this here in case this was actually needed. Will remove soon. */
     return new ApiSuccessModel("The game has been started successfully.");
   }
 
