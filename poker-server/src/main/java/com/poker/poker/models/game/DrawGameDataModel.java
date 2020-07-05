@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Schema(description = "Model representing player data in a game, i.e. cards drawn, etc...")
 public class DrawGameDataModel {
+
   @Schema(implementation = GamePlayerModel.class)
   private GamePlayerModel player;
 

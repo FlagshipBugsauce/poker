@@ -6,10 +6,11 @@ import {GameComponent} from './game.component';
 import {GameState} from 'src/app/shared/models/game-state.enum';
 import {AppStateContainer, GameStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
-import {leaveLobby} from '../../state/app.actions';
+import {leaveGame, leaveLobby} from '../../state/app.actions';
 import {GameDocument} from '../../api/models/game-document';
-import {selectGameDocument} from '../../state/app.selector';
+import {selectGameDocument, selectJwt} from '../../state/app.selector';
 import {WebSocketService} from '../../shared/web-socket.service';
+import {ActionModel} from '../../api/models/action-model';
 
 @Injectable({
   providedIn: 'root'
@@ -28,14 +29,17 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
 
   public gameModel: GameDocument;
 
+  private jwt: string;
+
   constructor(
     private webSocketService: WebSocketService,
     private router: Router,
     private gameService: GameService,
-    private store: Store<AppStateContainer>,
+    private appStore: Store<AppStateContainer>,
     private gameStore: Store<GameStateContainer>) {
     this.gameStore.select(selectGameDocument)
-      .subscribe((gameDocument: GameDocument) => this.gameModel = gameDocument);
+    .subscribe((gameDocument: GameDocument) => this.gameModel = gameDocument);
+    this.appStore.select(selectJwt).subscribe(jwt => this.jwt = jwt);
   }
 
   public canDeactivate(
@@ -67,7 +71,13 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
         this.unsubscribe();
 
         if (this.gameModel.state && this.gameModel.state === GameState.Lobby) {
-          this.store.dispatch(leaveLobby());  // Leave the lobby.
+          this.appStore.dispatch(leaveLobby());  // Leave the lobby.
+        }
+        if (this.gameModel.state && this.gameModel.state === GameState.Play) {
+          this.appStore.dispatch(leaveGame({
+            jwt: this.jwt,
+            actionType: 'LeaveGame'
+          } as ActionModel));
         }
 
         this.router.navigate([this.link]).then();

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ApiSuccessModel {
+
   @Schema(
       description = "Returned to indicate API call was successful",
       example = "Account created successfully.")

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SocketContainerModel {
+
   private MessageType type;
   private Object data;
 }

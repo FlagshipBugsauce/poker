@@ -28,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class UserServiceTests extends TestBaseClass {
+
   @Mock private AuthenticationManager authenticationManager;
 
   @Mock private JwtService jwtService;

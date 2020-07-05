@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 @AllArgsConstructor
 public class UuidService {
+
   private final AppConstants appConstants;
 
   /**
@@ -20,7 +21,9 @@ public class UuidService {
    * @return True if the string is a valid UUID, false otherwise.
    */
   public boolean isValidUuidString(String uuid) {
-    if (uuid.length() != 36) return false;
+    if (uuid.length() != 36) {
+      return false;
+    }
     try {
       UUID.fromString(uuid);
     } catch (Exception e) {

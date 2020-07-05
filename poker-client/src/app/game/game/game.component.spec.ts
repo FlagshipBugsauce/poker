@@ -24,6 +24,7 @@ describe('GameComponent', () => {
   let mockGameDataSelector: MemoizedSelector<GameDataStateContainer, DrawGameDataModel[]>;
   let mockGameStateSelector: MemoizedSelector<GameStateContainer, string>;
   let mockLoggedInUserSelector: MemoizedSelector<AppStateContainer, UserModel>;
+  let mockJwtSelector: MemoizedSelector<AppStateContainer, string>;
   let component: GameComponent;
   let fixture: ComponentFixture<GameComponent>;
 
@@ -45,12 +46,12 @@ describe('GameComponent', () => {
         }
       ]
     }).compileComponents();
-
-    fixture = TestBed.createComponent(GameComponent);
     mockStore = TestBed.inject(MockStore);
     mockGameDataSelector = mockStore.overrideSelector(selectors.selectGameData, mockGameData);
     mockGameStateSelector = mockStore.overrideSelector(selectors.selectGameState, 'Lobby');
     mockLoggedInUserSelector = mockStore.overrideSelector(selectors.selectLoggedInUser, mockUser);
+    mockJwtSelector = mockStore.overrideSelector(selectors.selectJwt, 'jwt');
+    fixture = TestBed.createComponent(GameComponent);
     fixture.detectChanges();
   }));
 

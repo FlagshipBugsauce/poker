@@ -11,6 +11,7 @@ import lombok.Getter;
 
 @Getter
 public class DeckModel {
+
   // TODO: Refactor to use a stack, since this is more appropriate.
   @ArraySchema(schema = @Schema(implementation = CardModel.class))
   private List<CardModel> cards;
@@ -44,9 +45,14 @@ public class DeckModel {
     restoreAndShuffle();
     shuffle();
     final List<List<CardModel>> hands = new ArrayList<>();
-    for (int i = 0; i < numPlayers; i++) hands.add(new ArrayList<>());
-    for (int i = 0; i < numCardsPerHand; i++)
-      for (int j = 0; j < numPlayers; j++) hands.get(j).add(draw());
+    for (int i = 0; i < numPlayers; i++) {
+      hands.add(new ArrayList<>());
+    }
+    for (int i = 0; i < numCardsPerHand; i++) {
+      for (int j = 0; j < numPlayers; j++) {
+        hands.get(j).add(draw());
+      }
+    }
     return hands;
   }
 
@@ -78,8 +84,10 @@ public class DeckModel {
 
   public void freshDeck() {
     cards = new ArrayList<>(52);
-    for (final CardSuit cardSuit : CardSuit.values())
-      for (final CardValue cardValue : CardValue.values())
+    for (final CardSuit cardSuit : CardSuit.values()) {
+      for (final CardValue cardValue : CardValue.values()) {
         cards.add(new CardModel(cardSuit, cardValue));
+      }
+    }
   }
 }

@@ -33,6 +33,7 @@ import org.mockito.quality.Strictness;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class LobbyServiceTests extends TestBaseClass {
+
   @Spy private AppConfig appConfig;
   @Spy private Map<UUID, LobbyDocument> activeGames;
   @Spy private Map<UUID, UUID> userIdToGameIdMap;
@@ -118,7 +119,12 @@ public class LobbyServiceTests extends TestBaseClass {
 
     lobbyService =
         new LobbyService(
-            activeGames, userIdToGameIdMap, gameConstants, lobbyRepository, webSocketService);
+            appConfig,
+            activeGames,
+            userIdToGameIdMap,
+            gameConstants,
+            lobbyRepository,
+            webSocketService);
     //    Mockito.when(uuidService.isValidUuidString(Mockito.anyString())).thenCallRealMethod();
     //    Mockito.doAnswer(
     //            (invocation) -> {

@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @Data
 public class TestBaseClass {
+
   private final String sampleJwt = "SampleJWT";
   private final String sampleEmail = "admin@domain.com";
   private final String samplePassword = "password123";

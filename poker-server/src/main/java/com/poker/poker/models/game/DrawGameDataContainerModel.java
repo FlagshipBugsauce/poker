@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Schema(description = "Container for a list of game data, plus some other useful information.")
 public class DrawGameDataContainerModel {
+
   @ArraySchema(schema = @Schema(implementation = DrawGameDataModel.class))
   private List<DrawGameDataModel> gameData;
 

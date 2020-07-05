@@ -6,5 +6,6 @@ public enum MessageType {
   Game,
   Hand,
   GameData,
-  PlayerData
+  PlayerData,
+  Toast
 }

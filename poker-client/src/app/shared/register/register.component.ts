@@ -55,7 +55,10 @@ export class RegisterComponent implements OnInit {
         lastName: values.lastName
       } as NewAccountModel
     }).subscribe((response: ApiSuccessModel) => {
-      this.toastService.show('Registration Successful!', {classname: 'bg-light toast-md', delay: 5000});
+      this.toastService.show('Registration Successful!', {
+        classname: 'bg-light toast-md',
+        delay: 5000
+      });
       this.router.navigate(['/login']);
     }, (error: any) => {
       console.log(error);

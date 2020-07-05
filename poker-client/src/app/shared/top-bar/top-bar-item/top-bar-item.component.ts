@@ -13,6 +13,9 @@ export class TopBarItemComponent implements OnInit {
    */
   @Input() menuItem: DropDownMenuItem;
 
+  constructor(private router: Router) {
+  }
+
   /**
    * Getter for a flag that will be used to determine whether the text in this menu item should be
    * highlighted to indicate that the user is currently on the page this item links to.
@@ -26,9 +29,8 @@ export class TopBarItemComponent implements OnInit {
     return this.router.url === `/${this.menuItem.anchor}` || activeDropDown;
   }
 
-  constructor(private router: Router) {}
-
-  ngOnInit(): void {}
+  ngOnInit(): void {
+  }
 
   public activeDropdown(anchor: string) {
     return this.router.url === `/${anchor}`;

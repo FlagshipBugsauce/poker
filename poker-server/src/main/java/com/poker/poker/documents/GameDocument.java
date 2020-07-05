@@ -18,6 +18,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 @Document(collection = "game")
 public class GameDocument {
+
   /** The game ID is the same as the lobby ID. */
   @Schema(
       description = "Game ID (same as game lobby ID).",

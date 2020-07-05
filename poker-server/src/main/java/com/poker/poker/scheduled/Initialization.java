@@ -17,12 +17,14 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 @Component
 public class Initialization {
-  private ServerStateRepository serverStateRepository;
-  private UserRepository userRepository;
-  private PasswordEncoder passwordEncoder;
-  private AppConstants appConstants;
+
+  private final ServerStateRepository serverStateRepository;
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
+  private final AppConstants appConstants;
 
   // TODO: Find a better way of initializing the server. Running this every minute seems bad.
+
   /**
    * This method runs every minute and checks whether the server has been initialized by checking
    * the server state repository. This collection should either be empty, or contain a single

@@ -16,13 +16,8 @@ import {takeUntil} from 'rxjs/operators';
 })
 export class LoginComponent implements OnInit, OnDestroy {
 
-  constructor(
-    private router: Router,
-    private formBuilder: FormBuilder,
-    private appStore: Store<AppStateContainer>) {
-  }
-
   public loginForm: FormGroup;
+  public ngDestroyed$ = new Subject();
 
   // TODO: Only for development! Remove later! These are local accounts that will not exist in production.
   // private quickCredentials: AuthRequestModel = <AuthRequestModel> {
@@ -41,15 +36,17 @@ export class LoginComponent implements OnInit, OnDestroy {
   //   email: 'jon@domain.com',
   //   password: 'jonathan'
   // } as AuthRequestModel;
-
+  public showFailedSignIn$: Observable<boolean>;
   private quickCredentials: AuthRequestModel = {
     email: '',
     password: ''
   } as AuthRequestModel;
 
-  public ngDestroyed$ = new Subject();
-
-  public showFailedSignIn$: Observable<boolean>;
+  constructor(
+    private router: Router,
+    private formBuilder: FormBuilder,
+    private appStore: Store<AppStateContainer>) {
+  }
 
   public ngOnDestroy() {
     this.ngDestroyed$.next();

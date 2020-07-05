@@ -1,3 +1,4 @@
+/* tslint:disable */
 import {Injectable, OnDestroy} from '@angular/core';
 import {Client, over, Subscription} from 'stompjs';
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
@@ -21,11 +22,13 @@ import {
   gameListUpdated,
   handDocumentUpdated,
   lobbyDocumentUpdated,
-  playerDataUpdated
+  playerDataUpdated,
+  updateCurrentGame
 } from '../state/app.actions';
 import {selectLoggedInUser} from '../state/app.selector';
 import {UserModel} from '../api/models/user-model';
 import {WebSocketUpdateModel} from '../api/models/web-socket-update-model';
+import {ToastService} from "./toast.service";
 
 export enum SocketClientState {
   ATTEMPTING, CONNECTED
@@ -36,31 +39,27 @@ export enum SocketClientState {
 })
 export class WebSocketService implements OnDestroy {
 
+  /** Stores game ID when user is in a game. */
+  public gameId: string = '';
+  /** Subject to unsubscribe from game topic. */
+  public gameTopicUnsubscribe$: Subject<any>;
+  /** Subject to unsubscribe from game list topic. */
+  public gameListTopicUnsubscribe$: Subject<any>;
+  /** Subject to unsubscribe from player data topic. */
+  public playerDataTopicUnsubscribe$: Subject<any>;
+  /** Subject to disconnect. */
+  public ngDestroyed$ = new Subject<any>();
+  /** Subject to unsubscribe from the user toast topic. */
+  userToastTopicUnsubscribe$: Subject<any>;
   /** SockJS client. */
   private readonly client: Client;
-
   /** Socket state. */
   private state: BehaviorSubject<SocketClientState>;
-
   /** Model for the logged in user. */
   private user: UserModel;
 
-  /** Stores game ID when user is in a game. */
-  public gameId: string = '';
-
-  /** Subject to unsubscribe from game topic. */
-  public gameTopicUnsubscribe$: Subject<any>;
-
-  /** Subject to unsubscribe from game list topic. */
-  public gameListTopicUnsubscribe$: Subject<any>;
-
-  /** Subject to unsubscribe from player data topic. */
-  public playerDataTopicUnsubscribe$: Subject<any>;
-
-  /** Subject to disconnect. */
-  public ngDestroyed$ = new Subject<any>();
-
   constructor(
+    private toastService: ToastService,
     private appStore: Store<AppStateContainer>,
     private gameDataStore: Store<GameDataStateContainer>,
     private gameStore: Store<GameStateContainer>,
@@ -70,24 +69,16 @@ export class WebSocketService implements OnDestroy {
     private playerDataStore: Store<PlayerDataStateContainer>
   ) {
     this.client = over(new SockJS(environment.api));
-    this.client.debug = () => {}; // TODO: Gets rid of debugging messages in console
+    this.client.debug = () => {
+    }; // TODO: Gets rid of debugging messages in console
     this.state = new BehaviorSubject<SocketClientState>(SocketClientState.ATTEMPTING);
     this.client.connect({}, () => {
       this.state.next(SocketClientState.CONNECTED);
     });
 
     this.appStore.select(selectLoggedInUser)
-      .pipe(takeUntil(this.ngDestroyed$))
-      .subscribe((user: UserModel) => this.user = user);
-  }
-
-  /** Connects to the server. */
-  private connect(): Observable<Client> {
-    return new Observable<Client>(observer => {
-      this.state.pipe(filter(state => state === SocketClientState.CONNECTED)).subscribe(() => {
-        observer.next(this.client);
-      });
-    });
+    .pipe(takeUntil(this.ngDestroyed$))
+    .subscribe((user: UserModel) => this.user = user);
   }
 
   public ngOnDestroy(): void {
@@ -123,6 +114,13 @@ export class WebSocketService implements OnDestroy {
   }
 
   /**
+   * Helper that returns an observable which NgRx effects can use.
+   */
+  public sendFromStore(): Observable<any> {
+    return this.connect();
+  }
+
+  /**
    * Subscribes to the game topic, which broadcasts game related updates.
    * @param gameId The ID of the game.
    */
@@ -142,6 +140,9 @@ export class WebSocketService implements OnDestroy {
           break;
         case MessageType.GameData:
           this.gameDataStore.dispatch(gameDataUpdated(data.data));
+          break;
+        case MessageType.Toast:
+          this.toastService.show(data.data.message, data.data.options);
           break;
       }
     });
@@ -181,10 +182,10 @@ export class WebSocketService implements OnDestroy {
   public subscribeToGameListTopic(): void {
     this.gameListTopicUnsubscribe$ = new Subject<any>();
     this.onMessage(`/topic/games`)
-      .pipe(takeUntil(this.gameListTopicUnsubscribe$))
-      .subscribe(data => {
-        this.gameListStore.dispatch(gameListUpdated({gameList: data.data}));
-      });
+    .pipe(takeUntil(this.gameListTopicUnsubscribe$))
+    .subscribe(data => {
+      this.gameListStore.dispatch(gameListUpdated({gameList: data.data}));
+    });
     this.requestUpdate(MessageType.GameList, '/topic/games').then();
   }
 
@@ -208,10 +209,10 @@ export class WebSocketService implements OnDestroy {
   public subscribeToPlayerDataTopic() {
     this.playerDataTopicUnsubscribe$ = new Subject<any>();
     this.onMessage(`/topic/game/${this.user.id}`)
-      .pipe(takeUntil(this.playerDataTopicUnsubscribe$))
-      .subscribe(data => {
-        this.playerDataStore.dispatch(playerDataUpdated(data.data));
-      });
+    .pipe(takeUntil(this.playerDataTopicUnsubscribe$))
+    .subscribe(data => {
+      this.playerDataStore.dispatch(playerDataUpdated(data.data));
+    });
     this.requestPlayerDataUpdate();
   }
 
@@ -221,5 +222,41 @@ export class WebSocketService implements OnDestroy {
       this.playerDataTopicUnsubscribe$.next();
       this.playerDataTopicUnsubscribe$.complete();
     }
+  }
+
+  /**
+   * Subscribes to toast topic that broadcasts to the logged in user only (not securely though).
+   */
+  public subscribeToUserToastTopic(): void {
+    this.onMessage(`/topic/toasts/${this.user.id}`)
+    .pipe(takeUntil(this.userToastTopicUnsubscribe$))
+    .subscribe(data => {
+      this.toastService.show(data.data.message, data.data.options);
+    });
+  }
+
+  public subscribeToCurrentGameTopic(userId: string): void {
+    this.onMessage(`/topic/game/current/${userId}`)
+    .pipe(takeUntil(this.ngDestroyed$))
+    .subscribe(data => {
+      this.appStore.dispatch(updateCurrentGame(data));
+    });
+  }
+
+  /** Unsubscribes from the user toast topic. */
+  userToastTopicUnsubscribe(): void {
+    if (this.userToastTopicUnsubscribe$) {
+      this.userToastTopicUnsubscribe$.next();
+      this.userToastTopicUnsubscribe$.complete();
+    }
+  }
+
+  /** Connects to the server. */
+  private connect(): Observable<Client> {
+    return new Observable<Client>(observer => {
+      this.state.pipe(filter(state => state === SocketClientState.CONNECTED)).subscribe(() => {
+        observer.next(this.client);
+      });
+    });
   }
 }

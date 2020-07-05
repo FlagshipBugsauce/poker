@@ -18,8 +18,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @AllArgsConstructor
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
-  private CustomUserDetailsService customUserDetailsService;
-  private JwtService jwtService;
+
+  private final CustomUserDetailsService customUserDetailsService;
+  private final JwtService jwtService;
 
   @Override
   protected void doFilterInternal(

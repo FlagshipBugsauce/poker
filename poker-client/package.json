@@ -8,8 +8,10 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "generate": "ng-openapi-gen --input api-docs.yaml --output src/app/api",
-    "deploy": "ng deploy"
+    "deploy": "ng deploy",
+    "update-api-docs": "node src/libs/service-generator/",
+    "generate-only": "ng-openapi-gen --input api-docs.yaml --output src/app/api",
+    "generate": "node src/libs/service-generator/ && ng-openapi-gen --input api-docs.yaml --output src/app/api"
   },
   "private": true,
   "dependencies": {
@@ -47,6 +49,7 @@
     "@types/jest": "^26.0.0",
     "@types/node": "^12.11.1",
     "codelyzer": "^5.1.2",
+    "follow-redirects": "^1.12.1",
     "jasmine-core": "~3.5.0",
     "jasmine-spec-reporter": "~4.2.1",
     "jest": "^26.0.1",

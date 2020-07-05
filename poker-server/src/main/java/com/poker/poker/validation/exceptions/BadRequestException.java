@@ -5,6 +5,7 @@ import java.util.Date;
 import lombok.Getter;
 
 public class BadRequestException extends RuntimeException {
+
   @Getter private final ApiErrorModel apiErrorModel;
 
   /**

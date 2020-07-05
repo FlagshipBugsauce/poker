@@ -13,7 +13,7 @@ describe('ToastContainerComponent', () => {
         NgbModule
       ]
     })
-      .compileComponents();
+    .compileComponents();
   }));
 
   beforeEach(() => {

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthRequestModel {
+
   @Schema(
       description = "Email address associated with a user account.",
       example = "email@domain.com")

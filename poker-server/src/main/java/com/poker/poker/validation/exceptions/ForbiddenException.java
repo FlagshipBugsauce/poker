@@ -7,6 +7,7 @@ import lombok.Getter;
 
 @Data
 public class ForbiddenException extends RuntimeException {
+
   @Getter private final ApiErrorModel apiErrorModel;
 
   /**

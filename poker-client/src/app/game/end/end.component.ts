@@ -21,15 +21,14 @@ export class EndComponent implements OnInit, OnDestroy {
    * Array of numbers used for the game summary.
    */
   public numbers: number[] = [];
-
-  constructor(private gameStore: Store<GameStateContainer>) {}
-
   /**
    * Getter for the game model.
    */
   public gameModel: GameDocument;
-
   public ngDestroyed$ = new Subject();
+
+  constructor(private gameStore: Store<GameStateContainer>) {
+  }
 
   public ngOnDestroy() {
     this.ngDestroyed$.next();
@@ -37,10 +36,10 @@ export class EndComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.gameStore.select(selectGameDocument)
-      .pipe(takeUntil(this.ngDestroyed$))
-      .subscribe((gameDocument: GameDocument) => {
-        this.gameModel = gameDocument;
-        this.numbers = Array(gameDocument.totalHands).fill('').map((v, i) => i + 1);
-      });
+    .pipe(takeUntil(this.ngDestroyed$))
+    .subscribe((gameDocument: GameDocument) => {
+      this.gameModel = gameDocument;
+      this.numbers = Array(gameDocument.totalHands).fill('').map((v, i) => i + 1);
+    });
   }
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class GameConstants extends AppConstants {
+
   // Exceptions
   private final BadRequestException lobbyNotFoundException =
       new BadRequestException(

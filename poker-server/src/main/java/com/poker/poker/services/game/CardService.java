@@ -65,9 +65,11 @@ public class CardService implements Comparator<CardModel> {
    */
   public List<CardModel> getFreshDeck() {
     final List<CardModel> deck = new ArrayList<>();
-    for (int i = 0; i < enumSuitValues.size(); i++)
-      for (int j = 0; j < enumCardValues.size(); i++)
+    for (int i = 0; i < enumSuitValues.size(); i++) {
+      for (int j = 0; j < enumCardValues.size(); i++) {
         deck.add(new CardModel(enumSuitValues.get(i), enumCardValues.get(j)));
+      }
+    }
     return deck;
   }
 

@@ -10,7 +10,7 @@ describe('HandComponent', () => {
     TestBed.configureTestingModule({
       declarations: [HandComponent]
     })
-      .compileComponents();
+    .compileComponents();
   }));
 
   beforeEach(() => {

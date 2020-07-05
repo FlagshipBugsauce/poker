@@ -11,9 +11,21 @@ import {selectAuthenticated} from '../../state/app.selector';
 })
 export class TopBarService {
   /**
+   * Top bar menu items that is generated anew each time the application state changes.
+   */
+  public topBarMenuItems: DropDownMenuItem[] = [];
+  /**
    * Flag selected from the application state which indicates whether a user is logged in.
    */
   private authenticated = initialState.authenticated;
+
+  constructor(private store: Store<AppStateContainer>) {
+    this.updateMenuItems();
+    store.select(selectAuthenticated).subscribe((authenticated: boolean) => {
+      this.authenticated = authenticated;
+      this.updateMenuItems();
+    });
+  }
 
   /**
    * Getter for the path to the icon on the top bar.
@@ -96,19 +108,6 @@ export class TopBarService {
         }
       ]
     };
-  }
-
-  /**
-   * Top bar menu items that is generated anew each time the application state changes.
-   */
-  public topBarMenuItems: DropDownMenuItem[] = [];
-
-  constructor(private store: Store<AppStateContainer>) {
-    this.updateMenuItems();
-    store.select(selectAuthenticated).subscribe((authenticated: boolean) => {
-      this.authenticated = authenticated;
-      this.updateMenuItems();
-    });
   }
 
   /**

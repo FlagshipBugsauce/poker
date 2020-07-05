@@ -1,5 +1,5 @@
-import { TestBed } from '@angular/core/testing';
-import { TopBarService } from './top-bar.service';
+import {TestBed} from '@angular/core/testing';
+import {TopBarService} from './top-bar.service';
 import {MockStore, provideMockStore} from '@ngrx/store/testing';
 import {SharedModule} from '../shared.module';
 

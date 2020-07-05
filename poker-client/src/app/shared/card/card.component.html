@@ -1,5 +1,5 @@
 <img
-  [src]="cardService.getCardImagePath(card)"
+  [alt]="cardText"
   [ngClass]="{
     'xs': size === 'xs',
     'sm': size === 'sm',
@@ -8,4 +8,4 @@
     'xl': size === 'xl'
     }"
   [ngbTooltip]="cardText"
-  [alt]="cardText">
+  [src]="cardService.getCardImagePath(card)">

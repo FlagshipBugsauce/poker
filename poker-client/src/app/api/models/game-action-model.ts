@@ -1,5 +1,6 @@
 /* tslint:disable */
-import { LobbyPlayerModel } from './lobby-player-model';
+import {LobbyPlayerModel} from './lobby-player-model';
+
 export interface GameActionModel {
 
   /**
@@ -10,7 +11,7 @@ export interface GameActionModel {
   /**
    * The action that occurred.
    */
-  gameAction?: 'Fold' | 'Check' | 'Raise' | 'Call' | 'Bet' | 'ReRaise' | 'Ready' | 'Join' | 'Leave' | 'Start';
+  gameAction?: 'Fold' | 'Check' | 'Raise' | 'Call' | 'Bet' | 'ReRaise' | 'Ready' | 'Join' | 'LeaveLobby' | 'Start' | 'LeaveGame' | 'ReJoinGame';
 
   /**
    * ID of the action performed which identifies it.

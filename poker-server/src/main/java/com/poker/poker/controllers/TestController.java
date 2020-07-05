@@ -6,6 +6,9 @@ import com.poker.poker.documents.LobbyDocument;
 import com.poker.poker.models.WebSocketUpdateModel;
 import com.poker.poker.models.game.DrawGameDataContainerModel;
 import com.poker.poker.models.game.DrawGameDataModel;
+import com.poker.poker.models.websocket.ActionModel;
+import com.poker.poker.models.websocket.CurrentGameModel;
+import com.poker.poker.models.websocket.ToastModel;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -16,8 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * This is a class where we can test various things. At some point we can get rid of it, but for
- * now, it will be useful to test some design ideas, etc...
+ * This class is serving as a place to return models that aren't returned anywhere else, so that the
+ * client model generation will generate client models automatically.
  */
 @Slf4j
 @AllArgsConstructor
@@ -56,5 +59,20 @@ public class TestController {
   @GetMapping("/test/websocketUpdateModel")
   public ResponseEntity<WebSocketUpdateModel> webSocketUpdateModel() {
     return ResponseEntity.ok(new WebSocketUpdateModel());
+  }
+
+  @GetMapping("/test/websocket/models/action-model")
+  public ResponseEntity<ActionModel> actionModel() {
+    return ResponseEntity.ok(new ActionModel());
+  }
+
+  @GetMapping("/test/websocket/models/toast-model")
+  public ResponseEntity<ToastModel> toastModel() {
+    return ResponseEntity.ok(new ToastModel());
+  }
+
+  @GetMapping("/test/websocket/models/current-game-model")
+  public ResponseEntity<CurrentGameModel> currentGameModel() {
+    return ResponseEntity.ok(new CurrentGameModel());
   }
 }

@@ -18,5 +18,5 @@ export interface WebSocketUpdateModel {
   /**
    * Type of message.
    */
-  type?: 'GameList' | 'Lobby' | 'Game' | 'Hand' | 'GameData' | 'PlayerData';
+  type?: 'GameList' | 'Lobby' | 'Game' | 'Hand' | 'GameData' | 'PlayerData' | 'Toast';
 }

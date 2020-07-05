@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @ExtendWith(MockitoExtension.class)
 public class UserControllerTests extends TestBaseClass {
+
   private final String baseMapping = "/user";
   private MockMvc mockMvc;
   @Mock private UserService userService;

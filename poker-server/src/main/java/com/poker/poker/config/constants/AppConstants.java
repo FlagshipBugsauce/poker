@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class AppConstants {
+
   // INITIALIZATION CONSTANTS
   private final String defaultAdminEmail = "admin@domain.com";
   private final String defaultAdminPassword = "admin!@#";

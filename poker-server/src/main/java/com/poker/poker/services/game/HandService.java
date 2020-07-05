@@ -76,10 +76,14 @@ public class HandService {
    * @throws BadRequestException If there is no hand associated with the ID provided.
    */
   public HandDocument getHand(final UUID handId) throws BadRequestException {
-    if (hands.get(handId) == null) {
+    // TODO: Was getting exceptions because the hand couldn't be found. Now checking DB if hand
+    // can't be found and only throwing if both attempts fail.
+    final HandDocument hand =
+        hands.get(handId) != null ? hands.get(handId) : handRepository.findHandDocumentById(handId);
+    if (hand == null) {
       throw handConstants.getHandNotFoundException();
     }
-    return hands.get(handId);
+    return hand;
   }
 
   /**
@@ -227,9 +231,8 @@ public class HandService {
     gameDocument.getPlayers().forEach(p -> userIdToGameIdMap.put(p.getId(), gameDocument.getId()));
 
     hand.setPlayerToAct(gameDocument.getPlayers().get(0)); // First in the list acts first.
-    // TODO: Remove if it's really not needed. Temporarily removed for now.
-    //    broadcastHandUpdate(gameDocument); // Broadcast the new hand.
     restoreAndShuffle(gameDocument); // Restore the deck and shuffle it.
+
     applicationEventPublisher.publishEvent(new WaitForPlayerEvent(this, hand.getPlayerToAct()));
   }
 
@@ -242,7 +245,8 @@ public class HandService {
     final HandDocument hand = getHand(gameDocument);
     // Broadcast to game topic
     webSocketService.sendPublicMessage(
-        "/topic/game/" + gameDocument.getId(), new SocketContainerModel(MessageType.Hand, hand));
+        appConfig.getGameTopic() + gameDocument.getId(),
+        new SocketContainerModel(MessageType.Hand, hand));
   }
 
   /**
@@ -281,8 +285,9 @@ public class HandService {
     if (!waitForPlayerEvent.getPlayer().isAway()) {
       applicationEventPublisher.publishEvent(
           new PlayerAfkEvent(this, waitForPlayerEvent.getPlayer()));
+    } else {
+      draw(userRepository.findUserDocumentById(userId)); // draw card
     }
-    draw(userRepository.findUserDocumentById(userId)); // draw card
   }
 
   /**
@@ -294,6 +299,7 @@ public class HandService {
   public void checkIfItsPlayersTurn(final HandDocument hand, final UserDocument user) {
     if (!hand.getPlayerToAct().getId().equals(user.getId())) {
       log.error("Player {} attempted to act but it is not this players turn.", user.getId());
+      // TODO: Maybe we don't actually need to throw here...
       throw handConstants.getNotPlayersTurnException();
     }
   }
@@ -311,21 +317,17 @@ public class HandService {
     checkIfItsPlayersTurn(hand, user); // Verify the player can act.
 
     final CardModel card = getDeck(userIdToGameIdMap.get(user.getId())).draw(); // Draw card.
-
+    final String toastMessage =
+        String.format(
+            "%s %s drew the %s of %s.", // Bob Dole drew the Five of Diamonds.
+            user.getFirstName(), user.getLastName(), card.getValue(), card.getSuit());
     hand.getActions()
         .add(
             new HandActionModel(
-                UUID.randomUUID(),
-                HandAction.Draw,
-                String.format(
-                    "%s %s drew the %s of %s.", // Bob Dole drew the Five of Diamonds.
-                    user.getFirstName(), user.getLastName(), card.getValue(), card.getSuit()),
-                hand.getPlayerToAct(),
-                -1,
-                card));
+                UUID.randomUUID(), HandAction.Draw, toastMessage, hand.getPlayerToAct(), -1, card));
 
     hand.getDrawnCards().add(card);
-
+    webSocketService.sendGameToast(hand.getGameId(), toastMessage, "lg");
     applicationEventPublisher.publishEvent(
         new HandActionEvent(this, hand.getGameId(), hand.getId(), HandAction.Draw));
     return new ApiSuccessModel("Card was drawn successfully.");
@@ -348,13 +350,18 @@ public class HandService {
    * @return The winner of the specified hand.
    */
   public PlayerModel determineWinner(final HandDocument hand) {
-    GamePlayerModel winner = null;
+    final GamePlayerModel winner;
     // Should be able
     final List<HandActionModel> actions = new ArrayList<>(hand.getActions());
     actions.sort((a, b) -> cardService.compare(a.getDrawnCard(), b.getDrawnCard()));
     Collections.reverse(actions);
     actions.get(0).getPlayer().setScore(actions.get(0).getPlayer().getScore() + 1);
-    return actions.get(0).getPlayer();
+    winner = actions.get(0).getPlayer();
+    webSocketService.sendGameToast(
+        hand.getGameId(),
+        winner.getFirstName() + " " + winner.getLastName() + " won the round!",
+        "lg");
+    return winner;
   }
 
   /**

@@ -27,6 +27,14 @@ export const selectLoggedInUser = createSelector(
   (state: AppState) => state.loggedInUser
 );
 
+/** Current game selector. */
+export const currentGameFeature =
+  createFeatureSelector<AppStateContainer, AppState>('appState');
+export const selectCurrentGame = createSelector(
+  currentGameFeature,
+  (state: AppState) => state.currentGame
+);
+
 export const selectLobbyInfo = (state: AppStateContainer) => state.appState.lobbyInfo;
 
 export const selectLastLobbyInfo = (state: AppStateContainer) => state.appState.lastLobbyInfo;

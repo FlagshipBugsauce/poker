@@ -1,5 +1,5 @@
 /* tslint:disable */
-import { CardModel } from './card-model';
+import {CardModel} from './card-model';
 
 /**
  * Model representing data in the draw game.

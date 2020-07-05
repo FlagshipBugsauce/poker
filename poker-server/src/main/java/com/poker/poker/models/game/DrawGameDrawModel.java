@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Schema(description = "Model representing data in the draw game.")
 public class DrawGameDrawModel {
+
   @Schema(description = "Card that was drawn.", implementation = CardModel.class)
   private CardModel card;
 

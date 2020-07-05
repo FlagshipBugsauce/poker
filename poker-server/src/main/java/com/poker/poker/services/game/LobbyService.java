@@ -1,5 +1,6 @@
 package com.poker.poker.services.game;
 
+import com.poker.poker.config.AppConfig;
 import com.poker.poker.config.constants.GameConstants;
 import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.LobbyDocument;
@@ -35,6 +36,8 @@ import org.springframework.stereotype.Service;
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class LobbyService {
 
+  private final AppConfig appConfig;
+
   /** A map of active games, keyed by the games ID. */
   private final Map<UUID, LobbyDocument> lobbys;
 
@@ -60,14 +63,15 @@ public class LobbyService {
   private void broadcastLobbyDocument(LobbyDocument lobbyDocument) {
     // Broadcast lobby document to lobby topic.
     webSocketService.sendPublicMessage(
-        "/topic/game/" + lobbyDocument.getId(),
+        appConfig.getGameTopic() + lobbyDocument.getId(),
         new SocketContainerModel(MessageType.Lobby, lobbyDocument));
   }
 
   /** Broadcasts the list of joinable games to the game list topic. */
   public void broadcastGameList() {
     webSocketService.sendPublicMessage(
-        "/topic/games", new SocketContainerModel(MessageType.GameList, getLobbyList()));
+        appConfig.getGameListTopic(),
+        new SocketContainerModel(MessageType.GameList, getLobbyList()));
   }
 
   /**
@@ -102,6 +106,7 @@ public class LobbyService {
 
     // Send to game list topic
     broadcastGameList();
+    webSocketService.sendGameToast(lobbyDocument.getId(), "The game has started!", "lg");
 
     lobbyRepository.save(lobbyDocument);
   }
@@ -199,6 +204,7 @@ public class LobbyService {
         .getGameActions()
         .add(new GameActionModel(UUID.randomUUID(), player.get(), GameAction.Ready, message));
 
+    webSocketService.sendGameToast(lobbyDocument.getId(), message, "md");
     log.debug("Player status set to ready (ID: {}).", user.getId().toString());
 
     broadcastLobbyDocument(lobbyDocument);
@@ -285,22 +291,38 @@ public class LobbyService {
 
     // Add new player to list of players in currently in the game.
     final LobbyPlayerModel lobbyPlayerModel = new LobbyPlayerModel(user, false, false);
-    lobbyDocument.getPlayers().add(lobbyPlayerModel);
-
+    /* TODO: Find a better way of handling this issue, perhaps using a synchronous event listener.
+    the idea here is to create join "events" that will form a queue and will only be executed
+    when another event has concluded. I think what is happening here is that when two players
+    attempt to join the same game in a short span of time, the add method of the array list
+    class is messing up because it's being modified on two threads simultaneously and then
+    failing some kind of integrity check. */
+    try {
+      lobbyDocument.getPlayers().add(lobbyPlayerModel);
+    } catch (ArrayIndexOutOfBoundsException e) {
+      try {
+        log.error("Issue with joining game, user: {}.", user.getId());
+        Thread.sleep(100);
+        lobbyDocument.getPlayers().add(lobbyPlayerModel);
+      } catch (InterruptedException interruptedException) {
+        interruptedException.printStackTrace();
+      }
+    }
+    final String toastMessage =
+        String.format(
+            "%s %s has joined the game.",
+            lobbyPlayerModel.getFirstName(), lobbyPlayerModel.getLastName());
     // Add the appropriate game action model.
     lobbyDocument
         .getGameActions()
         .add(
             new GameActionModel(
-                UUID.randomUUID(),
-                lobbyPlayerModel,
-                GameAction.Join,
-                String.format(
-                    "%s %s has joined the game.",
-                    lobbyPlayerModel.getFirstName(), lobbyPlayerModel.getLastName())));
+                UUID.randomUUID(), lobbyPlayerModel, GameAction.Join, toastMessage));
     userIdToLobbyIdMap.put(user.getId(), lobbyDocument.getId());
 
     // Broadcast updated lobby document to lobby topic and game list to game list topic.
+    webSocketService.sendGameToast(
+        lobbyDocument.getId(), toastMessage, "md"); // Also broadcast toast.
     broadcastLobbyDocument(lobbyDocument);
     broadcastGameList();
 
@@ -349,18 +371,18 @@ public class LobbyService {
     userIdToLobbyIdMap.remove(user.getId());
     log.debug("Player with ID: {}, has left game with ID: {}.", user.getId(), game.getId());
 
+    final String toastMessage =
+        String.format(
+            "%s %s has left the game.", player.get().getFirstName(), player.get().getLastName());
+
     // Add GameActionModel with the appropriate action.
     game.getGameActions()
         .add(
             new GameActionModel(
-                UUID.randomUUID(),
-                player.get(),
-                GameAction.Leave,
-                String.format(
-                    "%s %s has left the game.",
-                    player.get().getFirstName(), player.get().getLastName())));
+                UUID.randomUUID(), player.get(), GameAction.LeaveLobby, toastMessage));
 
     // Broadcast updated lobby document to lobby topic and game list to game list topic.
+    webSocketService.sendGameToast(game.getId(), toastMessage, "md");
     broadcastLobbyDocument(game);
     broadcastGameList();
 

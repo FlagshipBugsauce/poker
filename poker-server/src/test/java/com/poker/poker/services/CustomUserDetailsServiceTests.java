@@ -20,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class CustomUserDetailsServiceTests extends TestBaseClass {
+
   @Mock private UserRepository userRepository;
 
   @Spy private AppConstants appConstants;

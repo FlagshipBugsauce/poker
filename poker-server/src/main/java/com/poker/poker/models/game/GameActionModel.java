@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GameActionModel {
+
   @Schema(
       description = "ID of the action performed which identifies it.",
       implementation = UUID.class,
