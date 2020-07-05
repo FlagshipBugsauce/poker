@@ -21,14 +21,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class CustomUserDetailsServiceTests extends TestBaseClass {
 
-  @Mock
-  private UserRepository userRepository;
+  @Mock private UserRepository userRepository;
 
-  @Spy
-  private AppConstants appConstants;
+  @Spy private AppConstants appConstants;
 
-  @InjectMocks
-  private CustomUserDetailsService customUserDetailsService;
+  @InjectMocks private CustomUserDetailsService customUserDetailsService;
 
   @BeforeEach
   public void setup() {

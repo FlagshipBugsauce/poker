@@ -90,7 +90,7 @@ public class WebSocketService {
    * secure topic to communicate on.
    *
    * @param recipient The ID of the user.
-   * @param data      The data to be sent to this user.
+   * @param data The data to be sent to this user.
    */
   public void sendPrivateMessage(final UUID recipient, final SocketContainerModel data) {
     // TODO: Add validation
@@ -104,7 +104,7 @@ public class WebSocketService {
    * made to conceal the topic from anyone who wants to listen in.
    *
    * @param topic The topic to broadcast to.
-   * @param data  The data to broadcast.
+   * @param data The data to broadcast.
    */
   public void sendPublicMessage(final String topic, final SocketContainerModel data) {
     template.convertAndSend(topic, data);
@@ -116,9 +116,9 @@ public class WebSocketService {
    * this method will only display toasts with a specific appearance (light bg, medium size, which
    * last for 5 seconds).
    *
-   * @param gameId  The ID of the lobby the toast should appear in.
+   * @param gameId The ID of the lobby the toast should appear in.
    * @param message The message that should be contained in the toast.
-   * @param size    The size of the toast (sm, md, lg, xl).
+   * @param size The size of the toast (sm, md, lg, xl).
    */
   public void sendGameToast(final UUID gameId, final String message, final String size) {
     sendPublicMessage(

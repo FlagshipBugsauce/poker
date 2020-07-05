@@ -66,7 +66,7 @@ public class WebSocketController {
 
   @MessageMapping("/game/leave")
   public void leaveGame(final ActionModel action) {
-//    gameService.leaveGame(jwtService.getUserDocument(action.getJwt()));
+    //    gameService.leaveGame(jwtService.getUserDocument(action.getJwt()));
     applicationEventPublisher.publishEvent(
         new LeaveGameEvent(this, jwtService.getUserDocument(action.getJwt())));
   }
@@ -74,7 +74,7 @@ public class WebSocketController {
   //  @RequestMapping("${spring.data.rest.base-path}/_ping")
   @MessageMapping("/game/rejoin")
   public void rejoinGame(final ActionModel action) {
-//    gameService.rejoinGame(jwtService.getUserDocument(action.getJwt()));
+    //    gameService.rejoinGame(jwtService.getUserDocument(action.getJwt()));
     applicationEventPublisher.publishEvent(
         new RejoinGameEvent(this, jwtService.getUserDocument(action.getJwt())));
   }
@@ -84,8 +84,6 @@ public class WebSocketController {
     log.debug("User {} requesting update.", action.getUserId());
     applicationEventPublisher.publishEvent(
         new CurrentGameEvent(
-            this,
-            action.getUserId(),
-            gameService.getCurrentGameModel(action.getUserId())));
+            this, action.getUserId(), gameService.getCurrentGameModel(action.getUserId())));
   }
 }

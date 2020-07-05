@@ -55,19 +55,13 @@ public class GameService {
 
   private final UserRepository userRepository;
 
-  /**
-   * Mapping of user Id to game Id.
-   */
+  /** Mapping of user Id to game Id. */
   private final Map<UUID, UUID> userIdToGameIdMap;
 
-  /**
-   * Mapping of game Id to game document.
-   */
+  /** Mapping of game Id to game document. */
   private final Map<UUID, GameDocument> games;
 
-  /**
-   * Mapping of game Id to game data.
-   */
+  /** Mapping of game Id to game data. */
   private final Map<UUID, DrawGameDataContainerModel> gameIdToGameDataMap;
 
   private final GameConstants gameConstants;
@@ -86,9 +80,9 @@ public class GameService {
 
   public CurrentGameModel getCurrentGameModel(final UUID userId) {
     final CurrentGameModel currentGameModel = new CurrentGameModel();
-    if (userIdToGameIdMap.get(userId) != null &&
-        games.get(userIdToGameIdMap.get(userId)) != null &&
-        games.get(userIdToGameIdMap.get(userId)).getState() == GameState.Play) {
+    if (userIdToGameIdMap.get(userId) != null
+        && games.get(userIdToGameIdMap.get(userId)) != null
+        && games.get(userIdToGameIdMap.get(userId)).getState() == GameState.Play) {
       currentGameModel.setId(games.get(userIdToGameIdMap.get(userId)).getId());
       currentGameModel.setInGame(true);
     } else {
@@ -167,7 +161,7 @@ public class GameService {
    *
    * @param gameId The ID of the specified game.
    * @param player The player who won.
-   * @param hand   The hand the player won in.
+   * @param hand The hand the player won in.
    */
   private void setWinnerInGameData(final UUID gameId, final PlayerModel player, final int hand) {
     getGameData(gameId).incrementHand(appConfig.getNumRoundsInRollGame());
@@ -182,8 +176,8 @@ public class GameService {
    *
    * @param gameId The ID of the specified game.
    * @param player The player that acted.
-   * @param card   The card the player drew.
-   * @param hand   The current hand of the game.
+   * @param card The card the player drew.
+   * @param hand The current hand of the game.
    */
   private void updateGameData(
       final UUID gameId, final GamePlayerModel player, final CardModel card, final int hand) {
@@ -249,7 +243,7 @@ public class GameService {
    * Creates a new game.
    *
    * @param createGameModel Model representing the game parameters.
-   * @param user            The user who created the game.
+   * @param user The user who created the game.
    * @return An ApiSuccessModel containing the ID of the game, to indicate creation was successful.
    * @throws BadRequestException If the user is already in a game.
    */
@@ -296,7 +290,7 @@ public class GameService {
    * until the timer has elapsed.
    *
    * @param playerId The ID of the player whose status is being transitioned.
-   * @param status   The away status being set.
+   * @param status The away status being set.
    */
   public ApiSuccessModel setPlayerActiveStatus(final UUID playerId, final boolean status) {
     setPlayerActiveStatusInternal(playerId, status);
@@ -359,8 +353,8 @@ public class GameService {
    * @param userDocument Model representing the user attempting to join the game.
    * @return An ApiSuccessModel indicating the request was successful.
    * @throws BadRequestException If the game ID provided is invalid or if the specified user is
-   *                             already in a game (other than the game they are attempting to join
-   *                             - if they attempt to join this game, nothing will happen).
+   *     already in a game (other than the game they are attempting to join - if they attempt to
+   *     join this game, nothing will happen).
    */
   public ApiSuccessModel joinLobby(String gameIdString, UserDocument userDocument)
       throws BadRequestException {
@@ -441,11 +435,14 @@ public class GameService {
 
   // TODO: Add docs
   public void updateCurrentGameTopic(final GameDocument game, final boolean over) {
-    game.getPlayers().forEach(player -> applicationEventPublisher.publishEvent(
-        new CurrentGameEvent(
-            this,
-            player.getId(),
-            new CurrentGameModel(!over, over ? null : game.getId()))));
+    game.getPlayers()
+        .forEach(
+            player ->
+                applicationEventPublisher.publishEvent(
+                    new CurrentGameEvent(
+                        this,
+                        player.getId(),
+                        new CurrentGameModel(!over, over ? null : game.getId()))));
   }
 
   /**

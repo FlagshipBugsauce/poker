@@ -112,7 +112,7 @@ public class UserService {
   /**
    * Validates the user to check if the group they are in is correct based on their JWT.
    *
-   * @param jwt           A string that contains the Authentication information of a user.
+   * @param jwt A string that contains the Authentication information of a user.
    * @param groupsAllowed a list of user groups desired to validate a user against.
    */
   public void validate(final String jwt, final List<UserGroup> groupsAllowed)

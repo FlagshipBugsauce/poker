@@ -5,6 +5,4 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 
 @EnableMongoRepositories(basePackages = {"com.poker.poker.repositories"})
 @Configuration
-public class MongoConfig {
-
-}
+public class MongoConfig {}

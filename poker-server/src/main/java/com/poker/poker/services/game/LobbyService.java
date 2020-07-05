@@ -38,9 +38,7 @@ public class LobbyService {
 
   private final AppConfig appConfig;
 
-  /**
-   * A map of active games, keyed by the games ID.
-   */
+  /** A map of active games, keyed by the games ID. */
   private final Map<UUID, LobbyDocument> lobbys;
 
   /**
@@ -69,9 +67,7 @@ public class LobbyService {
         new SocketContainerModel(MessageType.Lobby, lobbyDocument));
   }
 
-  /**
-   * Broadcasts the list of joinable games to the game list topic.
-   */
+  /** Broadcasts the list of joinable games to the game list topic. */
   public void broadcastGameList() {
     webSocketService.sendPublicMessage(
         appConfig.getGameListTopic(),
@@ -221,7 +217,7 @@ public class LobbyService {
    * this method will throw if the user IS in a game.
    *
    * @param userId ID of the user being checked.
-   * @param in     Flag to determine whether the user should or should not, be in a game.
+   * @param in Flag to determine whether the user should or should not, be in a game.
    */
   public void checkWhetherUserIsInLobbyAndThrow(final UUID userId, final boolean in) {
     if (userIdToLobbyIdMap.get(userId) == null && in) {
@@ -235,7 +231,7 @@ public class LobbyService {
    * Creates a new game document based on attributes given in createGameModel.
    *
    * @param createGameModel A model containing: name, maximum players, and buy in.
-   * @param user            the user document of the player creating the game.
+   * @param user the user document of the player creating the game.
    */
   public void createLobby(CreateGameModel createGameModel, UserDocument user, UUID id) {
     checkWhetherUserIsInLobbyAndThrow(user.getId(), false);
@@ -285,9 +281,9 @@ public class LobbyService {
    * players game documents in the game.
    *
    * @param gameId The UUID of the game the player wishes to join.
-   * @param user   The UserDocument associated with the player attempting to join.
+   * @param user The UserDocument associated with the player attempting to join.
    * @return An ApiSuccessModel containing a message which indicates the attempt to join was
-   * successful.
+   *     successful.
    */
   public ApiSuccessModel joinLobby(UUID gameId, UserDocument user) {
     // Find the active game you wish to join
@@ -296,11 +292,11 @@ public class LobbyService {
     // Add new player to list of players in currently in the game.
     final LobbyPlayerModel lobbyPlayerModel = new LobbyPlayerModel(user, false, false);
     /* TODO: Find a better way of handling this issue, perhaps using a synchronous event listener.
-        the idea here is to create join "events" that will form a queue and will only be executed
-        when another event has concluded. I think what is happening here is that when two players
-        attempt to join the same game in a short span of time, the add method of the array list
-        class is messing up because it's being modified on two threads simultaneously and then
-        failing some kind of integrity check. */
+    the idea here is to create join "events" that will form a queue and will only be executed
+    when another event has concluded. I think what is happening here is that when two players
+    attempt to join the same game in a short span of time, the add method of the array list
+    class is messing up because it's being modified on two threads simultaneously and then
+    failing some kind of integrity check. */
     try {
       lobbyDocument.getPlayers().add(lobbyPlayerModel);
     } catch (ArrayIndexOutOfBoundsException e) {
@@ -312,23 +308,21 @@ public class LobbyService {
         interruptedException.printStackTrace();
       }
     }
-    final String toastMessage = String.format(
-        "%s %s has joined the game.",
-        lobbyPlayerModel.getFirstName(), lobbyPlayerModel.getLastName());
+    final String toastMessage =
+        String.format(
+            "%s %s has joined the game.",
+            lobbyPlayerModel.getFirstName(), lobbyPlayerModel.getLastName());
     // Add the appropriate game action model.
     lobbyDocument
         .getGameActions()
         .add(
             new GameActionModel(
-                UUID.randomUUID(),
-                lobbyPlayerModel,
-                GameAction.Join,
-                toastMessage));
+                UUID.randomUUID(), lobbyPlayerModel, GameAction.Join, toastMessage));
     userIdToLobbyIdMap.put(user.getId(), lobbyDocument.getId());
 
     // Broadcast updated lobby document to lobby topic and game list to game list topic.
-    webSocketService
-        .sendGameToast(lobbyDocument.getId(), toastMessage, "md"); // Also broadcast toast.
+    webSocketService.sendGameToast(
+        lobbyDocument.getId(), toastMessage, "md"); // Also broadcast toast.
     broadcastLobbyDocument(lobbyDocument);
     broadcastGameList();
 
@@ -377,18 +371,15 @@ public class LobbyService {
     userIdToLobbyIdMap.remove(user.getId());
     log.debug("Player with ID: {}, has left game with ID: {}.", user.getId(), game.getId());
 
-    final String toastMessage = String.format(
-        "%s %s has left the game.",
-        player.get().getFirstName(), player.get().getLastName());
+    final String toastMessage =
+        String.format(
+            "%s %s has left the game.", player.get().getFirstName(), player.get().getLastName());
 
     // Add GameActionModel with the appropriate action.
     game.getGameActions()
         .add(
             new GameActionModel(
-                UUID.randomUUID(),
-                player.get(),
-                GameAction.LeaveLobby,
-                toastMessage));
+                UUID.randomUUID(), player.get(), GameAction.LeaveLobby, toastMessage));
 
     // Broadcast updated lobby document to lobby topic and game list to game list topic.
     webSocketService.sendGameToast(game.getId(), toastMessage, "md");

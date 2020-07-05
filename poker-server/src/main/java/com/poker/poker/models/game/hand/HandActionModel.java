@@ -34,15 +34,11 @@ public class HandActionModel {
   @Schema(description = "Player that performed the roll.", implementation = GamePlayerModel.class)
   private GamePlayerModel player;
 
-  /**
-   * For roll events only.
-   */
+  /** For roll events only. */
   @Schema(description = "Value that was rolled.", example = "27")
   private int value;
 
-  /**
-   * For draw events only.
-   */
+  /** For draw events only. */
   @Schema(description = "Card that was drawn.", implementation = CardModel.class)
   private CardModel drawnCard;
 }

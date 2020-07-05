@@ -29,9 +29,7 @@ public class DeckModel {
     usedCards = new ArrayList<>();
   }
 
-  /**
-   * Randomizes the cards in the deck (shuffle).
-   */
+  /** Randomizes the cards in the deck (shuffle). */
   public void shuffle() {
     Collections.shuffle(cards);
   }
@@ -39,7 +37,7 @@ public class DeckModel {
   /**
    * Creates a list of CardModel lists, simulating dealing a hand of cards.
    *
-   * @param numPlayers      The number of players in the hand.
+   * @param numPlayers The number of players in the hand.
    * @param numCardsPerHand The number of cards to give each player.
    * @return A list of CardModel lists for each player.
    */
@@ -58,9 +56,7 @@ public class DeckModel {
     return hands;
   }
 
-  /**
-   * Adds all used cards back to the deck.
-   */
+  /** Adds all used cards back to the deck. */
   public void restoreDeck() {
     cards.addAll(usedCards);
     usedCards = new ArrayList<>();
@@ -81,9 +77,7 @@ public class DeckModel {
     return usedCards.get(usedCards.size() - 1);
   }
 
-  /**
-   * Removes a card from the deck (burns a card).
-   */
+  /** Removes a card from the deck (burns a card). */
   public void burn() {
     usedCards.add(cards.remove(cards.size() - 1));
   }

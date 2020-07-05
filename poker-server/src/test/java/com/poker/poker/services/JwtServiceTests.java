@@ -14,11 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class JwtServiceTests extends TestBaseClass {
 
-  @Spy
-  private AppConstants appConstants;
+  @Spy private AppConstants appConstants;
 
-  @InjectMocks
-  private JwtService jwtService;
+  @InjectMocks private JwtService jwtService;
 
   @Test
   public void testExtractEmail() {

@@ -45,24 +45,16 @@ public class HandService {
 
   private final HandConstants handConstants;
 
-  /**
-   * Mapping of hand Id to HandDocument of active hand.
-   */
+  /** Mapping of hand Id to HandDocument of active hand. */
   private final Map<UUID, HandDocument> hands;
 
-  /**
-   * Mapping of game Id to Id of an active hand.
-   */
+  /** Mapping of game Id to Id of an active hand. */
   private final Map<UUID, UUID> gameIdToHandIdMap;
 
-  /**
-   * Mapping of user Id to game Id.
-   */
+  /** Mapping of user Id to game Id. */
   private final Map<UUID, UUID> userIdToGameIdMap;
 
-  /**
-   * Mapping of game Id to deck
-   */
+  /** Mapping of game Id to deck */
   private final Map<UUID, DeckModel> gameIdToDeckMap;
 
   private final UserRepository userRepository;
@@ -84,7 +76,8 @@ public class HandService {
    * @throws BadRequestException If there is no hand associated with the ID provided.
    */
   public HandDocument getHand(final UUID handId) throws BadRequestException {
-    // TODO: Was getting exceptions because the hand couldn't be found. Now checking DB if hand can't be found and only throwing if both attempts fail.
+    // TODO: Was getting exceptions because the hand couldn't be found. Now checking DB if hand
+    // can't be found and only throwing if both attempts fail.
     final HandDocument hand =
         hands.get(handId) != null ? hands.get(handId) : handRepository.findHandDocumentById(handId);
     if (hand == null) {
@@ -142,7 +135,7 @@ public class HandService {
    * Creates the mapping from game Id to deck.
    *
    * @param gameId The specified game Id.
-   * @param deck   The deck.
+   * @param deck The deck.
    */
   public void setDeck(final UUID gameId, final DeckModel deck) {
     gameIdToDeckMap.put(gameId, deck);
@@ -169,8 +162,7 @@ public class HandService {
   }
 
   /**
-   * Shuffles the game for the specified game, throws if there is no deck associated with this
-   * game.
+   * Shuffles the game for the specified game, throws if there is no deck associated with this game.
    *
    * @param game The specified game.
    * @throws BadRequestException If there is no deck associated with the specified game.
@@ -180,8 +172,7 @@ public class HandService {
   }
 
   /**
-   * Shuffles the game for the specified game, throws if there is no deck associated with this
-   * game.
+   * Shuffles the game for the specified game, throws if there is no deck associated with this game.
    *
    * @param gameId The specified game.
    * @throws BadRequestException If there is no deck associated with the specified game.
@@ -326,18 +317,14 @@ public class HandService {
     checkIfItsPlayersTurn(hand, user); // Verify the player can act.
 
     final CardModel card = getDeck(userIdToGameIdMap.get(user.getId())).draw(); // Draw card.
-    final String toastMessage = String.format(
-        "%s %s drew the %s of %s.", // Bob Dole drew the Five of Diamonds.
-        user.getFirstName(), user.getLastName(), card.getValue(), card.getSuit());
+    final String toastMessage =
+        String.format(
+            "%s %s drew the %s of %s.", // Bob Dole drew the Five of Diamonds.
+            user.getFirstName(), user.getLastName(), card.getValue(), card.getSuit());
     hand.getActions()
         .add(
             new HandActionModel(
-                UUID.randomUUID(),
-                HandAction.Draw,
-                toastMessage,
-                hand.getPlayerToAct(),
-                -1,
-                card));
+                UUID.randomUUID(), HandAction.Draw, toastMessage, hand.getPlayerToAct(), -1, card));
 
     hand.getDrawnCards().add(card);
     webSocketService.sendGameToast(hand.getGameId(), toastMessage, "lg");
@@ -372,7 +359,8 @@ public class HandService {
     winner = actions.get(0).getPlayer();
     webSocketService.sendGameToast(
         hand.getGameId(),
-        winner.getFirstName() + " " + winner.getLastName() + " won the round!", "lg");
+        winner.getFirstName() + " " + winner.getLastName() + " won the round!",
+        "lg");
     return winner;
   }
 

@@ -21,11 +21,9 @@ public class UserControllerTests extends TestBaseClass {
 
   private final String baseMapping = "/user";
   private MockMvc mockMvc;
-  @Mock
-  private UserService userService;
+  @Mock private UserService userService;
 
-  @InjectMocks
-  private UserController userController;
+  @InjectMocks private UserController userController;
 
   @BeforeEach
   public void setup() {
