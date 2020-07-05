@@ -3,6 +3,7 @@ import {
   gameDataUpdated,
   gameDocumentUpdated,
   gameListUpdated,
+  gameToastReceived,
   handDocumentUpdated,
   hideFailedSignInWarning,
   joinLobby,
@@ -13,16 +14,20 @@ import {
   readyUp,
   signInFail,
   signInSuccess,
-  signOut
+  signOut,
+  updateCurrentGame
 } from './app.actions';
 import {AppState} from '../shared/models/app-state.model';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
   AuthResponseModel,
+  CurrentGameModel,
   DrawGameDataContainerModel,
-  GameDocument, GamePlayerModel,
+  GameDocument,
+  GamePlayerModel,
   HandDocument,
-  LobbyDocument
+  LobbyDocument,
+  ToastModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
 
@@ -64,8 +69,11 @@ const appReducerLocal = createReducer<AppState>(
       })
   ),
   on(signInFail, (state: AppState) => ({...state, showSignInFail: true})),
-  on(hideFailedSignInWarning, (state: AppState) => ({...state, showSignInFail: false}))
+  on(hideFailedSignInWarning, (state: AppState) => ({...state, showSignInFail: false})),
+  on(updateCurrentGame,
+    (state: AppState, currentGame: CurrentGameModel) => ({...state, currentGame}))
 );
+
 export function appReducer(state: AppState, action) {
   return appReducerLocal(state, action);
 }
@@ -81,6 +89,7 @@ const gameDataReducerInternal = createReducer<DrawGameDataContainerModel>(
   gameDataInitialState,
   on(gameDataUpdated,
     (state: DrawGameDataContainerModel, newState: DrawGameDataContainerModel) => newState));
+
 export function gameDataReducer(state: DrawGameDataContainerModel, action) {
   return gameDataReducerInternal(state, action);
 }
@@ -92,6 +101,7 @@ export const gameDocumentInitialState: GameDocument = {} as GameDocument;
 const gameDocumentReducerInternal = createReducer<GameDocument>(
   gameDocumentInitialState,
   on(gameDocumentUpdated, (state: GameDocument, newState: GameDocument) => newState));
+
 export function gameDocumentReducer(state: GameDocument, action) {
   return gameDocumentReducerInternal(state, action);
 }
@@ -103,6 +113,7 @@ export const lobbyDocumentInitialState: LobbyDocument = {} as LobbyDocument;
 const lobbyDocumentReducerInternal = createReducer<LobbyDocument>(
   lobbyDocumentInitialState,
   on(lobbyDocumentUpdated, (state: LobbyDocument, newState: LobbyDocument) => newState));
+
 export function lobbyDocumentReducer(state: LobbyDocument, action) {
   return lobbyDocumentReducerInternal(state, action);
 }
@@ -114,6 +125,7 @@ export const handDocumentInitialState: HandDocument = {} as HandDocument;
 const handDocumentReducerInternal = createReducer<HandDocument>(
   handDocumentInitialState,
   on(handDocumentUpdated, (state: HandDocument, newState: HandDocument) => newState));
+
 export function handDocumentReducer(state: HandDocument, action) {
   return handDocumentReducerInternal(state, action);
 }
@@ -126,6 +138,7 @@ const gameListReducerInternal = createReducer<GameListContainerModel>(
   gameListInitialState,
   on(gameListUpdated,
     (state: GameListContainerModel, newState: GameListContainerModel) => newState));
+
 export function gameListReducer(state: GameListContainerModel, action) {
   return gameListReducerInternal(state, action);
 }
@@ -138,6 +151,17 @@ const playerDataReducerInternal = createReducer<GamePlayerModel>(
   playerDataInitialState,
   on(playerDataUpdated,
     (state: GamePlayerModel, newState: GamePlayerModel) => newState));
+
 export function playerDataReducer(state: GamePlayerModel, action) {
   return playerDataReducerInternal(state, action);
+}
+
+// TODO: Don't think I actually need this...
+export const toastDataInitialState: ToastModel = {} as ToastModel;
+const toastDataReducerInternal = createReducer<ToastModel>(
+  toastDataInitialState,
+  on(gameToastReceived, (state: ToastModel, newState: ToastModel) => newState));
+
+export function toastDataReducer(state, action) {
+  return toastDataReducerInternal(state, action);
 }

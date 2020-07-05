@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Data
 public class ApiErrorModel implements Serializable {
+
   @Schema(description = "The type of the error.", example = "Bad Request")
   private final String errorType;
 

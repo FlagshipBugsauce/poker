@@ -33,7 +33,8 @@ public abstract class PlayerModel {
   protected String lastName;
 
   /**
-   * Constructor that takes in a UserDocument and fill in the fields the two classes have in common.
+   * Constructor that takes in a UserDocument and fill in the fields the two classes have in
+   * common.
    *
    * @param userDocument UserDocument representing a player.
    */

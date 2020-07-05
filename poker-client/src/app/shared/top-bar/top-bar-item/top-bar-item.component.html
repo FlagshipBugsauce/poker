@@ -10,16 +10,16 @@
     {{menuItem.text}}
   </a>
 </span>
-<div *ngIf="menuItem.dropDown" ngbDropdown class="d-inline-block top-bar-item">
+<div *ngIf="menuItem.dropDown" class="d-inline-block top-bar-item" ngbDropdown>
   <a
-     [ngClass]="{
+    [ngClass]="{
        'btn': 'true',
        'btn-outline-success': 'true',
        'top-bar-button': !active,
        'top-bar-button-active': active
      }"
-     role="button"
-     ngbDropdownToggle>
+    ngbDropdownToggle
+    role="button">
     {{menuItem.text}}
   </a>
   <div ngbDropdownMenu>

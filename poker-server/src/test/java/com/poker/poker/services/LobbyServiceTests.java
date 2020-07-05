@@ -33,12 +33,19 @@ import org.mockito.quality.Strictness;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class LobbyServiceTests extends TestBaseClass {
-  @Spy private AppConfig appConfig;
-  @Spy private Map<UUID, LobbyDocument> activeGames;
-  @Spy private Map<UUID, UUID> userIdToGameIdMap;
-  @Spy private GameConstants gameConstants;
-  @Mock private LobbyRepository lobbyRepository;
-  @Mock private WebSocketService webSocketService;
+
+  @Spy
+  private AppConfig appConfig;
+  @Spy
+  private Map<UUID, LobbyDocument> activeGames;
+  @Spy
+  private Map<UUID, UUID> userIdToGameIdMap;
+  @Spy
+  private GameConstants gameConstants;
+  @Mock
+  private LobbyRepository lobbyRepository;
+  @Mock
+  private WebSocketService webSocketService;
 
   private LobbyService lobbyService;
 
@@ -46,7 +53,7 @@ public class LobbyServiceTests extends TestBaseClass {
    * Helper which will create a game with a random name and arbitrary host. It will then add the
    * specified number of players to the game. The players will be generated randomly.
    *
-   * @param actions Lambda function that will be executed after the game is set up.
+   * @param actions    Lambda function that will be executed after the game is set up.
    * @param numPlayers The desired number of players which should be added to the game.
    */
   private void withRandomGameWithPlayers(Consumer<List<Object>> actions, int numPlayers) {
@@ -99,7 +106,7 @@ public class LobbyServiceTests extends TestBaseClass {
    *
    * @param actions Lambda function that will be executed after the game is created.
    * @param newGame CreateGameModel used when creating the game.
-   * @param host The model for the host of the game.
+   * @param host    The model for the host of the game.
    */
   private void withSpecifiedGameAndHost(
       Consumer<List<Object>> actions, CreateGameModel newGame, UserDocument host) {
@@ -118,7 +125,8 @@ public class LobbyServiceTests extends TestBaseClass {
 
     lobbyService =
         new LobbyService(
-            activeGames, userIdToGameIdMap, gameConstants, lobbyRepository, webSocketService);
+            appConfig, activeGames, userIdToGameIdMap, gameConstants, lobbyRepository,
+            webSocketService);
     //    Mockito.when(uuidService.isValidUuidString(Mockito.anyString())).thenCallRealMethod();
     //    Mockito.doAnswer(
     //            (invocation) -> {

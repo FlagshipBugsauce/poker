@@ -1,10 +1,12 @@
 import {TopBarLobbyModel} from './top-bar-lobby.model';
 import {
+  CurrentGameModel,
   DrawGameDataContainerModel,
   GameDocument,
   GamePlayerModel,
   HandDocument,
   LobbyDocument,
+  ToastModel,
   UserModel
 } from '../../api/models';
 import {GameListContainerModel} from './game-list-container.model';
@@ -17,6 +19,7 @@ export interface AppState {
   lastLobbyInfo?: TopBarLobbyModel;
   loggedInUser?: UserModel;
   ready: boolean;
+  currentGame?: CurrentGameModel;
 }
 
 export interface AppStateContainer {
@@ -45,4 +48,8 @@ export interface HandStateContainer {
 
 export interface PlayerDataStateContainer {
   playerData: GamePlayerModel;
+}
+
+export interface ToastStateContainer {
+  lastToast: ToastModel;
 }

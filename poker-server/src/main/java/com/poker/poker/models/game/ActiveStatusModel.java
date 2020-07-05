@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Valid
 public class ActiveStatusModel {
+
   @Schema(
       description = "Flag to determine what to set the player's active status to.",
       example = "true")

@@ -9,6 +9,8 @@ public enum GameAction {
   ReRaise,
   Ready,
   Join,
-  Leave,
-  Start
+  LeaveLobby,
+  Start,
+  LeaveGame,
+  ReJoinGame
 }

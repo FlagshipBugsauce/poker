@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class WaitForPlayerEvent extends ApplicationEvent {
 
-  private GamePlayerModel player;
+  private final GamePlayerModel player;
 
   public WaitForPlayerEvent(Object source, GamePlayerModel player) {
     super(source);

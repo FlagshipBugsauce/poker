@@ -5,8 +5,11 @@ import com.poker.poker.config.constants.GameConstants;
 import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.HandDocument;
 import com.poker.poker.documents.UserDocument;
+import com.poker.poker.events.CurrentGameEvent;
 import com.poker.poker.events.HandActionEvent;
+import com.poker.poker.events.LeaveGameEvent;
 import com.poker.poker.events.PlayerAfkEvent;
+import com.poker.poker.events.RejoinGameEvent;
 import com.poker.poker.events.WaitForPlayerEvent;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.GameSummaryModel;
@@ -21,7 +24,9 @@ import com.poker.poker.models.game.DrawGameDataModel;
 import com.poker.poker.models.game.DrawGameDrawModel;
 import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.PlayerModel;
+import com.poker.poker.models.websocket.CurrentGameModel;
 import com.poker.poker.repositories.GameRepository;
+import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.services.UuidService;
 import com.poker.poker.services.WebSocketService;
 import com.poker.poker.validation.exceptions.BadRequestException;
@@ -48,13 +53,21 @@ public class GameService {
 
   private final AppConfig appConfig;
 
-  /** Mapping of user Id to game Id. */
+  private final UserRepository userRepository;
+
+  /**
+   * Mapping of user Id to game Id.
+   */
   private final Map<UUID, UUID> userIdToGameIdMap;
 
-  /** Mapping of game Id to game document. */
+  /**
+   * Mapping of game Id to game document.
+   */
   private final Map<UUID, GameDocument> games;
 
-  /** Mapping of game Id to game data. */
+  /**
+   * Mapping of game Id to game data.
+   */
   private final Map<UUID, DrawGameDataContainerModel> gameIdToGameDataMap;
 
   private final GameConstants gameConstants;
@@ -70,6 +83,20 @@ public class GameService {
   private final ApplicationEventPublisher applicationEventPublisher;
 
   private final WebSocketService webSocketService;
+
+  public CurrentGameModel getCurrentGameModel(final UUID userId) {
+    final CurrentGameModel currentGameModel = new CurrentGameModel();
+    if (userIdToGameIdMap.get(userId) != null &&
+        games.get(userIdToGameIdMap.get(userId)) != null &&
+        games.get(userIdToGameIdMap.get(userId)).getState() == GameState.Play) {
+      currentGameModel.setId(games.get(userIdToGameIdMap.get(userId)).getId());
+      currentGameModel.setInGame(true);
+    } else {
+      currentGameModel.setInGame(false);
+      currentGameModel.setId(null);
+    }
+    return currentGameModel;
+  }
 
   /**
    * Retrieves the game data needed for the client to display a summary of what has occurred in the
@@ -140,7 +167,7 @@ public class GameService {
    *
    * @param gameId The ID of the specified game.
    * @param player The player who won.
-   * @param hand The hand the player won in.
+   * @param hand   The hand the player won in.
    */
   private void setWinnerInGameData(final UUID gameId, final PlayerModel player, final int hand) {
     getGameData(gameId).incrementHand(appConfig.getNumRoundsInRollGame());
@@ -155,8 +182,8 @@ public class GameService {
    *
    * @param gameId The ID of the specified game.
    * @param player The player that acted.
-   * @param card The card the player drew.
-   * @param hand The current hand of the game.
+   * @param card   The card the player drew.
+   * @param hand   The current hand of the game.
    */
   private void updateGameData(
       final UUID gameId, final GamePlayerModel player, final CardModel card, final int hand) {
@@ -222,7 +249,7 @@ public class GameService {
    * Creates a new game.
    *
    * @param createGameModel Model representing the game parameters.
-   * @param user The user who created the game.
+   * @param user            The user who created the game.
    * @return An ApiSuccessModel containing the ID of the game, to indicate creation was successful.
    * @throws BadRequestException If the user is already in a game.
    */
@@ -269,6 +296,7 @@ public class GameService {
    * until the timer has elapsed.
    *
    * @param playerId The ID of the player whose status is being transitioned.
+   * @param status   The away status being set.
    */
   public ApiSuccessModel setPlayerActiveStatus(final UUID playerId, final boolean status) {
     setPlayerActiveStatusInternal(playerId, status);
@@ -281,13 +309,18 @@ public class GameService {
    * @param playerId The ID of the player whose status is being transitioned.
    */
   private void setPlayerActiveStatusInternal(final UUID playerId, final boolean status) {
-    getUsersGameDocument(playerId).getPlayers().stream()
+    final GameDocument gameDocument = getUsersGameDocument(playerId);
+    gameDocument.getPlayers().stream()
         .filter(player -> player.getId().equals(playerId))
         .findFirst()
         .orElseThrow(gameConstants::getPlayerNotInGameException)
         .setAway(status);
+    final UserDocument user = userRepository.findUserDocumentById(playerId);
+    if (status && handService.getHand(user).getPlayerToAct().getId().equals(playerId)) {
+      handService.draw(user);
+    }
 
-    broadcastGameUpdate(getUsersGameDocument(playerId));
+    broadcastGameUpdate(gameDocument);
     webSocketService.sendPublicMessage(
         "/topic/game/" + playerId,
         new SocketContainerModel(MessageType.PlayerData, getPlayerData(playerId)));
@@ -300,12 +333,11 @@ public class GameService {
    * Instead, their status is set to AFK mode. If the player rejoins, their status will be
    * transitioned from AFK mode to normal.
    *
-   * @param gameId The ID of the game the player is leaving.
-   * @param userDocument Model associated with the player leaving the game.
-   * @return ApiSuccessModel indicating the request to leave the game was successful.
+   * @param leaveGameEvent Event that is dispatched when a user leaves a game.
    */
-  public ApiSuccessModel leaveGame(final UUID gameId, final UserDocument userDocument) {
-    return setPlayerActiveStatus(userDocument.getId(), false);
+  @EventListener
+  public void leaveGame(final LeaveGameEvent leaveGameEvent) {
+    setPlayerActiveStatus(leaveGameEvent.getUser().getId(), true);
   }
 
   /**
@@ -313,11 +345,11 @@ public class GameService {
    * determines whether the player can still rejoin and will perform the appropriate steps to add
    * them back into the game if they can.
    *
-   * @param gameIdString ID of the game the player is attempting to rejoin.
-   * @param userDocument Model representing the user attempting to rejoin.
+   * @param rejoinGameEvent Event that is dispatched when a user rejoins a game.
    */
-  public void rejoinGame(String gameIdString, UserDocument userDocument) {
-    // TODO: Implement this.
+  @EventListener
+  public void rejoinGame(final RejoinGameEvent rejoinGameEvent) {
+    setPlayerActiveStatus(rejoinGameEvent.getUser().getId(), false);
   }
 
   /**
@@ -327,8 +359,8 @@ public class GameService {
    * @param userDocument Model representing the user attempting to join the game.
    * @return An ApiSuccessModel indicating the request was successful.
    * @throws BadRequestException If the game ID provided is invalid or if the specified user is
-   *     already in a game (other than the game they are attempting to join - if they attempt to
-   *     join this game, nothing will happen).
+   *                             already in a game (other than the game they are attempting to join
+   *                             - if they attempt to join this game, nothing will happen).
    */
   public ApiSuccessModel joinLobby(String gameIdString, UserDocument userDocument)
       throws BadRequestException {
@@ -400,7 +432,20 @@ public class GameService {
 
     /*    TODO: I had an SSE broadcast here sending out player data to players[0] for some reason.
     Leaving this here in case this was actually needed. Will remove soon. */
+
+    // Update Current game topic
+    updateCurrentGameTopic(gameDocument, false);
+
     return new ApiSuccessModel("The game has been started successfully.");
+  }
+
+  // TODO: Add docs
+  public void updateCurrentGameTopic(final GameDocument game, final boolean over) {
+    game.getPlayers().forEach(player -> applicationEventPublisher.publishEvent(
+        new CurrentGameEvent(
+            this,
+            player.getId(),
+            new CurrentGameModel(!over, over ? null : game.getId()))));
   }
 
   /**
@@ -411,7 +456,7 @@ public class GameService {
   public void broadcastGameDataUpdate(final GameDocument gameDocument) {
     // Broadcast to game topic
     webSocketService.sendPublicMessage(
-        "/topic/game/" + gameDocument.getId(),
+        appConfig.getGameTopic() + gameDocument.getId(),
         new SocketContainerModel(MessageType.GameData, getGameData(gameDocument)));
   }
 
@@ -423,7 +468,7 @@ public class GameService {
   public void broadcastGameUpdate(final GameDocument gameDocument) {
     // Broadcast to game topic
     webSocketService.sendPublicMessage(
-        "/topic/game/" + gameDocument.getId(),
+        appConfig.getGameTopic() + gameDocument.getId(),
         new SocketContainerModel(MessageType.Game, gameDocument));
   }
 
@@ -446,7 +491,7 @@ public class GameService {
     gameDocument.getPlayers().get(playerThatActed).setActing(false);
     // Broadcast player data to game topic
     webSocketService.sendPublicMessage(
-        "/topic/game/" + gameDocument.getPlayers().get(playerThatActed).getId(),
+        appConfig.getGameTopic() + gameDocument.getPlayers().get(playerThatActed).getId(),
         new SocketContainerModel(
             MessageType.PlayerData,
             getPlayerData(gameDocument.getPlayers().get(playerThatActed).getId())));
@@ -455,7 +500,7 @@ public class GameService {
     nextPlayerToAct.setActing(true);
     // Broadcast player data to game topic
     webSocketService.sendPublicMessage(
-        "/topic/game/" + nextPlayerToAct.getId(),
+        appConfig.getGameTopic() + nextPlayerToAct.getId(),
         new SocketContainerModel(MessageType.PlayerData, getPlayerData(nextPlayerToAct.getId())));
 
     // Set player to act:
@@ -564,14 +609,8 @@ public class GameService {
     games.remove(gameDocument.getId()); // Remove mapping.
     gameDocument.getPlayers().forEach(p -> userIdToGameIdMap.remove(p.getId())); // Remove mappings.
     broadcastGameDataUpdate(gameDocument); // Broadcast final update.
-    // TODO: Time for client to get final game data update. Get rid of this once a better workaround
-    // is found.
-    try {
-      Thread.sleep(3000);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
     broadcastGameUpdate(gameDocument); // Broadcast final update.
     gameIdToGameDataMap.remove(gameDocument.getId()); // Remove mapping.
+    updateCurrentGameTopic(gameDocument, true);
   }
 }

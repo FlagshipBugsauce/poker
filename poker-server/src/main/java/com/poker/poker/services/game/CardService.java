@@ -13,7 +13,9 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-/** Service that can perform useful operations for a card game. */
+/**
+ * Service that can perform useful operations for a card game.
+ */
 @Slf4j
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -65,9 +67,11 @@ public class CardService implements Comparator<CardModel> {
    */
   public List<CardModel> getFreshDeck() {
     final List<CardModel> deck = new ArrayList<>();
-    for (int i = 0; i < enumSuitValues.size(); i++)
-      for (int j = 0; j < enumCardValues.size(); i++)
+    for (int i = 0; i < enumSuitValues.size(); i++) {
+      for (int j = 0; j < enumCardValues.size(); i++) {
         deck.add(new CardModel(enumSuitValues.get(i), enumCardValues.get(j)));
+      }
+    }
     return deck;
   }
 

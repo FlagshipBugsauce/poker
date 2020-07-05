@@ -20,12 +20,15 @@ export class CardComponent implements OnInit {
   /**
    * Models of the card (default value of Ace of Spades).
    */
-  @Input() card: CardModel = { suit: CardSuit.Spades, value: CardValue.Ace };
+  @Input() card: CardModel = {suit: CardSuit.Spades, value: CardValue.Ace};
 
   /**
    * Size of the card.
    */
   @Input() size: CardSize;
+
+  constructor(public cardService: CardService) {
+  }
 
   /**
    * Getter that will return a textual representation of a card, i.e. "Ace of Spades".
@@ -33,8 +36,6 @@ export class CardComponent implements OnInit {
   public get cardText(): string {
     return this.card != null ? `${this.card.value} of ${this.card.suit}` : 'n/a';
   }
-
-  constructor(public cardService: CardService) { }
 
   ngOnInit(): void {
   }

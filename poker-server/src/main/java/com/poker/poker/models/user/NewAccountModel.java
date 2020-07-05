@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NewAccountModel {
+
   @Schema(description = "User's email address.", example = "email@domain.com")
   private String email;
 

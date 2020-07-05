@@ -30,13 +30,14 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 public class UserService {
-  private AuthenticationManager authenticationManager;
-  private JwtService jwtService;
-  private CustomUserDetailsService customUserDetailsService;
-  private AppConstants appConstants;
-  private UserRepository userRepository;
-  private PasswordEncoder passwordEncoder;
-  private UuidService uuidService;
+
+  private final AuthenticationManager authenticationManager;
+  private final JwtService jwtService;
+  private final CustomUserDetailsService customUserDetailsService;
+  private final AppConstants appConstants;
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
+  private final UuidService uuidService;
 
   /**
    * Authenticates the user if the email and password provided in the AuthRequestModel is valid.
@@ -111,7 +112,7 @@ public class UserService {
   /**
    * Validates the user to check if the group they are in is correct based on their JWT.
    *
-   * @param jwt A string that contains the Authentication information of a user.
+   * @param jwt           A string that contains the Authentication information of a user.
    * @param groupsAllowed a list of user groups desired to validate a user against.
    */
   public void validate(final String jwt, final List<UserGroup> groupsAllowed)

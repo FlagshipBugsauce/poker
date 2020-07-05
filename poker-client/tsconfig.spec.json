@@ -7,7 +7,8 @@
       "jest"
     ],
     // TODO: Figure out why this is needed.
-    "emitDecoratorMetadata": true // This actually causes failing tests to pass.
+    "emitDecoratorMetadata": true
+    // This actually causes failing tests to pass.
   },
   "files": [
     "src/polyfills.ts"

@@ -3,6 +3,8 @@
     <h3 class="card-header bg-success text-light">Game Started</h3>
     <div class="card-body">
       <p>The game has started!</p>
+      <button (click)="leaveGame()" class="btn btn-primary">Leave Game</button>
+      <button (click)="rejoinGame()" class="btn btn-primary">Rejoin Game</button>
     </div>
   </div>
   <div class="card m-3">
@@ -27,8 +29,8 @@
                 <img
                   *ngIf="isPlayerAway(dataRow.player.id)"
                   [src]="activeIcon"
-                  class="afk-icon"
-                  alt="Icon to indicate whether a player is active or AFK">
+                  alt="Icon to indicate whether a player is active or AFK"
+                  class="afk-icon">
               </td>
               <td
                 *ngFor="let draw of dataRow.draws"
@@ -57,10 +59,10 @@
         <div class="col-sm-2 text-right">
           <label class="form-check-label">
             <input
-              class="form-check-input"
-              type="checkbox"
+              (click)="toggleStatus()"
               [checked]="awayStatus"
-              (click)="toggleStatus()">
+              class="form-check-input"
+              type="checkbox">
             Away
           </label>
         </div>
@@ -78,7 +80,7 @@
     <h3 class="card-header bg-success text-light">Hand Summary</h3>
     <div class="row">
       <div class="col-sm-12 text-center p-3">
-        <span class="m-1" *ngFor="let card of hand.drawnCards">
+        <span *ngFor="let card of hand.drawnCards" class="m-1">
           <pkr-card [card]="card" size="xl"></pkr-card>
         </span>
       </div>

@@ -1,6 +1,6 @@
 /* tslint:disable */
-import { DrawGameDrawModel } from './draw-game-draw-model';
-import { GamePlayerModel } from './game-player-model';
+import {DrawGameDrawModel} from './draw-game-draw-model';
+import {GamePlayerModel} from './game-player-model';
 
 /**
  * Model representing player data in a game, i.e. cards drawn, etc...

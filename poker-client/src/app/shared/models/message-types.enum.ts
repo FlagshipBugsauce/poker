@@ -4,5 +4,6 @@ export enum MessageType {
   Game = 'Game',
   Hand = 'Hand',
   GameData = 'GameData',
-  PlayerData = 'PlayerData'
+  PlayerData = 'PlayerData',
+  Toast = 'Toast'
 }

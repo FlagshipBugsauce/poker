@@ -10,15 +10,24 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @AllArgsConstructor
 @NoArgsConstructor
 public final class EmitterModel {
-  /** The emitter. */
+
+  /**
+   * The emitter.
+   */
   private SseEmitter emitter;
 
-  /** Timestamp when the emitter was created. */
+  /**
+   * Timestamp when the emitter was created.
+   */
   private DateTime created;
 
-  /** The last data sent using the emitter. */
+  /**
+   * The last data sent using the emitter.
+   */
   private Object lastSent;
 
-  /** Timestamp when the emitter last sent data. */
+  /**
+   * Timestamp when the emitter last sent data.
+   */
   private DateTime lastSendTime;
 }

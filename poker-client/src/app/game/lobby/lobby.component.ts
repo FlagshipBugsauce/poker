@@ -1,7 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {GameActionModel, LobbyPlayerModel, UserModel} from 'src/app/api/models';
-import {ToastService} from 'src/app/shared/toast.service';
 import {LobbyDocument} from 'src/app/api/models/lobby-document';
 import {AppStateContainer, LobbyStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
@@ -34,13 +33,19 @@ export class LobbyComponent implements OnInit, OnDestroy {
 
   /** Path to the crown icon used to communicate who is the host of the game. */
   public crownIcon = 'assets/icons/crown.svg';
-
+  /** Observable used to determine whether a player is ready or not. */
+  public ready$: Observable<boolean>;
+  /** Observable of the model for the user currently logged in. */
+  public userModel$: Observable<UserModel>;
+  /** Model representing the lobby. */
+  public lobbyModel: LobbyDocument;
+  /** Helper subject which assists in terminating subscriptions. */
+  public ngDestroyed$ = new Subject();
   /**
    * Previous value of canStart. Used to determine if canStart has changed when a new lobby document
    * is received.
    */
   private lastCanStart: boolean = false;
-
   /**
    * Stores the last action that was performed. Used to help determine whether a toast should be
    * displayed or not. The backend will occasionally re-send the same lobby document to prevent the
@@ -48,22 +53,9 @@ export class LobbyComponent implements OnInit, OnDestroy {
    */
   private lastAction: GameActionModel;
 
-  /** Observable used to determine whether a player is ready or not. */
-  public ready$: Observable<boolean>;
-
-  /** Observable of the model for the user currently logged in. */
-  public userModel$: Observable<UserModel>;
-
-  /** Model representing the lobby. */
-  public lobbyModel: LobbyDocument;
-
-  /** Helper subject which assists in terminating subscriptions. */
-  public ngDestroyed$ = new Subject();
-
   constructor(
     private activatedRoute: ActivatedRoute,
     private router: Router,
-    private toastService: ToastService,
     private appStore: Store<AppStateContainer>,
     private lobbyStore: Store<LobbyStateContainer>) {
   }
@@ -72,8 +64,8 @@ export class LobbyComponent implements OnInit, OnDestroy {
   public get canStart(): boolean {
     if (this.lobbyModel.players !== undefined) {
       const canStart: boolean = this.lobbyModel.players
-        .find((player: LobbyPlayerModel) =>
-          !player.ready) === undefined && this.lobbyModel.players.length > 1;
+      .find((player: LobbyPlayerModel) =>
+        !player.ready) === undefined && this.lobbyModel.players.length > 1;
       if (!this.lastCanStart && canStart) {
         this.displayCanStartAlert = true;
       }
@@ -109,11 +101,8 @@ export class LobbyComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.ready$ = this.appStore.select(selectReadyStatus);
     this.lobbyStore.select(selectLobbyDocument)
-      .pipe(takeUntil(this.ngDestroyed$))
-      .subscribe((lobbyDocument: LobbyDocument) => {
-        this.lobbyModel = lobbyDocument;
-        this.displayToast();
-      });
+    .pipe(takeUntil(this.ngDestroyed$))
+    .subscribe((lobbyDocument: LobbyDocument) => this.lobbyModel = lobbyDocument);
     this.userModel$ = this.appStore.select(selectLoggedInUser);
   }
 
@@ -131,21 +120,5 @@ export class LobbyComponent implements OnInit, OnDestroy {
   /** Starts the game. */
   public startGame(): void {
     this.appStore.dispatch(startGame());
-  }
-
-  /**
-   * Displays a toast when certain events occur. Will only display a toast if the latest action is
-   * different from the action that preceded it.
-   */
-  private displayToast(): void {
-    if (this.lobbyModel.gameActions != null && this.lobbyModel.gameActions.length > 0) {
-      const currentAction: GameActionModel =
-        this.lobbyModel.gameActions[this.lobbyModel.gameActions.length - 1];
-      if (this.lastAction == null || currentAction.id !== this.lastAction.id) {
-        this.toastService.show(
-          currentAction.clientMessage, {classname: 'bg-light toast-md', delay: 5000});
-      }
-      this.lastAction = currentAction;
-    }
   }
 }

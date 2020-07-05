@@ -16,7 +16,7 @@ describe('CreateComponent', () => {
         provideMockStore()
       ]
     })
-      .compileComponents();
+    .compileComponents();
   }));
 
   beforeEach(() => {

@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @Configuration
 @PropertySource("classpath:poker.properties")
 public class AppConfig {
+
   @Value("${min-number-of-players}")
   private int minNumberOfPlayers;
 
@@ -25,4 +26,19 @@ public class AppConfig {
 
   @Value("${web-socket.private-socket-timeout-hours}")
   private int privateSocketTimeoutHours;
+
+  @Value("${web-socket.topics.toast}")
+  private String toastTopic;
+
+  @Value("${web-socket.topics.secure}")
+  private String secureTopic;
+
+  @Value("${web-socket.topics.game-list}")
+  private String gameListTopic;
+
+  @Value("${web-socket.topics.game}")
+  private String gameTopic;
+
+  @Value("${web-socket.topics.current-game}")
+  private String currentGameTopic;
 }

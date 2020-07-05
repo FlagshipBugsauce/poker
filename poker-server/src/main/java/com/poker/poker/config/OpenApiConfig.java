@@ -1,6 +1,8 @@
 package com.poker.poker.config;
 
 import com.poker.poker.config.constants.AppConstants;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -9,11 +11,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@OpenAPIDefinition(servers = @Server(url = "http://poker-testing.ngrok.io"))
 @Configuration
 @AllArgsConstructor
 public class OpenApiConfig {
 
-  private AppConstants appConstants;
+  private final AppConstants appConstants;
 
   @Bean
   public OpenAPI customConfiguration() {

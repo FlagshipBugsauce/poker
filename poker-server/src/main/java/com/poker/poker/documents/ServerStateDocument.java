@@ -12,6 +12,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 @Document(collection = "server-state")
 public class ServerStateDocument {
-  @Id private UUID id;
+
+  @Id
+  private UUID id;
   private boolean initialized;
 }

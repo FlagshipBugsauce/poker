@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {TopBarService} from './top-bar.service';
 
 @Component({
@@ -8,11 +8,12 @@ import {TopBarService} from './top-bar.service';
 })
 export class TopBarComponent implements OnInit {
 
+  constructor(public topBarService: TopBarService) {
+  }
+
   public get icon(): string {
     return this.topBarService.topBarIcon;
   }
-
-  constructor(public topBarService: TopBarService) { }
 
   ngOnInit(): void {
   }

@@ -13,9 +13,10 @@ import {
   gameListReducer,
   handDocumentReducer,
   lobbyDocumentReducer,
-  playerDataReducer
+  playerDataReducer,
+  toastDataReducer
 } from './state/app.reducer';
-import { EffectsModule } from '@ngrx/effects';
+import {EffectsModule} from '@ngrx/effects';
 import {GameEffects} from './state/game.effects';
 import {AppEffects} from './state/app.effects';
 
@@ -35,8 +36,9 @@ import {AppEffects} from './state/app.effects';
         gameDocument: gameDocumentReducer,
         handDocument: handDocumentReducer,
         gameList: gameListReducer,
-        playerData: playerDataReducer
-    }),
+        playerData: playerDataReducer,
+        lastToast: toastDataReducer
+      }),
     EffectsModule.forRoot([AppEffects, GameEffects])
   ],
   exports: [

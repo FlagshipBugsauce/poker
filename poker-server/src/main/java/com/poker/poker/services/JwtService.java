@@ -73,9 +73,9 @@ public class JwtService {
   /**
    * Extracts a "claim" that was baked into a JWT, if possible.
    *
-   * @param token JWT.
+   * @param token          JWT.
    * @param claimsResolver Function that will resolve the claim.
-   * @param <T> Data type of the claim being extracted (usually a string).
+   * @param <T>            Data type of the claim being extracted (usually a string).
    * @return The extracted claim.
    */
   public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -114,7 +114,7 @@ public class JwtService {
   /**
    * Creates a JWT.
    *
-   * @param claims Map of claims.
+   * @param claims  Map of claims.
    * @param subject Subject, which is the username/email.
    * @return A JWT string which has email and other claims, such as expiration, baked in.
    */
@@ -132,10 +132,10 @@ public class JwtService {
   /**
    * Checks the email and expiration date baked into the token to determine if it is valid
    *
-   * @param token JWT.
+   * @param token       JWT.
    * @param userDetails User details.
    * @return True if the extracted email matches the email provided with the userDetails model and
-   *     the token hasn't expired, false otherwise.
+   * the token hasn't expired, false otherwise.
    */
   public Boolean validateToken(String token, UserDetails userDetails) {
     return extractEmail(cleanToken(token)).equals(userDetails.getUsername())

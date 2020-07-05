@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {CardSuit, CardValue} from './models/card.enum';
 import {CardModel} from '../api/models/card-model';
 

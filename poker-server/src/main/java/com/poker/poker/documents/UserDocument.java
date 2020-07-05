@@ -13,7 +13,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 @Document(collection = "users")
 public class UserDocument {
-  @Id private UUID id;
+
+  @Id
+  private UUID id;
   private String email;
   private String password;
   private UserGroup group;

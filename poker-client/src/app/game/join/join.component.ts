@@ -21,23 +21,31 @@ export class JoinComponent implements OnInit, OnDestroy {
 
   /** The current number of games being displayed per page. */
   public pageSize: number = 5;
-
-  /** The total games in the list of games. */
-  public get totalGames(): number {
-    return this.games ? this.games.length : 0;
-  }
-
   /** Popup to confirm player wishes to join the game they clicked on. */
   @ViewChild('popup') public confirmationPopup: PopupComponent;
-
   /** Content that will appear on the confirmation popup. */
   public popupContent: PopupContentModel[] = [
     {body: ''} as PopupContentModel,
     {body: 'Click cancel if you do not wish to proceed.'} as PopupContentModel
   ] as PopupContentModel[];
-
   /** Procedure to be executed when the OK button is clicked on the popup. */
   public popupOkCloseProcedure: () => void;
+  /** Helper subject which assists in terminating subscriptions. */
+  public ngDestroyed$ = new Subject();
+  /** List of games used internally. */
+  private gamesInternal: GetGameModel[];
+
+  constructor(
+    private apiConfiguration: ApiConfiguration,
+    private appStore: Store<AppStateContainer>,
+    private gameListStore: Store<GameListStateContainer>,
+    private webSocketService: WebSocketService) {
+  }
+
+  /** The total games in the list of games. */
+  public get totalGames(): number {
+    return this.games ? this.games.length : 0;
+  }
 
   /** Returns a slice of the list of games for pagination. */
   public get games(): GetGameModel[] {
@@ -47,27 +55,14 @@ export class JoinComponent implements OnInit, OnDestroy {
       [];
   }
 
-  /** List of games used internally. */
-  private gamesInternal: GetGameModel[];
-
-  /** Helper subject which assists in terminating subscriptions. */
-  public ngDestroyed$ = new Subject();
-
-  constructor(
-    private apiConfiguration: ApiConfiguration,
-    private appStore: Store<AppStateContainer>,
-    private gameListStore: Store<GameListStateContainer>,
-    private webSocketService: WebSocketService) {
-  }
-
   public ngOnDestroy() {
     this.ngDestroyed$.next();
   }
 
   public ngOnInit(): void {
     this.gameListStore.select(selectGameList)
-      .pipe(takeUntil(this.ngDestroyed$))
-      .subscribe((games: GetGameModel[]) => this.gamesInternal = games);
+    .pipe(takeUntil(this.ngDestroyed$))
+    .subscribe((games: GetGameModel[]) => this.gamesInternal = games);
 
     // Subscribe to game list topic.
     this.webSocketService.subscribeToGameListTopic();

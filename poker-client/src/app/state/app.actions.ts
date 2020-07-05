@@ -1,17 +1,21 @@
 import {createAction, props} from '@ngrx/store';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
+  ActionModel,
   ActiveStatusModel,
   AuthRequestModel,
   AuthResponseModel,
   CreateGameModel,
+  CurrentGameModel,
   DrawGameDataContainerModel,
   GameDocument,
   GamePlayerModel,
   HandDocument,
-  LobbyDocument
+  LobbyDocument,
+  ToastModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
+import {RejoinModel} from '../shared/models/rejoin.model';
 
 export const navigate = createAction('[Router Service] Navigate');
 export const signIn = createAction('[Auth Service] SignIn', props<AuthRequestModel>());
@@ -28,9 +32,18 @@ export const createGame = createAction(
   '[Lobby Component] CreateGame',
   props<CreateGameModel>()
 );
+
+export const updateCurrentGame = createAction(
+  '[TopBar Component] UpdateCurrentGame', props<CurrentGameModel>());
+export const requestCurrentGameUpdate = createAction(
+  '[TopBar Component] RequestCurrentGameUpdate', props<ActionModel>());
+export const requestCurrentGameUpdateSuccess = createAction(
+  '[TopBar Component] RequestCurrentGameUpdateSuccess');
 export const createGameSuccess = createAction('[Create Component] CreateGameSuccess');
-export const rejoinGame = createAction('[Lobby Component] RejoinGame');
-export const leaveGame = createAction('[Game Component] LeaveGame');
+export const rejoinGame = createAction('[Lobby Component] RejoinGame', props<RejoinModel>());
+export const leaveGame = createAction('[Game Component] LeaveGame', props<ActionModel>());
+export const leaveGameSuccess = createAction('[Game Component] LeaveGameSuccess');
+export const rejoinGameSuccess = createAction('[Game Component] RejoinGameSuccess');
 export const startGame = createAction('[Game Component] StartGame');
 export const readyUp = createAction('[Lobby Component] ReadyUp');
 export const notReady = createAction('[Lobby Component] NotReady');
@@ -39,7 +52,7 @@ export const joinLobbySuccess = createAction('[Lobby Component] JoinLobbySuccess
 export const startGameSuccess = createAction('[Game Component] StartGameSuccess');
 export const readyUpSuccess = createAction('[Lobby Component] ReadyUpSuccess');
 
-/* Game data actions */
+/* Game data actions */ // TODO: Change these strings to WebSocketService
 export const gameDocumentUpdated = createAction(
   '[SSE Service] GameDocumentUpdated', props<GameDocument>());
 export const gameListUpdated = createAction(
@@ -52,6 +65,8 @@ export const gameDataUpdated = createAction(
   '[SSE Service] GameDataUpdated', props<DrawGameDataContainerModel>());
 export const playerDataUpdated = createAction(
   '[SSE Service] PlayerDataUpdated', props<GamePlayerModel>());
+export const gameToastReceived = createAction(
+  '[WebSocketService] GameToastReceived', props<ToastModel>());
 
 export const drawCard = createAction('[Play Component] DrawCard');
 export const drawCardSuccess = createAction('[Play Component] DrawCardSuccess');

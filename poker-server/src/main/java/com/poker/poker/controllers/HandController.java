@@ -32,11 +32,11 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "hand", description = "Hand API handles all game requests after the game has started.")
 public class HandController {
 
-  private UserService userService;
-  private GameConstants constants;
-  private JwtService jwtService;
-  private HandService handService;
-  private HandRepository handRepository;
+  private final UserService userService;
+  private final GameConstants constants;
+  private final JwtService jwtService;
+  private final HandService handService;
+  private final HandRepository handRepository;
 
   @Operation(
       summary = "Draws a card.",
@@ -44,13 +44,13 @@ public class HandController {
       tags = "game")
   @ApiResponses(
       value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Draw was successful.",
-            content =
-                @Content(
-                    schema = @Schema(implementation = ApiSuccessModel.class),
-                    mediaType = MediaType.APPLICATION_JSON_VALUE))
+          @ApiResponse(
+              responseCode = "200",
+              description = "Draw was successful.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = ApiSuccessModel.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/draw", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> draw(
@@ -65,13 +65,13 @@ public class HandController {
       tags = "game")
   @ApiResponses(
       value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Draw was successful.",
-            content =
-                @Content(
-                    schema = @Schema(implementation = PlayerModel.class),
-                    mediaType = MediaType.APPLICATION_JSON_VALUE))
+          @ApiResponse(
+              responseCode = "200",
+              description = "Draw was successful.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = PlayerModel.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/determine-winner/{handId}", method = RequestMethod.POST)
   public ResponseEntity<PlayerModel> determineWinner(

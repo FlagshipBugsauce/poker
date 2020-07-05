@@ -28,19 +28,27 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class UserServiceTests extends TestBaseClass {
-  @Mock private AuthenticationManager authenticationManager;
 
-  @Mock private JwtService jwtService;
+  @Mock
+  private AuthenticationManager authenticationManager;
 
-  @Mock private CustomUserDetailsService customUserDetailsService;
+  @Mock
+  private JwtService jwtService;
 
-  @Spy private AppConstants appConstants;
+  @Mock
+  private CustomUserDetailsService customUserDetailsService;
 
-  @Mock private UserRepository userRepository;
+  @Spy
+  private AppConstants appConstants;
 
-  @Spy private PasswordEncoder passwordEncoder;
+  @Mock
+  private UserRepository userRepository;
 
-  @InjectMocks private UserService userService;
+  @Spy
+  private PasswordEncoder passwordEncoder;
+
+  @InjectMocks
+  private UserService userService;
 
   @Test
   public void testAuthenticationWithValidCredentials() {
@@ -97,7 +105,9 @@ public class UserServiceTests extends TestBaseClass {
         BadRequestException.class, () -> userService.register(getSampleNewAccountModel()));
   }
 
-  /** Testing that validation works correctly when a user is a member of the Client group. */
+  /**
+   * Testing that validation works correctly when a user is a member of the Client group.
+   */
   @Test
   public void testUserGroupValidation01() {
     // Given
@@ -113,7 +123,9 @@ public class UserServiceTests extends TestBaseClass {
     Assertions.assertDoesNotThrow(() -> userService.validate(jwt, appConstants.getAllUsers()));
   }
 
-  /** Testing that validation works correctly when a user is a member of the Guest group. */
+  /**
+   * Testing that validation works correctly when a user is a member of the Guest group.
+   */
   @Test
   public void testUserGroupValidation02() {
     // Given
@@ -137,7 +149,9 @@ public class UserServiceTests extends TestBaseClass {
     Assertions.assertDoesNotThrow(() -> userService.validate(jwt, appConstants.getAllUsers()));
   }
 
-  /** Testing that validation works correctly when a user is a member of the Administrator group. */
+  /**
+   * Testing that validation works correctly when a user is a member of the Administrator group.
+   */
   @Test
   public void testUserGroupValidation03() {
     // Given

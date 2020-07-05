@@ -18,6 +18,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 @Document(collection = "hands")
 public class HandDocument {
+
   @Schema(
       description = "Hand ID.",
       example = "0a7d95ef-94ba-47bc-b591-febb365bc543",

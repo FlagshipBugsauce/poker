@@ -9,6 +9,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class GetGameModel { // TODO: Refactor to LobbyListModel
+
   @Schema(description = "The ID of the game.", example = "0a7d95ef-94ba-47bc-b591-febb365bc543")
   private UUID id;
 

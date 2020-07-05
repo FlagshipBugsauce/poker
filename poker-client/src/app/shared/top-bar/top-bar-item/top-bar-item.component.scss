@@ -2,31 +2,39 @@
   position: relative;
   top: 15px;
   cursor: pointer;
+
   .top-bar-button {
     color: rgba(255, 255, 255, 0.5) !important;
+
     &:hover {
       color: rgba(255, 255, 255, 0.75) !important;
     }
   }
+
   .top-bar-button-active {
     color: rgba(255, 255, 255, 1) !important;
   }
+
   .top-bar-dropdown-button-active {
     color: rgba(255, 255, 255, 1);
     background: rgba(40, 167, 69, 0.5) !important;
+
     &:active {
       background: rgba(40, 167, 69, 0.95) !important;
     }
   }
+
   .top-bar-dropdown-button {
     &:hover {
       background: rgba(40, 167, 69, 0.2) !important;
     }
+
     &:active {
       color: rgba(255, 255, 255, 1);
       background: rgba(40, 167, 69, 0.95) !important;
     }
   }
+
   .pointer {
     cursor: pointer;
   }

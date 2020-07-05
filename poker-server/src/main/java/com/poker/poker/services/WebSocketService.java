@@ -2,8 +2,12 @@ package com.poker.poker.services;
 
 import com.poker.poker.config.AppConfig;
 import com.poker.poker.documents.UserDocument;
+import com.poker.poker.events.CurrentGameEvent;
 import com.poker.poker.models.SocketContainerModel;
 import com.poker.poker.models.WebSocketInfoModel;
+import com.poker.poker.models.enums.MessageType;
+import com.poker.poker.models.websocket.ToastClassModel;
+import com.poker.poker.models.websocket.ToastModel;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -14,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -85,7 +90,7 @@ public class WebSocketService {
    * secure topic to communicate on.
    *
    * @param recipient The ID of the user.
-   * @param data The data to be sent to this user.
+   * @param data      The data to be sent to this user.
    */
   public void sendPrivateMessage(final UUID recipient, final SocketContainerModel data) {
     // TODO: Add validation
@@ -99,10 +104,39 @@ public class WebSocketService {
    * made to conceal the topic from anyone who wants to listen in.
    *
    * @param topic The topic to broadcast to.
-   * @param data The data to broadcast.
+   * @param data  The data to broadcast.
    */
   public void sendPublicMessage(final String topic, final SocketContainerModel data) {
     template.convertAndSend(topic, data);
     log.debug("Sent {} update to topic {}.", data.getType(), topic);
+  }
+
+  /**
+   * Helper which will broadcast a message to the client which will appear as a toast. Note that
+   * this method will only display toasts with a specific appearance (light bg, medium size, which
+   * last for 5 seconds).
+   *
+   * @param gameId  The ID of the lobby the toast should appear in.
+   * @param message The message that should be contained in the toast.
+   * @param size    The size of the toast (sm, md, lg, xl).
+   */
+  public void sendGameToast(final UUID gameId, final String message, final String size) {
+    sendPublicMessage(
+        appConfig.getGameTopic() + gameId,
+        new SocketContainerModel(
+            MessageType.Toast,
+            new ToastModel(message, new ToastClassModel("bg-light toast-" + size, 5000))));
+  }
+
+  public void sendToast(final String message) {
+
+    log.debug("Sending toast to client with message: {}", message);
+  }
+
+  @EventListener
+  public void updateCurrentGameForUser(final CurrentGameEvent currentGameEvent) {
+    template.convertAndSend(
+        appConfig.getCurrentGameTopic() + currentGameEvent.getUserId(),
+        currentGameEvent.getCurrentGameModel());
   }
 }

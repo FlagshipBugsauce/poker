@@ -20,11 +20,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class CustomUserDetailsServiceTests extends TestBaseClass {
-  @Mock private UserRepository userRepository;
 
-  @Spy private AppConstants appConstants;
+  @Mock
+  private UserRepository userRepository;
 
-  @InjectMocks private CustomUserDetailsService customUserDetailsService;
+  @Spy
+  private AppConstants appConstants;
+
+  @InjectMocks
+  private CustomUserDetailsService customUserDetailsService;
 
   @BeforeEach
   public void setup() {

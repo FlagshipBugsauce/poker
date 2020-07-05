@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class AppConstants {
+
   // INITIALIZATION CONSTANTS
   private final String defaultAdminEmail = "admin@domain.com";
   private final String defaultAdminPassword = "admin!@#";
@@ -25,18 +26,18 @@ public class AppConstants {
 
   // SECURITY CONSTANTS
   private final String[] securityExceptions = {
-    "/user/auth",
-    "/swagger-ui/**",
-    "/v3/**",
-    "/user/register",
-    "/test/sse/**",
-    "/emitters/request/**",
-    "/emitters/request-lobby/**",
-    "/websocket/**", // TODO: Probably need to remove.
-    "/websocket",
-    "/topic/**",
-    "/live",
-    "/live/**"
+      "/user/auth",
+      "/swagger-ui/**",
+      "/v3/**",
+      "/user/register",
+      "/test/sse/**",
+      "/emitters/request/**",
+      "/emitters/request-lobby/**",
+      "/websocket/**", // TODO: Probably need to remove.
+      "/websocket",
+      "/topic/**",
+      "/live",
+      "/live/**"
   };
 
   // AUTHORIZATION CONSTANTS

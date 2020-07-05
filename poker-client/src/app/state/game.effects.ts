@@ -10,10 +10,14 @@ import {
   drawCardSuccess,
   joinLobby,
   joinLobbySuccess,
+  leaveGame,
+  leaveGameSuccess,
   leaveLobby,
   leaveLobbySuccess,
   readyUp,
   readyUpSuccess,
+  rejoinGame,
+  rejoinGameSuccess,
   setActiveStatusFail,
   setAwayStatus,
   startGame,
@@ -27,6 +31,8 @@ import {CreateGameModel} from '../api/models/create-game-model';
 import {ActiveStatusModel} from '../api/models/active-status-model';
 import {WebSocketService} from '../shared/web-socket.service';
 import {MessageType} from '../shared/models/message-types.enum';
+import {ActionModel} from '../api/models';
+import {RejoinModel} from "../shared/models/rejoin.model";
 
 @Injectable()
 export class GameEffects {
@@ -131,6 +137,41 @@ export class GameEffects {
       )
     ))
   );
+
+  leaveGame$ = createEffect(() => this.actions$.pipe(
+    ofType(leaveGame),
+    mergeMap((action: ActionModel) => this.webSocketService.sendFromStore()
+    .pipe(map(client => {
+        client.send('/topic/game/leave', {}, JSON.stringify({
+          actionType: action.actionType,
+          jwt: action.jwt
+        }));
+        return {type: leaveGameSuccess.type};
+      }, catchError(() => EMPTY)
+      )
+    ))
+  ));
+
+  rejoinGame$ = createEffect(() => this.actions$.pipe(
+    ofType(rejoinGame),
+    mergeMap((action: RejoinModel) => this.webSocketService.sendFromStore()
+    .pipe(map(client => {
+        client.send('/topic/game/rejoin', {}, JSON.stringify({
+          actionType: 'ReJoinGame',
+          jwt: action.jwt
+        }));
+        this.webSocketService.subscribeToGameTopic(action.gameId);
+        this.webSocketService.subscribeToPlayerDataTopic();
+        this.webSocketService.requestGameTopicUpdate(MessageType.Game);
+        this.webSocketService.requestGameTopicUpdate(MessageType.GameData);
+        this.webSocketService.requestGameTopicUpdate(MessageType.Hand);
+        this.webSocketService.requestPlayerDataUpdate();
+        this.router.navigate([`${APP_ROUTES.GAME_PREFIX.path}/${action.gameId}`]).then();
+        return {type: rejoinGameSuccess.type};
+      }, catchError(() => EMPTY)
+      )
+    ))
+  ));
 
   constructor(
     private actions$: Actions,

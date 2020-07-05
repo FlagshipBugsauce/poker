@@ -18,7 +18,7 @@ export class AuthGuardService implements CanActivate {
     private appStore: Store<AppStateContainer>) {
 
     this.appStore.select(selectAuthenticated)
-      .subscribe(authenticated => this.authenticated = authenticated);
+    .subscribe(authenticated => this.authenticated = authenticated);
   }
 
   canActivate(

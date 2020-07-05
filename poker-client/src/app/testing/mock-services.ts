@@ -1,3 +1,4 @@
 export class MockWebSocketService {
-  public subscribeToGameListTopic(): void {}
+  public subscribeToGameListTopic(): void {
+  }
 }
