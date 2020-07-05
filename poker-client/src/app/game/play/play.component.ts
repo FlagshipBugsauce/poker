@@ -71,6 +71,9 @@ export class PlayComponent implements OnInit, OnDestroy {
    * Flag used to track whether a player is AFK or not.
    */
   public awayStatus: boolean;
+  /**
+   * JWT for logged in user.
+   */
   private jwt: string;
   /**
    * Model of the user currently logged in.
@@ -160,13 +163,6 @@ export class PlayComponent implements OnInit, OnDestroy {
       jwt: this.jwt,
       actionType: 'LeaveGame'
     } as ActionModel));
-  }
-
-  public rejoinGame(): void {
-    // this.gameStore.dispatch(rejoinGame({
-    //   jwt: this.jwt,
-    //   actionType: 'ReJoinGame'
-    // } as ActionModel));
   }
 
   /**

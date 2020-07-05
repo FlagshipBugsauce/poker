@@ -31,6 +31,7 @@ describe('PlayComponent', () => {
   let mockGameSelector: MemoizedSelector<GameStateContainer, GameDocument>;
   let mockAwayStatusSelector: MemoizedSelector<PlayerDataStateContainer, boolean>;
   let mockActingStatusSelector: MemoizedSelector<PlayerDataStateContainer, boolean>;
+  let mockJwtSelector: MemoizedSelector<AppStateContainer, string>;
   let component: PlayComponent;
   let fixture: ComponentFixture<PlayComponent>;
 
@@ -47,7 +48,6 @@ describe('PlayComponent', () => {
       imports: [RouterTestingModule, SharedModule]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(PlayComponent);
     mockStore = TestBed.inject(MockStore);
     mockHandSelector = mockStore.overrideSelector(selectors.selectHandDocument, mockHandDocument);
     mockUserSelector = mockStore.overrideSelector(selectors.selectLoggedInUser, mockUser);
@@ -55,6 +55,8 @@ describe('PlayComponent', () => {
     mockGameSelector = mockStore.overrideSelector(selectors.selectGameDocument, mockGameDocument);
     mockAwayStatusSelector = mockStore.overrideSelector(selectors.selectAwayStatus, false);
     mockActingStatusSelector = mockStore.overrideSelector(selectors.selectActingStatus, false);
+    mockJwtSelector = mockStore.overrideSelector(selectors.selectJwt, 'jwt');
+    fixture = TestBed.createComponent(PlayComponent);
     fixture.detectChanges();
   }));
 

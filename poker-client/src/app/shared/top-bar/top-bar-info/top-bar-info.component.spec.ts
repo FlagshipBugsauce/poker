@@ -1,6 +1,7 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {TopBarInfoComponent} from './top-bar-info.component';
 import {provideMockStore} from '@ngrx/store/testing';
+import {RouterTestingModule} from '@angular/router/testing';
 
 describe('TopBarInfoComponent', () => {
   let component: TopBarInfoComponent;
@@ -9,7 +10,8 @@ describe('TopBarInfoComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [TopBarInfoComponent],
-      providers: [provideMockStore()]
+      providers: [provideMockStore()],
+      imports: [RouterTestingModule]
     })
     .compileComponents();
   }));

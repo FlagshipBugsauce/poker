@@ -36,10 +36,10 @@ export class TopBarInfoComponent implements OnInit {
   ngOnInit(): void {
     // TODO: This needs work - will have back arrow when game doesn't exist + doesn't show when hosting.
     this.store.select(selectLobbyInfo).subscribe(lobbyInfo => this.lobbyInfo = lobbyInfo);
-    this.store.select(selectLastLobbyInfo).subscribe(lobbyInfo => this.lastLobbyInfo = lobbyInfo);
-    this.store.select(selectCurrentGame).subscribe((currentGame: CurrentGameModel) => {
-      this.currentGame = currentGame;
-    });
+    this.store.select(selectLastLobbyInfo)
+    .subscribe(lobbyInfo => this.lastLobbyInfo = lobbyInfo);
+    this.store.select(selectCurrentGame)
+    .subscribe((currentGame: CurrentGameModel) =>  this.currentGame = currentGame);
     this.store.select(selectJwt).subscribe(jwt => this.jwt = jwt);
   }
 

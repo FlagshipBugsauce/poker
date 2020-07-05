@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class LeaveGameEvent extends ApplicationEvent {
 
-  final UserDocument user;
+  private final UserDocument user;
 
   public LeaveGameEvent(final Object source, final UserDocument user) {
     super(source);
