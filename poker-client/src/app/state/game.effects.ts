@@ -1,5 +1,6 @@
+/* tslint:disable */
 import {Injectable} from '@angular/core';
-import {catchError, exhaustMap, map, mergeMap} from 'rxjs/operators';
+import {catchError, exhaustMap, map, mergeMap, tap} from 'rxjs/operators';
 import {EMPTY, of} from 'rxjs';
 import {GameService} from '../api/services/game.service';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
@@ -8,6 +9,7 @@ import {
   createGameSuccess,
   drawCard,
   drawCardSuccess,
+  gameCreated,
   joinLobby,
   joinLobbySuccess,
   leaveGame,
@@ -29,10 +31,11 @@ import {APP_ROUTES} from '../app-routes';
 import {HandService} from '../api/services/hand.service';
 import {CreateGameModel} from '../api/models/create-game-model';
 import {ActiveStatusModel} from '../api/models/active-status-model';
-import {WebSocketService} from '../shared/web-socket.service';
+import {WebSocketService} from '../shared/web-socket/web-socket.service';
 import {MessageType} from '../shared/models/message-types.enum';
 import {ActionModel} from '../api/models';
-import {RejoinModel} from "../shared/models/rejoin.model";
+import {RejoinModel} from '../shared/models/rejoin.model';
+import {CreateGameService} from "../shared/web-socket/create-game.service";
 
 @Injectable()
 export class GameEffects {
@@ -107,23 +110,6 @@ export class GameEffects {
   );
 
   /**
-   * Creates a game.
-   */
-  createGame$ = createEffect(() => this.actions$.pipe(
-    ofType(createGame),
-    mergeMap((action: CreateGameModel) => this.gameService.createGame({body: action})
-      .pipe(
-        map(response => {
-          // TODO: Figure out how to set the top bar info
-          this.router.navigate([`/${APP_ROUTES.GAME_PREFIX.path}/${response.message}`]).then();
-          this.gameJoined(response.message);
-          return {type: createGameSuccess().type, payload: response};
-        }), catchError(() => EMPTY)
-      )
-    ))
-  );
-
-  /**
    * Sets the away status of the player.
    */
   setAwayStatus$ = createEffect(() => this.actions$.pipe(
@@ -143,7 +129,6 @@ export class GameEffects {
     mergeMap((action: ActionModel) => this.webSocketService.sendFromStore()
     .pipe(map(client => {
         client.send('/topic/game/leave', {}, JSON.stringify({
-          actionType: action.actionType,
           jwt: action.jwt
         }));
         return {type: leaveGameSuccess.type};
@@ -157,7 +142,6 @@ export class GameEffects {
     mergeMap((action: RejoinModel) => this.webSocketService.sendFromStore()
     .pipe(map(client => {
         client.send('/topic/game/rejoin', {}, JSON.stringify({
-          actionType: 'ReJoinGame',
           jwt: action.jwt
         }));
         this.webSocketService.subscribeToGameTopic(action.gameId);
@@ -173,9 +157,41 @@ export class GameEffects {
     ))
   ));
 
+  /**
+   * Creates a game.
+   */
+  createGame$ = createEffect(() => this.actions$.pipe(
+    ofType(createGame),
+    mergeMap((action: CreateGameModel) => this.createGameService.sendFromStore()
+    .pipe(map(client => {
+        client.send(
+          this.createGameService.createGameTopic,
+          {},
+          JSON.stringify(this.createGameService.createGamePayload({
+            buyIn: action.buyIn,
+            maxPlayers: action.maxPlayers,
+            name: action.name
+          } as CreateGameModel)))
+        return {type: createGameSuccess.type}
+      })
+    ))
+  ));
+
+  /**
+   * Effect when a game has been created.
+   */
+  gameCreated$ = createEffect(() => this.actions$.pipe(
+    ofType(gameCreated),
+    tap((action => {
+      this.router.navigate([`${APP_ROUTES.GAME_PREFIX.path}/${action.message}`]).then();
+      this.gameJoined(action.message);
+    }))
+  ), {dispatch: false});
+
   constructor(
     private actions$: Actions,
     private webSocketService: WebSocketService,
+    private createGameService: CreateGameService,
     private gameService: GameService,
     private handService: HandService,
     private router: Router) {

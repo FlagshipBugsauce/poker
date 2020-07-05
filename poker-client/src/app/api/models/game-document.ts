@@ -1,7 +1,6 @@
 /* tslint:disable */
-import {GamePlayerModel} from './game-player-model';
-import {GameSummaryModel} from './game-summary-model';
-
+import { GamePlayerModel } from './game-player-model';
+import { GameSummaryModel } from './game-summary-model';
 export interface GameDocument {
   hands?: Array<string>;
 

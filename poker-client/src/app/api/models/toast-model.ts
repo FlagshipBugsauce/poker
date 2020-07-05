@@ -1,5 +1,5 @@
 /* tslint:disable */
-import {ToastClassModel} from './toast-class-model';
+import { ToastClassModel } from './toast-class-model';
 
 /**
  * Contains the message to display and the duration of the toast.

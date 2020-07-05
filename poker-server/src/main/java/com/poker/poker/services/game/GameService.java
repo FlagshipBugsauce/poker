@@ -5,10 +5,12 @@ import com.poker.poker.config.constants.GameConstants;
 import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.HandDocument;
 import com.poker.poker.documents.UserDocument;
+import com.poker.poker.events.CreateGameEvent;
 import com.poker.poker.events.CurrentGameEvent;
 import com.poker.poker.events.HandActionEvent;
 import com.poker.poker.events.LeaveGameEvent;
 import com.poker.poker.events.PlayerAfkEvent;
+import com.poker.poker.events.PublishMessageEvent;
 import com.poker.poker.events.RejoinGameEvent;
 import com.poker.poker.events.WaitForPlayerEvent;
 import com.poker.poker.models.ApiSuccessModel;
@@ -240,15 +242,15 @@ public class GameService {
   }
 
   /**
-   * Creates a new game.
-   *
-   * @param createGameModel Model representing the game parameters.
-   * @param user The user who created the game.
-   * @return An ApiSuccessModel containing the ID of the game, to indicate creation was successful.
-   * @throws BadRequestException If the user is already in a game.
+   * Listens for create game events, then creates the game.
+   * @param createGameEvent Event object with information required to create the game.
+   * @throws BadRequestException If the request fails.
    */
-  public ApiSuccessModel createGame(CreateGameModel createGameModel, UserDocument user)
+  @EventListener
+  public void createGame(final CreateGameEvent createGameEvent)
       throws BadRequestException {
+    final CreateGameModel createGameModel = createGameEvent.getCreateGameModel();
+    final UserDocument user = createGameEvent.getHost();
     if (userIdToGameIdMap.get(user.getId()) != null) {
       throw gameConstants.getCreateGamePlayerAlreadyInGameException();
     }
@@ -269,7 +271,12 @@ public class GameService {
 
     // Create the lobby.
     lobbyService.createLobby(createGameModel, user, gameDocument.getId());
-    return new ApiSuccessModel(gameDocument.getId().toString());
+
+    applicationEventPublisher.publishEvent(new PublishMessageEvent<>(
+        this,
+        "/topic/game/create/" + user.getId(),
+        new ApiSuccessModel(gameDocument.getId().toString())
+    ));
   }
 
   /**

@@ -3,7 +3,7 @@ import {LeaveGameGuardService} from './leave-game-guard.service';
 import {SharedModule} from '../../shared/shared.module';
 import {RouterTestingModule} from '@angular/router/testing';
 import {provideMockStore} from '@ngrx/store/testing';
-import {WebSocketService} from '../../shared/web-socket.service';
+import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 
 describe('LeaveGameGuardService', () => {
   let service: LeaveGameGuardService;

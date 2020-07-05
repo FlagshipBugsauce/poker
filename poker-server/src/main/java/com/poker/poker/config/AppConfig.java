@@ -1,5 +1,7 @@
 package com.poker.poker.config;
 
+import com.poker.poker.models.enums.UserGroup;
+import java.util.List;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +13,14 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @Configuration
 @PropertySource("classpath:poker.properties")
 public class AppConfig {
+  @Value("${validation.admin-groups}")
+  private final List<UserGroup> adminGroups;
+
+  @Value("${validation.all-groups}")
+  private final List<UserGroup> allGroups;
+
+  @Value("${validation.general-groups}")
+  private final List<UserGroup> generalGroups;
 
   @Value("${min-number-of-players}")
   private int minNumberOfPlayers;

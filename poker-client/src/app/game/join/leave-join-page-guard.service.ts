@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {CanDeactivate} from '@angular/router';
 import {JoinComponent} from './join.component';
-import {WebSocketService} from '../../shared/web-socket.service';
+import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 
 @Injectable({
   providedIn: 'root'

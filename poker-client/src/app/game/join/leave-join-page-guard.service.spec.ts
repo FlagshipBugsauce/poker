@@ -2,7 +2,7 @@ import {TestBed} from '@angular/core/testing';
 import {LeaveJoinPageGuardService} from './leave-join-page-guard.service';
 import {SharedModule} from '../../shared/shared.module';
 import {provideMockStore} from '@ngrx/store/testing';
-import {WebSocketService} from '../../shared/web-socket.service';
+import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 
 describe('LeaveJoinPageGuardService', () => {
   let service: LeaveJoinPageGuardService;

@@ -21,7 +21,7 @@ import {
   mockUser
 } from '../../testing/mock-models';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
-import {WebSocketService} from '../../shared/web-socket.service';
+import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 
 describe('PlayComponent', () => {
   let mockStore: MockStore;

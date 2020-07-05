@@ -1,24 +1,26 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {CreateGameModel} from 'src/app/api/models';
 import {AppStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {createGame} from '../../state/app.actions';
+import {CreateGameService} from '../../shared/web-socket/create-game.service';
 
 @Component({
   selector: 'pkr-create',
   templateUrl: './create.component.html',
   styleUrls: ['./create.component.scss']
 })
-export class CreateComponent implements OnInit {
+export class CreateComponent implements OnInit, OnDestroy {
   public createGameForm: FormGroup;
   public maxPlayers: number = 10; // TODO: Retrieve this from the backend.
 
   constructor(
     private router: Router,
     private formBuilder: FormBuilder,
-    private store: Store<AppStateContainer>) {
+    private appStore: Store<AppStateContainer>,
+    private createGameService: CreateGameService) {
   }
 
   public ngOnInit(): void {
@@ -28,6 +30,12 @@ export class CreateComponent implements OnInit {
       buyIn: ['', [Validators.required]],
       // roundTime: ['', [Validators.required]],
     });
+
+    this.createGameService.subscribeToCreateGameTopic();
+  }
+
+  public ngOnDestroy(): void {
+    this.createGameService.unsubscribeFromCreateGameTopic();
   }
 
   /**
@@ -38,7 +46,7 @@ export class CreateComponent implements OnInit {
   }
 
   public createGame(values: any): void {
-    this.store.dispatch(createGame({
+    this.appStore.dispatch(createGame({
       buyIn: values.buyIn,
       maxPlayers: values.maxPlayers,
       name: values.name

@@ -2,7 +2,7 @@ import {createAction, props} from '@ngrx/store';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
   ActionModel,
-  ActiveStatusModel,
+  ActiveStatusModel, ApiSuccessModel,
   AuthRequestModel,
   AuthResponseModel,
   CreateGameModel,
@@ -32,6 +32,8 @@ export const createGame = createAction(
   '[Lobby Component] CreateGame',
   props<CreateGameModel>()
 );
+export const gameCreated = createAction(
+  '[CreateGameService] GameCreated', props<ApiSuccessModel>());
 
 export const updateCurrentGame = createAction(
   '[TopBar Component] UpdateCurrentGame', props<CurrentGameModel>());

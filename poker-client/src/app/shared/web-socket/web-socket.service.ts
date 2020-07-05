@@ -4,7 +4,7 @@ import {Client, over, Subscription} from 'stompjs';
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import * as SockJS from 'sockjs-client';
 import {filter, first, switchMap, takeUntil} from 'rxjs/operators';
-import {environment} from '../../environments/environment';
+import {environment} from '../../../environments/environment';
 import {Store} from '@ngrx/store';
 import {
   AppStateContainer,
@@ -14,8 +14,8 @@ import {
   HandStateContainer,
   LobbyStateContainer,
   PlayerDataStateContainer
-} from './models/app-state.model';
-import {MessageType} from './models/message-types.enum';
+} from '../models/app-state.model';
+import {MessageType} from '../models/message-types.enum';
 import {
   gameDataUpdated,
   gameDocumentUpdated,
@@ -24,11 +24,11 @@ import {
   lobbyDocumentUpdated,
   playerDataUpdated,
   updateCurrentGame
-} from '../state/app.actions';
-import {selectLoggedInUser} from '../state/app.selector';
-import {UserModel} from '../api/models/user-model';
-import {WebSocketUpdateModel} from '../api/models/web-socket-update-model';
-import {ToastService} from "./toast.service";
+} from '../../state/app.actions';
+import {selectLoggedInUser} from '../../state/app.selector';
+import {UserModel} from '../../api/models/user-model';
+import {WebSocketUpdateModel} from '../../api/models/web-socket-update-model';
+import {ToastService} from "../toast.service";
 
 export enum SocketClientState {
   ATTEMPTING, CONNECTED

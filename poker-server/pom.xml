@@ -14,6 +14,16 @@
   <dependencies>
     <!-- Extra dependencies -->
     <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>1.21</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <artifactId>spring-websocket</artifactId>
       <groupId>org.springframework</groupId>
       <version>5.2.2.RELEASE</version>

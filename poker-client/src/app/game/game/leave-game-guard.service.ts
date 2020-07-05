@@ -9,7 +9,7 @@ import {Store} from '@ngrx/store';
 import {leaveGame, leaveLobby} from '../../state/app.actions';
 import {GameDocument} from '../../api/models/game-document';
 import {selectGameDocument, selectJwt} from '../../state/app.selector';
-import {WebSocketService} from '../../shared/web-socket.service';
+import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 import {ActionModel} from '../../api/models/action-model';
 
 @Injectable({

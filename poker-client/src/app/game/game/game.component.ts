@@ -20,7 +20,7 @@ import {
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {leaveGame, leaveLobby} from '../../state/app.actions';
-import {WebSocketService} from '../../shared/web-socket.service';
+import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 import {MessageType} from '../../shared/models/message-types.enum';
 
 @Component({
