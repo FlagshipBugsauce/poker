@@ -148,7 +148,5 @@ public class WebSocketService {
         currentGameEvent.getCurrentGameModel());
   }
 
-  public void createGameSuccess() {
-
-  }
+  public void createGameSuccess() {}
 }

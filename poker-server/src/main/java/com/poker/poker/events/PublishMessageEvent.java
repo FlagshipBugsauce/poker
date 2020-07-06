@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
 @Getter
-public class PublishMessageEvent <T> extends ApplicationEvent {
+public class PublishMessageEvent<T> extends ApplicationEvent {
 
   private final String topic;
   private final T data;

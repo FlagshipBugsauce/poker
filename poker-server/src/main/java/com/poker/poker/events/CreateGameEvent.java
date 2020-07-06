@@ -12,9 +12,7 @@ public class CreateGameEvent extends ApplicationEvent {
   private final UserDocument host;
 
   public CreateGameEvent(
-      final Object source,
-      final CreateGameModel createGameModel,
-      final UserDocument host) {
+      final Object source, final CreateGameModel createGameModel, final UserDocument host) {
     super(source);
     this.createGameModel = createGameModel;
     this.host = host;

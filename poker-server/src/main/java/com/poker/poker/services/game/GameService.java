@@ -244,12 +244,12 @@ public class GameService {
 
   /**
    * Listens for create game events, then creates the game.
+   *
    * @param createGameEvent Event object with information required to create the game.
    * @throws BadRequestException If the request fails.
    */
   @EventListener
-  public void createGame(final CreateGameEvent createGameEvent)
-      throws BadRequestException {
+  public void createGame(final CreateGameEvent createGameEvent) throws BadRequestException {
     final CreateGameModel createGameModel = createGameEvent.getCreateGameModel();
     final UserDocument user = createGameEvent.getHost();
     if (userIdToGameIdMap.get(user.getId()) != null) {
@@ -273,11 +273,11 @@ public class GameService {
     // Create the lobby.
     lobbyService.createLobby(createGameModel, user, gameDocument.getId());
 
-    applicationEventPublisher.publishEvent(new PublishMessageEvent<>(
-        this,
-        "/topic/game/create/" + user.getId(),
-        new ApiSuccessModel(gameDocument.getId().toString())
-    ));
+    applicationEventPublisher.publishEvent(
+        new PublishMessageEvent<>(
+            this,
+            "/topic/game/create/" + user.getId(),
+            new ApiSuccessModel(gameDocument.getId().toString())));
   }
 
   /**
@@ -354,8 +354,6 @@ public class GameService {
     setPlayerActiveStatus(rejoinGameEvent.getUser().getId(), false);
   }
 
-
-
   public void checkIfGameExists(final UUID gameId) {
     if (games.get(gameId) == null) {
       throw gameConstants.getGameNotFoundException();
@@ -381,6 +379,7 @@ public class GameService {
 
   /**
    * Listener that adds a player to a specified game.
+   *
    * @param joinGameEvent Event that triggers the method.
    */
   @EventListener

@@ -19,7 +19,6 @@ import com.poker.poker.repositories.LobbyRepository;
 import com.poker.poker.services.WebSocketService;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -176,12 +175,17 @@ public class LobbyService {
    */
   public ApiSuccessModel ready(final UserDocument user) throws InterruptedException {
     if (!isUserInLobby(user.getId()) || getUsersLobbyDocument(user.getId()) == null) {
-      log.error("Failed to set player's status to ready (user ID: {}), trying again.", user.getId());
+      log.error(
+          "Failed to set player's status to ready (user ID: {}), trying again.", user.getId());
       Thread.sleep(1000);
       if (!isUserInLobby(user.getId()) || getUsersLobbyDocument(user.getId()) == null) {
-        log.error("Failed to set player's status to ready (user ID: {}) after second attempt.", user.getId());
+        log.error(
+            "Failed to set player's status to ready (user ID: {}) after second attempt.",
+            user.getId());
         log.error("!isUserInLobby(user.getId()): {}", !isUserInLobby(user.getId()));
-        log.error("getUsersLobbyDocument(user.getId()) == null): {}", getUsersLobbyDocument(user.getId()) == null);
+        log.error(
+            "getUsersLobbyDocument(user.getId()) == null): {}",
+            getUsersLobbyDocument(user.getId()) == null);
         throw gameConstants.getReadyStatusUpdateFailException();
       }
     }
@@ -245,8 +249,9 @@ public class LobbyService {
   public void createLobby(
       final CreateGameModel createGameModel, final UserDocument user, final UUID id) {
     checkWhetherUserIsInLobbyAndThrow(user.getId(), false);
-    final List<LobbyPlayerModel> players = Collections.synchronizedList(
-        new ArrayList<>(Collections.singletonList(new LobbyPlayerModel(user, false, true))));
+    final List<LobbyPlayerModel> players =
+        Collections.synchronizedList(
+            new ArrayList<>(Collections.singletonList(new LobbyPlayerModel(user, false, true))));
     final LobbyDocument lobbyDocument =
         new LobbyDocument(
             id,
@@ -290,6 +295,7 @@ public class LobbyService {
 
   /**
    * Listener that joins a game lobby.
+   *
    * @param joinGameEvent Event that triggers joining a lobby.
    */
   @EventListener
