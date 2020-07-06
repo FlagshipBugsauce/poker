@@ -11,6 +11,7 @@ import com.poker.poker.models.game.GetGameModel;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.services.JwtService;
 import com.poker.poker.services.UserService;
+import com.poker.poker.services.UuidService;
 import com.poker.poker.services.game.GameService;
 import com.poker.poker.services.game.LobbyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,6 +48,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class GameController {
 
   private final ApplicationEventPublisher applicationEventPublisher;
+  private final UuidService uuidService;
   private final GameService gameService;
   private final LobbyService lobbyService;
   private final UserService userService;
@@ -143,13 +145,19 @@ public class GameController {
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
       @PathVariable String gameId) {
     userService.validate(jwt, gameConstants.getClientGroups());
+    uuidService.checkIfValidAndThrowBadRequest(gameId);
+    final UserDocument user = jwtService.getUserDocument(jwt);
+    final UUID game = UUID.fromString(gameId);
 
-    final UUID userId = jwtService.getUserId(jwt);
-    applicationEventPublisher.publishEvent(new JoinGameEvent(this, UUID.fromString(gameId), userId));
+    gameService.checkIfGameExists(game);
+    gameService.checkIfGameIsInLobbyState(game);
+    if (gameService.isUserInSpecifiedGame(game, user.getId())) {
+      return ResponseEntity.ok(new ApiSuccessModel("Request Completed."));
+    }
+    gameService.checkIfUserIsInGame(user.getId());
+    applicationEventPublisher.publishEvent(new JoinGameEvent(this, game, user));
 
-    return ResponseEntity.ok(
-        gameService.joinLobby(
-            gameId, userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
+    return ResponseEntity.ok(new ApiSuccessModel("Request Completed."));
   }
 
   @Operation(
@@ -168,7 +176,8 @@ public class GameController {
       })
   @RequestMapping(value = "/ready", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> ready(
-      @Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
+      @Parameter(hidden = true) @RequestHeader("Authorization") String jwt)
+      throws InterruptedException {
     userService.validate(jwt, gameConstants.getClientGroups());
     return ResponseEntity.ok(
         lobbyService.ready(userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));

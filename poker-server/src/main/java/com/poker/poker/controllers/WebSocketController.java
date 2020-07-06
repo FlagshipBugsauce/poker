@@ -4,8 +4,10 @@ import com.poker.poker.config.AppConfig;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.CreateGameEvent;
 import com.poker.poker.events.CurrentGameEvent;
+import com.poker.poker.events.JoinGameEvent;
 import com.poker.poker.events.LeaveGameEvent;
 import com.poker.poker.events.RejoinGameEvent;
+import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.SocketContainerModel;
 import com.poker.poker.models.WebSocketUpdateModel;
 import com.poker.poker.models.game.CreateGameModel;
@@ -18,9 +20,11 @@ import com.poker.poker.services.game.GameService;
 import com.poker.poker.services.game.HandService;
 import com.poker.poker.services.game.LobbyService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 
@@ -98,5 +102,21 @@ public class WebSocketController {
     final UserDocument user = jwtService.getUserDocument(messageModel.getJwt());
     log.debug("User {} attempting to create a game.", user.getId());
     applicationEventPublisher.publishEvent(new CreateGameEvent(this, messageModel.getData(), user));
+  }
+
+  @MessageMapping("/game/join")
+  public void joinGame(final ClientMessageModel<Void> messageModel) {
+    userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
+    final UserDocument user = jwtService.getUserDocument(messageModel.getJwt());
+    log.debug("User {} attempting to join a game.", user.getId());
+
+    gameService.checkIfGameExists(messageModel.getGameId());
+    gameService.checkIfGameIsInLobbyState(messageModel.getGameId());
+    if (gameService.isUserInSpecifiedGame(messageModel.getGameId(), user.getId())) {
+      return;
+    }
+    gameService.checkIfUserIsInGame(user.getId());
+
+    applicationEventPublisher.publishEvent(new JoinGameEvent(this, messageModel.getGameId(), user));
   }
 }

@@ -8,6 +8,7 @@ import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.CreateGameEvent;
 import com.poker.poker.events.CurrentGameEvent;
 import com.poker.poker.events.HandActionEvent;
+import com.poker.poker.events.JoinGameEvent;
 import com.poker.poker.events.LeaveGameEvent;
 import com.poker.poker.events.PlayerAfkEvent;
 import com.poker.poker.events.PublishMessageEvent;
@@ -353,49 +354,39 @@ public class GameService {
     setPlayerActiveStatus(rejoinGameEvent.getUser().getId(), false);
   }
 
-  /**
-   * Attempts to add the specified user to the specified game lobby.
-   *
-   * @param gameIdString UUID associated with the game the specified user is attempting to join.
-   * @param userDocument Model representing the user attempting to join the game.
-   * @return An ApiSuccessModel indicating the request was successful.
-   * @throws BadRequestException If the game ID provided is invalid or if the specified user is
-   *     already in a game (other than the game they are attempting to join - if they attempt to
-   *     join this game, nothing will happen).
-   */
-  public ApiSuccessModel joinLobby(String gameIdString, UserDocument userDocument)
-      throws BadRequestException {
-    uuidService.checkIfValidAndThrowBadRequest(gameIdString);
 
-    // Check that game exists
-    if (games.get(UUID.fromString(gameIdString)) == null) {
+
+  public void checkIfGameExists(final UUID gameId) {
+    if (games.get(gameId) == null) {
       throw gameConstants.getGameNotFoundException();
     }
+  }
 
-    final GameDocument gameDocument = games.get(UUID.fromString(gameIdString));
-    if (gameDocument.getState() != GameState.Lobby) {
+  public void checkIfGameIsInLobbyState(final UUID gameId) {
+    if (getGameDocument(gameId).getState() != GameState.Lobby) {
       throw gameConstants.getCanOnlyJoinLobbyException();
     }
+  }
 
-    // Check if user is trying to join a lobby they're already in.
-    if (lobbyService.isUserInLobby(userDocument.getId())
-        && userIdToGameIdMap.get(userDocument.getId()).equals(gameDocument.getId())) {
-      // Return informative message with OK status.
-      return new ApiSuccessModel("Player is already in the game.");
-    }
+  public boolean isUserInSpecifiedGame(final UUID gameId, final UUID userId) {
+    return lobbyService.isUserInLobby(userId) && userIdToGameIdMap.get(userId).equals(gameId);
+  }
 
+  public void checkIfUserIsInGame(final UUID userId) {
     // Check if they're in a game. If they are, then throw.
-    if (userIdToGameIdMap.get(userDocument.getId()) != null) {
+    if (userIdToGameIdMap.get(userId) != null) {
       throw gameConstants.getJoinGamePlayerAlreadyJoinedException();
     }
+  }
 
-    // Call lobbyService and say the user wants to join.
-    final ApiSuccessModel response = lobbyService.joinLobby(gameDocument.getId(), userDocument);
-
-    // Add mapping userId -> gameId after adding to lobby succeeds.
-    userIdToGameIdMap.put(userDocument.getId(), gameDocument.getId());
-
-    return response;
+  /**
+   * Listener that adds a player to a specified game.
+   * @param joinGameEvent Event that triggers the method.
+   */
+  @EventListener
+  public void joinLobby(final JoinGameEvent joinGameEvent) {
+    userIdToGameIdMap.put(
+        joinGameEvent.getUser().getId(), getGameDocument(joinGameEvent.getGameId()).getId());
   }
 
   /**

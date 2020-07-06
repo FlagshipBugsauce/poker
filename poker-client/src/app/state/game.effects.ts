@@ -1,4 +1,3 @@
-/* tslint:disable */
 import {Injectable} from '@angular/core';
 import {catchError, exhaustMap, map, mergeMap, tap} from 'rxjs/operators';
 import {EMPTY, of} from 'rxjs';
@@ -6,20 +5,16 @@ import {GameService} from '../api/services/game.service';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {
   createGame,
-  createGameSuccess,
   drawCard,
   drawCardSuccess,
   gameCreated,
   joinLobby,
-  joinLobbySuccess,
   leaveGame,
-  leaveGameSuccess,
   leaveLobby,
   leaveLobbySuccess,
   readyUp,
   readyUpSuccess,
   rejoinGame,
-  rejoinGameSuccess,
   setActiveStatusFail,
   setAwayStatus,
   startGame,
@@ -33,12 +28,18 @@ import {CreateGameModel} from '../api/models/create-game-model';
 import {ActiveStatusModel} from '../api/models/active-status-model';
 import {WebSocketService} from '../shared/web-socket/web-socket.service';
 import {MessageType} from '../shared/models/message-types.enum';
-import {ActionModel} from '../api/models';
 import {RejoinModel} from '../shared/models/rejoin.model';
-import {CreateGameService} from "../shared/web-socket/create-game.service";
+import {CreateGameService} from '../shared/web-socket/create-game.service';
+import {AppStateContainer} from '../shared/models/app-state.model';
+import {Store} from '@ngrx/store';
+import {selectJwt} from './app.selector';
+import {TypedAction} from '@ngrx/store/src/models';
 
 @Injectable()
 export class GameEffects {
+
+  private jwt: string;
+
   /**
    * Leaves the game lobby. Does not redirect because there is a confirmation that handles this.
    */
@@ -48,23 +49,6 @@ export class GameEffects {
       .pipe(
         map(response => ({type: leaveLobbySuccess().type, payload: response})),
         catchError(() => EMPTY)
-      )
-    ))
-  );
-
-  /**
-   * Effect that will join lobby with ID provided in the prop and then navigate to the route that
-   * will display the lobby.
-   */
-  joinLobby$ = createEffect(() => this.actions$.pipe(
-    ofType(joinLobby),
-    exhaustMap(action => this.gameService.joinGame({gameId: action.id})
-      .pipe(
-        map(response => {
-          this.router.navigate([`/${APP_ROUTES.GAME_PREFIX.path}/${action.id}`]).then();
-          this.gameJoined(action.id);
-          return {type: joinLobbySuccess().type, payload: response};
-        })
       )
     ))
   );
@@ -123,69 +107,50 @@ export class GameEffects {
       )
     ))
   );
-
-  leaveGame$ = createEffect(() => this.actions$.pipe(
-    ofType(leaveGame),
-    mergeMap((action: ActionModel) => this.webSocketService.sendFromStore()
-    .pipe(map(client => {
-        client.send('/topic/game/leave', {}, JSON.stringify({
-          jwt: action.jwt
-        }));
-        return {type: leaveGameSuccess.type};
-      }, catchError(() => EMPTY)
-      )
-    ))
-  ));
-
-  rejoinGame$ = createEffect(() => this.actions$.pipe(
-    ofType(rejoinGame),
-    mergeMap((action: RejoinModel) => this.webSocketService.sendFromStore()
-    .pipe(map(client => {
-        client.send('/topic/game/rejoin', {}, JSON.stringify({
-          jwt: action.jwt
-        }));
-        this.webSocketService.subscribeToGameTopic(action.gameId);
-        this.webSocketService.subscribeToPlayerDataTopic();
-        this.webSocketService.requestGameTopicUpdate(MessageType.Game);
-        this.webSocketService.requestGameTopicUpdate(MessageType.GameData);
-        this.webSocketService.requestGameTopicUpdate(MessageType.Hand);
-        this.webSocketService.requestPlayerDataUpdate();
-        this.router.navigate([`${APP_ROUTES.GAME_PREFIX.path}/${action.gameId}`]).then();
-        return {type: rejoinGameSuccess.type};
-      }, catchError(() => EMPTY)
-      )
-    ))
-  ));
-
   /**
    * Creates a game.
    */
   createGame$ = createEffect(() => this.actions$.pipe(
     ofType(createGame),
-    mergeMap((action: CreateGameModel) => this.createGameService.sendFromStore()
-    .pipe(map(client => {
-        client.send(
-          this.createGameService.createGameTopic,
-          {},
-          JSON.stringify(this.createGameService.createGamePayload({
-            buyIn: action.buyIn,
-            maxPlayers: action.maxPlayers,
-            name: action.name
-          } as CreateGameModel)))
-        return {type: createGameSuccess.type}
-      })
-    ))
-  ));
-
+    tap((action: CreateGameModel & TypedAction<'[Lobby Component] CreateGame'>) => {
+      this.webSocketService.send(
+        this.createGameService.createGameTopic,
+        this.createGameService.createGamePayload(
+          {buyIn: action.buyIn, maxPlayers: action.maxPlayers, name: action.name}));
+    })
+  ), {dispatch: false});
   /**
    * Effect when a game has been created.
    */
   gameCreated$ = createEffect(() => this.actions$.pipe(
     ofType(gameCreated),
-    tap((action => {
-      this.router.navigate([`${APP_ROUTES.GAME_PREFIX.path}/${action.message}`]).then();
-      this.gameJoined(action.message);
-    }))
+    tap((action => this.lobbyJoined(action.message)))
+  ), {dispatch: false});
+
+  /**
+   * Effect that will join lobby with ID provided in the prop and then navigate to the route that
+   * will display the lobby.
+   */
+  joinLobby$ = createEffect(() => this.actions$.pipe(
+    ofType(joinLobby),
+    tap(action => {
+        this.webSocketService.send('/topic/game/join', {jwt: this.jwt, gameId: action.id});
+        this.lobbyJoined(action.id);
+      }
+    )
+  ), {dispatch: false});
+
+  leaveGame$ = createEffect(() => this.actions$.pipe(
+    ofType(leaveGame),
+    tap(() => this.webSocketService.send('/topic/game/leave', {jwt: this.jwt}))
+  ), {dispatch: false});
+
+  rejoinGame$ = createEffect(() => this.actions$.pipe(
+    ofType(rejoinGame),
+    tap((action: RejoinModel & TypedAction<'[Lobby Component] RejoinGame'>) => {
+      this.webSocketService.send('/topic/game/rejoin', {jwt: this.jwt});
+      this.gameRejoined(action.gameId);
+    })
   ), {dispatch: false});
 
   constructor(
@@ -194,13 +159,26 @@ export class GameEffects {
     private createGameService: CreateGameService,
     private gameService: GameService,
     private handService: HandService,
-    private router: Router) {
+    private router: Router,
+    private appStore: Store<AppStateContainer>) {
+    this.appStore.select(selectJwt).subscribe(jwt => this.jwt = jwt);
   }
 
-  private gameJoined(gameId: string): void {
+  private lobbyJoined(gameId: string): void {
     this.webSocketService.subscribeToGameTopic(gameId);
     this.webSocketService.requestGameTopicUpdate(MessageType.Game);
     this.webSocketService.requestGameTopicUpdate(MessageType.Lobby);
     this.webSocketService.gameListTopicUnsubscribe();
+    this.router.navigate([`${APP_ROUTES.GAME_PREFIX.path}/${gameId}`]).then();
+  }
+
+  private gameRejoined(gameId: string): void {
+    this.webSocketService.subscribeToGameTopic(gameId);
+    this.webSocketService.subscribeToPlayerDataTopic();
+    this.webSocketService.requestGameTopicUpdate(MessageType.Game);
+    this.webSocketService.requestGameTopicUpdate(MessageType.GameData);
+    this.webSocketService.requestGameTopicUpdate(MessageType.Hand);
+    this.webSocketService.requestPlayerDataUpdate();
+    this.router.navigate([`${APP_ROUTES.GAME_PREFIX.path}/${gameId}`]).then();
   }
 }
