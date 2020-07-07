@@ -6,19 +6,9 @@
 export interface LobbyPlayerModel {
 
   /**
-   * User's email address.
-   */
-  email?: string;
-
-  /**
    * User's first name.
    */
   firstName?: string;
-
-  /**
-   * User's user group.
-   */
-  group?: 'Administrator' | 'Client' | 'Guest';
 
   /**
    * Specifies whether the player created the game.

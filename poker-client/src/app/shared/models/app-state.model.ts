@@ -5,7 +5,7 @@ import {
   GameDocument,
   GamePlayerModel,
   HandDocument,
-  LobbyDocument,
+  LobbyModel,
   ToastModel,
   UserModel
 } from '../../api/models';
@@ -31,7 +31,7 @@ export interface GameDataStateContainer {
 }
 
 export interface LobbyStateContainer {
-  lobbyDocument: LobbyDocument;
+  lobbyDocument: LobbyModel;
 }
 
 export interface GameStateContainer {

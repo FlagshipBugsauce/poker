@@ -26,7 +26,7 @@ import {
   GameDocument,
   GamePlayerModel,
   HandDocument,
-  LobbyDocument,
+  LobbyModel,
   ToastModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
@@ -109,12 +109,12 @@ export function gameDocumentReducer(state: GameDocument, action) {
 /**
  * LobbyDocument reducer and initial state.
  */
-export const lobbyDocumentInitialState: LobbyDocument = {} as LobbyDocument;
-const lobbyDocumentReducerInternal = createReducer<LobbyDocument>(
+export const lobbyDocumentInitialState: LobbyModel = {} as LobbyModel;
+const lobbyDocumentReducerInternal = createReducer<LobbyModel>(
   lobbyDocumentInitialState,
-  on(lobbyDocumentUpdated, (state: LobbyDocument, newState: LobbyDocument) => newState));
+  on(lobbyDocumentUpdated, (state: LobbyModel, newState: LobbyModel) => newState));
 
-export function lobbyDocumentReducer(state: LobbyDocument, action) {
+export function lobbyDocumentReducer(state: LobbyModel, action) {
   return lobbyDocumentReducerInternal(state, action);
 }
 

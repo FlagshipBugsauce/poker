@@ -14,7 +14,7 @@ import {
   DrawGameDataContainerModel,
   GameDocument,
   GamePlayerModel,
-  LobbyDocument
+  LobbyModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
 
@@ -67,11 +67,11 @@ export const selectGameList = createSelector(
 );
 
 export const lobbyFeature =
-  createFeatureSelector<LobbyStateContainer, LobbyDocument>('lobbyDocument');
+  createFeatureSelector<LobbyStateContainer, LobbyModel>('lobbyDocument');
 /** Lobby document selector. */
 export const selectLobbyDocument = createSelector(
   lobbyFeature,
-  (state: LobbyDocument) => state
+  (state: LobbyModel) => state
 );
 
 export const gameFeature =

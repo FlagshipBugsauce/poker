@@ -10,7 +10,7 @@ import {
   GameDocument, GameParameterModel,
   GamePlayerModel,
   HandDocument,
-  LobbyDocument,
+  LobbyModel,
   ToastModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
@@ -59,7 +59,7 @@ export const gameDocumentUpdated = createAction(
 export const gameListUpdated = createAction(
   '[SSE Service] GameListDataUpdated', props<GameListContainerModel>());
 export const lobbyDocumentUpdated = createAction(
-  '[SSE Service] LobbyDocumentUpdated', props<LobbyDocument>());
+  '[SSE Service] LobbyDocumentUpdated', props<LobbyModel>());
 export const handDocumentUpdated = createAction(
   '[SSE Service] HandDocumentUpdated', props<HandDocument>());
 export const gameDataUpdated = createAction(

@@ -32,7 +32,7 @@
             <tbody>
             <tr *ngFor="let player of lobbyModel.players" class="text-center">
               <td>
-                <img *ngIf="player.id == hostModel.id" [src]="crownIcon" class="crown">
+                <img *ngIf="player.host" [src]="crownIcon" class="crown">
                 {{ player.firstName }} {{ player.lastName }}
               </td>
               <td>
@@ -54,7 +54,7 @@
               Name:
             </div>
             <div class="col-sm-8 text-truncate">
-              {{ lobbyModel.name }}
+              {{ lobbyModel.parameters.name }}
             </div>
             <div class="col-sm-4 font-weight-bold">
               Host:
@@ -66,13 +66,13 @@
               Max Players:
             </div>
             <div class="col-sm-8">
-              {{ lobbyModel.maxPlayers }}
+              {{ lobbyModel.parameters.maxPlayers }}
             </div>
             <div class="col-sm-4 font-weight-bold">
               Buy-In:
             </div>
             <div class="col-sm-8">
-              {{ lobbyModel.buyIn | currency }}
+              {{ lobbyModel.parameters.buyIn | currency }}
             </div>
           </div>
         </div>
@@ -92,7 +92,7 @@
             type="submit">{{(ready$ | async) ? "Un-Ready" : "Ready"}}</button>
           <button
             (click)="startGame()"
-            *ngIf="(userModel$ | async).id === lobbyModel.host"
+            *ngIf="(userModel$ | async).id === lobbyModel.host.id"
             [disabled]="!canStart"
             class="btn btn-warning button ml-3 text-light mt-3"
             ngbTooltip="Start the game!"
@@ -103,7 +103,7 @@
     </div>
   </div>
   <div
-    *ngIf="displayCanStartAlert && canStart && (userModel$ | async).id  === hostModel.id"
+    *ngIf="displayCanStartAlert && canStart && (userModel$ | async).id  === lobbyModel.host.id"
     class="container-fluid mt-3">
     <ngb-alert (close)="displayCanStartAlert = false" [type]="'success'">
       Note: All players are ready, you can start the game.

@@ -3,15 +3,13 @@ package com.poker.poker.services.game;
 import com.poker.poker.config.AppConfig;
 import com.poker.poker.config.constants.GameConstants;
 import com.poker.poker.documents.GameDocument;
-import com.poker.poker.documents.LobbyDocument;
+import com.poker.poker.models.game.LobbyModel;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.JoinGameEvent;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.SocketContainerModel;
-import com.poker.poker.models.enums.GameAction;
 import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.game.GameParameterModel;
-import com.poker.poker.models.game.GameActionModel;
 import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.GameListModel;
 import com.poker.poker.models.game.LobbyPlayerModel;
@@ -21,13 +19,11 @@ import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -43,7 +39,7 @@ public class LobbyService {
   private final AppConfig appConfig;
 
   /** A map of active games, keyed by the games ID. */
-  private final Map<UUID, LobbyDocument> lobbys;
+  private final Map<UUID, LobbyModel> lobbys;
 
   /**
    * A map of game UUID's, keyed by user UUID's, to identify which game a user is currently in, and
@@ -78,13 +74,13 @@ public class LobbyService {
    * Sends out a game document to all players in the game associated with the game document
    * argument.
    *
-   * @param lobbyDocument GameDocument representing the game that is being updated.
+   * @param lobbyModel GameDocument representing the game that is being updated.
    */
-  private void broadcastLobbyDocument(LobbyDocument lobbyDocument) {
+  private void broadcastLobbyDocument(LobbyModel lobbyModel) {
     // Broadcast lobby document to lobby topic.
     webSocketService.sendPublicMessage(
-        appConfig.getGameTopic() + lobbyDocument.getId(),
-        new SocketContainerModel(MessageType.Lobby, lobbyDocument));
+        appConfig.getGameTopic() + lobbyModel.getId(),
+        new SocketContainerModel(MessageType.Lobby, lobbyModel));
   }
 
   /** Broadcasts the list of joinable games to the game list topic. */
@@ -102,34 +98,34 @@ public class LobbyService {
    * @throws BadRequestException If there is no lobby associated with the specified game ID.
    */
   public void startGame(GameDocument gameDocument) throws BadRequestException {
-    final LobbyDocument lobbyDocument = lobbys.remove(gameDocument.getId());
-    if (lobbyDocument == null) {
+    final LobbyModel lobbyModel = lobbys.remove(gameDocument.getId());
+    if (lobbyModel == null) {
       throw gameConstants.getGameNotFoundException();
     }
 
     // Check if all players are ready.
-    for (LobbyPlayerModel player : lobbyDocument.getPlayers()) {
+    for (LobbyPlayerModel player : lobbyModel.getPlayers()) {
       if (!player.isReady()) {
         log.error("Host attempted to start the game, but all players were not ready.");
-        lobbys.put(gameDocument.getId(), lobbyDocument); // Add the mapping back.
+        lobbys.put(gameDocument.getId(), lobbyModel); // Add the mapping back.
         throw gameConstants.getPlayerNotReadyException();
       }
     }
 
     // Remove players from userIdToLobbyIdMap
-    lobbyDocument.getPlayers().forEach(player -> userIdToLobbyIdMap.remove(player.getId()));
+    lobbyModel.getPlayers().forEach(player -> userIdToLobbyIdMap.remove(player.getId()));
 
     // Add players to game document, then shuffle the players.
     gameDocument.setPlayers(
-        lobbyDocument.getPlayers().stream().map(GamePlayerModel::new).collect(Collectors.toList()));
+        lobbyModel.getPlayers().stream().map(GamePlayerModel::new).collect(Collectors.toList()));
     Collections.shuffle(gameDocument.getPlayers());
     gameDocument.getPlayers().get(0).setActing(true);
 
     // Send to game list topic
     useCachedGameList = false;
-    webSocketService.sendGameToast(lobbyDocument.getId(), "The game has started!", "lg");
+    webSocketService.sendGameToast(lobbyModel.getId(), "The game has started!", "lg");
 
-    lobbyRepository.save(lobbyDocument);
+    lobbyRepository.save(lobbyModel);
   }
 
   /**
@@ -138,7 +134,7 @@ public class LobbyService {
    * @param lobbyId The ID of the lobby document being sought.
    * @return LobbyDocument associated with the ID provided if it exists, otherwise, throws.
    */
-  public LobbyDocument getLobbyDocument(UUID lobbyId) {
+  public LobbyModel getLobbyDocument(UUID lobbyId) {
     if (lobbys.get(lobbyId) == null) {
       throw gameConstants.getLobbyNotFoundException();
     }
@@ -161,7 +157,7 @@ public class LobbyService {
    * @param userId ID of the user.
    * @return GameDocument of the game the user is in.
    */
-  public LobbyDocument getUsersLobbyDocument(UUID userId) {
+  public LobbyModel getUsersLobbyDocument(UUID userId) {
     if (!isUserInLobby(userId)) {
       throw gameConstants.getNoUserIdToLobbyIdMappingFound();
     }
@@ -174,13 +170,13 @@ public class LobbyService {
    * @param userId ID of the user.
    */
   public void checkUserIsPlayerInLobby(UUID userId) {
-    final LobbyDocument lobbyDocument = getUsersLobbyDocument(userId);
-    if (lobbyDocument == null) {
+    final LobbyModel lobbyModel = getUsersLobbyDocument(userId);
+    if (lobbyModel == null) {
       log.error("There is no game associated with user {}.", userId);
       throw gameConstants.getInvalidUuidException();
     }
-    if (lobbyDocument.getPlayers().stream().noneMatch(p -> p.getId().equals(userId))) {
-      log.error("User {} is not listed as a player of game {}.", lobbyDocument.getId(), userId);
+    if (lobbyModel.getPlayers().stream().noneMatch(p -> p.getId().equals(userId))) {
+      log.error("User {} is not listed as a player of game {}.", lobbyModel.getId(), userId);
       throw gameConstants.getUserNotInGameException();
     }
   }
@@ -210,11 +206,11 @@ public class LobbyService {
     }
 
     // Get the game document for the game now that we're sure it exists.
-    final LobbyDocument lobbyDocument = getUsersLobbyDocument(user.getId());
+    final LobbyModel lobbyModel = getUsersLobbyDocument(user.getId());
 
     // Find the playerModel, throw if not found, otherwise, remove player from game.
     final Optional<LobbyPlayerModel> player =
-        lobbyDocument.getPlayers().stream()
+        lobbyModel.getPlayers().stream()
             .filter(playerModel -> playerModel.getId().equals(user.getId()))
             .findFirst();
     if (!player.isPresent()) {
@@ -231,15 +227,10 @@ public class LobbyService {
             player.get().getLastName(),
             player.get().isReady() ? "is" : "is not");
 
-    // Add the appropriate game action model.
-    lobbyDocument
-        .getGameActions()
-        .add(new GameActionModel(UUID.randomUUID(), player.get(), GameAction.Ready, message));
-
-    webSocketService.sendGameToast(lobbyDocument.getId(), message, "md");
+    webSocketService.sendGameToast(lobbyModel.getId(), message, "md");
     log.debug("Player status set to ready (ID: {}).", user.getId().toString());
 
-    broadcastLobbyDocument(lobbyDocument);
+    broadcastLobbyDocument(lobbyModel);
     return new ApiSuccessModel("Player ready status was toggled.");
   }
 
@@ -268,21 +259,19 @@ public class LobbyService {
   public void createLobby(
       final GameParameterModel gameParameterModel, final UserDocument user, final UUID id) {
     checkWhetherUserIsInLobbyAndThrow(user.getId(), false);
+    final LobbyPlayerModel host =  new LobbyPlayerModel(user, false, true);
     final List<LobbyPlayerModel> players =
         Collections.synchronizedList(
-            new ArrayList<>(Collections.singletonList(new LobbyPlayerModel(user, false, true))));
-    final LobbyDocument lobbyDocument =
-        new LobbyDocument(
+            new ArrayList<>(Collections.singletonList(host)));
+    final LobbyModel lobbyModel =
+        new LobbyModel(
             id,
-            user.getId(),
-            gameParameterModel.getName(),
-            gameParameterModel.getMaxPlayers(),
-            gameParameterModel.getBuyIn(),
-            players,
-            new ArrayList<>());
+            host,
+            gameParameterModel,
+            players);
     log.info("User: {} created a game.", user.getId());
-    lobbys.put(lobbyDocument.getId(), lobbyDocument);
-    userIdToLobbyIdMap.put(user.getId(), lobbyDocument.getId());
+    lobbys.put(lobbyModel.getId(), lobbyModel);
+    userIdToLobbyIdMap.put(user.getId(), lobbyModel.getId());
     useCachedGameList = false;
   }
 
@@ -293,19 +282,13 @@ public class LobbyService {
    */
   public List<GameListModel> getLobbyList() {
     gameList = new ArrayList<>();
-    for (LobbyDocument lobbyDocument : lobbys.values()) {
+    for (final LobbyModel lobbyModel : lobbys.values()) {
       gameList.add(
           new GameListModel(
-              lobbyDocument.getId(),
-              new GameParameterModel(
-                  lobbyDocument.getName(),
-                  lobbyDocument.getMaxPlayers(),
-                  lobbyDocument.getBuyIn()),
-              lobbyDocument.getPlayers().stream()
-                  .filter(p -> p.getId().equals(lobbyDocument.getHost()))
-                  .findFirst()
-                  .get(),
-              lobbyDocument.getPlayers().size()));
+              lobbyModel.getId(),
+              lobbyModel.getParameters(),
+              lobbyModel.getHost(),
+              lobbyModel.getPlayers().size()));
     }
     useCachedGameList = true;
     return gameList;
@@ -321,26 +304,21 @@ public class LobbyService {
 
     final UUID gameId = joinGameEvent.getGameId();
     final UserDocument user = joinGameEvent.getUser();
-    final LobbyDocument lobbyDocument = lobbys.get(gameId);
+    final LobbyModel lobbyModel = lobbys.get(gameId);
     final LobbyPlayerModel lobbyPlayerModel = new LobbyPlayerModel(user, false, false);
-    lobbyDocument.getPlayers().add(lobbyPlayerModel);
+    lobbyModel.getPlayers().add(lobbyPlayerModel);
     final String toastMessage =
         String.format(
             "%s %s has joined the game.",
             lobbyPlayerModel.getFirstName(), lobbyPlayerModel.getLastName());
-    // Add the appropriate game action model.
-    lobbyDocument
-        .getGameActions()
-        .add(
-            new GameActionModel(
-                UUID.randomUUID(), lobbyPlayerModel, GameAction.Join, toastMessage));
+
     log.debug("Adding user {} to userIdToLobbyMap.", user.getId());
-    userIdToLobbyIdMap.put(user.getId(), lobbyDocument.getId());
+    userIdToLobbyIdMap.put(user.getId(), lobbyModel.getId());
 
     // Broadcast updated lobby document to lobby topic and game list to game list topic.
     webSocketService.sendGameToast(
-        lobbyDocument.getId(), toastMessage, "md"); // Also broadcast toast.
-    broadcastLobbyDocument(lobbyDocument);
+        lobbyModel.getId(), toastMessage, "md"); // Also broadcast toast.
+    broadcastLobbyDocument(lobbyModel);
     useCachedGameList = false;
   }
 
@@ -351,13 +329,13 @@ public class LobbyService {
    * @param user The user to be removed.
    * @return ApiSuccessModel indicating that the request was completed successfully.
    */
-  public ApiSuccessModel removePlayerFromLobby(UserDocument user) {
+  public ApiSuccessModel removePlayerFromLobby(final UserDocument user) {
     UUID gameId = userIdToLobbyIdMap.get(user.getId());
     if (gameId == null) {
       throw gameConstants.getLeaveGameException();
     }
 
-    LobbyDocument game = lobbys.get(gameId);
+    LobbyModel game = lobbys.get(gameId);
     if (game == null) {
       throw gameConstants.getLeaveGameException();
     }
@@ -374,7 +352,7 @@ public class LobbyService {
 
     if (game.getPlayers().size() > 0) {
       // Select another host.
-      game.setHost(game.getPlayers().get(0).getId());
+      game.setHost(game.getPlayers().get(0));
       log.debug("Changing host from: {}, to: {}.", user.getId(), game.getHost());
     } else {
       // The game is empty, so remove it.
@@ -389,12 +367,6 @@ public class LobbyService {
     final String toastMessage =
         String.format(
             "%s %s has left the game.", player.get().getFirstName(), player.get().getLastName());
-
-    // Add GameActionModel with the appropriate action.
-    game.getGameActions()
-        .add(
-            new GameActionModel(
-                UUID.randomUUID(), player.get(), GameAction.LeaveLobby, toastMessage));
 
     // Broadcast updated lobby document to lobby topic and game list to game list topic.
     webSocketService.sendGameToast(game.getId(), toastMessage, "md");

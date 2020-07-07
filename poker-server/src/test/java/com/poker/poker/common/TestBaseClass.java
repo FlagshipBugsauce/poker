@@ -3,7 +3,7 @@ package com.poker.poker.common;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.poker.poker.documents.LobbyDocument;
+import com.poker.poker.models.game.LobbyModel;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.AuthRequestModel;
@@ -67,16 +67,16 @@ public class TestBaseClass {
   private final GameParameterModel sampleGameParameterModel =
       new GameParameterModel(sampleGameName, sampleMaxPlayers, sampleBuyIn);
 
-  @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
-  private final LobbyDocument sampleLobbyDocument =
-      new LobbyDocument(
-          UUID.randomUUID(),
-          zeroUUID,
-          sampleGameName,
-          sampleMaxPlayers,
-          sampleBuyIn,
-          Arrays.asList(new LobbyPlayerModel()), // TODO: Fix this properly
-          new ArrayList<>());
+//  @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
+//  private final LobbyModel sampleLobbyModel =
+//      new LobbyModel(
+//          UUID.randomUUID(),
+//          sampl,
+//          sampleGameName,
+//          sampleMaxPlayers,
+//          sampleBuyIn,
+//          Arrays.asList(new LobbyPlayerModel()), // TODO: Fix this properly
+//          new ArrayList<>());
 
   public MockHttpServletResponse mockAuthResponse(
       final MockMvc mockMvc, final String uri, final String inputJson) throws Exception {

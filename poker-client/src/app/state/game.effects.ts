@@ -24,7 +24,6 @@ import {
 import {Router} from '@angular/router';
 import {APP_ROUTES} from '../app-routes';
 import {HandService} from '../api/services/hand.service';
-import {CreateGameModel} from '../api/models/create-game-model';
 import {ActiveStatusModel} from '../api/models/active-status-model';
 import {WebSocketService} from '../shared/web-socket/web-socket.service';
 import {MessageType} from '../shared/models/message-types.enum';
@@ -34,6 +33,7 @@ import {AppStateContainer} from '../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {selectJwt} from './app.selector';
 import {TypedAction} from '@ngrx/store/src/models';
+import {GameParameterModel} from "../api/models/game-parameter-model";
 
 @Injectable()
 export class GameEffects {
@@ -112,7 +112,7 @@ export class GameEffects {
    */
   createGame$ = createEffect(() => this.actions$.pipe(
     ofType(createGame),
-    tap((action: CreateGameModel & TypedAction<'[Lobby Component] CreateGame'>) => {
+    tap((action: GameParameterModel & TypedAction<'[Lobby Component] CreateGame'>) => {
       this.webSocketService.send(
         this.createGameService.createGameTopic,
         this.createGameService.createGamePayload(

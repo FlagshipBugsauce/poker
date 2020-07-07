@@ -2,7 +2,7 @@ package com.poker.poker.controllers;
 
 import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.HandDocument;
-import com.poker.poker.documents.LobbyDocument;
+import com.poker.poker.models.game.LobbyModel;
 import com.poker.poker.models.WebSocketUpdateModel;
 import com.poker.poker.models.game.DrawGameDataContainerModel;
 import com.poker.poker.models.game.DrawGameDataModel;
@@ -33,8 +33,8 @@ public class TestController {
   */
 
   @GetMapping("/test/lobbyDoc")
-  public ResponseEntity<LobbyDocument> lobbyDocument() {
-    return ResponseEntity.ok(new LobbyDocument());
+  public ResponseEntity<LobbyModel> lobbyDocument() {
+    return ResponseEntity.ok(new LobbyModel());
   }
 
   @GetMapping("/test/handDoc")

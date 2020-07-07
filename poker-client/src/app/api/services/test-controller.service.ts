@@ -15,7 +15,7 @@ import { DrawGameDataContainerModel } from '../models/draw-game-data-container-m
 import { DrawGameDataModel } from '../models/draw-game-data-model';
 import { GameDocument } from '../models/game-document';
 import { HandDocument } from '../models/hand-document';
-import { LobbyDocument } from '../models/lobby-document';
+import { LobbyModel } from '../models/lobby-model';
 import { ToastModel } from '../models/toast-model';
 import { WebSocketUpdateModel } from '../models/web-socket-update-model';
 
@@ -31,21 +31,21 @@ export class TestControllerService extends BaseService {
   }
 
   /**
-   * Path part for operation gameDocument
+   * Path part for operation lobbyDocument
    */
-  static readonly GameDocumentPath = '/test/test/gameDoc';
+  static readonly LobbyDocumentPath = '/test/test/lobbyDoc';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `gameDocument()` instead.
+   * To access only the response body, use `lobbyDocument()` instead.
    *
    * This method doesn't expect any request body.
    */
-  gameDocument$Response(params?: {
+  lobbyDocument$Response(params?: {
 
-  }): Observable<StrictHttpResponse<GameDocument>> {
+  }): Observable<StrictHttpResponse<LobbyModel>> {
 
-    const rb = new RequestBuilder(this.rootUrl, TestControllerService.GameDocumentPath, 'get');
+    const rb = new RequestBuilder(this.rootUrl, TestControllerService.LobbyDocumentPath, 'get');
     if (params) {
 
 
@@ -56,23 +56,69 @@ export class TestControllerService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<GameDocument>;
+        return r as StrictHttpResponse<LobbyModel>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `gameDocument$Response()` instead.
+   * To access the full response (for headers, for example), `lobbyDocument$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  gameDocument(params?: {
+  lobbyDocument(params?: {
 
-  }): Observable<GameDocument> {
+  }): Observable<LobbyModel> {
 
-    return this.gameDocument$Response(params).pipe(
-      map((r: StrictHttpResponse<GameDocument>) => r.body as GameDocument)
+    return this.lobbyDocument$Response(params).pipe(
+      map((r: StrictHttpResponse<LobbyModel>) => r.body as LobbyModel)
+    );
+  }
+
+  /**
+   * Path part for operation actionModel
+   */
+  static readonly ActionModelPath = '/test/test/websocket/models/action-model';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `actionModel()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  actionModel$Response(params?: {
+
+  }): Observable<StrictHttpResponse<ActionModel>> {
+
+    const rb = new RequestBuilder(this.rootUrl, TestControllerService.ActionModelPath, 'get');
+    if (params) {
+
+
+    }
+    return this.http.request(rb.build({
+      responseType: 'blob',
+      accept: '*/*'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<ActionModel>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `actionModel$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  actionModel(params?: {
+
+  }): Observable<ActionModel> {
+
+    return this.actionModel$Response(params).pipe(
+      map((r: StrictHttpResponse<ActionModel>) => r.body as ActionModel)
     );
   }
 
@@ -123,21 +169,21 @@ export class TestControllerService extends BaseService {
   }
 
   /**
-   * Path part for operation currentGameModel
+   * Path part for operation handDocument
    */
-  static readonly CurrentGameModelPath = '/test/test/websocket/models/current-game-model';
+  static readonly HandDocumentPath = '/test/test/handDoc';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `currentGameModel()` instead.
+   * To access only the response body, use `handDocument()` instead.
    *
    * This method doesn't expect any request body.
    */
-  currentGameModel$Response(params?: {
+  handDocument$Response(params?: {
 
-  }): Observable<StrictHttpResponse<CurrentGameModel>> {
+  }): Observable<StrictHttpResponse<HandDocument>> {
 
-    const rb = new RequestBuilder(this.rootUrl, TestControllerService.CurrentGameModelPath, 'get');
+    const rb = new RequestBuilder(this.rootUrl, TestControllerService.HandDocumentPath, 'get');
     if (params) {
 
 
@@ -148,23 +194,23 @@ export class TestControllerService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<CurrentGameModel>;
+        return r as StrictHttpResponse<HandDocument>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `currentGameModel$Response()` instead.
+   * To access the full response (for headers, for example), `handDocument$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  currentGameModel(params?: {
+  handDocument(params?: {
 
-  }): Observable<CurrentGameModel> {
+  }): Observable<HandDocument> {
 
-    return this.currentGameModel$Response(params).pipe(
-      map((r: StrictHttpResponse<CurrentGameModel>) => r.body as CurrentGameModel)
+    return this.handDocument$Response(params).pipe(
+      map((r: StrictHttpResponse<HandDocument>) => r.body as HandDocument)
     );
   }
 
@@ -215,21 +261,21 @@ export class TestControllerService extends BaseService {
   }
 
   /**
-   * Path part for operation lobbyDocument
+   * Path part for operation gameDocument
    */
-  static readonly LobbyDocumentPath = '/test/test/lobbyDoc';
+  static readonly GameDocumentPath = '/test/test/gameDoc';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `lobbyDocument()` instead.
+   * To access only the response body, use `gameDocument()` instead.
    *
    * This method doesn't expect any request body.
    */
-  lobbyDocument$Response(params?: {
+  gameDocument$Response(params?: {
 
-  }): Observable<StrictHttpResponse<LobbyDocument>> {
+  }): Observable<StrictHttpResponse<GameDocument>> {
 
-    const rb = new RequestBuilder(this.rootUrl, TestControllerService.LobbyDocumentPath, 'get');
+    const rb = new RequestBuilder(this.rootUrl, TestControllerService.GameDocumentPath, 'get');
     if (params) {
 
 
@@ -240,42 +286,42 @@ export class TestControllerService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<LobbyDocument>;
+        return r as StrictHttpResponse<GameDocument>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `lobbyDocument$Response()` instead.
+   * To access the full response (for headers, for example), `gameDocument$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  lobbyDocument(params?: {
+  gameDocument(params?: {
 
-  }): Observable<LobbyDocument> {
+  }): Observable<GameDocument> {
 
-    return this.lobbyDocument$Response(params).pipe(
-      map((r: StrictHttpResponse<LobbyDocument>) => r.body as LobbyDocument)
+    return this.gameDocument$Response(params).pipe(
+      map((r: StrictHttpResponse<GameDocument>) => r.body as GameDocument)
     );
   }
 
   /**
-   * Path part for operation handDocument
+   * Path part for operation currentGameModel
    */
-  static readonly HandDocumentPath = '/test/test/handDoc';
+  static readonly CurrentGameModelPath = '/test/test/websocket/models/current-game-model';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `handDocument()` instead.
+   * To access only the response body, use `currentGameModel()` instead.
    *
    * This method doesn't expect any request body.
    */
-  handDocument$Response(params?: {
+  currentGameModel$Response(params?: {
 
-  }): Observable<StrictHttpResponse<HandDocument>> {
+  }): Observable<StrictHttpResponse<CurrentGameModel>> {
 
-    const rb = new RequestBuilder(this.rootUrl, TestControllerService.HandDocumentPath, 'get');
+    const rb = new RequestBuilder(this.rootUrl, TestControllerService.CurrentGameModelPath, 'get');
     if (params) {
 
 
@@ -286,69 +332,23 @@ export class TestControllerService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<HandDocument>;
+        return r as StrictHttpResponse<CurrentGameModel>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `handDocument$Response()` instead.
+   * To access the full response (for headers, for example), `currentGameModel$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  handDocument(params?: {
+  currentGameModel(params?: {
 
-  }): Observable<HandDocument> {
+  }): Observable<CurrentGameModel> {
 
-    return this.handDocument$Response(params).pipe(
-      map((r: StrictHttpResponse<HandDocument>) => r.body as HandDocument)
-    );
-  }
-
-  /**
-   * Path part for operation actionModel
-   */
-  static readonly ActionModelPath = '/test/test/websocket/models/action-model';
-
-  /**
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `actionModel()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  actionModel$Response(params?: {
-
-  }): Observable<StrictHttpResponse<ActionModel>> {
-
-    const rb = new RequestBuilder(this.rootUrl, TestControllerService.ActionModelPath, 'get');
-    if (params) {
-
-
-    }
-    return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<ActionModel>;
-      })
-    );
-  }
-
-  /**
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `actionModel$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  actionModel(params?: {
-
-  }): Observable<ActionModel> {
-
-    return this.actionModel$Response(params).pipe(
-      map((r: StrictHttpResponse<ActionModel>) => r.body as ActionModel)
+    return this.currentGameModel$Response(params).pipe(
+      map((r: StrictHttpResponse<CurrentGameModel>) => r.body as CurrentGameModel)
     );
   }
 
