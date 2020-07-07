@@ -4,9 +4,9 @@ import {GameStateContainer, PlayerDataStateContainer} from '../../shared/models/
 import {Store} from '@ngrx/store';
 import {setAwayStatus} from '../../state/app.actions';
 import {Subject} from 'rxjs';
-import {selectGameDocument} from '../../state/app.selector';
+import {selectGameModel} from '../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
-import {GameDocument} from '../../api/models/game-document';
+import {GameModel} from '../../api/models/game-model';
 
 @Component({
   selector: 'pkr-popup-afk',
@@ -17,7 +17,7 @@ export class PopupAfkComponent implements OnInit, OnDestroy {
   @ViewChild('popup') popup: NgbActiveModal;
   public ngDestroyed$ = new Subject();
   private ngbModalRef: NgbModalRef;
-  private gameModel: GameDocument;
+  private gameModel: GameModel;
 
   constructor(
     private ngbModal: NgbModal,
@@ -26,9 +26,9 @@ export class PopupAfkComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.gameStore.select(selectGameDocument)
+    this.gameStore.select(selectGameModel)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((data: GameDocument) => this.gameModel = data);
+    .subscribe((data: GameModel) => this.gameModel = data);
   }
 
   public ngOnDestroy() {
@@ -44,7 +44,7 @@ export class PopupAfkComponent implements OnInit, OnDestroy {
   }
 
   public back(): void {
-    if (this.gameModel.state === 'Play') {
+    if (this.gameModel.phase === 'Play') {
       this.playerDataStore.dispatch(setAwayStatus({away: false}));
     }
     this.ngbModalRef.close();

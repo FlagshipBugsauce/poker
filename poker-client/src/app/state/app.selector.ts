@@ -12,7 +12,7 @@ import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {HandDocument} from '../api/models/hand-document';
 import {
   DrawGameDataContainerModel,
-  GameDocument,
+  GameModel,
   GamePlayerModel,
   LobbyModel
 } from '../api/models';
@@ -67,26 +67,26 @@ export const selectGameList = createSelector(
 );
 
 export const lobbyFeature =
-  createFeatureSelector<LobbyStateContainer, LobbyModel>('lobbyDocument');
+  createFeatureSelector<LobbyStateContainer, LobbyModel>('lobbyModel');
 /** Lobby document selector. */
-export const selectLobbyDocument = createSelector(
+export const selectLobbyModel = createSelector(
   lobbyFeature,
   (state: LobbyModel) => state
 );
 
 export const gameFeature =
-  createFeatureSelector<GameStateContainer, GameDocument>('gameDocument');
+  createFeatureSelector<GameStateContainer, GameModel>('gameModel');
 /** Game document selector. */
-export const selectGameDocument = createSelector(
+export const selectGameModel = createSelector(
   gameFeature,
-  (state: GameDocument) => state
+  (state: GameModel) => state
 );
-export const gameStateFeature =
-  createFeatureSelector<GameStateContainer, GameDocument>('gameDocument');
+export const gamePhaseFeature =
+  createFeatureSelector<GameStateContainer, GameModel>('gameModel');
 /** Game state selector. */
-export const selectGameState = createSelector(
-  gameStateFeature,
-  (state: GameDocument) => state.state
+export const selectGamePhase = createSelector(
+  gamePhaseFeature,
+  (state: GameModel) => state.phase
 );
 
 export const handFeature =

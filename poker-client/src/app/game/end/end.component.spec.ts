@@ -4,13 +4,13 @@ import {SharedModule} from '../../shared/shared.module';
 import {MockStore, provideMockStore} from '@ngrx/store/testing';
 import {MemoizedSelector} from '@ngrx/store';
 import {GameStateContainer} from '../../shared/models/app-state.model';
-import {GameDocument} from '../../api/models/game-document';
 import * as selectors from '../../state/app.selector';
-import {mockGameDocument} from '../../testing/mock-models';
+import {mockGameModel} from '../../testing/mock-models';
+import {GameModel} from '../../api/models';
 
 describe('EndComponent', () => {
   let mockStore: MockStore;
-  let mockGameSelector: MemoizedSelector<GameStateContainer, GameDocument>;
+  let mockGameSelector: MemoizedSelector<GameStateContainer, GameModel>;
   let component: EndComponent;
   let fixture: ComponentFixture<EndComponent>;
 
@@ -23,7 +23,7 @@ describe('EndComponent', () => {
 
     fixture = TestBed.createComponent(EndComponent);
     mockStore = TestBed.inject(MockStore);
-    mockGameSelector = mockStore.overrideSelector(selectors.selectGameDocument, mockGameDocument);
+    mockGameSelector = mockStore.overrideSelector(selectors.selectGameModel, mockGameModel);
     fixture.detectChanges();
   }));
 

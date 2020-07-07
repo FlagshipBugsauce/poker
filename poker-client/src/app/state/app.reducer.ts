@@ -1,14 +1,14 @@
 import {createReducer, on} from '@ngrx/store';
 import {
   gameDataUpdated,
-  gameDocumentUpdated,
+  gameModelUpdated,
   gameListUpdated,
   gameToastReceived,
   handDocumentUpdated,
   hideFailedSignInWarning,
   joinLobby,
   leaveLobby,
-  lobbyDocumentUpdated,
+  lobbyModelUpdated,
   notReady,
   playerDataUpdated,
   readyUp,
@@ -23,7 +23,7 @@ import {
   AuthResponseModel,
   CurrentGameModel,
   DrawGameDataContainerModel,
-  GameDocument,
+  GameModel,
   GamePlayerModel,
   HandDocument,
   LobbyModel,
@@ -95,27 +95,38 @@ export function gameDataReducer(state: DrawGameDataContainerModel, action) {
 }
 
 /**
- * GameDocument reducer and initial state.
+ * GameModel reducer and initial state.
  */
-export const gameDocumentInitialState: GameDocument = {} as GameDocument;
-const gameDocumentReducerInternal = createReducer<GameDocument>(
-  gameDocumentInitialState,
-  on(gameDocumentUpdated, (state: GameDocument, newState: GameDocument) => newState));
+export const gameModelInitialState: GameModel = {} as GameModel;
+const gameModelReducerInternal = createReducer<GameModel>(
+  gameModelInitialState,
+  on(gameModelUpdated, (state: GameModel, newState: GameModel) => newState));
 
-export function gameDocumentReducer(state: GameDocument, action) {
-  return gameDocumentReducerInternal(state, action);
+export function gameModelReducer(state: GameModel, action) {
+  return gameModelReducerInternal(state, action);
 }
 
 /**
- * LobbyDocument reducer and initial state.
+ * LobbyModel reducer and initial state.
  */
-export const lobbyDocumentInitialState: LobbyModel = {} as LobbyModel;
-const lobbyDocumentReducerInternal = createReducer<LobbyModel>(
-  lobbyDocumentInitialState,
-  on(lobbyDocumentUpdated, (state: LobbyModel, newState: LobbyModel) => newState));
+export const lobbyModelInitialState: LobbyModel = {
+  parameters: {
+    maxPlayers: 0,
+    name: '',
+    buyIn: 0
+  },
+  host: {
+    id: '',
+    firstName: '',
+    lastName: ''
+  }
+} as LobbyModel;
+const lobbyModelReducerInternal = createReducer<LobbyModel>(
+  lobbyModelInitialState,
+  on(lobbyModelUpdated, (state: LobbyModel, newState: LobbyModel) => newState));
 
-export function lobbyDocumentReducer(state: LobbyModel, action) {
-  return lobbyDocumentReducerInternal(state, action);
+export function lobbyModelReducer(state: LobbyModel, action) {
+  return lobbyModelReducerInternal(state, action);
 }
 
 /**

@@ -33,7 +33,7 @@ import {AppStateContainer} from '../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {selectJwt} from './app.selector';
 import {TypedAction} from '@ngrx/store/src/models';
-import {GameParameterModel} from "../api/models/game-parameter-model";
+import {GameParameterModel} from '../api/models/game-parameter-model';
 
 @Injectable()
 export class GameEffects {

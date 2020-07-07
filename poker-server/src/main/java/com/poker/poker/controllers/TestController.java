@@ -1,6 +1,6 @@
 package com.poker.poker.controllers;
 
-import com.poker.poker.documents.GameDocument;
+import com.poker.poker.models.game.GameModel;
 import com.poker.poker.documents.HandDocument;
 import com.poker.poker.models.game.LobbyModel;
 import com.poker.poker.models.WebSocketUpdateModel;
@@ -43,8 +43,8 @@ public class TestController {
   }
 
   @GetMapping("/test/gameDoc")
-  public ResponseEntity<GameDocument> gameDocument() {
-    return ResponseEntity.ok(new GameDocument());
+  public ResponseEntity<GameModel> gameDocument() {
+    return ResponseEntity.ok(new GameModel());
   }
 
   @GetMapping("/test/gameData")

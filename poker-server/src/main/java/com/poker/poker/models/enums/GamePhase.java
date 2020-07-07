@@ -1,6 +1,6 @@
 package com.poker.poker.models.enums;
 
-public enum GameState {
+public enum GamePhase {
   Lobby,
   Play,
   Over

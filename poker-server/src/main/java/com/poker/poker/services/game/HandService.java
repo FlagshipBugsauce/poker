@@ -2,7 +2,7 @@ package com.poker.poker.services.game;
 
 import com.poker.poker.config.AppConfig;
 import com.poker.poker.config.constants.HandConstants;
-import com.poker.poker.documents.GameDocument;
+import com.poker.poker.models.game.GameModel;
 import com.poker.poker.documents.HandDocument;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.HandActionEvent;
@@ -90,15 +90,15 @@ public class HandService {
    * Checks if there is an active hand associated with the game specified, throws if not and returns
    * the hand if there is.
    *
-   * @param gameDocument Model of the game associated with the hand being sought.
+   * @param gameModel Model of the game associated with the hand being sought.
    * @return The active hand associated with the game specified.
    * @throws BadRequestException If there is no hand associated with the game specified.
    */
-  public HandDocument getHand(final GameDocument gameDocument) throws BadRequestException {
-    if (gameIdToHandIdMap.get(gameDocument.getId()) == null) {
+  public HandDocument getHand(final GameModel gameModel) throws BadRequestException {
+    if (gameIdToHandIdMap.get(gameModel.getId()) == null) {
       throw handConstants.getNoGameToHandMappingException();
     }
-    return getHand(gameIdToHandIdMap.get(gameDocument.getId()));
+    return getHand(gameIdToHandIdMap.get(gameModel.getId()));
   }
 
   /**
@@ -147,7 +147,7 @@ public class HandService {
    * @param game The specified game.
    * @param deck The deck.
    */
-  public void setDeck(final GameDocument game, final DeckModel deck) {
+  public void setDeck(final GameModel game, final DeckModel deck) {
     setDeck(game.getId(), deck);
   }
 
@@ -156,7 +156,7 @@ public class HandService {
    *
    * @param game Game the deck is associated with.
    */
-  public void removeDeck(final GameDocument game) {
+  public void removeDeck(final GameModel game) {
     getDeck(game); // Make sure deck exists.
     gameIdToDeckMap.remove(game.getId());
   }
@@ -167,7 +167,7 @@ public class HandService {
    * @param game The specified game.
    * @throws BadRequestException If there is no deck associated with the specified game.
    */
-  public void restoreAndShuffle(final GameDocument game) throws BadRequestException {
+  public void restoreAndShuffle(final GameModel game) throws BadRequestException {
     restoreAndShuffle(game.getId());
   }
 
@@ -188,7 +188,7 @@ public class HandService {
    * @return The deck associated with the specified game.
    * @throws BadRequestException If there is no deck associated with the specified game.
    */
-  public DeckModel getDeck(final GameDocument game) throws BadRequestException {
+  public DeckModel getDeck(final GameModel game) throws BadRequestException {
     return getDeck(game.getId());
   }
 
@@ -209,29 +209,29 @@ public class HandService {
   /**
    * Creates a new hand for the specified game.
    *
-   * @param gameDocument The game the new hand is being created for.
+   * @param gameModel The game the new hand is being created for.
    */
-  public void newHand(final GameDocument gameDocument) {
-    log.debug("Creating new hand for game {}.", gameDocument.getId());
+  public void newHand(final GameModel gameModel) {
+    log.debug("Creating new hand for game {}.", gameModel.getId());
     final HandDocument hand =
         new HandDocument(
             UUID.randomUUID(),
-            gameDocument.getId(),
+            gameModel.getId(),
             null,
             new ArrayList<>(),
             null,
             new ArrayList<>());
 
     // Adding hand to list of hands in game document.
-    gameDocument.getHands().add(hand.getId());
+    gameModel.getHands().add(hand.getId());
 
     // Add required mappings.
     hands.put(hand.getId(), hand);
-    gameIdToHandIdMap.put(gameDocument.getId(), hand.getId());
-    gameDocument.getPlayers().forEach(p -> userIdToGameIdMap.put(p.getId(), gameDocument.getId()));
+    gameIdToHandIdMap.put(gameModel.getId(), hand.getId());
+    gameModel.getPlayers().forEach(p -> userIdToGameIdMap.put(p.getId(), gameModel.getId()));
 
-    hand.setPlayerToAct(gameDocument.getPlayers().get(0)); // First in the list acts first.
-    restoreAndShuffle(gameDocument); // Restore the deck and shuffle it.
+    hand.setPlayerToAct(gameModel.getPlayers().get(0)); // First in the list acts first.
+    restoreAndShuffle(gameModel); // Restore the deck and shuffle it.
 
     applicationEventPublisher.publishEvent(new WaitForPlayerEvent(this, hand.getPlayerToAct()));
   }
@@ -239,13 +239,13 @@ public class HandService {
   /**
    * Broadcasts the active hand associated with the specified game, to all players in this game.
    *
-   * @param gameDocument The game whose players are being broadcast to.
+   * @param gameModel The game whose players are being broadcast to.
    */
-  public void broadcastHandUpdate(final GameDocument gameDocument) {
-    final HandDocument hand = getHand(gameDocument);
+  public void broadcastHandUpdate(final GameModel gameModel) {
+    final HandDocument hand = getHand(gameModel);
     // Broadcast to game topic
     webSocketService.sendPublicMessage(
-        appConfig.getGameTopic() + gameDocument.getId(),
+        appConfig.getGameTopic() + gameModel.getId(),
         new SocketContainerModel(MessageType.Hand, hand));
   }
 
@@ -336,10 +336,10 @@ public class HandService {
   /**
    * Determines the winner of the current hand associated with the specified game document.
    *
-   * @param gameDocument The specified game document.
+   * @param gameModel The specified game document.
    */
-  public void determineWinner(final GameDocument gameDocument) {
-    final HandDocument hand = getHand(gameDocument);
+  public void determineWinner(final GameModel gameModel) {
+    final HandDocument hand = getHand(gameModel);
     determineWinner(hand);
   }
 
@@ -367,20 +367,20 @@ public class HandService {
   /**
    * Ends the active hand associated with the specified game.
    *
-   * @param gameDocument The game associated with the hand being ended.
+   * @param gameModel The game associated with the hand being ended.
    * @throws BadRequestException If there is no active hand associated with the game specified.
    */
-  public void endHand(final GameDocument gameDocument) throws BadRequestException {
+  public void endHand(final GameModel gameModel) throws BadRequestException {
     // Get the ID of the most recent hand in the game.
-    final UUID handId = gameDocument.getHands().get(gameDocument.getHands().size() - 1);
+    final UUID handId = gameModel.getHands().get(gameModel.getHands().size() - 1);
 
     // Verify that this is an active hand.
     getHand(handId); // This will throw if the hand does not exist
-    getHand(gameDocument);
+    getHand(gameModel);
 
     // Save the hand to the database.
     handRepository.save(hands.remove(handId));
-    gameIdToHandIdMap.remove(gameDocument.getId());
-    gameDocument.getPlayers().forEach(p -> userIdToGameIdMap.remove(p.getId()));
+    gameIdToHandIdMap.remove(gameModel.getId());
+    gameModel.getPlayers().forEach(p -> userIdToGameIdMap.remove(p.getId()));
   }
 }

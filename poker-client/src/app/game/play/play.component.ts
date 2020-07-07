@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {
   ActionModel,
   DrawGameDataModel,
-  GameDocument,
+  GameModel,
   HandDocument,
   UserModel,
 } from '../../api/models';
@@ -19,7 +19,7 @@ import {
   selectActingStatus,
   selectAwayStatus,
   selectGameData,
-  selectGameDocument,
+  selectGameModel,
   selectHandDocument,
   selectJwt,
   selectLoggedInUser,
@@ -27,6 +27,7 @@ import {
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
+import {GamePhase} from '../../shared/models/game-phase.enum';
 
 @Component({
   selector: 'pkr-play',
@@ -58,7 +59,7 @@ export class PlayComponent implements OnInit, OnDestroy {
   /**
    * Getter for the model representing the current game.
    */
-  public gameModel: GameDocument;
+  public gameModel: GameModel;
   /**
    * Getter for the data representing the current game.
    */
@@ -106,9 +107,9 @@ export class PlayComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.gameStore.select(selectGameDocument)
+    this.gameStore.select(selectGameModel)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((gameDocument: GameDocument) => this.gameModel = gameDocument);
+    .subscribe((gameModel: GameModel) => this.gameModel = gameModel);
 
     this.handStore.select(selectHandDocument)
     .pipe(takeUntil(this.ngDestroyed$))
@@ -116,7 +117,7 @@ export class PlayComponent implements OnInit, OnDestroy {
       this.hand = handDocument;
 
       if (this.hand.playerToAct && this.hand.playerToAct.id) {
-        if (this.gameModel.state !== 'Over') {
+        if (this.gameModel.phase !== GamePhase.Over) {
           this.startTurnTimer().then();
         }
       }

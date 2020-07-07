@@ -9,10 +9,10 @@ import {StoreModule} from '@ngrx/store';
 import {
   appReducer,
   gameDataReducer,
-  gameDocumentReducer,
+  gameModelReducer,
   gameListReducer,
   handDocumentReducer,
-  lobbyDocumentReducer,
+  lobbyModelReducer,
   playerDataReducer,
   toastDataReducer
 } from './state/app.reducer';
@@ -32,8 +32,8 @@ import {AppEffects} from './state/app.effects';
       {
         appState: appReducer,
         gameData: gameDataReducer,
-        lobbyDocument: lobbyDocumentReducer,
-        gameDocument: gameDocumentReducer,
+        lobbyModel: lobbyModelReducer,
+        gameModel: gameModelReducer,
         handDocument: handDocumentReducer,
         gameList: gameListReducer,
         playerData: playerDataReducer,

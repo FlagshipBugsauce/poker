@@ -86,7 +86,7 @@ public class GameController {
     userService.validate(jwt, gameConstants.getClientGroups());
     applicationEventPublisher.publishEvent(new CreateGameEvent(this, gameParameterModel, host));
     return ResponseEntity.ok(
-        new ApiSuccessModel(gameService.getUsersGameDocument(host.getId()).getId().toString()));
+        new ApiSuccessModel(gameService.getUsersGameModel(host.getId()).getId().toString()));
   }
 
   /**

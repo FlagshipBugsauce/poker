@@ -50,13 +50,13 @@ public class WebSocketController {
         data = lobbyService.getLobbyList();
         break;
       case Lobby:
-        data = lobbyService.getLobbyDocument(updateModel.getId());
+        data = lobbyService.getLobbyModel(updateModel.getId());
         break;
       case Game:
-        data = gameService.getGameDocument(updateModel.getId());
+        data = gameService.getGameModel(updateModel.getId());
         break;
       case Hand:
-        data = handService.getHand(gameService.getGameDocument(updateModel.getId()));
+        data = handService.getHand(gameService.getGameModel(updateModel.getId()));
         break;
       case GameData:
         data = gameService.getGameData(updateModel.getId());

@@ -13,10 +13,10 @@ import {
   PlayerDataStateContainer
 } from '../../shared/models/app-state.model';
 import * as selectors from '../../state/app.selector';
-import {GameDocument, HandDocument, UserModel} from '../../api/models';
+import {GameModel, HandDocument, UserModel} from '../../api/models';
 import {
   mockGameData,
-  mockGameDocument,
+  mockGameModel,
   mockHandDocument,
   mockUser
 } from '../../testing/mock-models';
@@ -28,7 +28,7 @@ describe('PlayComponent', () => {
   let mockHandSelector: MemoizedSelector<HandStateContainer, HandDocument>;
   let mockUserSelector: MemoizedSelector<AppStateContainer, UserModel>;
   let mockGameDataSelector: MemoizedSelector<GameDataStateContainer, DrawGameDataModel[]>;
-  let mockGameSelector: MemoizedSelector<GameStateContainer, GameDocument>;
+  let mockGameSelector: MemoizedSelector<GameStateContainer, GameModel>;
   let mockAwayStatusSelector: MemoizedSelector<PlayerDataStateContainer, boolean>;
   let mockActingStatusSelector: MemoizedSelector<PlayerDataStateContainer, boolean>;
   let mockJwtSelector: MemoizedSelector<AppStateContainer, string>;
@@ -52,7 +52,7 @@ describe('PlayComponent', () => {
     mockHandSelector = mockStore.overrideSelector(selectors.selectHandDocument, mockHandDocument);
     mockUserSelector = mockStore.overrideSelector(selectors.selectLoggedInUser, mockUser);
     mockGameDataSelector = mockStore.overrideSelector(selectors.selectGameData, mockGameData);
-    mockGameSelector = mockStore.overrideSelector(selectors.selectGameDocument, mockGameDocument);
+    mockGameSelector = mockStore.overrideSelector(selectors.selectGameModel, mockGameModel);
     mockAwayStatusSelector = mockStore.overrideSelector(selectors.selectAwayStatus, false);
     mockActingStatusSelector = mockStore.overrideSelector(selectors.selectActingStatus, false);
     mockJwtSelector = mockStore.overrideSelector(selectors.selectJwt, 'jwt');

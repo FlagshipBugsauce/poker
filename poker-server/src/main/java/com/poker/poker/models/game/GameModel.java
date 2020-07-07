@@ -1,8 +1,6 @@
-package com.poker.poker.documents;
+package com.poker.poker.models.game;
 
-import com.poker.poker.models.GameSummaryModel;
-import com.poker.poker.models.enums.GameState;
-import com.poker.poker.models.game.GamePlayerModel;
+import com.poker.poker.models.enums.GamePhase;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
@@ -17,9 +15,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "game")
-public class GameDocument {
+public class GameModel {
 
-  /** The game ID is the same as the lobby ID. */
+  /**
+   * The game ID is the same as the lobby ID.
+   */
   @Schema(
       description = "Game ID (same as game lobby ID).",
       example = "0a7d95ef-94ba-47bc-b591-febb365bc543",
@@ -27,18 +27,17 @@ public class GameDocument {
   @Id
   private UUID id;
 
-  @Schema(description = "Game state.", example = "Lobby", implementation = GameState.class)
-  private GameState state;
+  @Schema(description = "Game phase.", example = "Lobby", implementation = GamePhase.class)
+  private GamePhase phase;
 
-  /** This list of player ID's will only be updated after the game begins. */
+  /**
+   * This list of player ID's will only be updated after the game begins.
+   */
   @ArraySchema(schema = @Schema(implementation = GamePlayerModel.class))
   private List<GamePlayerModel> players;
 
   @ArraySchema(schema = @Schema(implementation = UUID.class))
   private List<UUID> hands;
-
-  @Schema(implementation = GameSummaryModel.class)
-  private GameSummaryModel summary;
 
   @Schema(description = "Total number of hands in the game.", example = "5")
   private int totalHands;

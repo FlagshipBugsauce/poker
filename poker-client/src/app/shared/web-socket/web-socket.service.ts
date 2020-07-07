@@ -18,10 +18,10 @@ import {
 import {MessageType} from '../models/message-types.enum';
 import {
   gameDataUpdated,
-  gameDocumentUpdated,
+  gameModelUpdated,
   gameListUpdated,
   handDocumentUpdated,
-  lobbyDocumentUpdated,
+  lobbyModelUpdated,
   playerDataUpdated,
   updateCurrentGame
 } from '../../state/app.actions';
@@ -130,10 +130,10 @@ export class WebSocketService implements OnDestroy {
     this.onMessage(`/topic/game/${gameId}`).pipe(takeUntil(this.gameTopicUnsubscribe$)).subscribe(data => {
       switch (data.type) {
         case MessageType.Lobby:
-          this.lobbyStore.dispatch(lobbyDocumentUpdated(data.data));
+          this.lobbyStore.dispatch(lobbyModelUpdated(data.data));
           break;
         case MessageType.Game:
-          this.gameStore.dispatch(gameDocumentUpdated(data.data));
+          this.gameStore.dispatch(gameModelUpdated(data.data));
           break;
         case MessageType.Hand:
           this.handStore.dispatch(handDocumentUpdated(data.data));

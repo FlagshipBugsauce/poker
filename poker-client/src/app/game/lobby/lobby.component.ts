@@ -4,7 +4,7 @@ import {LobbyModel, LobbyPlayerModel, UserModel} from 'src/app/api/models';
 import {AppStateContainer, LobbyStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {notReady, readyUp, startGame} from '../../state/app.actions';
-import {selectLobbyDocument, selectLoggedInUser, selectReadyStatus} from '../../state/app.selector';
+import {selectLobbyModel, selectLoggedInUser, selectReadyStatus} from '../../state/app.selector';
 import {Observable, Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {APP_ROUTES} from '../../app-routes';
@@ -81,7 +81,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.ready$ = this.appStore.select(selectReadyStatus);
-    this.lobbyStore.select(selectLobbyDocument)
+    this.lobbyStore.select(selectLobbyModel)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((lobbyModel: LobbyModel) => this.lobbyModel = lobbyModel);
     this.userModel$ = this.appStore.select(selectLoggedInUser);

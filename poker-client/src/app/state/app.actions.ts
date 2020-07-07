@@ -7,7 +7,7 @@ import {
   AuthResponseModel,
   CurrentGameModel,
   DrawGameDataContainerModel,
-  GameDocument, GameParameterModel,
+  GameModel, GameParameterModel,
   GamePlayerModel,
   HandDocument,
   LobbyModel,
@@ -54,12 +54,12 @@ export const startGameSuccess = createAction('[Game Component] StartGameSuccess'
 export const readyUpSuccess = createAction('[Lobby Component] ReadyUpSuccess');
 
 /* Game data actions */ // TODO: Change these strings to WebSocketService
-export const gameDocumentUpdated = createAction(
-  '[SSE Service] GameDocumentUpdated', props<GameDocument>());
+export const gameModelUpdated = createAction(
+  '[SSE Service] GameModelUpdated', props<GameModel>());
 export const gameListUpdated = createAction(
   '[SSE Service] GameListDataUpdated', props<GameListContainerModel>());
-export const lobbyDocumentUpdated = createAction(
-  '[SSE Service] LobbyDocumentUpdated', props<LobbyModel>());
+export const lobbyModelUpdated = createAction(
+  '[SSE Service] LobbyModelUpdated', props<LobbyModel>());
 export const handDocumentUpdated = createAction(
   '[SSE Service] HandDocumentUpdated', props<HandDocument>());
 export const gameDataUpdated = createAction(
