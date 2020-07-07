@@ -5,6 +5,7 @@ import com.poker.poker.config.constants.GameConstants;
 import com.poker.poker.documents.GameDocument;
 import com.poker.poker.documents.LobbyDocument;
 import com.poker.poker.documents.UserDocument;
+import com.poker.poker.events.JoinGameEvent;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.SocketContainerModel;
 import com.poker.poker.models.enums.GameAction;
@@ -28,6 +29,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -171,10 +173,21 @@ public class LobbyService {
    * @param user The user.
    * @return ApiSuccessModel indicating the request was successful.
    */
-  public ApiSuccessModel ready(UserDocument user) {
+  public ApiSuccessModel ready(final UserDocument user) throws InterruptedException {
     if (!isUserInLobby(user.getId()) || getUsersLobbyDocument(user.getId()) == null) {
-      log.error("Failed to set player's status to ready (user ID: {}).", user.getId());
-      throw gameConstants.getReadyStatusUpdateFailException();
+      log.error(
+          "Failed to set player's status to ready (user ID: {}), trying again.", user.getId());
+      Thread.sleep(1000);
+      if (!isUserInLobby(user.getId()) || getUsersLobbyDocument(user.getId()) == null) {
+        log.error(
+            "Failed to set player's status to ready (user ID: {}) after second attempt.",
+            user.getId());
+        log.error("!isUserInLobby(user.getId()): {}", !isUserInLobby(user.getId()));
+        log.error(
+            "getUsersLobbyDocument(user.getId()) == null): {}",
+            getUsersLobbyDocument(user.getId()) == null);
+        throw gameConstants.getReadyStatusUpdateFailException();
+      }
     }
 
     // Get the game document for the game now that we're sure it exists.
@@ -233,8 +246,12 @@ public class LobbyService {
    * @param createGameModel A model containing: name, maximum players, and buy in.
    * @param user the user document of the player creating the game.
    */
-  public void createLobby(CreateGameModel createGameModel, UserDocument user, UUID id) {
+  public void createLobby(
+      final CreateGameModel createGameModel, final UserDocument user, final UUID id) {
     checkWhetherUserIsInLobbyAndThrow(user.getId(), false);
+    final List<LobbyPlayerModel> players =
+        Collections.synchronizedList(
+            new ArrayList<>(Collections.singletonList(new LobbyPlayerModel(user, false, true))));
     final LobbyDocument lobbyDocument =
         new LobbyDocument(
             id,
@@ -242,7 +259,7 @@ public class LobbyService {
             createGameModel.getName(),
             createGameModel.getMaxPlayers(),
             createGameModel.getBuyIn(),
-            new ArrayList<>(Collections.singletonList(new LobbyPlayerModel(user, false, true))),
+            players,
             new ArrayList<>());
     log.info("User: {} created a game.", user.getId());
     lobbys.put(lobbyDocument.getId(), lobbyDocument);
@@ -277,37 +294,18 @@ public class LobbyService {
   }
 
   /**
-   * Join a game by adding the clients UUID to the list of player ids and updating all the other
-   * players game documents in the game.
+   * Listener that joins a game lobby.
    *
-   * @param gameId The UUID of the game the player wishes to join.
-   * @param user The UserDocument associated with the player attempting to join.
-   * @return An ApiSuccessModel containing a message which indicates the attempt to join was
-   *     successful.
+   * @param joinGameEvent Event that triggers joining a lobby.
    */
-  public ApiSuccessModel joinLobby(UUID gameId, UserDocument user) {
-    // Find the active game you wish to join
-    LobbyDocument lobbyDocument = lobbys.get(gameId);
+  @EventListener
+  public void joinLobby(final JoinGameEvent joinGameEvent) {
 
-    // Add new player to list of players in currently in the game.
+    final UUID gameId = joinGameEvent.getGameId();
+    final UserDocument user = joinGameEvent.getUser();
+    final LobbyDocument lobbyDocument = lobbys.get(gameId);
     final LobbyPlayerModel lobbyPlayerModel = new LobbyPlayerModel(user, false, false);
-    /* TODO: Find a better way of handling this issue, perhaps using a synchronous event listener.
-    the idea here is to create join "events" that will form a queue and will only be executed
-    when another event has concluded. I think what is happening here is that when two players
-    attempt to join the same game in a short span of time, the add method of the array list
-    class is messing up because it's being modified on two threads simultaneously and then
-    failing some kind of integrity check. */
-    try {
-      lobbyDocument.getPlayers().add(lobbyPlayerModel);
-    } catch (ArrayIndexOutOfBoundsException e) {
-      try {
-        log.error("Issue with joining game, user: {}.", user.getId());
-        Thread.sleep(100);
-        lobbyDocument.getPlayers().add(lobbyPlayerModel);
-      } catch (InterruptedException interruptedException) {
-        interruptedException.printStackTrace();
-      }
-    }
+    lobbyDocument.getPlayers().add(lobbyPlayerModel);
     final String toastMessage =
         String.format(
             "%s %s has joined the game.",
@@ -318,6 +316,7 @@ public class LobbyService {
         .add(
             new GameActionModel(
                 UUID.randomUUID(), lobbyPlayerModel, GameAction.Join, toastMessage));
+    log.debug("Adding user {} to userIdToLobbyMap.", user.getId());
     userIdToLobbyIdMap.put(user.getId(), lobbyDocument.getId());
 
     // Broadcast updated lobby document to lobby topic and game list to game list topic.
@@ -325,8 +324,6 @@ public class LobbyService {
         lobbyDocument.getId(), toastMessage, "md"); // Also broadcast toast.
     broadcastLobbyDocument(lobbyDocument);
     broadcastGameList();
-
-    return new ApiSuccessModel("User joined the game successfully.");
   }
 
   /**

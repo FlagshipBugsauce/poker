@@ -7,6 +7,7 @@ import com.poker.poker.models.WebSocketUpdateModel;
 import com.poker.poker.models.game.DrawGameDataContainerModel;
 import com.poker.poker.models.game.DrawGameDataModel;
 import com.poker.poker.models.websocket.ActionModel;
+import com.poker.poker.models.websocket.ClientMessageModel;
 import com.poker.poker.models.websocket.CurrentGameModel;
 import com.poker.poker.models.websocket.ToastModel;
 import java.util.ArrayList;
@@ -74,5 +75,10 @@ public class TestController {
   @GetMapping("/test/websocket/models/current-game-model")
   public ResponseEntity<CurrentGameModel> currentGameModel() {
     return ResponseEntity.ok(new CurrentGameModel());
+  }
+
+  @GetMapping("/test/websocket/models/client-message-model")
+  public ResponseEntity<ClientMessageModel> clientMessageModel() {
+    return ResponseEntity.ok(new ClientMessageModel());
   }
 }

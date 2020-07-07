@@ -3,7 +3,7 @@ import {JoinComponent} from './join.component';
 import {RouterTestingModule} from '@angular/router/testing';
 import {SharedModule} from '../../shared/shared.module';
 import {MockStore, provideMockStore} from '@ngrx/store/testing';
-import {WebSocketService} from '../../shared/web-socket.service';
+import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 import {MockWebSocketService} from '../../testing/mock-services';
 import {MemoizedSelector} from '@ngrx/store';
 import {GameListStateContainer} from '../../shared/models/app-state.model';

@@ -8,7 +8,7 @@ import {joinLobby} from '../../state/app.actions';
 import {selectGameList} from '../../state/app.selector';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
-import {WebSocketService} from '../../shared/web-socket.service';
+import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 
 @Component({
   selector: 'pkr-join',

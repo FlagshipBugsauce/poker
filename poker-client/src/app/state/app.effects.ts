@@ -16,7 +16,7 @@ import {AuthResponseModel} from '../api/models/auth-response-model';
 import {ToastService} from '../shared/toast.service';
 import {Router} from '@angular/router';
 import {APP_ROUTES} from '../app-routes';
-import {WebSocketService} from "../shared/web-socket.service";
+import {WebSocketService} from "../shared/web-socket/web-socket.service";
 import {ActionModel} from "../api/models/action-model";
 
 @Injectable()

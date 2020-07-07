@@ -3,6 +3,7 @@ package com.poker.poker.services;
 import com.poker.poker.config.AppConfig;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.CurrentGameEvent;
+import com.poker.poker.events.PublishMessageEvent;
 import com.poker.poker.models.SocketContainerModel;
 import com.poker.poker.models.WebSocketInfoModel;
 import com.poker.poker.models.enums.MessageType;
@@ -111,6 +112,13 @@ public class WebSocketService {
     log.debug("Sent {} update to topic {}.", data.getType(), topic);
   }
 
+  // TODO: Add docs
+  @EventListener
+  public <T> void sendGenericMessage(final PublishMessageEvent<T> publishMessageEvent) {
+    template.convertAndSend(publishMessageEvent.getTopic(), publishMessageEvent.getData());
+    log.debug("Sent generic message to topic {}.", publishMessageEvent.getTopic());
+  }
+
   /**
    * Helper which will broadcast a message to the client which will appear as a toast. Note that
    * this method will only display toasts with a specific appearance (light bg, medium size, which
@@ -139,4 +147,6 @@ public class WebSocketService {
         appConfig.getCurrentGameTopic() + currentGameEvent.getUserId(),
         currentGameEvent.getCurrentGameModel());
   }
+
+  public void createGameSuccess() {}
 }

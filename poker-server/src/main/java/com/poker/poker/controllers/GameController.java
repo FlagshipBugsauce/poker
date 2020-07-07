@@ -1,6 +1,9 @@
 package com.poker.poker.controllers;
 
 import com.poker.poker.config.constants.GameConstants;
+import com.poker.poker.documents.UserDocument;
+import com.poker.poker.events.CreateGameEvent;
+import com.poker.poker.events.JoinGameEvent;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.game.ActiveStatusModel;
 import com.poker.poker.models.game.CreateGameModel;
@@ -8,6 +11,7 @@ import com.poker.poker.models.game.GetGameModel;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.services.JwtService;
 import com.poker.poker.services.UserService;
+import com.poker.poker.services.UuidService;
 import com.poker.poker.services.game.GameService;
 import com.poker.poker.services.game.LobbyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,9 +23,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.UUID;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,6 +47,8 @@ import org.springframework.web.bind.annotation.RestController;
         "Games API handles all game requests, like creating a game, joining a game, etc...")
 public class GameController {
 
+  private final ApplicationEventPublisher applicationEventPublisher;
+  private final UuidService uuidService;
   private final GameService gameService;
   private final LobbyService lobbyService;
   private final UserService userService;
@@ -74,10 +82,11 @@ public class GameController {
   public ResponseEntity<ApiSuccessModel> createGame(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
       @Valid @RequestBody CreateGameModel createGameModel) {
+    final UserDocument host = jwtService.getUserDocument(jwt);
     userService.validate(jwt, gameConstants.getClientGroups());
+    applicationEventPublisher.publishEvent(new CreateGameEvent(this, createGameModel, host));
     return ResponseEntity.ok(
-        gameService.createGame(
-            createGameModel, userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
+        new ApiSuccessModel(gameService.getUsersGameDocument(host.getId()).getId().toString()));
   }
 
   /**
@@ -136,9 +145,19 @@ public class GameController {
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
       @PathVariable String gameId) {
     userService.validate(jwt, gameConstants.getClientGroups());
-    return ResponseEntity.ok(
-        gameService.joinLobby(
-            gameId, userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
+    uuidService.checkIfValidAndThrowBadRequest(gameId);
+    final UserDocument user = jwtService.getUserDocument(jwt);
+    final UUID game = UUID.fromString(gameId);
+
+    gameService.checkIfGameExists(game);
+    gameService.checkIfGameIsInLobbyState(game);
+    if (gameService.isUserInSpecifiedGame(game, user.getId())) {
+      return ResponseEntity.ok(new ApiSuccessModel("Request Completed."));
+    }
+    gameService.checkIfUserIsInGame(user.getId());
+    applicationEventPublisher.publishEvent(new JoinGameEvent(this, game, user));
+
+    return ResponseEntity.ok(new ApiSuccessModel("Request Completed."));
   }
 
   @Operation(
@@ -157,7 +176,8 @@ public class GameController {
       })
   @RequestMapping(value = "/ready", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> ready(
-      @Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
+      @Parameter(hidden = true) @RequestHeader("Authorization") String jwt)
+      throws InterruptedException {
     userService.validate(jwt, gameConstants.getClientGroups());
     return ResponseEntity.ok(
         lobbyService.ready(userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));

@@ -27,6 +27,7 @@
                 <img
                   *ngIf="isPlayerAway(dataRow.player.id)"
                   [src]="activeIcon"
+                  ngbTooltip="Player is away"
                   alt="Icon to indicate whether a player is active or AFK"
                   class="afk-icon">
               </td>

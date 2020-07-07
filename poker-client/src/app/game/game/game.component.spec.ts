@@ -16,7 +16,7 @@ import * as selectors from '../../state/app.selector';
 import {DrawGameDataModel} from '../../api/models/draw-game-data-model';
 import {mockGameData, mockUser} from '../../testing/mock-models';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
-import {WebSocketService} from '../../shared/web-socket.service';
+import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 import {UserModel} from '../../api/models/user-model';
 
 describe('GameComponent', () => {
