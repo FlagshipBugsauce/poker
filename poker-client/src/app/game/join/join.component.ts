@@ -1,6 +1,5 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {PopupComponent, PopupContentModel} from 'src/app/shared/popup/popup.component';
-import {GetGameModel} from 'src/app/api/models';
 import {ApiConfiguration} from 'src/app/api/api-configuration';
 import {AppStateContainer, GameListStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
@@ -9,6 +8,7 @@ import {selectGameList} from '../../state/app.selector';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {WebSocketService} from '../../shared/web-socket/web-socket.service';
+import {GameListModel} from '../../api/models/game-list-model';
 
 @Component({
   selector: 'pkr-join',
@@ -33,7 +33,7 @@ export class JoinComponent implements OnInit, OnDestroy {
   /** Helper subject which assists in terminating subscriptions. */
   public ngDestroyed$ = new Subject();
   /** List of games used internally. */
-  private gamesInternal: GetGameModel[];
+  private gamesInternal: GameListModel[];
 
   constructor(
     private apiConfiguration: ApiConfiguration,
@@ -48,9 +48,9 @@ export class JoinComponent implements OnInit, OnDestroy {
   }
 
   /** Returns a slice of the list of games for pagination. */
-  public get games(): GetGameModel[] {
+  public get games(): GameListModel[] {
     return this.gamesInternal ? this.gamesInternal
-      .map((game: GetGameModel) => ({...game}))
+      .map((game: GameListModel) => ({...game}))
       .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize) :
       [];
   }
@@ -62,7 +62,7 @@ export class JoinComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.gameListStore.select(selectGameList)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((games: GetGameModel[]) => this.gamesInternal = games);
+    .subscribe((games: GameListModel[]) => this.gamesInternal = games);
 
     // Subscribe to game list topic.
     this.webSocketService.subscribeToGameListTopic();
@@ -72,11 +72,11 @@ export class JoinComponent implements OnInit, OnDestroy {
    * Shows the confirmation popup that will take a player to the game they clicked on.
    * @param game GetGameModel with based information about the game.
    */
-  public showConfirmationPopup(game: GetGameModel): void {
-    this.popupContent[0].body = `Attempting to join game "${game.name}".`;
+  public showConfirmationPopup(game: GameListModel): void {
+    this.popupContent[0].body = `Attempting to join game "${game.parameters.name}".`;
     this.popupOkCloseProcedure = () => {
       // Join the lobby.
-      this.appStore.dispatch(joinLobby({id: game.id, name: game.name, host: game.host}));
+      this.appStore.dispatch(joinLobby({id: game.id, name: game.parameters.name, host: game.host}));
     };
     this.confirmationPopup.open();
   }

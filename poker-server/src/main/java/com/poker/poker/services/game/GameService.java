@@ -20,7 +20,7 @@ import com.poker.poker.models.SocketContainerModel;
 import com.poker.poker.models.enums.GameState;
 import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.game.CardModel;
-import com.poker.poker.models.game.CreateGameModel;
+import com.poker.poker.models.game.GameParameterModel;
 import com.poker.poker.models.game.DeckModel;
 import com.poker.poker.models.game.DrawGameDataContainerModel;
 import com.poker.poker.models.game.DrawGameDataModel;
@@ -250,7 +250,7 @@ public class GameService {
    */
   @EventListener
   public void createGame(final CreateGameEvent createGameEvent) throws BadRequestException {
-    final CreateGameModel createGameModel = createGameEvent.getCreateGameModel();
+    final GameParameterModel gameParameterModel = createGameEvent.getGameParameterModel();
     final UserDocument user = createGameEvent.getHost();
     if (userIdToGameIdMap.get(user.getId()) != null) {
       throw gameConstants.getCreateGamePlayerAlreadyInGameException();
@@ -271,7 +271,7 @@ public class GameService {
     games.put(gameDocument.getId(), gameDocument);
 
     // Create the lobby.
-    lobbyService.createLobby(createGameModel, user, gameDocument.getId());
+    lobbyService.createLobby(gameParameterModel, user, gameDocument.getId());
 
     applicationEventPublisher.publishEvent(
         new PublishMessageEvent<>(

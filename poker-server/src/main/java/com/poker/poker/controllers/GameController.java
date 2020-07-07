@@ -6,8 +6,8 @@ import com.poker.poker.events.CreateGameEvent;
 import com.poker.poker.events.JoinGameEvent;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.game.ActiveStatusModel;
-import com.poker.poker.models.game.CreateGameModel;
-import com.poker.poker.models.game.GetGameModel;
+import com.poker.poker.models.game.GameParameterModel;
+import com.poker.poker.models.game.GameListModel;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.services.JwtService;
 import com.poker.poker.services.UserService;
@@ -60,7 +60,7 @@ public class GameController {
    * Creates a game.
    *
    * @param jwt Authorization token.
-   * @param createGameModel Model containing the information necessary to create a game.
+   * @param gameParameterModel Model containing the information necessary to create a game.
    * @return An ApiSuccessModel containing the game's UUID in the message field if the request was
    *     successful, otherwise returns a 400 or 403.
    */
@@ -81,10 +81,10 @@ public class GameController {
   @RequestMapping(value = "/create", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> createGame(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
-      @Valid @RequestBody CreateGameModel createGameModel) {
+      @Valid @RequestBody GameParameterModel gameParameterModel) {
     final UserDocument host = jwtService.getUserDocument(jwt);
     userService.validate(jwt, gameConstants.getClientGroups());
-    applicationEventPublisher.publishEvent(new CreateGameEvent(this, createGameModel, host));
+    applicationEventPublisher.publishEvent(new CreateGameEvent(this, gameParameterModel, host));
     return ResponseEntity.ok(
         new ApiSuccessModel(gameService.getUsersGameDocument(host.getId()).getId().toString()));
   }
@@ -108,11 +108,11 @@ public class GameController {
                 "Getting game active list was successful. A GetGameModel should be returned",
             content =
                 @Content(
-                    array = @ArraySchema(schema = @Schema(implementation = GetGameModel.class)),
+                    array = @ArraySchema(schema = @Schema(implementation = GameListModel.class)),
                     mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/get-list", method = RequestMethod.GET)
-  public ResponseEntity<List<GetGameModel>> getGameList(
+  public ResponseEntity<List<GameListModel>> getGameList(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
     userService.validate(jwt, gameConstants.getClientGroups());
     return ResponseEntity.ok(lobbyService.getLobbyList());

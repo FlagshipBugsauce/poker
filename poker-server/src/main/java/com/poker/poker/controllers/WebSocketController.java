@@ -9,7 +9,7 @@ import com.poker.poker.events.LeaveGameEvent;
 import com.poker.poker.events.RejoinGameEvent;
 import com.poker.poker.models.SocketContainerModel;
 import com.poker.poker.models.WebSocketUpdateModel;
-import com.poker.poker.models.game.CreateGameModel;
+import com.poker.poker.models.game.GameParameterModel;
 import com.poker.poker.models.websocket.ActionModel;
 import com.poker.poker.models.websocket.ClientMessageModel;
 import com.poker.poker.services.JwtService;
@@ -94,7 +94,7 @@ public class WebSocketController {
   }
 
   @MessageMapping("/game/create")
-  public void createGame(final ClientMessageModel<CreateGameModel> messageModel) {
+  public void createGame(final ClientMessageModel<GameParameterModel> messageModel) {
     userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
     final UserDocument user = jwtService.getUserDocument(messageModel.getJwt());
     log.debug("User {} attempting to create a game.", user.getId());

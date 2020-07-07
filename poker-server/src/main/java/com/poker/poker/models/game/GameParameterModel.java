@@ -13,7 +13,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateGameModel {
+@Schema(description = "The parameters of a game.")
+public class GameParameterModel {
 
   @NotNull(message = "Game name cannot be null.")
   @NotEmpty(message = "Game name cannot be empty.")
@@ -28,6 +29,6 @@ public class CreateGameModel {
 
   @NotNull(message = "Buy-in must be specified.")
   @Min(value = 0, message = "Buy-in must be a positive value.")
-  @Schema(description = "Buy-in required to play in the game.", example = "$25")
+  @Schema(description = "Buy-in required to play in the game.", example = "25")
   private BigDecimal buyIn;
 }

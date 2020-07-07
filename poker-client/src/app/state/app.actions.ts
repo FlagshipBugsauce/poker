@@ -5,10 +5,9 @@ import {
   ActiveStatusModel, ApiSuccessModel,
   AuthRequestModel,
   AuthResponseModel,
-  CreateGameModel,
   CurrentGameModel,
   DrawGameDataContainerModel,
-  GameDocument,
+  GameDocument, GameParameterModel,
   GamePlayerModel,
   HandDocument,
   LobbyDocument,
@@ -30,7 +29,7 @@ export const joinLobby = createAction('[Join Component] JoinLobby', props<TopBar
 export const leaveLobby = createAction('[Lobby Component] LeaveLobby');
 export const createGame = createAction(
   '[Lobby Component] CreateGame',
-  props<CreateGameModel>()
+  props<GameParameterModel>()
 );
 export const gameCreated = createAction(
   '[CreateGameService] GameCreated', props<ApiSuccessModel>());

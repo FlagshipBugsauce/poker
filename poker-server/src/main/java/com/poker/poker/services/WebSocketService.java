@@ -109,7 +109,6 @@ public class WebSocketService {
    */
   public void sendPublicMessage(final String topic, final SocketContainerModel data) {
     template.convertAndSend(topic, data);
-    log.debug("Sent {} update to topic {}.", data.getType(), topic);
   }
 
   // TODO: Add docs

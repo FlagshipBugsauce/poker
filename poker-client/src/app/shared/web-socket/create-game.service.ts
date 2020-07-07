@@ -6,9 +6,9 @@ import {Store} from '@ngrx/store';
 import {selectJwt, selectLoggedInUser} from '../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
 import {UserModel} from '../../api/models/user-model';
-import {CreateGameModel} from '../../api/models/create-game-model';
 import {ClientMessageModel} from '../../api/models/client-message-model';
 import {gameCreated} from '../../state/app.actions';
+import {GameParameterModel} from '../../api/models/game-parameter-model';
 
 @Injectable({
   providedIn: 'root'
@@ -56,7 +56,7 @@ export class CreateGameService implements OnDestroy {
     return this.webSocketService.sendFromStore();
   }
 
-  public createGamePayload(data: CreateGameModel): ClientMessageModel {
+  public createGamePayload(data: GameParameterModel): ClientMessageModel {
     return {jwt: this.jwt, data} as ClientMessageModel;
   }
 }
