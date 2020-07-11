@@ -4,7 +4,7 @@ import com.poker.poker.config.AppConfig;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.CurrentGameEvent;
 import com.poker.poker.events.PublishMessageEvent;
-import com.poker.poker.models.SocketContainerModel;
+import com.poker.poker.models.websocket.SocketContainerModel;
 import com.poker.poker.models.WebSocketInfoModel;
 import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.websocket.ToastClassModel;

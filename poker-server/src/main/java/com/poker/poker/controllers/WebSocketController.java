@@ -7,7 +7,7 @@ import com.poker.poker.events.CurrentGameEvent;
 import com.poker.poker.events.JoinGameEvent;
 import com.poker.poker.events.LeaveGameEvent;
 import com.poker.poker.events.RejoinGameEvent;
-import com.poker.poker.models.SocketContainerModel;
+import com.poker.poker.models.websocket.SocketContainerModel;
 import com.poker.poker.models.WebSocketUpdateModel;
 import com.poker.poker.models.game.GameParameterModel;
 import com.poker.poker.models.websocket.ActionModel;

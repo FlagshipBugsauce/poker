@@ -4,13 +4,13 @@ import {
   ActionModel,
   ActiveStatusModel, ApiSuccessModel,
   AuthRequestModel,
-  AuthResponseModel,
+  AuthResponseModel, CardModel,
   CurrentGameModel,
   DrawGameDataContainerModel,
   GameModel, GameParameterModel,
   GamePlayerModel,
-  HandDocument,
-  LobbyModel,
+  HandModel,
+  LobbyModel, LobbyPlayerModel,
   ToastModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
@@ -60,8 +60,8 @@ export const gameListUpdated = createAction(
   '[SSE Service] GameListDataUpdated', props<GameListContainerModel>());
 export const lobbyModelUpdated = createAction(
   '[SSE Service] LobbyModelUpdated', props<LobbyModel>());
-export const handDocumentUpdated = createAction(
-  '[SSE Service] HandDocumentUpdated', props<HandDocument>());
+export const handModelUpdated = createAction(
+  '[SSE Service] HandDocumentUpdated', props<HandModel>());
 export const gameDataUpdated = createAction(
   '[SSE Service] GameDataUpdated', props<DrawGameDataContainerModel>());
 export const playerDataUpdated = createAction(
@@ -69,8 +69,19 @@ export const playerDataUpdated = createAction(
 export const gameToastReceived = createAction(
   '[WebSocketService] GameToastReceived', props<ToastModel>());
 
+// Lobby Actions
+export const playerReadyToggled = createAction(
+  '[WebSocketService] PlayerReadyToggled', props<LobbyPlayerModel>());
+export const playerJoinedLobby = createAction(
+  '[WebSocketService] PlayerJoinedLobby', props<LobbyPlayerModel>());
+export const playerLeftLobby = createAction(
+  '[WebSocketService] PlayerLeftLobby', props<LobbyPlayerModel>());
+
+
 export const drawCard = createAction('[Play Component] DrawCard');
 export const drawCardSuccess = createAction('[Play Component] DrawCardSuccess');
+export const cardDrawn = createAction('[WebSocketService] CardDrawn', props<CardModel>());
+export const handOver = createAction('[WebSocketService] HandOver');
 
 export const setAwayStatus = createAction(
   '[Play Component] SetActiveStatus',

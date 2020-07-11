@@ -1,10 +1,11 @@
 import {TopBarLobbyModel} from './top-bar-lobby.model';
 import {
+  CardModel,
   CurrentGameModel,
   DrawGameDataContainerModel,
   GameModel,
   GamePlayerModel,
-  HandDocument,
+  HandModel,
   LobbyModel,
   ToastModel,
   UserModel
@@ -43,11 +44,19 @@ export interface GameListStateContainer {
 }
 
 export interface HandStateContainer {
-  handDocument: HandDocument;
+  handModel: HandModel;
 }
 
 export interface PlayerDataStateContainer {
   playerData: GamePlayerModel;
+}
+
+export interface DrawnCardsStateContainer {
+  drawnCards: DrawnCardsContainer;
+}
+
+export interface DrawnCardsContainer {
+  drawnCards: CardModel[];
 }
 
 export interface ToastStateContainer {

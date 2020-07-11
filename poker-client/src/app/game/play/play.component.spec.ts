@@ -49,7 +49,7 @@ describe('PlayComponent', () => {
     }).compileComponents();
 
     mockStore = TestBed.inject(MockStore);
-    mockHandSelector = mockStore.overrideSelector(selectors.selectHandDocument, mockHandDocument);
+    mockHandSelector = mockStore.overrideSelector(selectors.selectHandModel, mockHandDocument);
     mockUserSelector = mockStore.overrideSelector(selectors.selectLoggedInUser, mockUser);
     mockGameDataSelector = mockStore.overrideSelector(selectors.selectGameData, mockGameData);
     mockGameSelector = mockStore.overrideSelector(selectors.selectGameModel, mockGameModel);

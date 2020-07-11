@@ -1,7 +1,5 @@
-package com.poker.poker.documents;
+package com.poker.poker.models.game;
 
-import com.poker.poker.models.game.CardModel;
-import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.hand.HandActionModel;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,7 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "hands")
-public class HandDocument {
+public class HandModel {
 
   @Schema(
       description = "Hand ID.",
@@ -32,20 +30,9 @@ public class HandDocument {
       implementation = UUID.class)
   private UUID gameId;
 
-  // Temporary
-  @Schema(
-      description = "Temporary message.",
-      example = "Player X won.",
-      implementation = String.class)
-  private String message;
-
   @ArraySchema(schema = @Schema(implementation = HandActionModel.class))
   private List<HandActionModel> actions;
 
   @Schema(implementation = GamePlayerModel.class)
-  private GamePlayerModel playerToAct;
-
-  // TODO: Remove once we evolve past the card drawing game.
-  @ArraySchema(schema = @Schema(implementation = CardModel.class))
-  private List<CardModel> drawnCards;
+  private GamePlayerModel acting;
 }

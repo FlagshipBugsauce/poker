@@ -3,7 +3,7 @@ package com.poker.poker.services.game;
 import com.poker.poker.config.AppConfig;
 import com.poker.poker.config.constants.GameConstants;
 import com.poker.poker.models.game.GameModel;
-import com.poker.poker.documents.HandDocument;
+import com.poker.poker.models.game.HandModel;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.CreateGameEvent;
 import com.poker.poker.events.CurrentGameEvent;
@@ -15,7 +15,7 @@ import com.poker.poker.events.PublishMessageEvent;
 import com.poker.poker.events.RejoinGameEvent;
 import com.poker.poker.events.WaitForPlayerEvent;
 import com.poker.poker.models.ApiSuccessModel;
-import com.poker.poker.models.SocketContainerModel;
+import com.poker.poker.models.websocket.SocketContainerModel;
 import com.poker.poker.models.enums.GamePhase;
 import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.game.CardModel;
@@ -314,7 +314,7 @@ public class GameService {
         .orElseThrow(gameConstants::getPlayerNotInGameException)
         .setAway(status);
     final UserDocument user = userRepository.findUserDocumentById(playerId);
-    if (status && handService.getHand(user).getPlayerToAct().getId().equals(playerId)) {
+    if (status && handService.getHand(user).getActing().getId().equals(playerId)) {
       handService.draw(user);
     }
 
@@ -472,8 +472,8 @@ public class GameService {
   public void handleHandActionEvent(final HandActionEvent handActionEvent) {
     log.debug("{} event detected by game service.", handActionEvent.getType());
     final GameModel gameModel = games.get(handActionEvent.getGameId());
-    final HandDocument hand = handService.getHand(handActionEvent.getHandId());
-    final int playerThatActed = gameModel.getPlayers().indexOf(hand.getPlayerToAct());
+    final HandModel hand = handService.getHand(handActionEvent.getHandId());
+    final int playerThatActed = gameModel.getPlayers().indexOf(hand.getActing());
     final GamePlayerModel nextPlayerToAct =
         gameModel.getPlayers().get((playerThatActed + 1) % gameModel.getPlayers().size());
 
@@ -495,7 +495,7 @@ public class GameService {
 
     // Set player to act:
     log.debug("Next player to act is {}.", nextPlayerToAct.getId());
-    hand.setPlayerToAct(nextPlayerToAct);
+    hand.setActing(nextPlayerToAct);
 
     // Broadcast updated hand model
     handService.broadcastHandUpdate(gameModel);
@@ -504,7 +504,7 @@ public class GameService {
          Temporary logic here to help design game flow for later. Most of this will be gone. Just
          trying to work out the kinks with waiting for players to act, etc...
     */
-    final boolean handOver = hand.getPlayerToAct().equals(gameModel.getPlayers().get(0));
+    final boolean handOver = hand.getActing().equals(gameModel.getPlayers().get(0));
     final int currentRound =
         handOver ? 1 + gameModel.getHands().size() : gameModel.getHands().size();
 

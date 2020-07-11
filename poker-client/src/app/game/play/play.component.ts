@@ -1,13 +1,13 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {
-  ActionModel,
+  ActionModel, CardModel,
   DrawGameDataModel,
   GameModel,
-  HandDocument,
+  HandModel,
   UserModel,
 } from '../../api/models';
 import {
-  AppStateContainer,
+  AppStateContainer, DrawnCardsStateContainer,
   GameDataStateContainer,
   GameStateContainer,
   HandStateContainer,
@@ -17,10 +17,10 @@ import {Store} from '@ngrx/store';
 import {drawCard, leaveGame, setAwayStatus} from '../../state/app.actions';
 import {
   selectActingStatus,
-  selectAwayStatus,
+  selectAwayStatus, selectDrawnCards,
   selectGameData,
   selectGameModel,
-  selectHandDocument,
+  selectHandModel,
   selectJwt,
   selectLoggedInUser,
 } from '../../state/app.selector';
@@ -28,6 +28,7 @@ import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 import {GamePhase} from '../../shared/models/game-phase.enum';
+import {WebSocketService} from "../../shared/web-socket/web-socket.service";
 
 @Component({
   selector: 'pkr-play',
@@ -55,7 +56,7 @@ export class PlayComponent implements OnInit, OnDestroy {
   /**
    * Getter for the model representing the current hand.
    */
-  public hand: HandDocument;
+  public hand: HandModel;
   /**
    * Getter for the model representing the current game.
    */
@@ -81,16 +82,21 @@ export class PlayComponent implements OnInit, OnDestroy {
    */
   private user: UserModel;
 
+  public drawnCards: CardModel[];
+
   constructor(
     private appStore: Store<AppStateContainer>,
     private gameDataStore: Store<GameDataStateContainer>,
     private gameStore: Store<GameStateContainer>,
     private handStore: Store<HandStateContainer>,
-    private playerDataStore: Store<PlayerDataStateContainer>) {
+    private playerDataStore: Store<PlayerDataStateContainer>,
+    private drawnCardsStore: Store<DrawnCardsStateContainer>,
+    private webSocketService: WebSocketService) {
   }
 
   public ngOnDestroy() {
     this.ngDestroyed$.next();
+    this.webSocketService.drawnCardsTopicUnsubscribe();
   }
 
   public ngOnInit(): void {
@@ -111,12 +117,12 @@ export class PlayComponent implements OnInit, OnDestroy {
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((gameModel: GameModel) => this.gameModel = gameModel);
 
-    this.handStore.select(selectHandDocument)
+    this.handStore.select(selectHandModel)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((handDocument: HandDocument) => {
+    .subscribe((handDocument: HandModel) => {
       this.hand = handDocument;
 
-      if (this.hand.playerToAct && this.hand.playerToAct.id) {
+      if (this.hand.acting && this.hand.acting.id) {
         if (this.gameModel.phase !== GamePhase.Over) {
           this.startTurnTimer().then();
         }
@@ -135,6 +141,10 @@ export class PlayComponent implements OnInit, OnDestroy {
         this.afkPopup.open();
       }
     });
+    this.webSocketService.subscribeToDrawnCardsTopic(this.gameModel.id);
+    this.drawnCardsStore.select(selectDrawnCards)
+    .pipe(takeUntil(this.ngDestroyed$))
+    .subscribe((cards: CardModel[]) => this.drawnCards = cards);
   }
 
   /**

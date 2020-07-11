@@ -1,6 +1,6 @@
 import {
   AppState,
-  AppStateContainer,
+  AppStateContainer, DrawnCardsContainer, DrawnCardsStateContainer,
   GameDataStateContainer,
   GameListStateContainer,
   GameStateContainer,
@@ -9,12 +9,12 @@ import {
   PlayerDataStateContainer
 } from '../shared/models/app-state.model';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
-import {HandDocument} from '../api/models/hand-document';
 import {
   DrawGameDataContainerModel,
   GameModel,
   GamePlayerModel,
-  LobbyModel
+  LobbyModel,
+  HandModel, CardModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
 
@@ -90,11 +90,19 @@ export const selectGamePhase = createSelector(
 );
 
 export const handFeature =
-  createFeatureSelector<HandStateContainer, HandDocument>('handDocument');
+  createFeatureSelector<HandStateContainer, HandModel>('handModel');
 /** Hand document selector. */
-export const selectHandDocument = createSelector(
+export const selectHandModel = createSelector(
   handFeature,
-  (state: HandDocument) => state
+  (state: HandModel) => state
+);
+
+export const drawnCardsFeature =
+  createFeatureSelector<DrawnCardsStateContainer, DrawnCardsContainer>('drawnCards');
+/** Drawn cards selector. */
+export const selectDrawnCards = createSelector(
+  drawnCardsFeature,
+  (state: DrawnCardsContainer) => state.drawnCards
 );
 
 export const gameDataFeature =

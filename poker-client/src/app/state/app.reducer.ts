@@ -1,32 +1,39 @@
 import {createReducer, on} from '@ngrx/store';
 import {
+  cardDrawn,
   gameDataUpdated,
-  gameModelUpdated,
   gameListUpdated,
+  gameModelUpdated,
   gameToastReceived,
-  handDocumentUpdated,
+  handModelUpdated,
+  handOver,
   hideFailedSignInWarning,
   joinLobby,
   leaveLobby,
   lobbyModelUpdated,
   notReady,
   playerDataUpdated,
+  playerJoinedLobby,
+  playerLeftLobby,
+  playerReadyToggled,
   readyUp,
   signInFail,
   signInSuccess,
   signOut,
   updateCurrentGame
 } from './app.actions';
-import {AppState} from '../shared/models/app-state.model';
+import {AppState, DrawnCardsContainer} from '../shared/models/app-state.model';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
   AuthResponseModel,
+  CardModel,
   CurrentGameModel,
   DrawGameDataContainerModel,
   GameModel,
   GamePlayerModel,
-  HandDocument,
+  HandModel,
   LobbyModel,
+  LobbyPlayerModel,
   ToastModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
@@ -119,11 +126,32 @@ export const lobbyModelInitialState: LobbyModel = {
     id: '',
     firstName: '',
     lastName: ''
-  }
+  },
+  players: []
 } as LobbyModel;
 const lobbyModelReducerInternal = createReducer<LobbyModel>(
   lobbyModelInitialState,
-  on(lobbyModelUpdated, (state: LobbyModel, newState: LobbyModel) => newState));
+  on(lobbyModelUpdated, (state: LobbyModel, newState: LobbyModel) => newState),
+  on(playerReadyToggled, (state: LobbyModel, player: LobbyPlayerModel) =>
+    ({...state, players: state.players.map(p => p.id === player.id ? player : p)})),
+  on(playerJoinedLobby, (state: LobbyModel, player: LobbyPlayerModel) => {
+    const players: LobbyPlayerModel[] = state.players.map(p => ({...p}));
+    players.push(player);
+    return ({...state, players});
+  }),
+  on(playerLeftLobby, (state: LobbyModel, player: LobbyPlayerModel) => {
+    // Filter out player that left.
+    const players: LobbyPlayerModel[] =
+      state.players.map(p => ({...p})).filter(p => p.id !== player.id);
+    // Updating host (host is always players[0]).
+    let host: LobbyPlayerModel;
+    if (players.length > 0) {
+      players[0].host = true;
+      host = players[0];
+    }
+    return ({...state, players, host});
+  })
+);
 
 export function lobbyModelReducer(state: LobbyModel, action) {
   return lobbyModelReducerInternal(state, action);
@@ -132,13 +160,13 @@ export function lobbyModelReducer(state: LobbyModel, action) {
 /**
  * HandDocument reducer and initial state.
  */
-export const handDocumentInitialState: HandDocument = {} as HandDocument;
-const handDocumentReducerInternal = createReducer<HandDocument>(
-  handDocumentInitialState,
-  on(handDocumentUpdated, (state: HandDocument, newState: HandDocument) => newState));
+export const handModelInitialState: HandModel = {} as HandModel;
+const handModelReducerInternal = createReducer<HandModel>(
+  handModelInitialState,
+  on(handModelUpdated, (state: HandModel, newState: HandModel) => newState));
 
-export function handDocumentReducer(state: HandDocument, action) {
-  return handDocumentReducerInternal(state, action);
+export function handModelReducer(state: HandModel, action) {
+  return handModelReducerInternal(state, action);
 }
 
 /**
@@ -165,6 +193,23 @@ const playerDataReducerInternal = createReducer<GamePlayerModel>(
 
 export function playerDataReducer(state: GamePlayerModel, action) {
   return playerDataReducerInternal(state, action);
+}
+
+export const drawnCardsInitialState: DrawnCardsContainer = {drawnCards: []};
+const drawnCardsReducerInternal = createReducer<DrawnCardsContainer>(
+  drawnCardsInitialState,
+  on(cardDrawn,
+    (state: DrawnCardsContainer, card: CardModel) => {
+      const cards: CardModel[] = state.drawnCards.map((c: CardModel) => ({...c}));
+      cards.push(card);
+      // state.drawnCards.push(card);
+      return {drawnCards: cards};
+    }),
+  on(handOver, () => ({drawnCards: []}))
+);
+
+export function drawnCardsReducer(state: DrawnCardsContainer, action) {
+  return drawnCardsReducerInternal(state, action);
 }
 
 // TODO: Don't think I actually need this...
