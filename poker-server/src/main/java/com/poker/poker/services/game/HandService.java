@@ -34,7 +34,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -215,8 +214,7 @@ public class HandService {
    */
   public void newHand(final GameModel game) {
     log.debug("Creating new hand for game {}.", game.getId());
-    final HandModel hand =
-        new HandModel(UUID.randomUUID(), game.getId(), new ArrayList<>(), null);
+    final HandModel hand = new HandModel(UUID.randomUUID(), game.getId(), new ArrayList<>(), null);
 
     // Adding hand to list of hands in game document.
     game.getHands().add(hand.getId());
@@ -335,7 +333,7 @@ public class HandService {
     webSocketService.sendPublicMessage(
         appConfig.getGameTopic() + hand.getGameId(),
         new SocketContainerModel(MessageType.HandActionPerformed, action));
-    
+
     // TODO: Broadcast drawn card.
     applicationEventPublisher.publishEvent(
         new PublishMessageEvent<CardModel>(

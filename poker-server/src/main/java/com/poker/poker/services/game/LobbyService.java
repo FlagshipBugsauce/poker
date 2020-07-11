@@ -72,8 +72,7 @@ public class LobbyService {
   }
 
   /**
-   * Sends out a lobby model to all players in the game associated with the game document
-   * argument.
+   * Sends out a lobby model to all players in the game associated with the game document argument.
    *
    * @param lobby GameDocument representing the game that is being updated.
    */

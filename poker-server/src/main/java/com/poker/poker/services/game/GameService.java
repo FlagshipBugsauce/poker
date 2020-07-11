@@ -309,17 +309,18 @@ public class GameService {
    */
   private void setPlayerActiveStatusInternal(final UUID playerId, final boolean status) {
     final GameModel game = getUsersGameModel(playerId);
-    final GamePlayerModel player = game.getPlayers().stream()
-        .filter(p -> p.getId().equals(playerId))
-        .findFirst()
-        .orElseThrow(gameConstants::getPlayerNotInGameException);
+    final GamePlayerModel player =
+        game.getPlayers().stream()
+            .filter(p -> p.getId().equals(playerId))
+            .findFirst()
+            .orElseThrow(gameConstants::getPlayerNotInGameException);
     player.setAway(status);
     final UserDocument user = userRepository.findUserDocumentById(playerId);
     if (status && handService.getHand(user).getActing().getId().equals(playerId)) {
       handService.draw(user);
     }
 
-//    broadcastGameUpdate(game);
+    //    broadcastGameUpdate(game);
     webSocketService.sendPublicMessage(
         appConfig.getGameTopic() + game.getId(),
         new SocketContainerModel(MessageType.PlayerAwayToggled, player));
@@ -433,6 +434,7 @@ public class GameService {
 
   /**
    * Updates the current game topic to ensure the client knows when a player is in a game.
+   *
    * @param game The game the player is in.
    * @param over Indicates whether the game is over.
    */
@@ -447,37 +449,39 @@ public class GameService {
                         new CurrentGameModel(!over, over ? null : game.getId()))));
   }
 
-  /**
-   * Regularly broadcasts player data to clients, to ensure they have an accurate model.
-   */
+  /** Regularly broadcasts player data to clients, to ensure they have an accurate model. */
   @Scheduled(cron = "0/10 * * * * ?")
   public void broadcastPlayerUpdates() {
-    this.games.values().forEach(game -> {
-      if (game.getPhase() == GamePhase.Play) {
-        game.getPlayers().forEach(p -> {
-          webSocketService.sendPublicMessage(
-              appConfig.getGameTopic() + p.getId(),
-              new SocketContainerModel(MessageType.PlayerData, p));
-        });
-      }
-    });
+    this.games
+        .values()
+        .forEach(
+            game -> {
+              if (game.getPhase() == GamePhase.Play) {
+                game.getPlayers()
+                    .forEach(
+                        p -> {
+                          webSocketService.sendPublicMessage(
+                              appConfig.getGameTopic() + p.getId(),
+                              new SocketContainerModel(MessageType.PlayerData, p));
+                        });
+              }
+            });
   }
 
-  /**
-   * Regularly broadcasts hand updates to clients, to ensure they have an accurate model.
-   */
+  /** Regularly broadcasts hand updates to clients, to ensure they have an accurate model. */
   @Scheduled(cron = "0/20 * * * * ?")
   public void broadcastHandUpdates() {
-    games.values().forEach(game -> {
-      if (game.getPhase() == GamePhase.Play) {
-        this.handService.broadcastHandUpdate(game);
-      }
-    });
+    games
+        .values()
+        .forEach(
+            game -> {
+              if (game.getPhase() == GamePhase.Play) {
+                this.handService.broadcastHandUpdate(game);
+              }
+            });
   }
 
-  /**
-   * Regularly broadcasts game updates to client, to ensure they have an accurate model.
-   */
+  /** Regularly broadcasts game updates to client, to ensure they have an accurate model. */
   @Scheduled(cron = "0/20 * * * * ?")
   public void broadcastGameUpdates() {
     this.games.values().forEach(this::broadcastGameUpdate);
@@ -503,8 +507,7 @@ public class GameService {
   public void broadcastGameUpdate(final GameModel game) {
     // Broadcast to game topic
     webSocketService.sendPublicMessage(
-        appConfig.getGameTopic() + game.getId(),
-        new SocketContainerModel(MessageType.Game, game));
+        appConfig.getGameTopic() + game.getId(), new SocketContainerModel(MessageType.Game, game));
   }
 
   /**
@@ -528,8 +531,7 @@ public class GameService {
     webSocketService.sendPublicMessage(
         appConfig.getGameTopic() + game.getPlayers().get(playerThatActed).getId(),
         new SocketContainerModel(
-            MessageType.PlayerData,
-            getPlayerData(game.getPlayers().get(playerThatActed).getId())));
+            MessageType.PlayerData, getPlayerData(game.getPlayers().get(playerThatActed).getId())));
 
     // Set acting to true for player who needs to act.
     nextPlayerToAct.setActing(true);
@@ -547,14 +549,12 @@ public class GameService {
         appConfig.getGameTopic() + game.getId(),
         new SocketContainerModel(MessageType.ActingPlayerChanged, nextPlayerToAct));
 
-
     /*
          Temporary logic here to help design game flow for later. Most of this will be gone. Just
          trying to work out the kinks with waiting for players to act, etc...
     */
     final boolean handOver = hand.getActing().equals(game.getPlayers().get(0));
-    final int currentRound =
-        handOver ? 1 + game.getHands().size() : game.getHands().size();
+    final int currentRound = handOver ? 1 + game.getHands().size() : game.getHands().size();
 
     // Update game data needed for UI.
     updateGameData(
@@ -569,8 +569,7 @@ public class GameService {
     } else if (currentRound <= game.getTotalHands()) {
       log.debug("Hand ended. Beginning new hand.");
       // Update game data
-      setWinnerInGameData(
-          game.getId(), handService.determineWinner(hand), game.getHands().size());
+      setWinnerInGameData(game.getId(), handService.determineWinner(hand), game.getHands().size());
 
       // Update scores
       handService.endHand(game);
@@ -580,8 +579,7 @@ public class GameService {
     } else {
       // If the round is over and the current round > total rounds, then the game must be over.
       log.debug("The game has ended.");
-      setWinnerInGameData(
-          game.getId(), handService.determineWinner(hand), game.getHands().size());
+      setWinnerInGameData(game.getId(), handService.determineWinner(hand), game.getHands().size());
       endGame(game);
     }
   }
