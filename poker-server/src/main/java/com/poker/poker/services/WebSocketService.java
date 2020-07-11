@@ -91,7 +91,7 @@ public class WebSocketService {
    * secure topic to communicate on.
    *
    * @param recipient The ID of the user.
-   * @param data      The data to be sent to this user.
+   * @param data The data to be sent to this user.
    */
   public <T> void sendPrivateMessage(final UUID recipient, final GenericServerMessage<T> data) {
     // TODO: Add validation
@@ -105,8 +105,8 @@ public class WebSocketService {
    * made to conceal the topic from anyone who wants to listen in.
    *
    * @param topic Topic to broadcast to.
-   * @param data  Data being broadcast.
-   * @param <T>   Type of data.
+   * @param data Data being broadcast.
+   * @param <T> Type of data.
    */
   public <T> void sendPublicMessage(final String topic, final GenericServerMessage<T> data) {
     template.convertAndSend(topic, data);
@@ -118,7 +118,7 @@ public class WebSocketService {
    * is being sent.
    *
    * @param publishMessageEvent Event that is published when server should send raw data.
-   * @param <T>                 Type of data being sent.
+   * @param <T> Type of data being sent.
    */
   @EventListener
   public <T> void messageEventHandler(final PublishMessageEvent<T> publishMessageEvent) {

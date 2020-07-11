@@ -17,9 +17,7 @@ import lombok.NoArgsConstructor;
 @Schema(description = "The parameters of a game.")
 public class GameParameterModel {
 
-  /**
-   * The name of the game.
-   */
+  /** The name of the game. */
   @NotNull(message = "Game name cannot be null.")
   @NotEmpty(message = "Game name cannot be empty.")
   @Schema(description = "The name of the game to be created", example = "Friends Night Out Poker")
@@ -27,9 +25,7 @@ public class GameParameterModel {
   @JsonProperty(required = true)
   private String name;
 
-  /**
-   * The maximum number of players that can join the game.
-   */
+  /** The maximum number of players that can join the game. */
   @NotNull(message = "Max players must be specified.")
   @Min(value = 2, message = "Must have at least 2 players in a game.")
   @Max(value = 10, message = "Cannot have more than 10 players in a game.")
@@ -37,9 +33,7 @@ public class GameParameterModel {
   @JsonProperty(required = true)
   private int maxPlayers;
 
-  /**
-   * The amount of money required to play the game.
-   */
+  /** The amount of money required to play the game. */
   @NotNull(message = "Buy-in must be specified.")
   @Min(value = 0, message = "Buy-in must be a positive value.")
   @Schema(description = "Buy-in required to play in the game.", example = "25")

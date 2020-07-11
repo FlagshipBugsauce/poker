@@ -456,9 +456,10 @@ public class GameService {
               if (game.getPhase() == GamePhase.Play) {
                 game.getPlayers()
                     .forEach(
-                        p -> webSocketService.sendPublicMessage(
-                            appConfig.getGameTopic() + p.getId(),
-                            new GenericServerMessage<>(MessageType.PlayerData, p)));
+                        p ->
+                            webSocketService.sendPublicMessage(
+                                appConfig.getGameTopic() + p.getId(),
+                                new GenericServerMessage<>(MessageType.PlayerData, p)));
               }
             });
   }

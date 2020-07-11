@@ -17,9 +17,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "hands")
 public class HandModel {
 
-  /**
-   * The ID of the hand.
-   */
+  /** The ID of the hand. */
   @Schema(
       description = "Hand ID.",
       example = "0a7d95ef-94ba-47bc-b591-febb365bc543",
@@ -27,18 +25,14 @@ public class HandModel {
   @Id
   private UUID id;
 
-  /**
-   * The ID of the game the hand was played/is being played in.
-   */
+  /** The ID of the game the hand was played/is being played in. */
   @Schema(
       description = "Game ID.",
       example = "0a7d95ef-94ba-47bc-b591-febb365bc543",
       implementation = UUID.class)
   private UUID gameId;
 
-  /**
-   * List of actions that occurred in the hand.
-   */
+  /** List of actions that occurred in the hand. */
   @ArraySchema(schema = @Schema(implementation = HandActionModel.class))
   private List<HandActionModel> actions;
 
