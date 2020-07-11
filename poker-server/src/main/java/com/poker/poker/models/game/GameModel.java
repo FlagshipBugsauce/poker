@@ -17,9 +17,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "game")
 public class GameModel {
 
-  /**
-   * The game ID is the same as the lobby ID.
-   */
+  /** The game ID is the same as the lobby ID. */
   @Schema(
       description = "Game ID (same as game lobby ID).",
       example = "0a7d95ef-94ba-47bc-b591-febb365bc543",
@@ -30,9 +28,7 @@ public class GameModel {
   @Schema(description = "Game phase.", example = "Lobby", implementation = GamePhase.class)
   private GamePhase phase;
 
-  /**
-   * This list of player ID's will only be updated after the game begins.
-   */
+  /** This list of player ID's will only be updated after the game begins. */
   @ArraySchema(schema = @Schema(implementation = GamePlayerModel.class))
   private List<GamePlayerModel> players;
 

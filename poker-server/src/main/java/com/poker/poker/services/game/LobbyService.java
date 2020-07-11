@@ -2,17 +2,17 @@ package com.poker.poker.services.game;
 
 import com.poker.poker.config.AppConfig;
 import com.poker.poker.config.constants.GameConstants;
-import com.poker.poker.models.game.GameModel;
-import com.poker.poker.models.game.LobbyModel;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.JoinGameEvent;
 import com.poker.poker.models.ApiSuccessModel;
-import com.poker.poker.models.websocket.SocketContainerModel;
 import com.poker.poker.models.enums.MessageType;
+import com.poker.poker.models.game.GameListModel;
+import com.poker.poker.models.game.GameModel;
 import com.poker.poker.models.game.GameParameterModel;
 import com.poker.poker.models.game.GamePlayerModel;
-import com.poker.poker.models.game.GameListModel;
+import com.poker.poker.models.game.LobbyModel;
 import com.poker.poker.models.game.LobbyPlayerModel;
+import com.poker.poker.models.websocket.SocketContainerModel;
 import com.poker.poker.repositories.LobbyRepository;
 import com.poker.poker.services.WebSocketService;
 import com.poker.poker.validation.exceptions.BadRequestException;
@@ -85,8 +85,8 @@ public class LobbyService {
   }
 
   /**
-   * Every 10 seconds, server will broadcast a complete lobby model to all players subscribed to
-   * the lobby topic.
+   * Every 10 seconds, server will broadcast a complete lobby model to all players subscribed to the
+   * lobby topic.
    */
   @Scheduled(cron = "0/10 * * * * ?")
   public void broadcastLobbyUpdate() {
@@ -98,7 +98,8 @@ public class LobbyService {
   public void broadcastGameList() {
     webSocketService.sendPublicMessage(
         appConfig.getGameListTopic(),
-        new SocketContainerModel(MessageType.GameList, useCachedGameList ? gameList : getLobbyList()));
+        new SocketContainerModel(
+            MessageType.GameList, useCachedGameList ? gameList : getLobbyList()));
   }
 
   /**
@@ -271,16 +272,10 @@ public class LobbyService {
   public void createLobby(
       final GameParameterModel gameParameterModel, final UserDocument user, final UUID id) {
     checkWhetherUserIsInLobbyAndThrow(user.getId(), false);
-    final LobbyPlayerModel host =  new LobbyPlayerModel(user, false, true);
+    final LobbyPlayerModel host = new LobbyPlayerModel(user, false, true);
     final List<LobbyPlayerModel> players =
-        Collections.synchronizedList(
-            new ArrayList<>(Collections.singletonList(host)));
-    final LobbyModel lobbyModel =
-        new LobbyModel(
-            id,
-            host,
-            gameParameterModel,
-            players);
+        Collections.synchronizedList(new ArrayList<>(Collections.singletonList(host)));
+    final LobbyModel lobbyModel = new LobbyModel(id, host, gameParameterModel, players);
     log.info("User: {} created a game.", user.getId());
     lobbys.put(lobbyModel.getId(), lobbyModel);
     userIdToLobbyIdMap.put(user.getId(), lobbyModel.getId());
@@ -320,16 +315,13 @@ public class LobbyService {
     final LobbyPlayerModel player = new LobbyPlayerModel(user, false, false);
     lobbyModel.getPlayers().add(player);
     final String toastMessage =
-        String.format(
-            "%s %s has joined the game.",
-            player.getFirstName(), player.getLastName());
+        String.format("%s %s has joined the game.", player.getFirstName(), player.getLastName());
 
     log.debug("Adding user {} to userIdToLobbyMap.", user.getId());
     userIdToLobbyIdMap.put(user.getId(), lobbyModel.getId());
 
     // Send toast, tell client which player joined and indicate that cached game list is outdated.
-    webSocketService.sendGameToast(
-        lobbyModel.getId(), toastMessage, "md"); // Also broadcast toast.
+    webSocketService.sendGameToast(lobbyModel.getId(), toastMessage, "md"); // Also broadcast toast.
     webSocketService.sendPublicMessage(
         "/topic/game/" + lobbyModel.getId(),
         new SocketContainerModel(MessageType.PlayerJoinedLobby, player));

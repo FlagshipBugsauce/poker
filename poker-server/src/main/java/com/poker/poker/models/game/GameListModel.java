@@ -30,5 +30,4 @@ public class GameListModel {
       example = "4",
       implementation = BigDecimal.class)
   private int currentPlayers;
-
 }

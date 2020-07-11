@@ -2,22 +2,22 @@ package com.poker.poker.services.game;
 
 import com.poker.poker.config.AppConfig;
 import com.poker.poker.config.constants.HandConstants;
-import com.poker.poker.events.PublishMessageEvent;
-import com.poker.poker.models.game.GameModel;
-import com.poker.poker.models.game.HandModel;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.HandActionEvent;
 import com.poker.poker.events.PlayerAfkEvent;
+import com.poker.poker.events.PublishMessageEvent;
 import com.poker.poker.events.WaitForPlayerEvent;
 import com.poker.poker.models.ApiSuccessModel;
-import com.poker.poker.models.websocket.SocketContainerModel;
 import com.poker.poker.models.enums.HandAction;
 import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.game.CardModel;
 import com.poker.poker.models.game.DeckModel;
+import com.poker.poker.models.game.GameModel;
 import com.poker.poker.models.game.GamePlayerModel;
+import com.poker.poker.models.game.HandModel;
 import com.poker.poker.models.game.PlayerModel;
 import com.poker.poker.models.game.hand.HandActionModel;
+import com.poker.poker.models.websocket.SocketContainerModel;
 import com.poker.poker.repositories.HandRepository;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.services.WebSocketService;
@@ -215,11 +215,7 @@ public class HandService {
   public void newHand(final GameModel gameModel) {
     log.debug("Creating new hand for game {}.", gameModel.getId());
     final HandModel hand =
-        new HandModel(
-            UUID.randomUUID(),
-            gameModel.getId(),
-            new ArrayList<>(),
-            null);
+        new HandModel(UUID.randomUUID(), gameModel.getId(), new ArrayList<>(), null);
 
     // Adding hand to list of hands in game document.
     gameModel.getHands().add(hand.getId());
@@ -324,11 +320,9 @@ public class HandService {
     hand.getActions().add(new HandActionModel(HandAction.Draw, hand.getActing(), card));
 
     // TODO: Broadcast drawn card.
-    applicationEventPublisher.publishEvent(new PublishMessageEvent<CardModel>(
-        this,
-        "/topic/game/" + hand.getGameId() + "/drawn-cards",
-        card
-    ));
+    applicationEventPublisher.publishEvent(
+        new PublishMessageEvent<CardModel>(
+            this, "/topic/game/" + hand.getGameId() + "/drawn-cards", card));
     webSocketService.sendGameToast(hand.getGameId(), toastMessage, "lg");
     applicationEventPublisher.publishEvent(
         new HandActionEvent(this, hand.getGameId(), hand.getId(), HandAction.Draw));
@@ -380,11 +374,12 @@ public class HandService {
     getHand(handId); // This will throw if the hand does not exist
     getHand(gameModel);
 
-    applicationEventPublisher.publishEvent(new PublishMessageEvent<>(
-        this,
-        "/topic/game/" + gameModel.getId() + "/drawn-cards",
-        new CardModel() // Send a blank card model to indicate the hand is over.
-    ));
+    applicationEventPublisher.publishEvent(
+        new PublishMessageEvent<>(
+            this,
+            "/topic/game/" + gameModel.getId() + "/drawn-cards",
+            new CardModel() // Send a blank card model to indicate the hand is over.
+            ));
 
     // Save the hand to the database.
     handRepository.save(hands.remove(handId));
