@@ -7,11 +7,11 @@ import com.poker.poker.events.CurrentGameEvent;
 import com.poker.poker.events.JoinGameEvent;
 import com.poker.poker.events.LeaveGameEvent;
 import com.poker.poker.events.RejoinGameEvent;
-import com.poker.poker.models.SocketContainerModel;
 import com.poker.poker.models.WebSocketUpdateModel;
-import com.poker.poker.models.game.CreateGameModel;
+import com.poker.poker.models.game.GameParameterModel;
 import com.poker.poker.models.websocket.ActionModel;
 import com.poker.poker.models.websocket.ClientMessageModel;
+import com.poker.poker.models.websocket.GenericServerMessage;
 import com.poker.poker.services.JwtService;
 import com.poker.poker.services.UserService;
 import com.poker.poker.services.WebSocketService;
@@ -50,13 +50,13 @@ public class WebSocketController {
         data = lobbyService.getLobbyList();
         break;
       case Lobby:
-        data = lobbyService.getLobbyDocument(updateModel.getId());
+        data = lobbyService.getLobbyModel(updateModel.getId());
         break;
       case Game:
-        data = gameService.getGameDocument(updateModel.getId());
+        data = gameService.getGameModel(updateModel.getId());
         break;
       case Hand:
-        data = handService.getHand(gameService.getGameDocument(updateModel.getId()));
+        data = handService.getHand(gameService.getGameModel(updateModel.getId()));
         break;
       case GameData:
         data = gameService.getGameData(updateModel.getId());
@@ -68,7 +68,7 @@ public class WebSocketController {
         data = null;
     }
     webSocketService.sendPublicMessage(
-        updateModel.getTopic(), new SocketContainerModel(updateModel.getType(), data));
+        updateModel.getTopic(), new GenericServerMessage<>(updateModel.getType(), data));
   }
 
   @MessageMapping("/game/leave")
@@ -94,7 +94,7 @@ public class WebSocketController {
   }
 
   @MessageMapping("/game/create")
-  public void createGame(final ClientMessageModel<CreateGameModel> messageModel) {
+  public void createGame(final ClientMessageModel<GameParameterModel> messageModel) {
     userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
     final UserDocument user = jwtService.getUserDocument(messageModel.getJwt());
     log.debug("User {} attempting to create a game.", user.getId());

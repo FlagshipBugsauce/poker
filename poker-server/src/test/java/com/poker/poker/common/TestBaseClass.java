@@ -3,19 +3,16 @@ package com.poker.poker.common;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.poker.poker.documents.LobbyDocument;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.AuthRequestModel;
 import com.poker.poker.models.AuthResponseModel;
 import com.poker.poker.models.enums.UserGroup;
-import com.poker.poker.models.game.CreateGameModel;
-import com.poker.poker.models.game.LobbyPlayerModel;
+import com.poker.poker.models.game.GameParameterModel;
 import com.poker.poker.models.user.NewAccountModel;
 import com.poker.poker.models.user.UserModel;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.UUID;
 import lombok.Data;
 import org.springframework.http.MediaType;
@@ -64,19 +61,19 @@ public class TestBaseClass {
   private final String sampleGameName = "Randy's NL Hold'em Game";
   private final int sampleMaxPlayers = 7;
   private final BigDecimal sampleBuyIn = new BigDecimal("69");
-  private final CreateGameModel sampleCreateGameModel =
-      new CreateGameModel(sampleGameName, sampleMaxPlayers, sampleBuyIn);
+  private final GameParameterModel sampleGameParameterModel =
+      new GameParameterModel(sampleGameName, sampleMaxPlayers, sampleBuyIn);
 
-  @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
-  private final LobbyDocument sampleLobbyDocument =
-      new LobbyDocument(
-          UUID.randomUUID(),
-          zeroUUID,
-          sampleGameName,
-          sampleMaxPlayers,
-          sampleBuyIn,
-          Arrays.asList(new LobbyPlayerModel()), // TODO: Fix this properly
-          new ArrayList<>());
+  //  @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
+  //  private final LobbyModel sampleLobbyModel =
+  //      new LobbyModel(
+  //          UUID.randomUUID(),
+  //          sampl,
+  //          sampleGameName,
+  //          sampleMaxPlayers,
+  //          sampleBuyIn,
+  //          Arrays.asList(new LobbyPlayerModel()), // TODO: Fix this properly
+  //          new ArrayList<>());
 
   public MockHttpServletResponse mockAuthResponse(
       final MockMvc mockMvc, final String uri, final String inputJson) throws Exception {

@@ -1,13 +1,10 @@
-import {HandDocument} from '../api/models/hand-document';
-import {CardSuit, CardValue} from '../shared/models/card.enum';
 import {UserModel} from '../api/models/user-model';
 import {DrawGameDataModel} from '../api/models/draw-game-data-model';
-import {GameDocument} from '../api/models/game-document';
-import {LobbyDocument} from '../api/models/lobby-document';
+import {GameModel} from '../api/models/game-model';
+import {LobbyModel} from '../api/models/lobby-model';
+import {HandModel} from '../api/models/hand-model';
 
-export const mockHandDocument: HandDocument = {
-  drawnCards: [{suit: CardSuit.Spades, value: CardValue.Ace}]
-};
+export const mockHandDocument: HandModel = {};
 
 export const mockUser: UserModel = {
   id: 'abc123'
@@ -15,12 +12,12 @@ export const mockUser: UserModel = {
 
 export const mockGameData: DrawGameDataModel[] = [];
 
-export const mockGameDocument: GameDocument = {
-  state: 'Play',
-  summary: {message: 'end game summary'}
+export const mockGameModel: GameModel = {
+  phase: 'Play'
 };
 
-export const mockLobbyDocument: LobbyDocument = {
-  host: 'jim',
-  players: [{id: 'jim', firstName: 'jim', lastName: 'bob'}]
+export const mockLobbyModel: LobbyModel = {
+  host: {id: 'jim', firstName: 'jim', lastName: 'bob'},
+  players: [{id: 'jim', firstName: 'jim', lastName: 'bob'}],
+  parameters: {name: 'some name', maxPlayers: 10, buyIn: 4240}
 };

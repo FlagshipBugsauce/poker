@@ -24,7 +24,6 @@ import {
 import {Router} from '@angular/router';
 import {APP_ROUTES} from '../app-routes';
 import {HandService} from '../api/services/hand.service';
-import {CreateGameModel} from '../api/models/create-game-model';
 import {ActiveStatusModel} from '../api/models/active-status-model';
 import {WebSocketService} from '../shared/web-socket/web-socket.service';
 import {MessageType} from '../shared/models/message-types.enum';
@@ -34,12 +33,10 @@ import {AppStateContainer} from '../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {selectJwt} from './app.selector';
 import {TypedAction} from '@ngrx/store/src/models';
+import {GameParameterModel} from '../api/models/game-parameter-model';
 
 @Injectable()
 export class GameEffects {
-
-  private jwt: string;
-
   /**
    * Leaves the game lobby. Does not redirect because there is a confirmation that handles this.
    */
@@ -52,20 +49,18 @@ export class GameEffects {
       )
     ))
   );
-
   /**
    * Toggles a players ready status in a game lobby.
    */
   readyUp$ = createEffect(() => this.actions$.pipe(
     ofType(readyUp),
-    exhaustMap(action => this.gameService.ready()
+    exhaustMap(() => this.gameService.ready()
       .pipe(
         map(response => ({type: readyUpSuccess().type, payload: response})),
         catchError(() => EMPTY)
       )
     ))
   );
-
   /**
    * Starts a game (will only work if dispatched by host).
    */
@@ -79,7 +74,6 @@ export class GameEffects {
       )
     ))
   );
-
   /**
    * Draws a card.
    */
@@ -92,7 +86,6 @@ export class GameEffects {
       )
     ))
   );
-
   /**
    * Sets the away status of the player.
    */
@@ -101,7 +94,7 @@ export class GameEffects {
     exhaustMap((action: ActiveStatusModel) => this.gameService.setActiveStatus({body: action})
       .pipe(
         map(
-          response => updateAwayStatus(action),
+          () => updateAwayStatus(action),
           catchError(() => of({type: setActiveStatusFail().type}))
         )
       )
@@ -112,7 +105,7 @@ export class GameEffects {
    */
   createGame$ = createEffect(() => this.actions$.pipe(
     ofType(createGame),
-    tap((action: CreateGameModel & TypedAction<'[Lobby Component] CreateGame'>) => {
+    tap((action: GameParameterModel & TypedAction<'[Lobby Component] CreateGame'>) => {
       this.webSocketService.send(
         this.createGameService.createGameTopic,
         this.createGameService.createGamePayload(
@@ -126,7 +119,10 @@ export class GameEffects {
     ofType(gameCreated),
     tap((action => this.lobbyJoined(action.message)))
   ), {dispatch: false});
-
+  /**
+   * JWT for the logged in user.
+   */
+  private jwt: string;
   /**
    * Effect that will join lobby with ID provided in the prop and then navigate to the route that
    * will display the lobby.
@@ -139,12 +135,20 @@ export class GameEffects {
       }
     )
   ), {dispatch: false});
-
+  /**
+   * Effect when player leaves an active game, as in, leaves a game that is in the 'Play' phase.
+   * This will send a message to the server and the server will set the players away status to true,
+   * which will result in the server performing default actions immediately whenever it is the
+   * player's turn to act.
+   */
   leaveGame$ = createEffect(() => this.actions$.pipe(
     ofType(leaveGame),
     tap(() => this.webSocketService.send('/topic/game/leave', {jwt: this.jwt}))
   ), {dispatch: false});
-
+  /**
+   * Effect when a player rejoins an active game that they have left. Note that only a game in the
+   * 'Play' phase can be rejoined.
+   */
   rejoinGame$ = createEffect(() => this.actions$.pipe(
     ofType(rejoinGame),
     tap((action: RejoinModel & TypedAction<'[Lobby Component] RejoinGame'>) => {
@@ -164,6 +168,11 @@ export class GameEffects {
     this.appStore.select(selectJwt).subscribe(jwt => this.jwt = jwt);
   }
 
+  /**
+   * Helper that will subscribe to various topics and request any updates that are required by the
+   * UI when a player joins a lobby.
+   * @param gameId The ID of the lobby (lobby ID is the same as game ID) that was joined.
+   */
   private lobbyJoined(gameId: string): void {
     this.webSocketService.subscribeToGameTopic(gameId);
     this.webSocketService.requestGameTopicUpdate(MessageType.Game);
@@ -172,6 +181,11 @@ export class GameEffects {
     this.router.navigate([`${APP_ROUTES.GAME_PREFIX.path}/${gameId}`]).then();
   }
 
+  /**
+   * Helper that will subscribe to various topics and request any updates that are required by the
+   * UI when a player rejoins an active game (i.e. a game that is in 'Play' phase).
+   * @param gameId The ID of the game being rejoined.
+   */
   private gameRejoined(gameId: string): void {
     this.webSocketService.subscribeToGameTopic(gameId);
     this.webSocketService.subscribeToPlayerDataTopic();

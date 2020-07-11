@@ -7,7 +7,7 @@ import {filter, first, switchMap, takeUntil} from 'rxjs/operators';
 import {environment} from '../../../environments/environment';
 import {Store} from '@ngrx/store';
 import {
-  AppStateContainer,
+  AppStateContainer, DrawnCardsStateContainer,
   GameDataStateContainer,
   GameListStateContainer,
   GameStateContainer,
@@ -18,12 +18,18 @@ import {
 import {MessageType} from '../models/message-types.enum';
 import {
   gameDataUpdated,
-  gameDocumentUpdated,
+  gameModelUpdated,
   gameListUpdated,
-  handDocumentUpdated,
-  lobbyDocumentUpdated,
+  handModelUpdated,
+  lobbyModelUpdated,
   playerDataUpdated,
-  updateCurrentGame
+  updateCurrentGame,
+  cardDrawn,
+  handOver,
+  playerReadyToggled,
+  playerJoinedLobby,
+  playerLeftLobby,
+  gamePhaseChanged, handCompleted, playerAwayToggled, handActionPerformed, actingPlayerChanged
 } from '../../state/app.actions';
 import {selectLoggedInUser} from '../../state/app.selector';
 import {UserModel} from '../../api/models/user-model';
@@ -66,7 +72,8 @@ export class WebSocketService implements OnDestroy {
     private handStore: Store<HandStateContainer>,
     private lobbyStore: Store<LobbyStateContainer>,
     private gameListStore: Store<GameListStateContainer>,
-    private playerDataStore: Store<PlayerDataStateContainer>
+    private playerDataStore: Store<PlayerDataStateContainer>,
+    private drawnCardsStore: Store<DrawnCardsStateContainer>
   ) {
     this.client = over(new SockJS(environment.api));
     this.client.debug = () => {
@@ -130,19 +137,43 @@ export class WebSocketService implements OnDestroy {
     this.onMessage(`/topic/game/${gameId}`).pipe(takeUntil(this.gameTopicUnsubscribe$)).subscribe(data => {
       switch (data.type) {
         case MessageType.Lobby:
-          this.lobbyStore.dispatch(lobbyDocumentUpdated(data.data));
+          this.lobbyStore.dispatch(lobbyModelUpdated(data.data));
           break;
         case MessageType.Game:
-          this.gameStore.dispatch(gameDocumentUpdated(data.data));
+          this.gameStore.dispatch(gameModelUpdated(data.data));
           break;
         case MessageType.Hand:
-          this.handStore.dispatch(handDocumentUpdated(data.data));
+          this.handStore.dispatch(handModelUpdated(data.data));
           break;
         case MessageType.GameData:
           this.gameDataStore.dispatch(gameDataUpdated(data.data));
           break;
         case MessageType.Toast:
           this.toastService.show(data.data.message, data.data.options);
+          break;
+        case MessageType.ReadyToggled:
+          this.lobbyStore.dispatch(playerReadyToggled(data.data));
+          break;
+        case MessageType.PlayerJoinedLobby:
+          this.lobbyStore.dispatch(playerJoinedLobby(data.data));
+          break;
+        case MessageType.PlayerLeftLobby:
+          this.lobbyStore.dispatch(playerLeftLobby(data.data));
+          break;
+        case MessageType.GamePhaseChanged:
+          this.gameStore.dispatch(gamePhaseChanged({phase: data.data}));
+          break;
+        case MessageType.HandStarted:
+          this.gameStore.dispatch(handCompleted({id: data.data}));
+          break;
+        case MessageType.PlayerAwayToggled:
+          this.gameStore.dispatch(playerAwayToggled(data.data));
+          break;
+        case MessageType.HandActionPerformed:
+          this.handStore.dispatch(handActionPerformed(data.data));
+          break;
+        case MessageType.ActingPlayerChanged:
+          this.handStore.dispatch(actingPlayerChanged(data.data));
           break;
       }
     });
@@ -176,6 +207,18 @@ export class WebSocketService implements OnDestroy {
     await new Promise(resolve => setTimeout(resolve, 100));
     this.send(`/topic/game/update`, {type, topic, id} as WebSocketUpdateModel);
     return null;
+  }
+
+  public drawnCardsTopicUnsubscribe$: Subject<any>;
+  public subscribeToDrawnCardsTopic(gameId: string): void {
+    this.drawnCardsTopicUnsubscribe$ = new Subject<any>();
+    this.onMessage(`/topic/game/${gameId}/drawn-cards`)
+    .pipe(takeUntil(this.drawnCardsTopicUnsubscribe$))
+    .subscribe(data => this.drawnCardsStore.dispatch(data.suit ? cardDrawn(data) : handOver()))
+  }
+  public drawnCardsTopicUnsubscribe() {
+    this.drawnCardsTopicUnsubscribe$.next();
+    this.drawnCardsTopicUnsubscribe$.complete();
   }
 
   /** Subscribes to the game list topic. */

@@ -1,11 +1,11 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {CreateGameModel} from 'src/app/api/models';
 import {AppStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {createGame} from '../../state/app.actions';
 import {CreateGameService} from '../../shared/web-socket/create-game.service';
+import {GameParameterModel} from '../../api/models/game-parameter-model';
 
 @Component({
   selector: 'pkr-create',
@@ -50,6 +50,6 @@ export class CreateComponent implements OnInit, OnDestroy {
       buyIn: values.buyIn,
       maxPlayers: values.maxPlayers,
       name: values.name
-    } as CreateGameModel));
+    } as GameParameterModel));
   }
 }

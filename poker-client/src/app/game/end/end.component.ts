@@ -1,8 +1,8 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {DrawGameDataModel, GameDocument} from 'src/app/api/models';
+import {DrawGameDataModel, GameModel} from 'src/app/api/models';
 import {GameStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
-import {selectGameDocument} from '../../state/app.selector';
+import {selectGameModel} from '../../state/app.selector';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 
@@ -24,7 +24,7 @@ export class EndComponent implements OnInit, OnDestroy {
   /**
    * Getter for the game model.
    */
-  public gameModel: GameDocument;
+  public gameModel: GameModel;
   public ngDestroyed$ = new Subject();
 
   constructor(private gameStore: Store<GameStateContainer>) {
@@ -35,11 +35,11 @@ export class EndComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.gameStore.select(selectGameDocument)
+    this.gameStore.select(selectGameModel)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((gameDocument: GameDocument) => {
-      this.gameModel = gameDocument;
-      this.numbers = Array(gameDocument.totalHands).fill('').map((v, i) => i + 1);
+    .subscribe((gameModel: GameModel) => {
+      this.gameModel = gameModel;
+      this.numbers = Array(gameModel.totalHands).fill('').map((v, i) => i + 1);
     });
   }
 }

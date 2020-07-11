@@ -4,9 +4,9 @@ import com.poker.poker.config.AppConfig;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.CurrentGameEvent;
 import com.poker.poker.events.PublishMessageEvent;
-import com.poker.poker.models.SocketContainerModel;
 import com.poker.poker.models.WebSocketInfoModel;
 import com.poker.poker.models.enums.MessageType;
+import com.poker.poker.models.websocket.GenericServerMessage;
 import com.poker.poker.models.websocket.ToastClassModel;
 import com.poker.poker.models.websocket.ToastModel;
 import java.util.ArrayList;
@@ -93,7 +93,7 @@ public class WebSocketService {
    * @param recipient The ID of the user.
    * @param data The data to be sent to this user.
    */
-  public void sendPrivateMessage(final UUID recipient, final SocketContainerModel data) {
+  public <T> void sendPrivateMessage(final UUID recipient, final GenericServerMessage<T> data) {
     // TODO: Add validation
     final WebSocketInfoModel model = privateSockets.get(recipient);
     template.convertAndSend("/topic/secure/" + model.getSecureTopicId(), data);
@@ -101,20 +101,27 @@ public class WebSocketService {
   }
 
   /**
-   * Sends the providied data to the specified topic. This message is public and no attempt has been
+   * Sends the provided data to the specified topic. This message is public and no attempt has been
    * made to conceal the topic from anyone who wants to listen in.
    *
-   * @param topic The topic to broadcast to.
-   * @param data The data to broadcast.
+   * @param topic Topic to broadcast to.
+   * @param data Data being broadcast.
+   * @param <T> Type of data.
    */
-  public void sendPublicMessage(final String topic, final SocketContainerModel data) {
+  public <T> void sendPublicMessage(final String topic, final GenericServerMessage<T> data) {
     template.convertAndSend(topic, data);
-    log.debug("Sent {} update to topic {}.", data.getType(), topic);
   }
 
-  // TODO: Add docs
+  /**
+   * Handles publish message events. Unlike sendPublicMessage, this method will broadcast raw data,
+   * as in, it will not place the data in a container with a type enum indicating what kind of data
+   * is being sent.
+   *
+   * @param publishMessageEvent Event that is published when server should send raw data.
+   * @param <T> Type of data being sent.
+   */
   @EventListener
-  public <T> void sendGenericMessage(final PublishMessageEvent<T> publishMessageEvent) {
+  public <T> void messageEventHandler(final PublishMessageEvent<T> publishMessageEvent) {
     template.convertAndSend(publishMessageEvent.getTopic(), publishMessageEvent.getData());
     log.debug("Sent generic message to topic {}.", publishMessageEvent.getTopic());
   }
@@ -131,14 +138,9 @@ public class WebSocketService {
   public void sendGameToast(final UUID gameId, final String message, final String size) {
     sendPublicMessage(
         appConfig.getGameTopic() + gameId,
-        new SocketContainerModel(
+        new GenericServerMessage<>(
             MessageType.Toast,
             new ToastModel(message, new ToastClassModel("bg-light toast-" + size, 5000))));
-  }
-
-  public void sendToast(final String message) {
-
-    log.debug("Sending toast to client with message: {}", message);
   }
 
   @EventListener
@@ -147,6 +149,4 @@ public class WebSocketService {
         appConfig.getCurrentGameTopic() + currentGameEvent.getUserId(),
         currentGameEvent.getCurrentGameModel());
   }
-
-  public void createGameSuccess() {}
 }

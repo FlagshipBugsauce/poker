@@ -1,9 +1,9 @@
 import {AfterViewInit, Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {DrawGameDataModel, GameDocument} from 'src/app/api/models';
+import {DrawGameDataModel, GameModel} from 'src/app/api/models';
 import {LobbyComponent} from '../lobby/lobby.component';
 import {LeaveGameGuardService} from './leave-game-guard.service';
 import {PopupComponent, PopupContentModel} from 'src/app/shared/popup/popup.component';
-import {GameState} from 'src/app/shared/models/game-state.enum';
+import {GamePhase} from 'src/app/shared/models/game-phase.enum';
 import {PlayComponent} from '../play/play.component';
 import {
   AppStateContainer,
@@ -13,8 +13,8 @@ import {
 import {Store} from '@ngrx/store';
 import {
   selectGameData,
-  selectGameDocument,
-  selectGameState,
+  selectGameModel,
+  selectGamePhase,
   selectJwt
 } from '../../state/app.selector';
 import {Subject} from 'rxjs';
@@ -52,7 +52,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   /** Helper subject which assists in terminating subscriptions. */
   public ngDestroyed$ = new Subject();
   /** The model representing the state of the game at any given point in time. */
-  public gameModel: GameDocument;
+  public gameModel: GameModel;
   /** The last state the game was in. */
   private lastState: string = '';
   private jwt: string;
@@ -77,10 +77,10 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     this.appStore.select(selectJwt)
     .pipe(takeUntil(this.ngDestroyed$)).subscribe(jwt => this.jwt = jwt);
     this.leaveGameGuardService.canLeave = false;  // Need to set this to false when page loads.
-    this.gameStore.select(selectGameDocument).pipe(takeUntil(this.ngDestroyed$)).subscribe(
-      (game: GameDocument) => this.gameModel = game);
+    this.gameStore.select(selectGameModel).pipe(takeUntil(this.ngDestroyed$)).subscribe(
+      (game: GameModel) => this.gameModel = game);
 
-    this.gameStore.select(selectGameState)
+    this.gameStore.select(selectGamePhase)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe(state => {
       if (state !== this.lastState && state === 'Play') {
@@ -102,10 +102,10 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   @HostListener('window:beforeunload', ['$event'])
   public userLeftPage($event: any): void {
-    if (this.gameModel.state === GameState.Lobby) {
+    if (this.gameModel.phase === GamePhase.Lobby) {
       this.appStore.dispatch(leaveLobby());
     }
-    if (this.gameModel.state === GameState.Play) {
+    if (this.gameModel.phase === GamePhase.Play) {
       this.appStore.dispatch(leaveGame({jwt: this.jwt, actionType: 'LeaveGame'}));
     }
   }

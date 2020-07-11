@@ -1,4 +1,3 @@
-/* tslint:disable */
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {UsersService} from '../api/services/users.service';
@@ -16,8 +15,8 @@ import {AuthResponseModel} from '../api/models/auth-response-model';
 import {ToastService} from '../shared/toast.service';
 import {Router} from '@angular/router';
 import {APP_ROUTES} from '../app-routes';
-import {WebSocketService} from "../shared/web-socket/web-socket.service";
-import {ActionModel} from "../api/models/action-model";
+import {WebSocketService} from '../shared/web-socket/web-socket.service';
+import {ActionModel} from '../api/models/action-model';
 
 @Injectable()
 export class AppEffects {
@@ -47,8 +46,8 @@ export class AppEffects {
     .pipe(map(client => {
       client.send('/topic/game/current/update', {}, JSON.stringify({
         userId: action.userId
-      } as ActionModel))
-      return {type: requestCurrentGameUpdateSuccess.type}
+      } as ActionModel));
+      return {type: requestCurrentGameUpdateSuccess.type};
     }, catchError(() => EMPTY))))
   ));
 

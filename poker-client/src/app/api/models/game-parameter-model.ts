@@ -1,5 +1,9 @@
 /* tslint:disable */
-export interface CreateGameModel {
+
+/**
+ * The parameters of a game.
+ */
+export interface GameParameterModel {
 
   /**
    * Buy-in required to play in the game.

@@ -5,5 +5,13 @@ export enum MessageType {
   Hand = 'Hand',
   GameData = 'GameData',
   PlayerData = 'PlayerData',
-  Toast = 'Toast'
+  Toast = 'Toast',
+  ReadyToggled = 'ReadyToggled',
+  PlayerJoinedLobby = 'PlayerJoinedLobby',
+  PlayerLeftLobby = 'PlayerLeftLobby',
+  GamePhaseChanged = 'GamePhaseChanged',
+  HandStarted = 'HandStarted',
+  PlayerAwayToggled = 'PlayerAwayToggled',
+  HandActionPerformed = 'HandActionPerformed',
+  ActingPlayerChanged = 'ActingPlayerChanged'
 }

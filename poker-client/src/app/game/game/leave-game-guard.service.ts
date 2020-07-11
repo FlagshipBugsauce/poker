@@ -3,14 +3,14 @@ import {CanDeactivate, Router} from '@angular/router';
 import {PopupComponent} from 'src/app/shared/popup/popup.component';
 import {GameService} from 'src/app/api/services';
 import {GameComponent} from './game.component';
-import {GameState} from 'src/app/shared/models/game-state.enum';
+import {GamePhase} from 'src/app/shared/models/game-phase.enum';
 import {AppStateContainer, GameStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {leaveGame, leaveLobby} from '../../state/app.actions';
-import {GameDocument} from '../../api/models/game-document';
-import {selectGameDocument, selectJwt} from '../../state/app.selector';
+import {selectGameModel, selectJwt} from '../../state/app.selector';
 import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 import {ActionModel} from '../../api/models/action-model';
+import {GameModel} from '../../api/models';
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +27,7 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
   /** The page the user is attempting to access. */
   public link: string;
 
-  public gameModel: GameDocument;
+  public gameModel: GameModel;
 
   private jwt: string;
 
@@ -37,8 +37,8 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
     private gameService: GameService,
     private appStore: Store<AppStateContainer>,
     private gameStore: Store<GameStateContainer>) {
-    this.gameStore.select(selectGameDocument)
-    .subscribe((gameDocument: GameDocument) => this.gameModel = gameDocument);
+    this.gameStore.select(selectGameModel)
+    .subscribe((gameModel: GameModel) => this.gameModel = gameModel);
     this.appStore.select(selectJwt).subscribe(jwt => this.jwt = jwt);
   }
 
@@ -53,7 +53,7 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
     Promise<boolean |
       import('@angular/router').UrlTree> {
     // If state is null or the game is over, then we should just let the player leave the page.
-    if (!this.gameModel.state || this.gameModel.state === GameState.Over) {
+    if (!this.gameModel.phase || this.gameModel.phase === GamePhase.Over) {
       this.unsubscribe();
       return true;
     }
@@ -70,10 +70,10 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
         this.canLeave = true;
         this.unsubscribe();
 
-        if (this.gameModel.state && this.gameModel.state === GameState.Lobby) {
+        if (this.gameModel.phase && this.gameModel.phase === GamePhase.Lobby) {
           this.appStore.dispatch(leaveLobby());  // Leave the lobby.
         }
-        if (this.gameModel.state && this.gameModel.state === GameState.Play) {
+        if (this.gameModel.phase && this.gameModel.phase === GamePhase.Play) {
           this.appStore.dispatch(leaveGame({
             jwt: this.jwt,
             actionType: 'LeaveGame'

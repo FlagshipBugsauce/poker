@@ -1,20 +1,18 @@
 /* tslint:disable */
 import { GamePlayerModel } from './game-player-model';
-import { GameSummaryModel } from './game-summary-model';
-export interface GameDocument {
+export interface GameModel {
   hands?: Array<string>;
 
   /**
    * Game ID (same as game lobby ID).
    */
   id?: string;
-  players?: Array<GamePlayerModel>;
 
   /**
-   * Game state.
+   * Game phase.
    */
-  state?: 'Lobby' | 'Play' | 'Over';
-  summary?: GameSummaryModel;
+  phase?: 'Lobby' | 'Play' | 'Over';
+  players?: Array<GamePlayerModel>;
 
   /**
    * Amount of time each player has to act.

@@ -1,6 +1,8 @@
 import {
   AppState,
   AppStateContainer,
+  DrawnCardsContainer,
+  DrawnCardsStateContainer,
   GameDataStateContainer,
   GameListStateContainer,
   GameStateContainer,
@@ -9,12 +11,12 @@ import {
   PlayerDataStateContainer
 } from '../shared/models/app-state.model';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
-import {HandDocument} from '../api/models/hand-document';
 import {
   DrawGameDataContainerModel,
-  GameDocument,
+  GameModel,
   GamePlayerModel,
-  LobbyDocument
+  HandModel,
+  LobbyModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
 
@@ -67,34 +69,42 @@ export const selectGameList = createSelector(
 );
 
 export const lobbyFeature =
-  createFeatureSelector<LobbyStateContainer, LobbyDocument>('lobbyDocument');
+  createFeatureSelector<LobbyStateContainer, LobbyModel>('lobbyModel');
 /** Lobby document selector. */
-export const selectLobbyDocument = createSelector(
+export const selectLobbyModel = createSelector(
   lobbyFeature,
-  (state: LobbyDocument) => state
+  (state: LobbyModel) => state
 );
 
 export const gameFeature =
-  createFeatureSelector<GameStateContainer, GameDocument>('gameDocument');
+  createFeatureSelector<GameStateContainer, GameModel>('gameModel');
 /** Game document selector. */
-export const selectGameDocument = createSelector(
+export const selectGameModel = createSelector(
   gameFeature,
-  (state: GameDocument) => state
+  (state: GameModel) => state
 );
-export const gameStateFeature =
-  createFeatureSelector<GameStateContainer, GameDocument>('gameDocument');
+export const gamePhaseFeature =
+  createFeatureSelector<GameStateContainer, GameModel>('gameModel');
 /** Game state selector. */
-export const selectGameState = createSelector(
-  gameStateFeature,
-  (state: GameDocument) => state.state
+export const selectGamePhase = createSelector(
+  gamePhaseFeature,
+  (state: GameModel) => state.phase
 );
 
 export const handFeature =
-  createFeatureSelector<HandStateContainer, HandDocument>('handDocument');
+  createFeatureSelector<HandStateContainer, HandModel>('handModel');
 /** Hand document selector. */
-export const selectHandDocument = createSelector(
+export const selectHandModel = createSelector(
   handFeature,
-  (state: HandDocument) => state
+  (state: HandModel) => state
+);
+
+export const drawnCardsFeature =
+  createFeatureSelector<DrawnCardsStateContainer, DrawnCardsContainer>('drawnCards');
+/** Drawn cards selector. */
+export const selectDrawnCards = createSelector(
+  drawnCardsFeature,
+  (state: DrawnCardsContainer) => state.drawnCards
 );
 
 export const gameDataFeature =

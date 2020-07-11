@@ -1,4 +1,4 @@
-<pkr-lobby *ngIf="gameModel && gameModel.state === 'Lobby'"></pkr-lobby>
-<pkr-play *ngIf="gameModel && gameModel.state === 'Play'"></pkr-play>
-<pkr-end *ngIf="gameModel && gameModel.state === 'Over'" [gameData]="gameData"></pkr-end>
+<pkr-lobby *ngIf="gameModel && gameModel.phase === 'Lobby'"></pkr-lobby>
+<pkr-play *ngIf="gameModel && gameModel.phase === 'Play'"></pkr-play>
+<pkr-end *ngIf="gameModel && gameModel.phase === 'Over'" [gameData]="gameData"></pkr-end>
 <pkr-popup #popup [content]="popupContent" title="Leaving Page"></pkr-popup>

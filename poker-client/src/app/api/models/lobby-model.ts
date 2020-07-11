@@ -1,0 +1,13 @@
+/* tslint:disable */
+import { GameParameterModel } from './game-parameter-model';
+import { LobbyPlayerModel } from './lobby-player-model';
+export interface LobbyModel {
+  host?: LobbyPlayerModel;
+
+  /**
+   * Lobby's ID.
+   */
+  id?: string;
+  parameters?: GameParameterModel;
+  players?: Array<LobbyPlayerModel>;
+}

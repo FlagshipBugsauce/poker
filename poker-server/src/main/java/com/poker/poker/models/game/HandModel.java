@@ -1,7 +1,5 @@
-package com.poker.poker.documents;
+package com.poker.poker.models.game;
 
-import com.poker.poker.models.game.CardModel;
-import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.hand.HandActionModel;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,8 +15,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "hands")
-public class HandDocument {
+public class HandModel {
 
+  /** The ID of the hand. */
   @Schema(
       description = "Hand ID.",
       example = "0a7d95ef-94ba-47bc-b591-febb365bc543",
@@ -26,26 +25,18 @@ public class HandDocument {
   @Id
   private UUID id;
 
+  /** The ID of the game the hand was played/is being played in. */
   @Schema(
       description = "Game ID.",
       example = "0a7d95ef-94ba-47bc-b591-febb365bc543",
       implementation = UUID.class)
   private UUID gameId;
 
-  // Temporary
-  @Schema(
-      description = "Temporary message.",
-      example = "Player X won.",
-      implementation = String.class)
-  private String message;
-
+  /** List of actions that occurred in the hand. */
   @ArraySchema(schema = @Schema(implementation = HandActionModel.class))
   private List<HandActionModel> actions;
 
+  /** Model of the player whose turn it is to act. */
   @Schema(implementation = GamePlayerModel.class)
-  private GamePlayerModel playerToAct;
-
-  // TODO: Remove once we evolve past the card drawing game.
-  @ArraySchema(schema = @Schema(implementation = CardModel.class))
-  private List<CardModel> drawnCards;
+  private GamePlayerModel acting;
 }

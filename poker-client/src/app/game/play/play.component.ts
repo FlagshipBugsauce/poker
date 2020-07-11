@@ -1,13 +1,15 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {
   ActionModel,
+  CardModel,
   DrawGameDataModel,
-  GameDocument,
-  HandDocument,
+  GameModel,
+  HandModel,
   UserModel,
 } from '../../api/models';
 import {
   AppStateContainer,
+  DrawnCardsStateContainer,
   GameDataStateContainer,
   GameStateContainer,
   HandStateContainer,
@@ -18,15 +20,18 @@ import {drawCard, leaveGame, setAwayStatus} from '../../state/app.actions';
 import {
   selectActingStatus,
   selectAwayStatus,
+  selectDrawnCards,
   selectGameData,
-  selectGameDocument,
-  selectHandDocument,
+  selectGameModel,
+  selectHandModel,
   selectJwt,
   selectLoggedInUser,
 } from '../../state/app.selector';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
+import {GamePhase} from '../../shared/models/game-phase.enum';
+import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 
 @Component({
   selector: 'pkr-play',
@@ -54,11 +59,11 @@ export class PlayComponent implements OnInit, OnDestroy {
   /**
    * Getter for the model representing the current hand.
    */
-  public hand: HandDocument;
+  public hand: HandModel;
   /**
    * Getter for the model representing the current game.
    */
-  public gameModel: GameDocument;
+  public gameModel: GameModel;
   /**
    * Getter for the data representing the current game.
    */
@@ -71,6 +76,10 @@ export class PlayComponent implements OnInit, OnDestroy {
    * Flag used to track whether a player is AFK or not.
    */
   public awayStatus: boolean;
+  /**
+   * Cards that have been drawn in the current hand.
+   */
+  public drawnCards: CardModel[];
   /**
    * JWT for logged in user.
    */
@@ -85,11 +94,14 @@ export class PlayComponent implements OnInit, OnDestroy {
     private gameDataStore: Store<GameDataStateContainer>,
     private gameStore: Store<GameStateContainer>,
     private handStore: Store<HandStateContainer>,
-    private playerDataStore: Store<PlayerDataStateContainer>) {
+    private playerDataStore: Store<PlayerDataStateContainer>,
+    private drawnCardsStore: Store<DrawnCardsStateContainer>,
+    private webSocketService: WebSocketService) {
   }
 
   public ngOnDestroy() {
     this.ngDestroyed$.next();
+    this.webSocketService.drawnCardsTopicUnsubscribe();
   }
 
   public ngOnInit(): void {
@@ -106,17 +118,17 @@ export class PlayComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.gameStore.select(selectGameDocument)
+    this.gameStore.select(selectGameModel)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((gameDocument: GameDocument) => this.gameModel = gameDocument);
+    .subscribe((game: GameModel) => this.gameModel = game);
 
-    this.handStore.select(selectHandDocument)
+    this.handStore.select(selectHandModel)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((handDocument: HandDocument) => {
-      this.hand = handDocument;
+    .subscribe((hand: HandModel) => {
+      this.hand = hand;
 
-      if (this.hand.playerToAct && this.hand.playerToAct.id) {
-        if (this.gameModel.state !== 'Over') {
+      if (this.hand.acting && this.hand.acting.id) {
+        if (this.gameModel.phase !== GamePhase.Over) {
           this.startTurnTimer().then();
         }
       }
@@ -134,6 +146,10 @@ export class PlayComponent implements OnInit, OnDestroy {
         this.afkPopup.open();
       }
     });
+    this.webSocketService.subscribeToDrawnCardsTopic(this.gameModel.id);
+    this.drawnCardsStore.select(selectDrawnCards)
+    .pipe(takeUntil(this.ngDestroyed$))
+    .subscribe((cards: CardModel[]) => this.drawnCards = cards);
   }
 
   /**
@@ -170,7 +186,7 @@ export class PlayComponent implements OnInit, OnDestroy {
    */
   private async startTurnTimer(): Promise<void> {
     const numHandActions = this.hand.actions.length;
-    let currentTime = this.gameModel.timeToAct;
+    let currentTime = this.hand.acting.away ? 1 : this.gameModel.timeToAct;
     while (currentTime >= 0) {
       this.timeToAct = currentTime;
       await new Promise(resolve => setTimeout(resolve, 1000));

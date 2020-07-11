@@ -1,11 +1,10 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {GameActionModel, LobbyPlayerModel, UserModel} from 'src/app/api/models';
-import {LobbyDocument} from 'src/app/api/models/lobby-document';
+import {LobbyModel, LobbyPlayerModel, UserModel} from 'src/app/api/models';
 import {AppStateContainer, LobbyStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {notReady, readyUp, startGame} from '../../state/app.actions';
-import {selectLobbyDocument, selectLoggedInUser, selectReadyStatus} from '../../state/app.selector';
+import {selectLobbyModel, selectLoggedInUser, selectReadyStatus} from '../../state/app.selector';
 import {Observable, Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {APP_ROUTES} from '../../app-routes';
@@ -38,7 +37,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
   /** Observable of the model for the user currently logged in. */
   public userModel$: Observable<UserModel>;
   /** Model representing the lobby. */
-  public lobbyModel: LobbyDocument;
+  public lobbyModel: LobbyModel;
   /** Helper subject which assists in terminating subscriptions. */
   public ngDestroyed$ = new Subject();
   /**
@@ -46,12 +45,6 @@ export class LobbyComponent implements OnInit, OnDestroy {
    * is received.
    */
   private lastCanStart: boolean = false;
-  /**
-   * Stores the last action that was performed. Used to help determine whether a toast should be
-   * displayed or not. The backend will occasionally re-send the same lobby document to prevent the
-   * emitter from timing out. In such a case, we don't want to re-display the same toast.
-   */
-  private lastAction: GameActionModel;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -75,22 +68,10 @@ export class LobbyComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  /** Getter for the model representing the host of the game. */
-  public get hostModel(): LobbyPlayerModel {
-    return this.lobbyModel && this.lobbyModel.players ?
-      this.lobbyModel.players.find(player => player.id === this.lobbyModel.host) :
-      {host: false} as LobbyPlayerModel;
-  }
-
   /** Getter for the name of the host. Format is '{First Name} {Last Name}'. */
   public get host(): string {
-    if (this.lobbyModel && this.lobbyModel.players) {
-      const hostModel: LobbyPlayerModel =
-        this.lobbyModel.players.find(player => player.id === this.lobbyModel.host);
-      return `${hostModel.firstName} ${hostModel.lastName}`;
-    } else {
-      return '';
-    }
+    return this.lobbyModel ? this.lobbyModel.host ?
+      `${this.lobbyModel.host.firstName} ${this.lobbyModel.host.lastName}` : '' : '';
   }
 
   public ngOnDestroy() {
@@ -100,9 +81,9 @@ export class LobbyComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.ready$ = this.appStore.select(selectReadyStatus);
-    this.lobbyStore.select(selectLobbyDocument)
+    this.lobbyStore.select(selectLobbyModel)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((lobbyDocument: LobbyDocument) => this.lobbyModel = lobbyDocument);
+    .subscribe((lobbyModel: LobbyModel) => this.lobbyModel = lobbyModel);
     this.userModel$ = this.appStore.select(selectLoggedInUser);
   }
 

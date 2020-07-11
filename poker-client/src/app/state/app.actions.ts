@@ -2,20 +2,25 @@ import {createAction, props} from '@ngrx/store';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
   ActionModel,
-  ActiveStatusModel, ApiSuccessModel,
+  ActiveStatusModel,
+  ApiSuccessModel,
   AuthRequestModel,
   AuthResponseModel,
-  CreateGameModel,
+  CardModel,
   CurrentGameModel,
   DrawGameDataContainerModel,
-  GameDocument,
+  GameModel,
+  GameParameterModel,
   GamePlayerModel,
-  HandDocument,
-  LobbyDocument,
+  HandActionModel,
+  HandModel,
+  LobbyModel,
+  LobbyPlayerModel,
   ToastModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
 import {RejoinModel} from '../shared/models/rejoin.model';
+import {GamePhase} from '../shared/models/game-phase.enum';
 
 export const navigate = createAction('[Router Service] Navigate');
 export const signIn = createAction('[Auth Service] SignIn', props<AuthRequestModel>());
@@ -30,7 +35,7 @@ export const joinLobby = createAction('[Join Component] JoinLobby', props<TopBar
 export const leaveLobby = createAction('[Lobby Component] LeaveLobby');
 export const createGame = createAction(
   '[Lobby Component] CreateGame',
-  props<CreateGameModel>()
+  props<GameParameterModel>()
 );
 export const gameCreated = createAction(
   '[CreateGameService] GameCreated', props<ApiSuccessModel>());
@@ -55,14 +60,14 @@ export const startGameSuccess = createAction('[Game Component] StartGameSuccess'
 export const readyUpSuccess = createAction('[Lobby Component] ReadyUpSuccess');
 
 /* Game data actions */ // TODO: Change these strings to WebSocketService
-export const gameDocumentUpdated = createAction(
-  '[SSE Service] GameDocumentUpdated', props<GameDocument>());
+export const gameModelUpdated = createAction(
+  '[SSE Service] GameModelUpdated', props<GameModel>());
 export const gameListUpdated = createAction(
   '[SSE Service] GameListDataUpdated', props<GameListContainerModel>());
-export const lobbyDocumentUpdated = createAction(
-  '[SSE Service] LobbyDocumentUpdated', props<LobbyDocument>());
-export const handDocumentUpdated = createAction(
-  '[SSE Service] HandDocumentUpdated', props<HandDocument>());
+export const lobbyModelUpdated = createAction(
+  '[SSE Service] LobbyModelUpdated', props<LobbyModel>());
+export const handModelUpdated = createAction(
+  '[SSE Service] HandDocumentUpdated', props<HandModel>());
 export const gameDataUpdated = createAction(
   '[SSE Service] GameDataUpdated', props<DrawGameDataContainerModel>());
 export const playerDataUpdated = createAction(
@@ -70,8 +75,33 @@ export const playerDataUpdated = createAction(
 export const gameToastReceived = createAction(
   '[WebSocketService] GameToastReceived', props<ToastModel>());
 
+// Lobby Actions
+export const playerReadyToggled = createAction(
+  '[WebSocketService] PlayerReadyToggled', props<LobbyPlayerModel>());
+export const playerJoinedLobby = createAction(
+  '[WebSocketService] PlayerJoinedLobby', props<LobbyPlayerModel>());
+export const playerLeftLobby = createAction(
+  '[WebSocketService] PlayerLeftLobby', props<LobbyPlayerModel>());
+
+// Game Actions
+export const gamePhaseChanged = createAction(
+  '[WebSocketService] GamePhaseChanged', props<{ phase: GamePhase }>());
+export const handCompleted = createAction(
+  '[WebSocketService] HandCompleted', props<{ id: string }>());
+export const playerAwayToggled = createAction(
+  '[WebSocketService] PlayerAwayToggled', props<GamePlayerModel>());
+
+// Hand Actions
+export const handActionPerformed = createAction(
+  '[WebSocketService] HandActionPerformed', props<HandActionModel>());
+export const actingPlayerChanged = createAction(
+  '[WebSocketService] ActingPlayerChanged', props<GamePlayerModel>());
+
+
 export const drawCard = createAction('[Play Component] DrawCard');
 export const drawCardSuccess = createAction('[Play Component] DrawCardSuccess');
+export const cardDrawn = createAction('[WebSocketService] CardDrawn', props<CardModel>());
+export const handOver = createAction('[WebSocketService] HandOver');
 
 export const setAwayStatus = createAction(
   '[Play Component] SetActiveStatus',

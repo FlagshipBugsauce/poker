@@ -1,7 +1,6 @@
 package com.poker.poker.models.game;
 
 import com.poker.poker.documents.UserDocument;
-import com.poker.poker.models.enums.UserGroup;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -15,20 +14,21 @@ import lombok.Setter;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(description = "Player of a game.")
 public abstract class PlayerModel {
 
-  @Schema(description = "User's ID.", example = "0a7d95ef-94ba-47bc-b591-febb365bc543")
+  /** Player's user ID. */
+  @Schema(
+      description = "User's ID.",
+      example = "0a7d95ef-94ba-47bc-b591-febb365bc543",
+      implementation = UUID.class)
   protected UUID id;
 
-  @Schema(description = "User's email address.", example = "user@domain.com")
-  protected String email;
-
-  @Schema(description = "User's user group.", example = "Administrator")
-  protected UserGroup group;
-
+  /** Player's first name. */
   @Schema(description = "User's first name.", example = "Fred")
   protected String firstName;
 
+  /** Player's last name. */
   @Schema(description = "User's last name.", example = "Flintstone")
   protected String lastName;
 
@@ -37,10 +37,8 @@ public abstract class PlayerModel {
    *
    * @param userDocument UserDocument representing a player.
    */
-  public PlayerModel(UserDocument userDocument) {
+  public PlayerModel(final UserDocument userDocument) {
     id = userDocument.getId();
-    email = userDocument.getEmail();
-    group = userDocument.getGroup();
     firstName = userDocument.getFirstName();
     lastName = userDocument.getLastName();
   }
@@ -51,10 +49,8 @@ public abstract class PlayerModel {
    *
    * @param playerModel PlayerModel that will be copied.
    */
-  public PlayerModel(PlayerModel playerModel) {
+  public PlayerModel(final PlayerModel playerModel) {
     id = playerModel.getId();
-    email = playerModel.getEmail();
-    group = playerModel.getGroup();
     firstName = playerModel.getFirstName();
     lastName = playerModel.getLastName();
   }

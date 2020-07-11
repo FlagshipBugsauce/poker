@@ -7,5 +7,13 @@ public enum MessageType {
   Hand,
   GameData,
   PlayerData,
-  Toast
+  Toast,
+  ReadyToggled,
+  PlayerJoinedLobby,
+  PlayerLeftLobby,
+  GamePhaseChanged,
+  HandStarted,
+  PlayerAwayToggled,
+  HandActionPerformed,
+  ActingPlayerChanged
 }

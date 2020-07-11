@@ -48,7 +48,7 @@ describe('GameComponent', () => {
     }).compileComponents();
     mockStore = TestBed.inject(MockStore);
     mockGameDataSelector = mockStore.overrideSelector(selectors.selectGameData, mockGameData);
-    mockGameStateSelector = mockStore.overrideSelector(selectors.selectGameState, 'Lobby');
+    mockGameStateSelector = mockStore.overrideSelector(selectors.selectGamePhase, 'Lobby');
     mockLoggedInUserSelector = mockStore.overrideSelector(selectors.selectLoggedInUser, mockUser);
     mockJwtSelector = mockStore.overrideSelector(selectors.selectJwt, 'jwt');
     fixture = TestBed.createComponent(GameComponent);

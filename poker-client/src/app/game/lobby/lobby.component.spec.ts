@@ -5,17 +5,17 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {MockStore, provideMockStore} from '@ngrx/store/testing';
 import {MemoizedSelector} from '@ngrx/store';
 import {AppStateContainer, LobbyStateContainer} from '../../shared/models/app-state.model';
-import {LobbyDocument} from '../../api/models/lobby-document';
 import * as selectors from '../../state/app.selector';
-import {mockLobbyDocument, mockUser} from '../../testing/mock-models';
+import {mockLobbyModel, mockUser} from '../../testing/mock-models';
 import {UserModel} from '../../api/models/user-model';
 import {By} from '@angular/platform-browser';
+import {LobbyModel} from '../../api/models/lobby-model';
 
 describe('LobbyComponent', () => {
   let mockStore: MockStore;
   let mockReadySelector: MemoizedSelector<AppStateContainer, boolean>;
   let mockUserSelector: MemoizedSelector<AppStateContainer, UserModel>;
-  let mockLobbySelector: MemoizedSelector<LobbyStateContainer, LobbyDocument>;
+  let mockLobbySelector: MemoizedSelector<LobbyStateContainer, LobbyModel>;
   let component: LobbyComponent;
   let fixture: ComponentFixture<LobbyComponent>;
 
@@ -32,10 +32,7 @@ describe('LobbyComponent', () => {
     mockStore = TestBed.inject(MockStore);
     mockReadySelector = mockStore.overrideSelector(selectors.selectReadyStatus, false);
     mockUserSelector = mockStore.overrideSelector(selectors.selectLoggedInUser, mockUser);
-    mockLobbySelector = mockStore.overrideSelector(
-      selectors.selectLobbyDocument,
-      mockLobbyDocument
-    );
+    mockLobbySelector = mockStore.overrideSelector(selectors.selectLobbyModel, mockLobbyModel);
     fixture.detectChanges();
   }));
 

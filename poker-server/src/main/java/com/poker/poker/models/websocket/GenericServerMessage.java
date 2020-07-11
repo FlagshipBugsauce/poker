@@ -1,4 +1,4 @@
-package com.poker.poker.models;
+package com.poker.poker.models.websocket;
 
 import com.poker.poker.models.enums.MessageType;
 import lombok.AllArgsConstructor;
@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SocketContainerModel {
+public class GenericServerMessage<T> {
 
   private MessageType type;
-  private Object data;
+  private T data;
 }

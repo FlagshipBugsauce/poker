@@ -1,35 +1,49 @@
 import {createReducer, on} from '@ngrx/store';
 import {
+  actingPlayerChanged,
+  cardDrawn,
   gameDataUpdated,
-  gameDocumentUpdated,
   gameListUpdated,
+  gameModelUpdated,
+  gamePhaseChanged,
   gameToastReceived,
-  handDocumentUpdated,
+  handActionPerformed,
+  handCompleted,
+  handModelUpdated,
+  handOver,
   hideFailedSignInWarning,
   joinLobby,
   leaveLobby,
-  lobbyDocumentUpdated,
+  lobbyModelUpdated,
   notReady,
+  playerAwayToggled,
   playerDataUpdated,
+  playerJoinedLobby,
+  playerLeftLobby,
+  playerReadyToggled,
   readyUp,
   signInFail,
   signInSuccess,
   signOut,
   updateCurrentGame
 } from './app.actions';
-import {AppState} from '../shared/models/app-state.model';
+import {AppState, DrawnCardsContainer} from '../shared/models/app-state.model';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
   AuthResponseModel,
+  CardModel,
   CurrentGameModel,
   DrawGameDataContainerModel,
-  GameDocument,
+  GameModel,
   GamePlayerModel,
-  HandDocument,
-  LobbyDocument,
+  HandActionModel,
+  HandModel,
+  LobbyModel,
+  LobbyPlayerModel,
   ToastModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
+import {GamePhase} from '../shared/models/game-phase.enum';
 
 /**
  * Reducer for general application state.
@@ -95,39 +109,92 @@ export function gameDataReducer(state: DrawGameDataContainerModel, action) {
 }
 
 /**
- * GameDocument reducer and initial state.
+ * GameModel reducer and initial state.
  */
-export const gameDocumentInitialState: GameDocument = {} as GameDocument;
-const gameDocumentReducerInternal = createReducer<GameDocument>(
-  gameDocumentInitialState,
-  on(gameDocumentUpdated, (state: GameDocument, newState: GameDocument) => newState));
+export const gameModelInitialState: GameModel = {} as GameModel;
+const gameModelReducerInternal = createReducer<GameModel>(
+  gameModelInitialState,
+  on(gameModelUpdated, (state: GameModel, newState: GameModel) => newState),
+  on(gamePhaseChanged, (state: GameModel, phase: { phase: GamePhase }) =>
+    ({...state, phase: phase.phase})),
+  on(handCompleted, (state: GameModel, id: { id: string }) => {
+    const hands: string[] = state.hands.map(h => h);
+    hands.push(id.id);
+    return ({...state, hands});
+  }),
+  on(playerAwayToggled, (state: GameModel, player: GamePlayerModel) => {
+    const players: GamePlayerModel[] = state
+    .players.map(p => p.id === player.id ? player : ({...p}));
+    return ({...state, players});
+  })
+);
 
-export function gameDocumentReducer(state: GameDocument, action) {
-  return gameDocumentReducerInternal(state, action);
+export function gameModelReducer(state: GameModel, action) {
+  return gameModelReducerInternal(state, action);
 }
 
 /**
- * LobbyDocument reducer and initial state.
+ * LobbyModel reducer and initial state.
  */
-export const lobbyDocumentInitialState: LobbyDocument = {} as LobbyDocument;
-const lobbyDocumentReducerInternal = createReducer<LobbyDocument>(
-  lobbyDocumentInitialState,
-  on(lobbyDocumentUpdated, (state: LobbyDocument, newState: LobbyDocument) => newState));
+export const lobbyModelInitialState: LobbyModel = {
+  parameters: {
+    maxPlayers: 0,
+    name: '',
+    buyIn: 0
+  },
+  host: {
+    id: '',
+    firstName: '',
+    lastName: ''
+  },
+  players: []
+} as LobbyModel;
+const lobbyModelReducerInternal = createReducer<LobbyModel>(
+  lobbyModelInitialState,
+  on(lobbyModelUpdated, (state: LobbyModel, newState: LobbyModel) => newState),
+  on(playerReadyToggled, (state: LobbyModel, player: LobbyPlayerModel) =>
+    ({...state, players: state.players.map(p => p.id === player.id ? player : p)})),
+  on(playerJoinedLobby, (state: LobbyModel, player: LobbyPlayerModel) => {
+    const players: LobbyPlayerModel[] = state.players.map(p => ({...p}));
+    players.push(player);
+    return ({...state, players});
+  }),
+  on(playerLeftLobby, (state: LobbyModel, player: LobbyPlayerModel) => {
+    // Filter out player that left.
+    const players: LobbyPlayerModel[] =
+      state.players.map(p => ({...p})).filter(p => p.id !== player.id);
+    // Updating host (host is always players[0]).
+    let host: LobbyPlayerModel;
+    if (players.length > 0) {
+      players[0].host = true;
+      host = players[0];
+    }
+    return ({...state, players, host});
+  })
+);
 
-export function lobbyDocumentReducer(state: LobbyDocument, action) {
-  return lobbyDocumentReducerInternal(state, action);
+export function lobbyModelReducer(state: LobbyModel, action) {
+  return lobbyModelReducerInternal(state, action);
 }
 
 /**
  * HandDocument reducer and initial state.
  */
-export const handDocumentInitialState: HandDocument = {} as HandDocument;
-const handDocumentReducerInternal = createReducer<HandDocument>(
-  handDocumentInitialState,
-  on(handDocumentUpdated, (state: HandDocument, newState: HandDocument) => newState));
+export const handModelInitialState: HandModel = {} as HandModel;
+const handModelReducerInternal = createReducer<HandModel>(
+  handModelInitialState,
+  on(handModelUpdated, (state: HandModel, newState: HandModel) => newState),
+  on(handActionPerformed, (state: HandModel, action: HandActionModel) => {
+    const actions: HandActionModel[] = state.actions.map(a => ({...a}));
+    actions.push(action);
+    return ({...state, actions});
+  }),
+  on(actingPlayerChanged, (state: HandModel, player: GamePlayerModel) =>
+    ({...state, acting: player}))
+);
 
-export function handDocumentReducer(state: HandDocument, action) {
-  return handDocumentReducerInternal(state, action);
+export function handModelReducer(state: HandModel, action) {
+  return handModelReducerInternal(state, action);
 }
 
 /**
@@ -154,6 +221,23 @@ const playerDataReducerInternal = createReducer<GamePlayerModel>(
 
 export function playerDataReducer(state: GamePlayerModel, action) {
   return playerDataReducerInternal(state, action);
+}
+
+export const drawnCardsInitialState: DrawnCardsContainer = {drawnCards: []};
+const drawnCardsReducerInternal = createReducer<DrawnCardsContainer>(
+  drawnCardsInitialState,
+  on(cardDrawn,
+    (state: DrawnCardsContainer, card: CardModel) => {
+      const cards: CardModel[] = state.drawnCards.map((c: CardModel) => ({...c}));
+      cards.push(card);
+      // state.drawnCards.push(card);
+      return {drawnCards: cards};
+    }),
+  on(handOver, () => ({drawnCards: []}))
+);
+
+export function drawnCardsReducer(state: DrawnCardsContainer, action) {
+  return drawnCardsReducerInternal(state, action);
 }
 
 // TODO: Don't think I actually need this...

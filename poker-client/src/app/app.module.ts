@@ -8,11 +8,12 @@ import {GameModule} from './game/game.module';
 import {StoreModule} from '@ngrx/store';
 import {
   appReducer,
+  drawnCardsReducer,
   gameDataReducer,
-  gameDocumentReducer,
   gameListReducer,
-  handDocumentReducer,
-  lobbyDocumentReducer,
+  gameModelReducer,
+  handModelReducer,
+  lobbyModelReducer,
   playerDataReducer,
   toastDataReducer
 } from './state/app.reducer';
@@ -32,12 +33,13 @@ import {AppEffects} from './state/app.effects';
       {
         appState: appReducer,
         gameData: gameDataReducer,
-        lobbyDocument: lobbyDocumentReducer,
-        gameDocument: gameDocumentReducer,
-        handDocument: handDocumentReducer,
+        lobbyModel: lobbyModelReducer,
+        gameModel: gameModelReducer,
+        handModel: handModelReducer,
         gameList: gameListReducer,
         playerData: playerDataReducer,
-        lastToast: toastDataReducer
+        lastToast: toastDataReducer,
+        drawnCards: drawnCardsReducer
       }),
     EffectsModule.forRoot([AppEffects, GameEffects])
   ],
