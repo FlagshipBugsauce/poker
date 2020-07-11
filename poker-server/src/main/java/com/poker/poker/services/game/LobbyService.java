@@ -12,7 +12,7 @@ import com.poker.poker.models.game.GameParameterModel;
 import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.LobbyModel;
 import com.poker.poker.models.game.LobbyPlayerModel;
-import com.poker.poker.models.websocket.SocketContainerModel;
+import com.poker.poker.models.websocket.GenericServerMessage;
 import com.poker.poker.repositories.LobbyRepository;
 import com.poker.poker.services.WebSocketService;
 import com.poker.poker.validation.exceptions.BadRequestException;
@@ -80,7 +80,7 @@ public class LobbyService {
     // Broadcast lobby document to lobby topic.
     webSocketService.sendPublicMessage(
         appConfig.getGameTopic() + lobby.getId(),
-        new SocketContainerModel(MessageType.Lobby, lobby));
+        new GenericServerMessage<>(MessageType.Lobby, lobby));
   }
 
   /**
@@ -97,7 +97,7 @@ public class LobbyService {
   public void broadcastGameList() {
     webSocketService.sendPublicMessage(
         appConfig.getGameListTopic(),
-        new SocketContainerModel(
+        new GenericServerMessage<>(
             MessageType.GameList, useCachedGameList ? gameList : getLobbyList()));
   }
 
@@ -242,7 +242,7 @@ public class LobbyService {
     log.debug("Player status set to ready (ID: {}).", user.getId().toString());
     webSocketService.sendPublicMessage(
         appConfig.getGameTopic() + lobbyModel.getId(),
-        new SocketContainerModel(MessageType.ReadyToggled, player.get()));
+        new GenericServerMessage<>(MessageType.ReadyToggled, player.get()));
     return new ApiSuccessModel("Player ready status was toggled.");
   }
 
@@ -323,7 +323,7 @@ public class LobbyService {
     webSocketService.sendGameToast(lobbyModel.getId(), toastMessage, "md"); // Also broadcast toast.
     webSocketService.sendPublicMessage(
         appConfig.getGameTopic() + lobbyModel.getId(),
-        new SocketContainerModel(MessageType.PlayerJoinedLobby, player));
+        new GenericServerMessage<>(MessageType.PlayerJoinedLobby, player));
     useCachedGameList = false;
   }
 
@@ -378,7 +378,7 @@ public class LobbyService {
     webSocketService.sendGameToast(lobby.getId(), toastMessage, "md");
     webSocketService.sendPublicMessage(
         appConfig.getGameTopic() + lobby.getId(),
-        new SocketContainerModel(MessageType.PlayerLeftLobby, player));
+        new GenericServerMessage<>(MessageType.PlayerLeftLobby, player));
     useCachedGameList = false;
 
     return new ApiSuccessModel("Player has left the lobby.");

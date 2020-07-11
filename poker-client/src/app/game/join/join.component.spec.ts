@@ -7,12 +7,12 @@ import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 import {MockWebSocketService} from '../../testing/mock-services';
 import {MemoizedSelector} from '@ngrx/store';
 import {GameListStateContainer} from '../../shared/models/app-state.model';
-import {GetGameModel} from '../../api/models/get-game-model';
 import {selectGameList} from '../../state/app.selector';
+import {GameListModel} from '../../api/models/game-list-model';
 
 describe('JoinComponent', () => {
   let mockStore: MockStore;
-  let mockGameListSelector: MemoizedSelector<GameListStateContainer, GetGameModel[]>;
+  let mockGameListSelector: MemoizedSelector<GameListStateContainer, GameListModel[]>;
   let component: JoinComponent;
   let fixture: ComponentFixture<JoinComponent>;
 
@@ -30,7 +30,7 @@ describe('JoinComponent', () => {
     }).compileComponents();
     fixture = TestBed.createComponent(JoinComponent);
     mockStore = TestBed.inject(MockStore);
-    mockGameListSelector = mockStore.overrideSelector(selectGameList, [] as GetGameModel[]);
+    mockGameListSelector = mockStore.overrideSelector(selectGameList, [] as GameListModel[]);
     fixture.detectChanges();
   }));
 

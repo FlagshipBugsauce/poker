@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "game")
+@Schema(description = "Information that defines the game state, such as phase, players, etc...")
 public class GameModel {
 
   /** The game ID is the same as the lobby ID. */
@@ -28,16 +29,27 @@ public class GameModel {
   @Schema(description = "Game phase.", example = "Lobby", implementation = GamePhase.class)
   private GamePhase phase;
 
-  /** This list of player ID's will only be updated after the game begins. */
+  /**
+   * This list of player ID's will only be updated after the game begins.
+   */
   @ArraySchema(schema = @Schema(implementation = GamePlayerModel.class))
   private List<GamePlayerModel> players;
 
+  /**
+   * List of hand IDs, up to and including the current hand.
+   */
   @ArraySchema(schema = @Schema(implementation = UUID.class))
   private List<UUID> hands;
 
+  /**
+   * The total number of hands that will be played in the game.
+   */
   @Schema(description = "Total number of hands in the game.", example = "5")
   private int totalHands;
 
+  /**
+   * Amount of time each player has to act.
+   */
   @Schema(description = "Amount of time each player has to act.", example = "17")
   private int timeToAct;
 }

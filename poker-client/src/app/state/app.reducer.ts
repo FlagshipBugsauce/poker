@@ -4,15 +4,19 @@ import {
   cardDrawn,
   gameDataUpdated,
   gameListUpdated,
-  gameModelUpdated, gamePhaseChanged,
-  gameToastReceived, handActionPerformed, handCompleted,
+  gameModelUpdated,
+  gamePhaseChanged,
+  gameToastReceived,
+  handActionPerformed,
+  handCompleted,
   handModelUpdated,
   handOver,
   hideFailedSignInWarning,
   joinLobby,
   leaveLobby,
   lobbyModelUpdated,
-  notReady, playerAwayToggled,
+  notReady,
+  playerAwayToggled,
   playerDataUpdated,
   playerJoinedLobby,
   playerLeftLobby,
@@ -31,14 +35,15 @@ import {
   CurrentGameModel,
   DrawGameDataContainerModel,
   GameModel,
-  GamePlayerModel, HandActionModel,
+  GamePlayerModel,
+  HandActionModel,
   HandModel,
   LobbyModel,
   LobbyPlayerModel,
   ToastModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
-import {GamePhase} from "../shared/models/game-phase.enum";
+import {GamePhase} from '../shared/models/game-phase.enum';
 
 /**
  * Reducer for general application state.
@@ -110,9 +115,9 @@ export const gameModelInitialState: GameModel = {} as GameModel;
 const gameModelReducerInternal = createReducer<GameModel>(
   gameModelInitialState,
   on(gameModelUpdated, (state: GameModel, newState: GameModel) => newState),
-  on(gamePhaseChanged, (state: GameModel, phase: {phase: GamePhase}) =>
+  on(gamePhaseChanged, (state: GameModel, phase: { phase: GamePhase }) =>
     ({...state, phase: phase.phase})),
-  on(handCompleted, (state: GameModel, id: {id: string}) => {
+  on(handCompleted, (state: GameModel, id: { id: string }) => {
     const hands: string[] = state.hands.map(h => h);
     hands.push(id.id);
     return ({...state, hands});

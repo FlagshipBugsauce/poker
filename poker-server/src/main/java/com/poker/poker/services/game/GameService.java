@@ -26,7 +26,7 @@ import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.HandModel;
 import com.poker.poker.models.game.PlayerModel;
 import com.poker.poker.models.websocket.CurrentGameModel;
-import com.poker.poker.models.websocket.SocketContainerModel;
+import com.poker.poker.models.websocket.GenericServerMessage;
 import com.poker.poker.repositories.GameRepository;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.services.UuidService;
@@ -323,11 +323,11 @@ public class GameService {
     //    broadcastGameUpdate(game);
     webSocketService.sendPublicMessage(
         appConfig.getGameTopic() + game.getId(),
-        new SocketContainerModel(MessageType.PlayerAwayToggled, player));
+        new GenericServerMessage<>(MessageType.PlayerAwayToggled, player));
 
     webSocketService.sendPublicMessage(
         appConfig.getGameTopic() + playerId,
-        new SocketContainerModel(MessageType.PlayerData, getPlayerData(playerId)));
+        new GenericServerMessage<>(MessageType.PlayerData, getPlayerData(playerId)));
 
     log.debug("Updating away status to {} for player {}.", status, playerId);
   }
@@ -421,11 +421,8 @@ public class GameService {
     handService.setDeck(gameId, new DeckModel()); // Give hand service the deck.
     handService.newHand(gameModel); // Create the hand.
     initializeGameData(gameModel); // Initialize game data for client.
-    broadcastGameUpdate(gameModel); // Broadcast the game document.
-
-    /*    TODO: I had an SSE broadcast here sending out player data to players[0] for some reason.
-    Leaving this here in case this was actually needed. Will remove soon. */
-
+    // May as well broadcast full game model instead of players list + phase change.
+    broadcastGameUpdate(gameModel); // Broadcast the game model.
     // Update Current game topic
     updateCurrentGameTopic(gameModel, false);
 
@@ -459,11 +456,9 @@ public class GameService {
               if (game.getPhase() == GamePhase.Play) {
                 game.getPlayers()
                     .forEach(
-                        p -> {
-                          webSocketService.sendPublicMessage(
-                              appConfig.getGameTopic() + p.getId(),
-                              new SocketContainerModel(MessageType.PlayerData, p));
-                        });
+                        p -> webSocketService.sendPublicMessage(
+                            appConfig.getGameTopic() + p.getId(),
+                            new GenericServerMessage<>(MessageType.PlayerData, p)));
               }
             });
   }
@@ -496,7 +491,7 @@ public class GameService {
     // Broadcast to game topic
     webSocketService.sendPublicMessage(
         appConfig.getGameTopic() + game.getId(),
-        new SocketContainerModel(MessageType.GameData, getGameData(game)));
+        new GenericServerMessage<>(MessageType.GameData, getGameData(game)));
   }
 
   /**
@@ -507,7 +502,8 @@ public class GameService {
   public void broadcastGameUpdate(final GameModel game) {
     // Broadcast to game topic
     webSocketService.sendPublicMessage(
-        appConfig.getGameTopic() + game.getId(), new SocketContainerModel(MessageType.Game, game));
+        appConfig.getGameTopic() + game.getId(),
+        new GenericServerMessage<>(MessageType.Game, game));
   }
 
   /**
@@ -530,7 +526,7 @@ public class GameService {
     // Broadcast player data to game topic
     webSocketService.sendPublicMessage(
         appConfig.getGameTopic() + game.getPlayers().get(playerThatActed).getId(),
-        new SocketContainerModel(
+        new GenericServerMessage<>(
             MessageType.PlayerData, getPlayerData(game.getPlayers().get(playerThatActed).getId())));
 
     // Set acting to true for player who needs to act.
@@ -538,7 +534,7 @@ public class GameService {
     // Broadcast player data to game topic
     webSocketService.sendPublicMessage(
         appConfig.getGameTopic() + nextPlayerToAct.getId(),
-        new SocketContainerModel(MessageType.PlayerData, getPlayerData(nextPlayerToAct.getId())));
+        new GenericServerMessage<>(MessageType.PlayerData, getPlayerData(nextPlayerToAct.getId())));
 
     // Set player to act:
     log.debug("Next player to act is {}.", nextPlayerToAct.getId());
@@ -547,7 +543,7 @@ public class GameService {
     // Broadcast which player is acting.
     webSocketService.sendPublicMessage(
         appConfig.getGameTopic() + game.getId(),
-        new SocketContainerModel(MessageType.ActingPlayerChanged, nextPlayerToAct));
+        new GenericServerMessage<>(MessageType.ActingPlayerChanged, nextPlayerToAct));
 
     /*
          Temporary logic here to help design game flow for later. Most of this will be gone. Just
@@ -602,7 +598,7 @@ public class GameService {
 
     webSocketService.sendPublicMessage(
         appConfig.getGameTopic() + game.getId(),
-        new SocketContainerModel(MessageType.GamePhaseChanged, GamePhase.Over));
+        new GenericServerMessage<>(MessageType.GamePhaseChanged, GamePhase.Over));
 
     gameIdToGameDataMap.remove(game.getId()); // Remove mapping.
     updateCurrentGameTopic(game, true);

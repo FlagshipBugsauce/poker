@@ -7,31 +7,29 @@ import {MockStore, provideMockStore} from '@ngrx/store/testing';
 import {MemoizedSelector} from '@ngrx/store';
 import {
   AppStateContainer,
+  DrawnCardsContainer,
   GameDataStateContainer,
   GameStateContainer,
   HandStateContainer,
   PlayerDataStateContainer
 } from '../../shared/models/app-state.model';
 import * as selectors from '../../state/app.selector';
-import {GameModel, HandDocument, UserModel} from '../../api/models';
-import {
-  mockGameData,
-  mockGameModel,
-  mockHandDocument,
-  mockUser
-} from '../../testing/mock-models';
+import {CardModel, GameModel, HandModel, UserModel} from '../../api/models';
+import {mockGameData, mockGameModel, mockHandDocument, mockUser} from '../../testing/mock-models';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 import {WebSocketService} from '../../shared/web-socket/web-socket.service';
+import {MockWebSocketService} from '../../testing/mock-services';
 
 describe('PlayComponent', () => {
   let mockStore: MockStore;
-  let mockHandSelector: MemoizedSelector<HandStateContainer, HandDocument>;
+  let mockHandSelector: MemoizedSelector<HandStateContainer, HandModel>;
   let mockUserSelector: MemoizedSelector<AppStateContainer, UserModel>;
   let mockGameDataSelector: MemoizedSelector<GameDataStateContainer, DrawGameDataModel[]>;
   let mockGameSelector: MemoizedSelector<GameStateContainer, GameModel>;
   let mockAwayStatusSelector: MemoizedSelector<PlayerDataStateContainer, boolean>;
   let mockActingStatusSelector: MemoizedSelector<PlayerDataStateContainer, boolean>;
   let mockJwtSelector: MemoizedSelector<AppStateContainer, string>;
+  let mockDrawnCardsSelector: MemoizedSelector<DrawnCardsContainer, CardModel[]>;
   let component: PlayComponent;
   let fixture: ComponentFixture<PlayComponent>;
 
@@ -42,7 +40,7 @@ describe('PlayComponent', () => {
         provideMockStore(),
         {
           provide: WebSocketService,
-          useClass: jest.fn()
+          useClass: MockWebSocketService
         }
       ],
       imports: [RouterTestingModule, SharedModule]
@@ -56,6 +54,7 @@ describe('PlayComponent', () => {
     mockAwayStatusSelector = mockStore.overrideSelector(selectors.selectAwayStatus, false);
     mockActingStatusSelector = mockStore.overrideSelector(selectors.selectActingStatus, false);
     mockJwtSelector = mockStore.overrideSelector(selectors.selectJwt, 'jwt');
+    mockDrawnCardsSelector = mockStore.overrideSelector(selectors.selectDrawnCards, []);
     fixture = TestBed.createComponent(PlayComponent);
     fixture.detectChanges();
   }));

@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SocketContainerModel {
+public class GenericServerMessage<T> {
 
   private MessageType type;
-  private Object data;
+  private T data;
 }

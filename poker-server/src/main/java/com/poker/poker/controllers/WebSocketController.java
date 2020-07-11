@@ -11,7 +11,7 @@ import com.poker.poker.models.WebSocketUpdateModel;
 import com.poker.poker.models.game.GameParameterModel;
 import com.poker.poker.models.websocket.ActionModel;
 import com.poker.poker.models.websocket.ClientMessageModel;
-import com.poker.poker.models.websocket.SocketContainerModel;
+import com.poker.poker.models.websocket.GenericServerMessage;
 import com.poker.poker.services.JwtService;
 import com.poker.poker.services.UserService;
 import com.poker.poker.services.WebSocketService;
@@ -68,7 +68,7 @@ public class WebSocketController {
         data = null;
     }
     webSocketService.sendPublicMessage(
-        updateModel.getTopic(), new SocketContainerModel(updateModel.getType(), data));
+        updateModel.getTopic(), new GenericServerMessage<>(updateModel.getType(), data));
   }
 
   @MessageMapping("/game/leave")

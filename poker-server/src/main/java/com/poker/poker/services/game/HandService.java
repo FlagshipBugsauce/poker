@@ -17,7 +17,7 @@ import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.HandModel;
 import com.poker.poker.models.game.PlayerModel;
 import com.poker.poker.models.game.hand.HandActionModel;
-import com.poker.poker.models.websocket.SocketContainerModel;
+import com.poker.poker.models.websocket.GenericServerMessage;
 import com.poker.poker.repositories.HandRepository;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.services.WebSocketService;
@@ -222,7 +222,7 @@ public class HandService {
     // Send hand ID to client.
     webSocketService.sendPublicMessage(
         appConfig.getGameTopic() + game.getId(),
-        new SocketContainerModel(MessageType.HandStarted, hand.getId()));
+        new GenericServerMessage<>(MessageType.HandStarted, hand.getId()));
 
     // Add required mappings.
     hands.put(hand.getId(), hand);
@@ -247,7 +247,7 @@ public class HandService {
       // Broadcast to game topic
       webSocketService.sendPublicMessage(
           appConfig.getGameTopic() + gameModel.getId(),
-          new SocketContainerModel(MessageType.Hand, hand));
+          new GenericServerMessage<>(MessageType.Hand, hand));
     } catch (Exception e) {
       log.error("Error broadcasting hand update: {}.", e.getMessage());
     }
@@ -332,11 +332,10 @@ public class HandService {
     // Broadcast action.
     webSocketService.sendPublicMessage(
         appConfig.getGameTopic() + hand.getGameId(),
-        new SocketContainerModel(MessageType.HandActionPerformed, action));
+        new GenericServerMessage<>(MessageType.HandActionPerformed, action));
 
-    // TODO: Broadcast drawn card.
     applicationEventPublisher.publishEvent(
-        new PublishMessageEvent<CardModel>(
+        new PublishMessageEvent<>(
             this, appConfig.getGameTopic() + hand.getGameId() + "/drawn-cards", card));
     webSocketService.sendGameToast(hand.getGameId(), toastMessage, "lg");
     applicationEventPublisher.publishEvent(

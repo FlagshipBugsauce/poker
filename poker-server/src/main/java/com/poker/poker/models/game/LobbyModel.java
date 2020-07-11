@@ -14,8 +14,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "lobby")
+@Schema(description = "Game lobby containing information such as game parameters, players, etc...")
 public class LobbyModel {
 
+  /**
+   * ID of the lobby (this ID is the same as the game ID).
+   */
   @Schema(
       description = "Lobby's ID.",
       example = "0a7d95ef-94ba-47bc-b591-febb365bc543",
@@ -23,12 +27,21 @@ public class LobbyModel {
   @Id
   private UUID id;
 
-  @Schema(implementation = LobbyPlayerModel.class)
+  /**
+   * Player who hosted the game.
+   */
+  @Schema(implementation = LobbyPlayerModel.class, description = "Player who hosted the game.")
   private LobbyPlayerModel host;
 
-  @Schema(implementation = GameParameterModel.class)
+  /**
+   * Game parameters.
+   */
+  @Schema(implementation = GameParameterModel.class, description = "Game parameters.")
   private GameParameterModel parameters;
 
+  /**
+   * List of players currently in the lobby.
+   */
   @ArraySchema(schema = @Schema(implementation = LobbyPlayerModel.class))
   private List<LobbyPlayerModel> players;
 }

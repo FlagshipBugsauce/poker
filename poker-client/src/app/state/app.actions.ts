@@ -2,20 +2,25 @@ import {createAction, props} from '@ngrx/store';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
   ActionModel,
-  ActiveStatusModel, ApiSuccessModel,
+  ActiveStatusModel,
+  ApiSuccessModel,
   AuthRequestModel,
-  AuthResponseModel, CardModel,
+  AuthResponseModel,
+  CardModel,
   CurrentGameModel,
   DrawGameDataContainerModel,
-  GameModel, GameParameterModel,
-  GamePlayerModel, HandActionModel,
+  GameModel,
+  GameParameterModel,
+  GamePlayerModel,
+  HandActionModel,
   HandModel,
-  LobbyModel, LobbyPlayerModel,
+  LobbyModel,
+  LobbyPlayerModel,
   ToastModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
 import {RejoinModel} from '../shared/models/rejoin.model';
-import {GamePhase} from "../shared/models/game-phase.enum";
+import {GamePhase} from '../shared/models/game-phase.enum';
 
 export const navigate = createAction('[Router Service] Navigate');
 export const signIn = createAction('[Auth Service] SignIn', props<AuthRequestModel>());
@@ -80,9 +85,9 @@ export const playerLeftLobby = createAction(
 
 // Game Actions
 export const gamePhaseChanged = createAction(
-  '[WebSocketService] GamePhaseChanged', props<{phase: GamePhase}>());
+  '[WebSocketService] GamePhaseChanged', props<{ phase: GamePhase }>());
 export const handCompleted = createAction(
-  '[WebSocketService] HandCompleted', props<{id: string}>());
+  '[WebSocketService] HandCompleted', props<{ id: string }>());
 export const playerAwayToggled = createAction(
   '[WebSocketService] PlayerAwayToggled', props<GamePlayerModel>());
 

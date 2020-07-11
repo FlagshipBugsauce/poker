@@ -14,19 +14,33 @@ import lombok.Setter;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(description = "Player of a game.")
 public abstract class PlayerModel {
 
-  @Schema(description = "User's ID.", example = "0a7d95ef-94ba-47bc-b591-febb365bc543")
+  /**
+   * Player's user ID.
+   */
+  @Schema(
+      description = "User's ID.",
+      example = "0a7d95ef-94ba-47bc-b591-febb365bc543",
+      implementation = UUID.class)
   protected UUID id;
 
+  /**
+   * Player's first name.
+   */
   @Schema(description = "User's first name.", example = "Fred")
   protected String firstName;
 
+  /**
+   * Player's last name.
+   */
   @Schema(description = "User's last name.", example = "Flintstone")
   protected String lastName;
 
   /**
-   * Constructor that takes in a UserDocument and fill in the fields the two classes have in common.
+   * Constructor that takes in a UserDocument and fill in the fields the two classes have in
+   * common.
    *
    * @param userDocument UserDocument representing a player.
    */

@@ -1,6 +1,8 @@
 import {
   AppState,
-  AppStateContainer, DrawnCardsContainer, DrawnCardsStateContainer,
+  AppStateContainer,
+  DrawnCardsContainer,
+  DrawnCardsStateContainer,
   GameDataStateContainer,
   GameListStateContainer,
   GameStateContainer,
@@ -13,8 +15,8 @@ import {
   DrawGameDataContainerModel,
   GameModel,
   GamePlayerModel,
-  LobbyModel,
-  HandModel, CardModel
+  HandModel,
+  LobbyModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
 
