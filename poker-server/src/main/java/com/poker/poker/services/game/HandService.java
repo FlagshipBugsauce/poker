@@ -34,6 +34,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -210,24 +211,30 @@ public class HandService {
   /**
    * Creates a new hand for the specified game.
    *
-   * @param gameModel The game the new hand is being created for.
+   * @param game The game the new hand is being created for.
    */
-  public void newHand(final GameModel gameModel) {
-    log.debug("Creating new hand for game {}.", gameModel.getId());
+  public void newHand(final GameModel game) {
+    log.debug("Creating new hand for game {}.", game.getId());
     final HandModel hand =
-        new HandModel(UUID.randomUUID(), gameModel.getId(), new ArrayList<>(), null);
+        new HandModel(UUID.randomUUID(), game.getId(), new ArrayList<>(), null);
 
     // Adding hand to list of hands in game document.
-    gameModel.getHands().add(hand.getId());
+    game.getHands().add(hand.getId());
+
+    // Send hand ID to client.
+    webSocketService.sendPublicMessage(
+        appConfig.getGameTopic() + game.getId(),
+        new SocketContainerModel(MessageType.HandStarted, hand.getId()));
 
     // Add required mappings.
     hands.put(hand.getId(), hand);
-    gameIdToHandIdMap.put(gameModel.getId(), hand.getId());
-    gameModel.getPlayers().forEach(p -> userIdToGameIdMap.put(p.getId(), gameModel.getId()));
+    gameIdToHandIdMap.put(game.getId(), hand.getId());
+    game.getPlayers().forEach(p -> userIdToGameIdMap.put(p.getId(), game.getId()));
 
-    hand.setActing(gameModel.getPlayers().get(0)); // First in the list acts first.
-    restoreAndShuffle(gameModel); // Restore the deck and shuffle it.
+    hand.setActing(game.getPlayers().get(0)); // First in the list acts first.
+    restoreAndShuffle(game); // Restore the deck and shuffle it.
 
+    broadcastHandUpdate(game);
     applicationEventPublisher.publishEvent(new WaitForPlayerEvent(this, hand.getActing()));
   }
 
@@ -237,11 +244,15 @@ public class HandService {
    * @param gameModel The game whose players are being broadcast to.
    */
   public void broadcastHandUpdate(final GameModel gameModel) {
-    final HandModel hand = getHand(gameModel);
-    // Broadcast to game topic
-    webSocketService.sendPublicMessage(
-        appConfig.getGameTopic() + gameModel.getId(),
-        new SocketContainerModel(MessageType.Hand, hand));
+    try {
+      final HandModel hand = getHand(gameModel);
+      // Broadcast to game topic
+      webSocketService.sendPublicMessage(
+          appConfig.getGameTopic() + gameModel.getId(),
+          new SocketContainerModel(MessageType.Hand, hand));
+    } catch (Exception e) {
+      log.error("Error broadcasting hand update: {}.", e.getMessage());
+    }
   }
 
   /**
@@ -317,12 +328,18 @@ public class HandService {
             "%s %s drew the %s of %s.", // Bob Dole drew the Five of Diamonds.
             user.getFirstName(), user.getLastName(), card.getValue(), card.getSuit());
 
-    hand.getActions().add(new HandActionModel(HandAction.Draw, hand.getActing(), card));
+    final HandActionModel action = new HandActionModel(HandAction.Draw, hand.getActing(), card);
+    hand.getActions().add(action);
 
+    // Broadcast action.
+    webSocketService.sendPublicMessage(
+        appConfig.getGameTopic() + hand.getGameId(),
+        new SocketContainerModel(MessageType.HandActionPerformed, action));
+    
     // TODO: Broadcast drawn card.
     applicationEventPublisher.publishEvent(
         new PublishMessageEvent<CardModel>(
-            this, "/topic/game/" + hand.getGameId() + "/drawn-cards", card));
+            this, appConfig.getGameTopic() + hand.getGameId() + "/drawn-cards", card));
     webSocketService.sendGameToast(hand.getGameId(), toastMessage, "lg");
     applicationEventPublisher.publishEvent(
         new HandActionEvent(this, hand.getGameId(), hand.getId(), HandAction.Draw));
@@ -377,7 +394,7 @@ public class HandService {
     applicationEventPublisher.publishEvent(
         new PublishMessageEvent<>(
             this,
-            "/topic/game/" + gameModel.getId() + "/drawn-cards",
+            appConfig.getGameTopic() + gameModel.getId() + "/drawn-cards",
             new CardModel() // Send a blank card model to indicate the hand is over.
             ));
 

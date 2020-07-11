@@ -1,13 +1,15 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {
-  ActionModel, CardModel,
+  ActionModel,
+  CardModel,
   DrawGameDataModel,
   GameModel,
   HandModel,
   UserModel,
 } from '../../api/models';
 import {
-  AppStateContainer, DrawnCardsStateContainer,
+  AppStateContainer,
+  DrawnCardsStateContainer,
   GameDataStateContainer,
   GameStateContainer,
   HandStateContainer,
@@ -17,7 +19,8 @@ import {Store} from '@ngrx/store';
 import {drawCard, leaveGame, setAwayStatus} from '../../state/app.actions';
 import {
   selectActingStatus,
-  selectAwayStatus, selectDrawnCards,
+  selectAwayStatus,
+  selectDrawnCards,
   selectGameData,
   selectGameModel,
   selectHandModel,
@@ -28,7 +31,7 @@ import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 import {GamePhase} from '../../shared/models/game-phase.enum';
-import {WebSocketService} from "../../shared/web-socket/web-socket.service";
+import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 
 @Component({
   selector: 'pkr-play',
@@ -74,6 +77,10 @@ export class PlayComponent implements OnInit, OnDestroy {
    */
   public awayStatus: boolean;
   /**
+   * Cards that have been drawn in the current hand.
+   */
+  public drawnCards: CardModel[];
+  /**
    * JWT for logged in user.
    */
   private jwt: string;
@@ -81,8 +88,6 @@ export class PlayComponent implements OnInit, OnDestroy {
    * Model of the user currently logged in.
    */
   private user: UserModel;
-
-  public drawnCards: CardModel[];
 
   constructor(
     private appStore: Store<AppStateContainer>,
@@ -115,12 +120,12 @@ export class PlayComponent implements OnInit, OnDestroy {
 
     this.gameStore.select(selectGameModel)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((gameModel: GameModel) => this.gameModel = gameModel);
+    .subscribe((game: GameModel) => this.gameModel = game);
 
     this.handStore.select(selectHandModel)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((handDocument: HandModel) => {
-      this.hand = handDocument;
+    .subscribe((hand: HandModel) => {
+      this.hand = hand;
 
       if (this.hand.acting && this.hand.acting.id) {
         if (this.gameModel.phase !== GamePhase.Over) {
@@ -181,7 +186,7 @@ export class PlayComponent implements OnInit, OnDestroy {
    */
   private async startTurnTimer(): Promise<void> {
     const numHandActions = this.hand.actions.length;
-    let currentTime = this.gameModel.timeToAct;
+    let currentTime = this.hand.acting.away ? 1 : this.gameModel.timeToAct;
     while (currentTime >= 0) {
       this.timeToAct = currentTime;
       await new Promise(resolve => setTimeout(resolve, 1000));

@@ -43,6 +43,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -307,20 +308,24 @@ public class GameService {
    * @param playerId The ID of the player whose status is being transitioned.
    */
   private void setPlayerActiveStatusInternal(final UUID playerId, final boolean status) {
-    final GameModel gameModel = getUsersGameModel(playerId);
-    gameModel.getPlayers().stream()
-        .filter(player -> player.getId().equals(playerId))
+    final GameModel game = getUsersGameModel(playerId);
+    final GamePlayerModel player = game.getPlayers().stream()
+        .filter(p -> p.getId().equals(playerId))
         .findFirst()
-        .orElseThrow(gameConstants::getPlayerNotInGameException)
-        .setAway(status);
+        .orElseThrow(gameConstants::getPlayerNotInGameException);
+    player.setAway(status);
     final UserDocument user = userRepository.findUserDocumentById(playerId);
     if (status && handService.getHand(user).getActing().getId().equals(playerId)) {
       handService.draw(user);
     }
 
-    broadcastGameUpdate(gameModel);
+//    broadcastGameUpdate(game);
     webSocketService.sendPublicMessage(
-        "/topic/game/" + playerId,
+        appConfig.getGameTopic() + game.getId(),
+        new SocketContainerModel(MessageType.PlayerAwayToggled, player));
+
+    webSocketService.sendPublicMessage(
+        appConfig.getGameTopic() + playerId,
         new SocketContainerModel(MessageType.PlayerData, getPlayerData(playerId)));
 
     log.debug("Updating away status to {} for player {}.", status, playerId);
@@ -426,7 +431,11 @@ public class GameService {
     return new ApiSuccessModel("The game has been started successfully.");
   }
 
-  // TODO: Add docs
+  /**
+   * Updates the current game topic to ensure the client knows when a player is in a game.
+   * @param game The game the player is in.
+   * @param over Indicates whether the game is over.
+   */
   public void updateCurrentGameTopic(final GameModel game, final boolean over) {
     game.getPlayers()
         .forEach(
@@ -439,27 +448,63 @@ public class GameService {
   }
 
   /**
+   * Regularly broadcasts player data to clients, to ensure they have an accurate model.
+   */
+  @Scheduled(cron = "0/10 * * * * ?")
+  public void broadcastPlayerUpdates() {
+    this.games.values().forEach(game -> {
+      if (game.getPhase() == GamePhase.Play) {
+        game.getPlayers().forEach(p -> {
+          webSocketService.sendPublicMessage(
+              appConfig.getGameTopic() + p.getId(),
+              new SocketContainerModel(MessageType.PlayerData, p));
+        });
+      }
+    });
+  }
+
+  /**
+   * Regularly broadcasts hand updates to clients, to ensure they have an accurate model.
+   */
+  @Scheduled(cron = "0/20 * * * * ?")
+  public void broadcastHandUpdates() {
+    games.values().forEach(game -> {
+      if (game.getPhase() == GamePhase.Play) {
+        this.handService.broadcastHandUpdate(game);
+      }
+    });
+  }
+
+  /**
+   * Regularly broadcasts game updates to client, to ensure they have an accurate model.
+   */
+  @Scheduled(cron = "0/20 * * * * ?")
+  public void broadcastGameUpdates() {
+    this.games.values().forEach(this::broadcastGameUpdate);
+  }
+
+  /**
    * Broadcasts the game data for the specified game to relevant players.
    *
-   * @param gameModel The specified game.
+   * @param game The specified game.
    */
-  public void broadcastGameDataUpdate(final GameModel gameModel) {
+  public void broadcastGameDataUpdate(final GameModel game) {
     // Broadcast to game topic
     webSocketService.sendPublicMessage(
-        appConfig.getGameTopic() + gameModel.getId(),
-        new SocketContainerModel(MessageType.GameData, getGameData(gameModel)));
+        appConfig.getGameTopic() + game.getId(),
+        new SocketContainerModel(MessageType.GameData, getGameData(game)));
   }
 
   /**
    * Broadcasts the specified game document to relevant players.
    *
-   * @param gameModel The data being broadcast to players.
+   * @param game The data being broadcast to players.
    */
-  public void broadcastGameUpdate(final GameModel gameModel) {
+  public void broadcastGameUpdate(final GameModel game) {
     // Broadcast to game topic
     webSocketService.sendPublicMessage(
-        appConfig.getGameTopic() + gameModel.getId(),
-        new SocketContainerModel(MessageType.Game, gameModel));
+        appConfig.getGameTopic() + game.getId(),
+        new SocketContainerModel(MessageType.Game, game));
   }
 
   /**
@@ -471,20 +516,20 @@ public class GameService {
   @EventListener
   public void handleHandActionEvent(final HandActionEvent handActionEvent) {
     log.debug("{} event detected by game service.", handActionEvent.getType());
-    final GameModel gameModel = games.get(handActionEvent.getGameId());
+    final GameModel game = games.get(handActionEvent.getGameId());
     final HandModel hand = handService.getHand(handActionEvent.getHandId());
-    final int playerThatActed = gameModel.getPlayers().indexOf(hand.getActing());
+    final int playerThatActed = game.getPlayers().indexOf(hand.getActing());
     final GamePlayerModel nextPlayerToAct =
-        gameModel.getPlayers().get((playerThatActed + 1) % gameModel.getPlayers().size());
+        game.getPlayers().get((playerThatActed + 1) % game.getPlayers().size());
 
     // Update acting field and update players
-    gameModel.getPlayers().get(playerThatActed).setActing(false);
+    game.getPlayers().get(playerThatActed).setActing(false);
     // Broadcast player data to game topic
     webSocketService.sendPublicMessage(
-        appConfig.getGameTopic() + gameModel.getPlayers().get(playerThatActed).getId(),
+        appConfig.getGameTopic() + game.getPlayers().get(playerThatActed).getId(),
         new SocketContainerModel(
             MessageType.PlayerData,
-            getPlayerData(gameModel.getPlayers().get(playerThatActed).getId())));
+            getPlayerData(game.getPlayers().get(playerThatActed).getId())));
 
     // Set acting to true for player who needs to act.
     nextPlayerToAct.setActing(true);
@@ -497,44 +542,47 @@ public class GameService {
     log.debug("Next player to act is {}.", nextPlayerToAct.getId());
     hand.setActing(nextPlayerToAct);
 
-    // Broadcast updated hand model
-    handService.broadcastHandUpdate(gameModel);
+    // Broadcast which player is acting.
+    webSocketService.sendPublicMessage(
+        appConfig.getGameTopic() + game.getId(),
+        new SocketContainerModel(MessageType.ActingPlayerChanged, nextPlayerToAct));
+
 
     /*
          Temporary logic here to help design game flow for later. Most of this will be gone. Just
          trying to work out the kinks with waiting for players to act, etc...
     */
-    final boolean handOver = hand.getActing().equals(gameModel.getPlayers().get(0));
+    final boolean handOver = hand.getActing().equals(game.getPlayers().get(0));
     final int currentRound =
-        handOver ? 1 + gameModel.getHands().size() : gameModel.getHands().size();
+        handOver ? 1 + game.getHands().size() : game.getHands().size();
 
     // Update game data needed for UI.
     updateGameData(
-        gameModel.getId(),
-        gameModel.getPlayers().get(playerThatActed),
+        game.getId(),
+        game.getPlayers().get(playerThatActed),
         hand.getActions().get(hand.getActions().size() - 1).getDrawnCard(),
-        gameModel.getHands().size());
+        game.getHands().size());
 
     if (!handOver) {
       applicationEventPublisher.publishEvent(new WaitForPlayerEvent(this, nextPlayerToAct));
-      broadcastGameDataUpdate(gameModel);
-    } else if (currentRound <= gameModel.getTotalHands()) {
+      broadcastGameDataUpdate(game);
+    } else if (currentRound <= game.getTotalHands()) {
       log.debug("Hand ended. Beginning new hand.");
       // Update game data
       setWinnerInGameData(
-          gameModel.getId(), handService.determineWinner(hand), gameModel.getHands().size());
+          game.getId(), handService.determineWinner(hand), game.getHands().size());
 
       // Update scores
-      handService.endHand(gameModel);
-      handService.newHand(gameModel);
-      broadcastGameUpdate(gameModel);
-      broadcastGameDataUpdate(gameModel);
+      handService.endHand(game);
+      handService.newHand(game);
+      broadcastGameUpdate(game);
+      broadcastGameDataUpdate(game);
     } else {
       // If the round is over and the current round > total rounds, then the game must be over.
       log.debug("The game has ended.");
       setWinnerInGameData(
-          gameModel.getId(), handService.determineWinner(hand), gameModel.getHands().size());
-      endGame(gameModel);
+          game.getId(), handService.determineWinner(hand), game.getHands().size());
+      endGame(game);
     }
   }
 
@@ -543,18 +591,22 @@ public class GameService {
    * and who won, provides some basic statistics about the game and performs a few housekeeping
    * tasks like removing relevant mappings, etc...
    *
-   * @param gameModel The game document associated with the game that is ending.
+   * @param game The game document associated with the game that is ending.
    */
-  public void endGame(GameModel gameModel) {
-    handService.endHand(gameModel); // End hand.
-    handService.removeDeck(gameModel);
-    gameModel.setPhase(GamePhase.Over); // Transition game state.
-    gameRepository.save(gameModel); // Save game document.
-    games.remove(gameModel.getId()); // Remove mapping.
-    gameModel.getPlayers().forEach(p -> userIdToGameIdMap.remove(p.getId())); // Remove mappings.
-    broadcastGameDataUpdate(gameModel); // Broadcast final update.
-    broadcastGameUpdate(gameModel); // Broadcast final update.
-    gameIdToGameDataMap.remove(gameModel.getId()); // Remove mapping.
-    updateCurrentGameTopic(gameModel, true);
+  public void endGame(final GameModel game) {
+    handService.endHand(game); // End hand.
+    handService.removeDeck(game);
+    game.setPhase(GamePhase.Over); // Transition game state.
+    gameRepository.save(game); // Save game document.
+    games.remove(game.getId()); // Remove mapping.
+    game.getPlayers().forEach(p -> userIdToGameIdMap.remove(p.getId())); // Remove mappings.
+    broadcastGameDataUpdate(game); // Broadcast final update.
+
+    webSocketService.sendPublicMessage(
+        appConfig.getGameTopic() + game.getId(),
+        new SocketContainerModel(MessageType.GamePhaseChanged, GamePhase.Over));
+
+    gameIdToGameDataMap.remove(game.getId()); // Remove mapping.
+    updateCurrentGameTopic(game, true);
   }
 }

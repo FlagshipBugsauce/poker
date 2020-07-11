@@ -8,5 +8,10 @@ export enum MessageType {
   Toast = 'Toast',
   ReadyToggled = 'ReadyToggled',
   PlayerJoinedLobby = 'PlayerJoinedLobby',
-  PlayerLeftLobby = 'PlayerLeftLobby'
+  PlayerLeftLobby = 'PlayerLeftLobby',
+  GamePhaseChanged = 'GamePhaseChanged',
+  HandStarted = 'HandStarted',
+  PlayerAwayToggled = 'PlayerAwayToggled',
+  HandActionPerformed = 'HandActionPerformed',
+  ActingPlayerChanged = 'ActingPlayerChanged'
 }

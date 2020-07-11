@@ -23,7 +23,13 @@ import {
   handModelUpdated,
   lobbyModelUpdated,
   playerDataUpdated,
-  updateCurrentGame, cardDrawn, handOver, playerReadyToggled, playerJoinedLobby, playerLeftLobby
+  updateCurrentGame,
+  cardDrawn,
+  handOver,
+  playerReadyToggled,
+  playerJoinedLobby,
+  playerLeftLobby,
+  gamePhaseChanged, handCompleted, playerAwayToggled, handActionPerformed, actingPlayerChanged
 } from '../../state/app.actions';
 import {selectLoggedInUser} from '../../state/app.selector';
 import {UserModel} from '../../api/models/user-model';
@@ -153,6 +159,21 @@ export class WebSocketService implements OnDestroy {
           break;
         case MessageType.PlayerLeftLobby:
           this.lobbyStore.dispatch(playerLeftLobby(data.data));
+          break;
+        case MessageType.GamePhaseChanged:
+          this.gameStore.dispatch(gamePhaseChanged({phase: data.data}));
+          break;
+        case MessageType.HandStarted:
+          this.gameStore.dispatch(handCompleted({id: data.data}));
+          break;
+        case MessageType.PlayerAwayToggled:
+          this.gameStore.dispatch(playerAwayToggled(data.data));
+          break;
+        case MessageType.HandActionPerformed:
+          this.handStore.dispatch(handActionPerformed(data.data));
+          break;
+        case MessageType.ActingPlayerChanged:
+          this.handStore.dispatch(actingPlayerChanged(data.data));
           break;
       }
     });

@@ -10,5 +10,10 @@ public enum MessageType {
   Toast,
   ReadyToggled,
   PlayerJoinedLobby,
-  PlayerLeftLobby
+  PlayerLeftLobby,
+  GamePhaseChanged,
+  HandStarted,
+  PlayerAwayToggled,
+  HandActionPerformed,
+  ActingPlayerChanged
 }

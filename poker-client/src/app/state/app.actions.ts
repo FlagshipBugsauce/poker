@@ -8,13 +8,14 @@ import {
   CurrentGameModel,
   DrawGameDataContainerModel,
   GameModel, GameParameterModel,
-  GamePlayerModel,
+  GamePlayerModel, HandActionModel,
   HandModel,
   LobbyModel, LobbyPlayerModel,
   ToastModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
 import {RejoinModel} from '../shared/models/rejoin.model';
+import {GamePhase} from "../shared/models/game-phase.enum";
 
 export const navigate = createAction('[Router Service] Navigate');
 export const signIn = createAction('[Auth Service] SignIn', props<AuthRequestModel>());
@@ -76,6 +77,20 @@ export const playerJoinedLobby = createAction(
   '[WebSocketService] PlayerJoinedLobby', props<LobbyPlayerModel>());
 export const playerLeftLobby = createAction(
   '[WebSocketService] PlayerLeftLobby', props<LobbyPlayerModel>());
+
+// Game Actions
+export const gamePhaseChanged = createAction(
+  '[WebSocketService] GamePhaseChanged', props<{phase: GamePhase}>());
+export const handCompleted = createAction(
+  '[WebSocketService] HandCompleted', props<{id: string}>());
+export const playerAwayToggled = createAction(
+  '[WebSocketService] PlayerAwayToggled', props<GamePlayerModel>());
+
+// Hand Actions
+export const handActionPerformed = createAction(
+  '[WebSocketService] HandActionPerformed', props<HandActionModel>());
+export const actingPlayerChanged = createAction(
+  '[WebSocketService] ActingPlayerChanged', props<GamePlayerModel>());
 
 
 export const drawCard = createAction('[Play Component] DrawCard');

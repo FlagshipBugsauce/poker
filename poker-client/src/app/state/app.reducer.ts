@@ -1,17 +1,18 @@
 import {createReducer, on} from '@ngrx/store';
 import {
+  actingPlayerChanged,
   cardDrawn,
   gameDataUpdated,
   gameListUpdated,
-  gameModelUpdated,
-  gameToastReceived,
+  gameModelUpdated, gamePhaseChanged,
+  gameToastReceived, handActionPerformed, handCompleted,
   handModelUpdated,
   handOver,
   hideFailedSignInWarning,
   joinLobby,
   leaveLobby,
   lobbyModelUpdated,
-  notReady,
+  notReady, playerAwayToggled,
   playerDataUpdated,
   playerJoinedLobby,
   playerLeftLobby,
@@ -30,13 +31,14 @@ import {
   CurrentGameModel,
   DrawGameDataContainerModel,
   GameModel,
-  GamePlayerModel,
+  GamePlayerModel, HandActionModel,
   HandModel,
   LobbyModel,
   LobbyPlayerModel,
   ToastModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
+import {GamePhase} from "../shared/models/game-phase.enum";
 
 /**
  * Reducer for general application state.
@@ -107,7 +109,20 @@ export function gameDataReducer(state: DrawGameDataContainerModel, action) {
 export const gameModelInitialState: GameModel = {} as GameModel;
 const gameModelReducerInternal = createReducer<GameModel>(
   gameModelInitialState,
-  on(gameModelUpdated, (state: GameModel, newState: GameModel) => newState));
+  on(gameModelUpdated, (state: GameModel, newState: GameModel) => newState),
+  on(gamePhaseChanged, (state: GameModel, phase: {phase: GamePhase}) =>
+    ({...state, phase: phase.phase})),
+  on(handCompleted, (state: GameModel, id: {id: string}) => {
+    const hands: string[] = state.hands.map(h => h);
+    hands.push(id.id);
+    return ({...state, hands});
+  }),
+  on(playerAwayToggled, (state: GameModel, player: GamePlayerModel) => {
+    const players: GamePlayerModel[] = state
+    .players.map(p => p.id === player.id ? player : ({...p}));
+    return ({...state, players});
+  })
+);
 
 export function gameModelReducer(state: GameModel, action) {
   return gameModelReducerInternal(state, action);
@@ -163,7 +178,15 @@ export function lobbyModelReducer(state: LobbyModel, action) {
 export const handModelInitialState: HandModel = {} as HandModel;
 const handModelReducerInternal = createReducer<HandModel>(
   handModelInitialState,
-  on(handModelUpdated, (state: HandModel, newState: HandModel) => newState));
+  on(handModelUpdated, (state: HandModel, newState: HandModel) => newState),
+  on(handActionPerformed, (state: HandModel, action: HandActionModel) => {
+    const actions: HandActionModel[] = state.actions.map(a => ({...a}));
+    actions.push(action);
+    return ({...state, actions});
+  }),
+  on(actingPlayerChanged, (state: HandModel, player: GamePlayerModel) =>
+    ({...state, acting: player}))
+);
 
 export function handModelReducer(state: HandModel, action) {
   return handModelReducerInternal(state, action);
