@@ -30,12 +30,12 @@ export class AppEffects {
    */
   signInWithJwt$ = createEffect(() => this.actions$.pipe(
     ofType(signInWithJwt),
-    exhaustMap((action: { jwt: string, url: string }) =>
+    exhaustMap((action: { jwt: string }) =>
       this.usersService.authorizeWithJwt({body: {jwt: action.jwt}})
       .pipe(
         switchMap((response: AuthResponseModel) => {
           this.webSocketService.subscribeToCurrentGameTopic(response.userDetails.id);
-          this.router.navigate([action.url]).then();
+          this.router.navigate([`/${APP_ROUTES.HOME.path}`]).then();
           return [signInSuccess(response), requestCurrentGameUpdate({userId: response.userDetails.id})];
         }), catchError(() => of({type: signInFail().type}))
       )

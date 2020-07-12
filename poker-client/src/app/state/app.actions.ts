@@ -25,7 +25,7 @@ import {GamePhase} from '../shared/models/game-phase.enum';
 export const navigate = createAction('[Router Service] Navigate');
 export const signIn = createAction('[Auth Service] SignIn', props<AuthRequestModel>());
 export const signInWithJwt = createAction(
-  '[AuthGuardService] SignInWithJwt', props<{ jwt: string, url: string }>());
+  '[AuthGuardService] SignInWithJwt', props<{ jwt: string }>());
 export const signInSuccess = createAction(
   '[Auth Service] SignInSuccess',
   props<AuthResponseModel>()

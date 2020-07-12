@@ -35,10 +35,7 @@ export class AuthGuardService implements CanActivate {
 
     // If user has not "authenticated", then dispatch special authentication using JWT from cookie.
     if (!this.authenticated && this.cookieService.check('jwt')) {
-      this.appStore.dispatch(signInWithJwt({
-        jwt: this.cookieService.get('jwt'),
-        url: state.url
-      }));
+      this.appStore.dispatch(signInWithJwt({jwt: this.cookieService.get('jwt')}));
       return false;
     }
 
