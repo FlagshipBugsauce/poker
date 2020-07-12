@@ -11,9 +11,7 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Authorization request using a JWT.")
 public class JwtAuthRequestModel {
 
-  /**
-   * JWT being used to authenticate.
-   */
+  /** JWT being used to authenticate. */
   @Schema(description = "JWT being used to authenticate.")
   private String jwt;
 }

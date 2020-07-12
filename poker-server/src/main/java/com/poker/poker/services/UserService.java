@@ -63,8 +63,7 @@ public class UserService {
         customUserDetailsService.loadUserByUsername(authRequestModel.getEmail());
     final String jwt = jwtService.generateToken(userDetails);
 
-    final UserDocument user =
-        userRepository.findUserDocumentByEmail(authRequestModel.getEmail());
+    final UserDocument user = userRepository.findUserDocumentByEmail(authRequestModel.getEmail());
 
     return new AuthResponseModel(
         jwt,
@@ -81,7 +80,7 @@ public class UserService {
    *
    * @param jwt Authentication token.
    * @return AuthResponseModel containing the same data that is returned when a client authenticates
-   * normally.
+   *     normally.
    */
   public AuthResponseModel authenticateWithJwt(final String jwt) {
     final String email = jwtService.extractEmail(jwt);

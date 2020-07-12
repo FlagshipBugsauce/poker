@@ -54,15 +54,15 @@ public class UserController {
       tags = "users")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description =
-                  "Authorization was successful. A JWT should be returned, which can be used "
-                      + "to access secured endpoints.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = AuthResponseModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description =
+                "Authorization was successful. A JWT should be returned, which can be used "
+                    + "to access secured endpoints.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = AuthResponseModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/auth", method = RequestMethod.POST)
   public ResponseEntity<AuthResponseModel> authorize(
@@ -84,13 +84,13 @@ public class UserController {
       tags = "users")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Authorization was successful.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = AuthResponseModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Authorization was successful.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = AuthResponseModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/auth-with-jwt", method = RequestMethod.POST)
   public ResponseEntity<AuthResponseModel> authorizeWithJwt(
@@ -101,13 +101,13 @@ public class UserController {
   @Operation(summary = "Register", description = "Create an account.", tags = "register")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Account creation was successful.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = ApiSuccessModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "Account creation was successful.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ApiSuccessModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/register", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> register(@RequestBody NewAccountModel newAccountModel) {
