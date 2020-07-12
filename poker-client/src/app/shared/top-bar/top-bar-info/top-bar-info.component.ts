@@ -49,7 +49,6 @@ export class TopBarInfoComponent implements OnInit {
 
   public rejoinGame(): void {
     this.store.dispatch(rejoinGame({
-      jwt: this.jwt,
       gameId: this.currentGame.id
     }));
   }

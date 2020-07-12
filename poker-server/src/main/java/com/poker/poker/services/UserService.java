@@ -63,17 +63,41 @@ public class UserService {
         customUserDetailsService.loadUserByUsername(authRequestModel.getEmail());
     final String jwt = jwtService.generateToken(userDetails);
 
-    final UserDocument userDocument =
-        userRepository.findUserDocumentByEmail(authRequestModel.getEmail());
+    final UserDocument user = userRepository.findUserDocumentByEmail(authRequestModel.getEmail());
 
     return new AuthResponseModel(
         jwt,
         new UserModel(
-            userDocument.getId(),
-            userDocument.getEmail(),
-            userDocument.getGroup(),
-            userDocument.getFirstName(),
-            userDocument.getLastName()));
+            user.getId(),
+            user.getEmail(),
+            user.getGroup(),
+            user.getFirstName(),
+            user.getLastName()));
+  }
+
+  /**
+   * Performs a pseudo authentication when client provides a JWT.
+   *
+   * @param jwt Authentication token.
+   * @return AuthResponseModel containing the same data that is returned when a client authenticates
+   *     normally.
+   */
+  public AuthResponseModel authenticateWithJwt(final String jwt) {
+    final String email = jwtService.extractEmail(jwt);
+    final UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+    if (jwtService.validateToken(jwt, userDetails)) {
+      final UserDocument user = userRepository.findUserDocumentByEmail(email);
+      return new AuthResponseModel(
+          jwt,
+          new UserModel(
+              user.getId(),
+              user.getEmail(),
+              user.getGroup(),
+              user.getFirstName(),
+              user.getLastName()));
+    } else {
+      throw new ForbiddenException("Invalid JWT", "The JWT provided is invalid.");
+    }
   }
 
   /**

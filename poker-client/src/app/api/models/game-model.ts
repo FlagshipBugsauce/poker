@@ -1,5 +1,9 @@
 /* tslint:disable */
-import { GamePlayerModel } from './game-player-model';
+import {GamePlayerModel} from './game-player-model';
+
+/**
+ * Information that defines the game state, such as phase, players, etc...
+ */
 export interface GameModel {
   hands?: Array<string>;
 

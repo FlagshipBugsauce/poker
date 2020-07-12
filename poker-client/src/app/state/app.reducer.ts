@@ -111,7 +111,9 @@ export function gameDataReducer(state: DrawGameDataContainerModel, action) {
 /**
  * GameModel reducer and initial state.
  */
-export const gameModelInitialState: GameModel = {} as GameModel;
+export const gameModelInitialState: GameModel = {
+  players: []
+} as GameModel;
 const gameModelReducerInternal = createReducer<GameModel>(
   gameModelInitialState,
   on(gameModelUpdated, (state: GameModel, newState: GameModel) => newState),
@@ -180,7 +182,9 @@ export function lobbyModelReducer(state: LobbyModel, action) {
 /**
  * HandDocument reducer and initial state.
  */
-export const handModelInitialState: HandModel = {} as HandModel;
+export const handModelInitialState: HandModel = {
+  actions: [] as HandActionModel[]
+} as HandModel;
 const handModelReducerInternal = createReducer<HandModel>(
   handModelInitialState,
   on(handModelUpdated, (state: HandModel, newState: HandModel) => newState),

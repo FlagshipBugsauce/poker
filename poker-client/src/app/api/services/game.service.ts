@@ -1,17 +1,17 @@
 /* tslint:disable */
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
-import { BaseService } from '../base-service';
-import { ApiConfiguration } from '../api-configuration';
-import { StrictHttpResponse } from '../strict-http-response';
-import { RequestBuilder } from '../request-builder';
-import { Observable } from 'rxjs';
-import { map, filter } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpResponse} from '@angular/common/http';
+import {BaseService} from '../base-service';
+import {ApiConfiguration} from '../api-configuration';
+import {StrictHttpResponse} from '../strict-http-response';
+import {RequestBuilder} from '../request-builder';
+import {Observable} from 'rxjs';
+import {filter, map} from 'rxjs/operators';
 
-import { ActiveStatusModel } from '../models/active-status-model';
-import { ApiSuccessModel } from '../models/api-success-model';
-import { GameListModel } from '../models/game-list-model';
-import { GameParameterModel } from '../models/game-parameter-model';
+import {ActiveStatusModel} from '../models/active-status-model';
+import {ApiSuccessModel} from '../models/api-success-model';
+import {GameListModel} from '../models/game-list-model';
+import {GameParameterModel} from '../models/game-parameter-model';
 
 
 /**
@@ -118,6 +118,15 @@ export class GameService extends BaseService {
   }
 
   /**
+   * Path part for operation setActiveStatus
+   */
+  static readonly SetActiveStatusPath = '/game/active';
+  /**
+   * Path part for operation getGameList
+   */
+  static readonly GetGameListPath = '/game/get-list';
+
+  /**
    * Start Game.
    *
    * Starts the game, provided all preconditions are satisfied..
@@ -127,12 +136,41 @@ export class GameService extends BaseService {
    *
    * This method doesn't expect any request body.
    */
-  startGame(params?: {
-
-  }): Observable<ApiSuccessModel> {
+  startGame(params?: {}): Observable<ApiSuccessModel> {
 
     return this.startGame$Response(params).pipe(
       map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
+    );
+  }
+
+  /**
+   * Set Active Status.
+   *
+   * Sets the status that indicates whether a player is active or not.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `setActiveStatus()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  setActiveStatus$Response(params: {
+    body: ActiveStatusModel
+  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
+
+    const rb = new RequestBuilder(this.rootUrl, GameService.SetActiveStatusPath, 'post');
+    if (params) {
+
+
+      rb.body(params.body, 'application/json');
+    }
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<ApiSuccessModel>;
+      })
     );
   }
 
@@ -190,6 +228,70 @@ export class GameService extends BaseService {
 
     return this.joinGame$Response(params).pipe(
       map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
+    );
+  }
+
+  /**
+   * Set Active Status.
+   *
+   * Sets the status that indicates whether a player is active or not.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `setActiveStatus$Response()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  setActiveStatus(params: {
+    body: ActiveStatusModel
+  }): Observable<ApiSuccessModel> {
+
+    return this.setActiveStatus$Response(params).pipe(
+      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
+    );
+  }
+
+  /**
+   * Get game list.
+   *
+   * Retrieves a list of games which are not full and have not yet started.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `getGameList()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getGameList$Response(params?: {}): Observable<StrictHttpResponse<Array<GameListModel>>> {
+
+    const rb = new RequestBuilder(this.rootUrl, GameService.GetGameListPath, 'get');
+    if (params) {
+
+
+    }
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<Array<GameListModel>>;
+      })
+    );
+  }
+
+  /**
+   * Get game list.
+   *
+   * Retrieves a list of games which are not full and have not yet started.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `getGameList$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getGameList(params?: {}): Observable<Array<GameListModel>> {
+
+    return this.getGameList$Response(params).pipe(
+      map((r: StrictHttpResponse<Array<GameListModel>>) => r.body as Array<GameListModel>)
     );
   }
 
@@ -299,115 +401,6 @@ export class GameService extends BaseService {
 
     return this.createGame$Response(params).pipe(
       map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
-    );
-  }
-
-  /**
-   * Path part for operation setActiveStatus
-   */
-  static readonly SetActiveStatusPath = '/game/active';
-
-  /**
-   * Set Active Status.
-   *
-   * Sets the status that indicates whether a player is active or not.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `setActiveStatus()` instead.
-   *
-   * This method sends `application/json` and handles request body of type `application/json`.
-   */
-  setActiveStatus$Response(params: {
-      body: ActiveStatusModel
-  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
-
-    const rb = new RequestBuilder(this.rootUrl, GameService.SetActiveStatusPath, 'post');
-    if (params) {
-
-
-      rb.body(params.body, 'application/json');
-    }
-    return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<ApiSuccessModel>;
-      })
-    );
-  }
-
-  /**
-   * Set Active Status.
-   *
-   * Sets the status that indicates whether a player is active or not.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `setActiveStatus$Response()` instead.
-   *
-   * This method sends `application/json` and handles request body of type `application/json`.
-   */
-  setActiveStatus(params: {
-      body: ActiveStatusModel
-  }): Observable<ApiSuccessModel> {
-
-    return this.setActiveStatus$Response(params).pipe(
-      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
-    );
-  }
-
-  /**
-   * Path part for operation getGameList
-   */
-  static readonly GetGameListPath = '/game/get-list';
-
-  /**
-   * Get game list.
-   *
-   * Retrieves a list of games which are not full and have not yet started.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `getGameList()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getGameList$Response(params?: {
-
-  }): Observable<StrictHttpResponse<Array<GameListModel>>> {
-
-    const rb = new RequestBuilder(this.rootUrl, GameService.GetGameListPath, 'get');
-    if (params) {
-
-
-    }
-    return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<Array<GameListModel>>;
-      })
-    );
-  }
-
-  /**
-   * Get game list.
-   *
-   * Retrieves a list of games which are not full and have not yet started.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `getGameList$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getGameList(params?: {
-
-  }): Observable<Array<GameListModel>> {
-
-    return this.getGameList$Response(params).pipe(
-      map((r: StrictHttpResponse<Array<GameListModel>>) => r.body as Array<GameListModel>)
     );
   }
 

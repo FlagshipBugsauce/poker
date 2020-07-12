@@ -27,6 +27,7 @@ public class AppConstants {
   // SECURITY CONSTANTS
   private final String[] securityExceptions = {
     "/user/auth",
+    "/user/auth-with-jwt",
     "/swagger-ui/**",
     "/v3/**",
     "/user/register",
