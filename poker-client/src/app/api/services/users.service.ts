@@ -1,18 +1,19 @@
 /* tslint:disable */
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
-import { BaseService } from '../base-service';
-import { ApiConfiguration } from '../api-configuration';
-import { StrictHttpResponse } from '../strict-http-response';
-import { RequestBuilder } from '../request-builder';
-import { Observable } from 'rxjs';
-import { map, filter } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpResponse} from '@angular/common/http';
+import {BaseService} from '../base-service';
+import {ApiConfiguration} from '../api-configuration';
+import {StrictHttpResponse} from '../strict-http-response';
+import {RequestBuilder} from '../request-builder';
+import {Observable} from 'rxjs';
+import {filter, map} from 'rxjs/operators';
 
-import { ApiSuccessModel } from '../models/api-success-model';
-import { AuthRequestModel } from '../models/auth-request-model';
-import { AuthResponseModel } from '../models/auth-response-model';
-import { NewAccountModel } from '../models/new-account-model';
-import { UserModel } from '../models/user-model';
+import {ApiSuccessModel} from '../models/api-success-model';
+import {AuthRequestModel} from '../models/auth-request-model';
+import {AuthResponseModel} from '../models/auth-response-model';
+import {JwtAuthRequestModel} from '../models/jwt-auth-request-model';
+import {NewAccountModel} from '../models/new-account-model';
+import {UserModel} from '../models/user-model';
 
 
 /**
@@ -138,6 +139,61 @@ export class UsersService extends BaseService {
 
     return this.getUserInfo$Response(params).pipe(
       map((r: StrictHttpResponse<UserModel>) => r.body as UserModel)
+    );
+  }
+
+  /**
+   * Path part for operation authorizeWithJwt
+   */
+  static readonly AuthorizeWithJwtPath = '/user/auth-with-jwt';
+
+  /**
+   * Authenticate With JWT.
+   *
+   * If the client has a JWT stored in a cookie, it can call this endpoint to authenticate using the JWT stored in the cookie.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `authorizeWithJwt()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  authorizeWithJwt$Response(params: {
+    body: JwtAuthRequestModel
+  }): Observable<StrictHttpResponse<AuthResponseModel>> {
+
+    const rb = new RequestBuilder(this.rootUrl, UsersService.AuthorizeWithJwtPath, 'post');
+    if (params) {
+
+
+      rb.body(params.body, 'application/json');
+    }
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<AuthResponseModel>;
+      })
+    );
+  }
+
+  /**
+   * Authenticate With JWT.
+   *
+   * If the client has a JWT stored in a cookie, it can call this endpoint to authenticate using the JWT stored in the cookie.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `authorizeWithJwt$Response()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  authorizeWithJwt(params: {
+    body: JwtAuthRequestModel
+  }): Observable<AuthResponseModel> {
+
+    return this.authorizeWithJwt$Response(params).pipe(
+      map((r: StrictHttpResponse<AuthResponseModel>) => r.body as AuthResponseModel)
     );
   }
 

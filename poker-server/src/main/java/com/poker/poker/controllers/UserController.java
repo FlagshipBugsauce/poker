@@ -4,6 +4,7 @@ import com.poker.poker.config.constants.AppConstants;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.AuthRequestModel;
 import com.poker.poker.models.AuthResponseModel;
+import com.poker.poker.models.JwtAuthRequestModel;
 import com.poker.poker.models.user.NewAccountModel;
 import com.poker.poker.models.user.UserModel;
 import com.poker.poker.services.UserService;
@@ -38,6 +39,13 @@ public class UserController {
   private final UserService userService;
   private final AppConstants appConstants;
 
+  /**
+   * Authenticates using a users email and password, returns a token that can be used to identify
+   * the client and access secure resources.
+   *
+   * @param authRequestModel Model containing a user's email and password.
+   * @return AuthResponseModel containing data needed by the client.
+   */
   @Operation(
       summary = "Authenticate",
       description =
@@ -46,15 +54,15 @@ public class UserController {
       tags = "users")
   @ApiResponses(
       value = {
-        @ApiResponse(
-            responseCode = "200",
-            description =
-                "Authorization was successful. A JWT should be returned, which can be used "
-                    + "to access secured endpoints.",
-            content =
-                @Content(
-                    schema = @Schema(implementation = AuthResponseModel.class),
-                    mediaType = MediaType.APPLICATION_JSON_VALUE))
+          @ApiResponse(
+              responseCode = "200",
+              description =
+                  "Authorization was successful. A JWT should be returned, which can be used "
+                      + "to access secured endpoints.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = AuthResponseModel.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/auth", method = RequestMethod.POST)
   public ResponseEntity<AuthResponseModel> authorize(
@@ -62,16 +70,44 @@ public class UserController {
     return ResponseEntity.ok(userService.authenticate(authRequestModel));
   }
 
+  /**
+   * Authenticates using a JWT stored in a cookie.
+   *
+   * @param jwtAuthRequestModel JwtAuthRequestModel which stores a JWT.
+   * @return AuthResponseModel containing data needed by the client after successful authentication.
+   */
+  @Operation(
+      summary = "Authenticate With JWT",
+      description =
+          "If the client has a JWT stored in a cookie, it can call this endpoint to authenticate "
+              + "using the JWT stored in the cookie.",
+      tags = "users")
+  @ApiResponses(
+      value = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Authorization was successful.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = AuthResponseModel.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+      })
+  @RequestMapping(value = "/auth-with-jwt", method = RequestMethod.POST)
+  public ResponseEntity<AuthResponseModel> authorizeWithJwt(
+      @RequestBody JwtAuthRequestModel jwtAuthRequestModel) {
+    return ResponseEntity.ok(userService.authenticateWithJwt(jwtAuthRequestModel.getJwt()));
+  }
+
   @Operation(summary = "Register", description = "Create an account.", tags = "register")
   @ApiResponses(
       value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Account creation was successful.",
-            content =
-                @Content(
-                    schema = @Schema(implementation = ApiSuccessModel.class),
-                    mediaType = MediaType.APPLICATION_JSON_VALUE))
+          @ApiResponse(
+              responseCode = "200",
+              description = "Account creation was successful.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = ApiSuccessModel.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @RequestMapping(value = "/register", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccessModel> register(@RequestBody NewAccountModel newAccountModel) {

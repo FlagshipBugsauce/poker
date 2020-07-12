@@ -4,7 +4,8 @@ import {APP_ROUTES} from '../app-routes';
 import {AppStateContainer} from './models/app-state.model';
 import {Store} from '@ngrx/store';
 import {selectAuthenticated} from '../state/app.selector';
-import {signOut} from '../state/app.actions';
+import {signInWithJwt, signOut} from '../state/app.actions';
+import {CookieService} from 'ngx-cookie-service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class AuthGuardService implements CanActivate {
 
   constructor(
     private router: Router,
-    private appStore: Store<AppStateContainer>) {
+    private appStore: Store<AppStateContainer>,
+    private cookieService: CookieService) {
 
     this.appStore.select(selectAuthenticated)
     .subscribe(authenticated => this.authenticated = authenticated);
@@ -29,6 +31,15 @@ export class AuthGuardService implements CanActivate {
       this.appStore.dispatch(signOut());
       this.router.navigate([`/${APP_ROUTES.LOGIN.path}`]).then();
       return true;
+    }
+
+    // If user has not "authenticated", then dispatch special authentication using JWT from cookie.
+    if (!this.authenticated && this.cookieService.check('jwt')) {
+      this.appStore.dispatch(signInWithJwt({
+        jwt: this.cookieService.get('jwt'),
+        url: state.url
+      }));
+      return false;
     }
 
     if (!this.authenticated) {

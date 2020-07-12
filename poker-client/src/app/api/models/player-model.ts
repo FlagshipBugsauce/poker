@@ -1,4 +1,8 @@
 /* tslint:disable */
+
+/**
+ * Player of a game.
+ */
 export interface PlayerModel {
 
   /**
