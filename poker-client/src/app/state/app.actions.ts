@@ -7,6 +7,8 @@ import {
   AuthRequestModel,
   AuthResponseModel,
   CardModel,
+  ChatMessageModel,
+  ClientMessageModel,
   CurrentGameModel,
   DrawGameDataContainerModel,
   GameModel,
@@ -114,3 +116,11 @@ export const updateAwayStatus = createAction(
   props<ActiveStatusModel>()
 );
 export const setActiveStatusFail = createAction('[Play Component] SetActiveStatusFail');
+
+// Chat Actions
+export const sendChatMessage = createAction(
+  '[ChatBox] SendMessage', props<ClientMessageModel>());
+export const generalChatMessageReceived = createAction(
+  '[WebSocketService] GeneralMessageReceived', props<ChatMessageModel>());
+export const gameChatMessageReceived = createAction(
+  '[WebSocketService] GameMessageReceived', props<ChatMessageModel>());

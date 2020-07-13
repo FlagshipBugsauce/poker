@@ -7,6 +7,7 @@ import com.poker.poker.models.game.GameModel;
 import com.poker.poker.models.game.HandModel;
 import com.poker.poker.models.game.LobbyModel;
 import com.poker.poker.models.websocket.ActionModel;
+import com.poker.poker.models.websocket.ChatMessageModel;
 import com.poker.poker.models.websocket.ClientMessageModel;
 import com.poker.poker.models.websocket.CurrentGameModel;
 import com.poker.poker.models.websocket.ToastModel;
@@ -81,4 +82,11 @@ public class TestController {
   public ResponseEntity<ClientMessageModel> clientMessageModel() {
     return ResponseEntity.ok(new ClientMessageModel());
   }
+
+  @GetMapping("/test/websocket/models/chat-message-model")
+  public ResponseEntity<ChatMessageModel> chatMessageModel() {
+    return ResponseEntity.ok(new ChatMessageModel());
+  }
+
+
 }

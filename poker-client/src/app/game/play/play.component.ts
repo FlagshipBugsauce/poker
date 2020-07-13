@@ -55,7 +55,7 @@ export class PlayComponent implements OnInit, OnDestroy {
   /**
    * Used to ensure we're not maintaining multiple subscriptions.
    */
-  public ngDestroyed$ = new Subject();
+  public ngDestroyed$ = new Subject<any>();
   /**
    * Getter for the model representing the current hand.
    */

@@ -18,6 +18,8 @@ import {CardComponent} from './card/card.component';
 import {TopBarComponent} from './top-bar/top-bar.component';
 import {TopBarItemComponent} from './top-bar/top-bar-item/top-bar-item.component';
 import {TopBarInfoComponent} from './top-bar/top-bar-info/top-bar-info.component';
+import {ChatBoxComponent} from './chat-box/chat-box.component';
+import {ChatMessageComponent} from './chat-box/chat-message/chat-message.component';
 
 export const API_INTERCEPTOR_PROVIDER: Provider = {
   provide: HTTP_INTERCEPTORS,
@@ -37,7 +39,9 @@ export const API_INTERCEPTOR_PROVIDER: Provider = {
     CardComponent,
     TopBarComponent,
     TopBarItemComponent,
-    TopBarInfoComponent
+    TopBarInfoComponent,
+    ChatBoxComponent,
+    ChatMessageComponent
   ],
   imports: [
     CommonModule,
@@ -59,7 +63,8 @@ export const API_INTERCEPTOR_PROVIDER: Provider = {
     FormsModule,
     PopupComponent,
     RouterModule,
-    CardComponent
+    CardComponent,
+    ChatBoxComponent
   ]
 })
 export class SharedModule {

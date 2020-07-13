@@ -9,15 +9,19 @@ import {MockStore, provideMockStore} from '@ngrx/store/testing';
 import {MemoizedSelector} from '@ngrx/store';
 import {
   AppStateContainer,
+  ChatStateContainer,
   GameDataStateContainer,
   GameStateContainer
 } from '../../shared/models/app-state.model';
 import * as selectors from '../../state/app.selector';
 import {DrawGameDataModel} from '../../api/models/draw-game-data-model';
-import {mockGameData, mockUser} from '../../testing/mock-models';
+import {mockChatMessage, mockGameData, mockUser} from '../../testing/mock-models';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 import {UserModel} from '../../api/models/user-model';
+import {MockChatService, MockWebSocketService} from '../../testing/mock-services';
+import {ChatService} from '../../shared/web-socket/chat.service';
+import {ChatMessageModel} from '../../api/models/chat-message-model';
 
 describe('GameComponent', () => {
   let mockStore: MockStore;
@@ -25,6 +29,7 @@ describe('GameComponent', () => {
   let mockGameStateSelector: MemoizedSelector<GameStateContainer, string>;
   let mockLoggedInUserSelector: MemoizedSelector<AppStateContainer, UserModel>;
   let mockJwtSelector: MemoizedSelector<AppStateContainer, string>;
+  let mockGeneralChatSelector: MemoizedSelector<ChatStateContainer, ChatMessageModel>;
   let component: GameComponent;
   let fixture: ComponentFixture<GameComponent>;
 
@@ -42,7 +47,11 @@ describe('GameComponent', () => {
         provideMockStore(),
         {
           provide: WebSocketService,
-          useClass: jest.fn()
+          useClass: MockWebSocketService
+        },
+        {
+          provide: ChatService,
+          useClass: MockChatService
         }
       ]
     }).compileComponents();
@@ -51,6 +60,7 @@ describe('GameComponent', () => {
     mockGameStateSelector = mockStore.overrideSelector(selectors.selectGamePhase, 'Lobby');
     mockLoggedInUserSelector = mockStore.overrideSelector(selectors.selectLoggedInUser, mockUser);
     mockJwtSelector = mockStore.overrideSelector(selectors.selectJwt, 'jwt');
+    mockGeneralChatSelector = mockStore.overrideSelector(selectors.selectGeneralChat, mockChatMessage);
     fixture = TestBed.createComponent(GameComponent);
     fixture.detectChanges();
   }));

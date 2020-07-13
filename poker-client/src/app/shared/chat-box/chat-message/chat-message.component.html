@@ -1,0 +1,9 @@
+<div *ngIf="message.author">
+  [{{message.timestamp | date: 'shortTime'}}]
+  <strong>{{message.author}}</strong>:
+  {{message.message}}
+</div>
+<div *ngIf="!message.author">
+  [{{message.timestamp | date: 'shortTime'}}]
+  <em>{{message.message}}</em>
+</div>

@@ -22,6 +22,7 @@ import {takeUntil} from 'rxjs/operators';
 import {leaveGame, leaveLobby} from '../../state/app.actions';
 import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 import {MessageType} from '../../shared/models/message-types.enum';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'pkr-game',
@@ -62,7 +63,12 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     private appStore: Store<AppStateContainer>,
     private gameStore: Store<GameStateContainer>,
     private gameDataStore: Store<GameDataStateContainer>,
-    private webSocketService: WebSocketService) {
+    private webSocketService: WebSocketService,
+    private router: Router) {
+  }
+
+  public get gameId(): string {
+    return this.router.url.split('/')[2];
   }
 
   public ngAfterViewInit(): void {
