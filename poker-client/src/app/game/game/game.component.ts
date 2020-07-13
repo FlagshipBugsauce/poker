@@ -11,17 +11,11 @@ import {
   GameStateContainer
 } from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
-import {
-  selectGameData,
-  selectGameModel,
-  selectGamePhase,
-  selectJwt
-} from '../../state/app.selector';
+import {selectGameData, selectGameModel} from '../../state/app.selector';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
-import {leaveGame, leaveLobby} from '../../state/app.actions';
+import {leaveGame, leaveLobby, unsubscribeFromGameTopics} from '../../state/app.actions';
 import {WebSocketService} from '../../shared/web-socket/web-socket.service';
-import {MessageType} from '../../shared/models/message-types.enum';
 import {Router} from '@angular/router';
 
 @Component({
@@ -54,9 +48,6 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   public ngDestroyed$ = new Subject();
   /** The model representing the state of the game at any given point in time. */
   public gameModel: GameModel;
-  /** The last state the game was in. */
-  private lastState: string = '';
-  private jwt: string;
 
   constructor(
     private leaveGameGuardService: LeaveGameGuardService,
@@ -67,6 +58,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     private router: Router) {
   }
 
+  /** Getter for game ID which uses active router link. */
   public get gameId(): string {
     return this.router.url.split('/')[2];
   }
@@ -77,25 +69,14 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public ngOnDestroy() {
     this.ngDestroyed$.next();
+    this.ngDestroyed$.complete();
+    this.gameStore.dispatch(unsubscribeFromGameTopics());
   }
 
   public ngOnInit(): void {
-    this.appStore.select(selectJwt)
-    .pipe(takeUntil(this.ngDestroyed$)).subscribe(jwt => this.jwt = jwt);
     this.leaveGameGuardService.canLeave = false;  // Need to set this to false when page loads.
     this.gameStore.select(selectGameModel).pipe(takeUntil(this.ngDestroyed$)).subscribe(
       (game: GameModel) => this.gameModel = game);
-
-    this.gameStore.select(selectGamePhase)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe(state => {
-      if (state !== this.lastState && state === 'Play') {
-        this.webSocketService.subscribeToPlayerDataTopic();
-        this.webSocketService.requestGameTopicUpdate(MessageType.GameData);
-        this.webSocketService.requestGameTopicUpdate(MessageType.Hand);
-      }
-      this.lastState = state;
-    });
 
     this.gameDataStore.select(selectGameData).pipe(takeUntil(this.ngDestroyed$)).subscribe(
       (data: DrawGameDataModel[]) => this.gameData = data
@@ -112,7 +93,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
       this.appStore.dispatch(leaveLobby());
     }
     if (this.gameModel.phase === GamePhase.Play) {
-      this.appStore.dispatch(leaveGame({jwt: this.jwt, actionType: 'LeaveGame'}));
+      this.appStore.dispatch(leaveGame({actionType: 'LeaveGame'}));
     }
   }
 }

@@ -7,7 +7,8 @@ import {filter, first, switchMap, takeUntil} from 'rxjs/operators';
 import {environment} from '../../../environments/environment';
 import {Store} from '@ngrx/store';
 import {
-  AppStateContainer, DrawnCardsStateContainer,
+  AppStateContainer,
+  DrawnCardsStateContainer,
   GameDataStateContainer,
   GameListStateContainer,
   GameStateContainer,
@@ -17,19 +18,23 @@ import {
 } from '../models/app-state.model';
 import {MessageType} from '../models/message-types.enum';
 import {
-  gameDataUpdated,
-  gameModelUpdated,
-  gameListUpdated,
-  handModelUpdated,
-  lobbyModelUpdated,
-  playerDataUpdated,
-  updateCurrentGame,
+  actingPlayerChanged,
   cardDrawn,
+  gameDataUpdated,
+  gameListUpdated,
+  gameModelUpdated,
+  gamePhaseChanged,
+  handActionPerformed,
+  handCompleted,
+  handModelUpdated,
   handOver,
-  playerReadyToggled,
+  lobbyModelUpdated,
+  playerAwayToggled,
+  playerDataUpdated,
   playerJoinedLobby,
   playerLeftLobby,
-  gamePhaseChanged, handCompleted, playerAwayToggled, handActionPerformed, actingPlayerChanged
+  playerReadyToggled,
+  updateCurrentGame
 } from '../../state/app.actions';
 import {selectLoggedInUser} from '../../state/app.selector';
 import {UserModel} from '../../api/models/user-model';
@@ -134,7 +139,9 @@ export class WebSocketService implements OnDestroy {
   public subscribeToGameTopic(gameId: string): void {
     this.gameId = gameId;
     this.gameTopicUnsubscribe$ = new Subject<any>();
-    this.onMessage(`/topic/game/${gameId}`).pipe(takeUntil(this.gameTopicUnsubscribe$)).subscribe(data => {
+    this.onMessage(`/topic/game/${gameId}`)
+    .pipe(takeUntil(this.gameTopicUnsubscribe$))
+    .subscribe(data => {
       switch (data.type) {
         case MessageType.Lobby:
           this.lobbyStore.dispatch(lobbyModelUpdated(data.data));
@@ -217,8 +224,10 @@ export class WebSocketService implements OnDestroy {
     .subscribe(data => this.drawnCardsStore.dispatch(data.suit ? cardDrawn(data) : handOver()))
   }
   public drawnCardsTopicUnsubscribe() {
-    this.drawnCardsTopicUnsubscribe$.next();
-    this.drawnCardsTopicUnsubscribe$.complete();
+    if (this.drawnCardsTopicUnsubscribe$) {
+      this.drawnCardsTopicUnsubscribe$.next();
+      this.drawnCardsTopicUnsubscribe$.complete();
+    }
   }
 
   /** Subscribes to the game list topic. */
@@ -253,10 +262,8 @@ export class WebSocketService implements OnDestroy {
     this.playerDataTopicUnsubscribe$ = new Subject<any>();
     this.onMessage(`/topic/game/${this.user.id}`)
     .pipe(takeUntil(this.playerDataTopicUnsubscribe$))
-    .subscribe(data => {
-      this.playerDataStore.dispatch(playerDataUpdated(data.data));
-    });
-    this.requestPlayerDataUpdate();
+    .subscribe(data => this.playerDataStore.dispatch(playerDataUpdated(data.data)));
+    // this.requestPlayerDataUpdate();
   }
 
   /** Unsubscribes from the player data topic. */

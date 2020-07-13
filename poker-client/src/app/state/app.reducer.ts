@@ -2,6 +2,7 @@ import {createReducer, on} from '@ngrx/store';
 import {
   actingPlayerChanged,
   cardDrawn,
+  closeChat,
   gameChatMessageReceived,
   gameDataUpdated,
   gameListUpdated,
@@ -49,7 +50,7 @@ import {GameListContainerModel} from '../shared/models/game-list-container.model
 import {GamePhase} from '../shared/models/game-phase.enum';
 
 /**
- * Reducer for general application state.
+ * Initial application state.
  */
 export const initialState: AppState = {
   showSignInFail: false,
@@ -183,7 +184,7 @@ export function lobbyModelReducer(state: LobbyModel, action) {
 }
 
 /**
- * HandDocument reducer and initial state.
+ * HandDocument initial state.
  */
 export const handModelInitialState: HandModel = {
   actions: [] as HandActionModel[]
@@ -205,7 +206,7 @@ export function handModelReducer(state: HandModel, action) {
 }
 
 /**
- * GameList reducer and initial state.
+ * GameList initial state.
  */
 export const gameListInitialState: GameListContainerModel = {gameList: []};
 const gameListReducerInternal = createReducer<GameListContainerModel>(
@@ -218,7 +219,7 @@ export function gameListReducer(state: GameListContainerModel, action) {
 }
 
 /**
- * Player data reducer and initial state.
+ * Player data initial state.
  */
 export const playerDataInitialState: GamePlayerModel = {} as GamePlayerModel;
 const playerDataReducerInternal = createReducer<GamePlayerModel>(
@@ -257,7 +258,7 @@ export function toastDataReducer(state, action) {
 }
 
 /**
- * Chat reducer and initial state.
+ * Chat initial state.
  */
 export const chatInitialState: ChatContainer = {
   generalChat: {
@@ -278,7 +279,8 @@ const chatReducerInternal = createReducer<ChatContainer>(
       ({...chatInitialState, generalChat: message})),
   on(gameChatMessageReceived,
     (state: ChatContainer, message: ChatMessageModel) =>
-      ({...chatInitialState, gameChat: message}))
+      ({...chatInitialState, gameChat: message})),
+  on(closeChat, (state: ChatContainer) => chatInitialState)
 );
 
 export function chatReducer(state, action) {

@@ -5,8 +5,7 @@ import {Store} from '@ngrx/store';
 import {Subject} from 'rxjs';
 import {selectGameChat, selectGeneralChat} from '../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
-import {sendChatMessage} from '../../state/app.actions';
-import {ChatService} from '../web-socket/chat.service';
+import {closeChat, sendChatMessage, startChat} from '../../state/app.actions';
 
 @Component({
   selector: 'pkr-chat-box',
@@ -15,20 +14,33 @@ import {ChatService} from '../web-socket/chat.service';
 })
 export class ChatBoxComponent implements OnInit, OnDestroy {
 
+  /**
+   * If the chat is for a specific game, this field is the ID of that game and is used to determine
+   * which topic should be listened to.
+   */
   @Input() gameId: string;
 
+  /**
+   * Text input where a user types in their chat message.
+   */
   @ViewChild('chatInput') chatInput;
 
+  /**
+   * Text box where chat messages appear.
+   */
   @ViewChild('chatBox') chatBox;
 
+  /**
+   * Messages that have been received by the chat since this component opened.
+   */
   public messages: ChatMessageModel[] = [];
 
+  /**
+   * Used to ensure we're not maintaining multiple subscriptions.
+   */
   private ngDestroyed$: Subject<any> = new Subject<any>();
 
-  constructor(
-    private chatStore: Store<ChatStateContainer>,
-    private chatService: ChatService
-  ) {
+  constructor(private chatStore: Store<ChatStateContainer>) {
   }
 
   ngOnInit(): void {
@@ -43,10 +55,16 @@ export class ChatBoxComponent implements OnInit, OnDestroy {
         this.scrollDown().then();
       }
     });
-
-    this.chatService.subscribeToChatTopic(this.gameId);
+    this.chatStore.dispatch(startChat({gameId: this.gameId}));
   }
 
+  /**
+   * Scrolls down the chat box whenever a message is received.
+   * TODO: There is probably a better way of doing this. The issue here is that there is a delay
+   *  between a message being received and the scroll height of the chat box increasing, so we need
+   *  some way of ensuring that new messages actually appear when they are received, without the
+   *  user having to manually scroll down.
+   */
   public async scrollDown() {
     let i = 0;
     while (i++ < 100) {
@@ -58,9 +76,12 @@ export class ChatBoxComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.ngDestroyed$.next();
     this.ngDestroyed$.complete();
-    this.chatService.unsubscribeFromChatTopic();
+    this.chatStore.dispatch(closeChat());
   }
 
+  /**
+   * Sends a message.
+   */
   public sendMessage() {
     if (this.chatInput.nativeElement.value !== '') {
       this.chatStore.dispatch(sendChatMessage({
@@ -68,7 +89,6 @@ export class ChatBoxComponent implements OnInit, OnDestroy {
         data: this.chatInput.nativeElement.value
       }));
       this.chatInput.nativeElement.value = '';
-      this.scrollDown().then();
     }
 
   }

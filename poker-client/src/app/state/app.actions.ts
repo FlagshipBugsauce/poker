@@ -53,6 +53,8 @@ export const requestCurrentGameUpdateSuccess = createAction(
 export const createGameSuccess = createAction('[Create Component] CreateGameSuccess');
 export const rejoinGame = createAction('[Lobby Component] RejoinGame', props<RejoinModel>());
 export const leaveGame = createAction('[Game Component] LeaveGame', props<ActionModel>());
+export const unsubscribeFromGameTopics =
+  createAction('[Game Components] UnsubscribeFromGameTopics');
 export const leaveGameSuccess = createAction('[Game Component] LeaveGameSuccess');
 export const rejoinGameSuccess = createAction('[Game Component] RejoinGameSuccess');
 export const startGame = createAction('[Game Component] StartGame');
@@ -118,6 +120,8 @@ export const updateAwayStatus = createAction(
 export const setActiveStatusFail = createAction('[Play Component] SetActiveStatusFail');
 
 // Chat Actions
+export const startChat = createAction('[ChatBox] StartChat', props<{ gameId: string }>());
+export const closeChat = createAction('[ChatBox] CloseChat');
 export const sendChatMessage = createAction(
   '[ChatBox] SendMessage', props<ClientMessageModel>());
 export const generalChatMessageReceived = createAction(
