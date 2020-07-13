@@ -22,7 +22,10 @@ import {
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
 
-export const selectAuthenticated = (state: AppStateContainer) => state.appState.authenticated;
+export const authenticatedFeature =
+  createFeatureSelector<AppStateContainer, AppState>('appState');
+export const selectAuthenticated = createSelector(
+  authenticatedFeature, (state: AppState) => state.authenticated);
 
 export const loggedInUserFeature =
   createFeatureSelector<AppStateContainer, AppState>('appState');

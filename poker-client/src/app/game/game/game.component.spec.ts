@@ -30,6 +30,7 @@ describe('GameComponent', () => {
   let mockLoggedInUserSelector: MemoizedSelector<AppStateContainer, UserModel>;
   let mockJwtSelector: MemoizedSelector<AppStateContainer, string>;
   let mockGeneralChatSelector: MemoizedSelector<ChatStateContainer, ChatMessageModel>;
+  let mockAuthenticatedSelector: MemoizedSelector<AppStateContainer, boolean>;
   let component: GameComponent;
   let fixture: ComponentFixture<GameComponent>;
 
@@ -61,6 +62,7 @@ describe('GameComponent', () => {
     mockLoggedInUserSelector = mockStore.overrideSelector(selectors.selectLoggedInUser, mockUser);
     mockJwtSelector = mockStore.overrideSelector(selectors.selectJwt, 'jwt');
     mockGeneralChatSelector = mockStore.overrideSelector(selectors.selectGeneralChat, mockChatMessage);
+    mockAuthenticatedSelector = mockStore.overrideSelector(selectors.selectAuthenticated, true);
     fixture = TestBed.createComponent(GameComponent);
     fixture.detectChanges();
   }));
