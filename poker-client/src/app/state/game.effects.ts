@@ -1,27 +1,20 @@
 import {Injectable} from '@angular/core';
-import {catchError, exhaustMap, map, mergeMap, tap} from 'rxjs/operators';
-import {EMPTY, of} from 'rxjs';
+import {exhaustMap, map, mergeMap, tap} from 'rxjs/operators';
 import {GameService} from '../api/services/game.service';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {
   createGame,
   drawCard,
-  drawCardSuccess,
   gameCreated,
   gamePhaseChanged,
   joinLobby,
   leaveGame,
   leaveLobby,
-  leaveLobbySuccess,
   readyUp,
-  readyUpSuccess,
   rejoinGame,
-  setActiveStatusFail,
   setAwayStatus,
   startGame,
-  startGameSuccess,
-  unsubscribeFromGameTopics,
-  updateAwayStatus
+  unsubscribeFromGameTopics
 } from './app.actions';
 import {Router} from '@angular/router';
 import {APP_ROUTES} from '../app-routes';
@@ -46,66 +39,31 @@ export class GameEffects {
   leaveLobby$ = createEffect(() => this.actions$.pipe(
     ofType(leaveLobby().type),
     mergeMap(() => this.gameService.leaveLobby()
-      .pipe(
-        map(response => {
-          this.unsubscribeFromGameTopics();
-          return ({type: leaveLobbySuccess().type, payload: response});
-        }),
-        catchError(() => EMPTY)
-      )
-    )), {dispatch: false}
-  );
+    .pipe(map(() => this.unsubscribeFromGameTopics())))), {dispatch: false});
   /**
    * Toggles a players ready status in a game lobby.
    */
   readyUp$ = createEffect(() => this.actions$.pipe(
-    ofType(readyUp),
-    exhaustMap(() => this.gameService.ready()
-      .pipe(
-        map(response => ({type: readyUpSuccess().type, payload: response})),
-        catchError(() => EMPTY)
-      )
-    ))
-  );
+    ofType(readyUp), exhaustMap(() => this.gameService.ready())),
+    {dispatch: false});
   /**
    * Starts a game (will only work if dispatched by host).
    */
   startGame$ = createEffect(() => this.actions$.pipe(
     ofType(startGame().type),
-    mergeMap(() => this.gameService.startGame()
-      .pipe(
-        map(response => {
-          return {type: startGameSuccess().type, payload: response};
-        }), catchError(() => EMPTY)
-      )
-    ))
-  );
+    mergeMap(() => this.gameService.startGame())), {dispatch: false});
   /**
    * Draws a card.
    */
   drawCard$ = createEffect(() => this.actions$.pipe(
-    ofType(drawCard),
-    exhaustMap(() => this.handService.draw()
-      .pipe(
-        map(response => ({type: drawCardSuccess().type, payload: response})),
-        catchError(() => EMPTY)
-      )
-    ))
-  );
+    ofType(drawCard), exhaustMap(() => this.handService.draw())), {dispatch: false});
   /**
    * Sets the away status of the player.
    */
   setAwayStatus$ = createEffect(() => this.actions$.pipe(
     ofType(setAwayStatus),
-    exhaustMap((action: ActiveStatusModel) => this.gameService.setActiveStatus({body: action})
-      .pipe(
-        map(
-          () => updateAwayStatus(action),
-          catchError(() => of({type: setActiveStatusFail().type}))
-        )
-      )
-    ))
-  );
+    exhaustMap((action: ActiveStatusModel) =>
+      this.gameService.setActiveStatus({body: action}))), {dispatch: false});
   /**
    * Creates a game.
    */
@@ -146,6 +104,7 @@ export class GameEffects {
       if (action.phase === GamePhase.Play) {
         this.webSocketService.requestGameTopicUpdate(MessageType.Hand);
         this.webSocketService.requestGameTopicUpdate(MessageType.GameData);
+        this.webSocketService.requestPlayerDataUpdate();
       }
     })
   ), {dispatch: false});

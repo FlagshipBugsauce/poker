@@ -13,11 +13,17 @@
     <div class="input-group input-group-sm">
       <input
         #chatInput
+        [disabled]="!(authenticated$ | async)"
+        [placeholder]="(authenticated$ | async) ? 'Enter text...' : 'Sign in to chat...'"
         (keyup.enter)="sendMessage()"
         class="form-control shadow-none send-input"
         type="text">
       <div class="input-group-append">
-        <button (click)="sendMessage()" class="btn btn-success shadow-none">Send</button>
+        <button
+          (click)="sendMessage()"
+          [disabled]="!(authenticated$ | async)"
+          class="btn btn-success shadow-none">Send
+        </button>
       </div>
     </div>
   </div>

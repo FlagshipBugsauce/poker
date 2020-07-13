@@ -126,13 +126,6 @@ export class WebSocketService implements OnDestroy {
   }
 
   /**
-   * Helper that returns an observable which NgRx effects can use.
-   */
-  public sendFromStore(): Observable<any> {
-    return this.connect();
-  }
-
-  /**
    * Subscribes to the game topic, which broadcasts game related updates.
    * @param gameId The ID of the game.
    */
@@ -263,7 +256,6 @@ export class WebSocketService implements OnDestroy {
     this.onMessage(`/topic/game/${this.user.id}`)
     .pipe(takeUntil(this.playerDataTopicUnsubscribe$))
     .subscribe(data => this.playerDataStore.dispatch(playerDataUpdated(data.data)));
-    // this.requestPlayerDataUpdate();
   }
 
   /** Unsubscribes from the player data topic. */

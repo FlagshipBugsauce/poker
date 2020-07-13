@@ -1,9 +1,9 @@
 import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ChatMessageModel} from '../../api/models/chat-message-model';
-import {ChatStateContainer} from '../models/app-state.model';
+import {AppStateContainer, ChatStateContainer} from '../models/app-state.model';
 import {Store} from '@ngrx/store';
-import {Subject} from 'rxjs';
-import {selectGameChat, selectGeneralChat} from '../../state/app.selector';
+import {Observable, Subject} from 'rxjs';
+import {selectAuthenticated, selectGameChat, selectGeneralChat} from '../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
 import {closeChat, sendChatMessage, startChat} from '../../state/app.actions';
 
@@ -36,14 +36,23 @@ export class ChatBoxComponent implements OnInit, OnDestroy {
   public messages: ChatMessageModel[] = [];
 
   /**
+   * Observable flag which is true if user has authenticated, false otherwise.
+   */
+  public authenticated$: Observable<boolean>;
+
+  /**
    * Used to ensure we're not maintaining multiple subscriptions.
    */
   private ngDestroyed$: Subject<any> = new Subject<any>();
 
-  constructor(private chatStore: Store<ChatStateContainer>) {
+  constructor(
+    private appStore: Store<AppStateContainer>,
+    private chatStore: Store<ChatStateContainer>) {
   }
 
   ngOnInit(): void {
+    this.authenticated$ =
+      this.appStore.select(selectAuthenticated).pipe(takeUntil(this.ngDestroyed$));
     this.chatStore.select(this.gameId ? selectGameChat : selectGeneralChat)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((message: ChatMessageModel) => {
