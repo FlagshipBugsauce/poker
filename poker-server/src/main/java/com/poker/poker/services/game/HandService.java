@@ -338,8 +338,8 @@ public class HandService {
     applicationEventPublisher.publishEvent(
         new PublishMessageEvent<>(
             this, appConfig.getGameTopic() + hand.getGameId() + "/drawn-cards", card));
-    applicationEventPublisher
-        .publishEvent(new SystemChatMessageEvent(this, hand.getGameId(), toastMessage));
+    applicationEventPublisher.publishEvent(
+        new SystemChatMessageEvent(this, hand.getGameId(), toastMessage));
 
     applicationEventPublisher.publishEvent(
         new HandActionEvent(this, hand.getGameId(), hand.getId(), HandAction.Draw));
@@ -370,8 +370,8 @@ public class HandService {
     Collections.reverse(actions);
     actions.get(0).getPlayer().setScore(actions.get(0).getPlayer().getScore() + 1);
     winner = actions.get(0).getPlayer();
-    applicationEventPublisher
-        .publishEvent(new SystemChatMessageEvent(
+    applicationEventPublisher.publishEvent(
+        new SystemChatMessageEvent(
             this,
             hand.getGameId(),
             winner.getFirstName() + " " + winner.getLastName() + " won the round!"));

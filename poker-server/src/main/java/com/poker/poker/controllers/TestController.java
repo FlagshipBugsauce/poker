@@ -87,6 +87,4 @@ public class TestController {
   public ResponseEntity<ChatMessageModel> chatMessageModel() {
     return ResponseEntity.ok(new ChatMessageModel());
   }
-
-
 }

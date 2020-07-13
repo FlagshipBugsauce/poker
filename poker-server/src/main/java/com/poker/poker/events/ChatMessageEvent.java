@@ -13,10 +13,7 @@ public class ChatMessageEvent extends ApplicationEvent {
   private final UUID gameId;
 
   public ChatMessageEvent(
-      final Object source,
-      final UserDocument user,
-      final String message,
-      final UUID gameId) {
+      final Object source, final UserDocument user, final String message, final UUID gameId) {
     super(source);
     this.user = user;
     this.message = message;

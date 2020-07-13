@@ -75,11 +75,12 @@ public class WebSocketController {
   @MessageMapping("/chat/send")
   public void chatMessage(final ClientMessageModel<String> messageModel) {
     userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
-    applicationEventPublisher.publishEvent(new ChatMessageEvent(
-        this,
-        jwtService.getUserDocument(messageModel.getJwt()),
-        messageModel.getData(),
-        messageModel.getGameId()));
+    applicationEventPublisher.publishEvent(
+        new ChatMessageEvent(
+            this,
+            jwtService.getUserDocument(messageModel.getJwt()),
+            messageModel.getData(),
+            messageModel.getGameId()));
   }
 
   @MessageMapping("/game/leave")

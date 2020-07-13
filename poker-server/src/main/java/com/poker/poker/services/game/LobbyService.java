@@ -42,9 +42,7 @@ public class LobbyService {
 
   private final ApplicationEventPublisher applicationEventPublisher;
 
-  /**
-   * A map of active games, keyed by the games ID.
-   */
+  /** A map of active games, keyed by the games ID. */
   private final Map<UUID, LobbyModel> lobbys;
 
   /**

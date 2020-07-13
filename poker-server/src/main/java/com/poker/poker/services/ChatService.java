@@ -29,13 +29,14 @@ public class ChatService {
    */
   @EventListener
   public void handleChatMessageEvent(final ChatMessageEvent event) {
-    final ChatMessageModel message = new ChatMessageModel(
-        new Date(),
-        event.getUser().getFirstName() + " " + event.getUser().getLastName(),
-        event.getMessage());
+    final ChatMessageModel message =
+        new ChatMessageModel(
+            new Date(),
+            event.getUser().getFirstName() + " " + event.getUser().getLastName(),
+            event.getMessage());
     // If a game ID is provided, then broadcast to that game only, otherwise, broadcast to general.
-    final String topic = event.getGameId() == null ?
-        "/topic/chat/general" : "/topic/chat/" + event.getGameId();
+    final String topic =
+        event.getGameId() == null ? "/topic/chat/general" : "/topic/chat/" + event.getGameId();
     applicationEventPublisher.publishEvent(new PublishMessageEvent<>(this, topic, message));
   }
 
@@ -47,11 +48,10 @@ public class ChatService {
    */
   @EventListener
   public void handleSystemMessageEvent(final SystemChatMessageEvent event) {
-    final ChatMessageModel message = new ChatMessageModel(
-        new Date(), null, event.getMessage());
+    final ChatMessageModel message = new ChatMessageModel(new Date(), null, event.getMessage());
     // If a game ID is provided, then broadcast to that game only, otherwise, broadcast to general.
-    final String topic = event.getGameId() == null ?
-        "/topic/chat/general" : "/topic/chat/" + event.getGameId();
+    final String topic =
+        event.getGameId() == null ? "/topic/chat/general" : "/topic/chat/" + event.getGameId();
     applicationEventPublisher.publishEvent(new PublishMessageEvent<>(this, topic, message));
   }
 }
