@@ -2,6 +2,7 @@ package com.poker.poker.controllers;
 
 import com.poker.poker.config.AppConfig;
 import com.poker.poker.documents.UserDocument;
+import com.poker.poker.events.ChatMessageEvent;
 import com.poker.poker.events.CreateGameEvent;
 import com.poker.poker.events.CurrentGameEvent;
 import com.poker.poker.events.JoinGameEvent;
@@ -69,6 +70,17 @@ public class WebSocketController {
     }
     webSocketService.sendPublicMessage(
         updateModel.getTopic(), new GenericServerMessage<>(updateModel.getType(), data));
+  }
+
+  @MessageMapping("/chat/send")
+  public void chatMessage(final ClientMessageModel<String> messageModel) {
+    userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
+    applicationEventPublisher.publishEvent(
+        new ChatMessageEvent(
+            this,
+            jwtService.getUserDocument(messageModel.getJwt()),
+            messageModel.getData(),
+            messageModel.getGameId()));
   }
 
   @MessageMapping("/game/leave")

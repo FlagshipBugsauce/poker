@@ -4,6 +4,7 @@ import com.poker.poker.config.AppConfig;
 import com.poker.poker.config.constants.GameConstants;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.JoinGameEvent;
+import com.poker.poker.events.SystemChatMessageEvent;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.game.GameListModel;
@@ -26,6 +27,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -37,6 +39,8 @@ import org.springframework.stereotype.Service;
 public class LobbyService {
 
   private final AppConfig appConfig;
+
+  private final ApplicationEventPublisher applicationEventPublisher;
 
   /** A map of active games, keyed by the games ID. */
   private final Map<UUID, LobbyModel> lobbys;
@@ -60,10 +64,12 @@ public class LobbyService {
 
   public LobbyService(
       final AppConfig appConfig,
+      final ApplicationEventPublisher applicationEventPublisher,
       final GameConstants gameConstants,
       final LobbyRepository lobbyRepository,
       final WebSocketService webSocketService) {
     this.appConfig = appConfig;
+    this.applicationEventPublisher = applicationEventPublisher;
     this.lobbys = new HashMap<>();
     this.userIdToLobbyIdMap = new HashMap<>();
     this.gameConstants = gameConstants;
@@ -133,7 +139,8 @@ public class LobbyService {
 
     // Send to game list topic
     useCachedGameList = false;
-    webSocketService.sendGameToast(lobbyModel.getId(), "The game has started!", "lg");
+    applicationEventPublisher.publishEvent(
+        new SystemChatMessageEvent(this, game.getId(), "The game has started!"));
 
     lobbyRepository.save(lobbyModel);
   }
@@ -217,11 +224,11 @@ public class LobbyService {
     }
 
     // Get the game document for the game now that we're sure it exists.
-    final LobbyModel lobbyModel = getUsersLobbyModel(user.getId());
+    final LobbyModel lobby = getUsersLobbyModel(user.getId());
 
     // Find the playerModel, throw if not found, otherwise, remove player from game.
     final Optional<LobbyPlayerModel> player =
-        lobbyModel.getPlayers().stream()
+        lobby.getPlayers().stream()
             .filter(playerModel -> playerModel.getId().equals(user.getId()))
             .findFirst();
     if (!player.isPresent()) {
@@ -238,10 +245,12 @@ public class LobbyService {
             player.get().getLastName(),
             player.get().isReady() ? "is" : "is not");
 
-    webSocketService.sendGameToast(lobbyModel.getId(), message, "md");
+    applicationEventPublisher.publishEvent(
+        new SystemChatMessageEvent(this, lobby.getId(), message));
+
     log.debug("Player status set to ready (ID: {}).", user.getId().toString());
     webSocketService.sendPublicMessage(
-        appConfig.getGameTopic() + lobbyModel.getId(),
+        appConfig.getGameTopic() + lobby.getId(),
         new GenericServerMessage<>(MessageType.ReadyToggled, player.get()));
     return new ApiSuccessModel("Player ready status was toggled.");
   }

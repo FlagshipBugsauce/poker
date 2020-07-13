@@ -158,7 +158,7 @@ export class UsersService extends BaseService {
    * This method sends `application/json` and handles request body of type `application/json`.
    */
   authorizeWithJwt$Response(params: {
-    body: JwtAuthRequestModel
+      body: JwtAuthRequestModel
   }): Observable<StrictHttpResponse<AuthResponseModel>> {
 
     const rb = new RequestBuilder(this.rootUrl, UsersService.AuthorizeWithJwtPath, 'post');

@@ -1,25 +1,20 @@
 import {Injectable} from '@angular/core';
-import {catchError, exhaustMap, map, mergeMap, tap} from 'rxjs/operators';
-import {EMPTY, of} from 'rxjs';
+import {exhaustMap, map, mergeMap, tap} from 'rxjs/operators';
 import {GameService} from '../api/services/game.service';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {
   createGame,
   drawCard,
-  drawCardSuccess,
   gameCreated,
+  gamePhaseChanged,
   joinLobby,
   leaveGame,
   leaveLobby,
-  leaveLobbySuccess,
   readyUp,
-  readyUpSuccess,
   rejoinGame,
-  setActiveStatusFail,
   setAwayStatus,
   startGame,
-  startGameSuccess,
-  updateAwayStatus
+  unsubscribeFromGameTopics
 } from './app.actions';
 import {Router} from '@angular/router';
 import {APP_ROUTES} from '../app-routes';
@@ -34,6 +29,7 @@ import {Store} from '@ngrx/store';
 import {selectJwt} from './app.selector';
 import {TypedAction} from '@ngrx/store/src/models';
 import {GameParameterModel} from '../api/models/game-parameter-model';
+import {GamePhase} from '../shared/models/game-phase.enum';
 
 @Injectable()
 export class GameEffects {
@@ -43,63 +39,31 @@ export class GameEffects {
   leaveLobby$ = createEffect(() => this.actions$.pipe(
     ofType(leaveLobby().type),
     mergeMap(() => this.gameService.leaveLobby()
-      .pipe(
-        map(response => ({type: leaveLobbySuccess().type, payload: response})),
-        catchError(() => EMPTY)
-      )
-    ))
-  );
+    .pipe(map(() => this.unsubscribeFromGameTopics())))), {dispatch: false});
   /**
    * Toggles a players ready status in a game lobby.
    */
   readyUp$ = createEffect(() => this.actions$.pipe(
-    ofType(readyUp),
-    exhaustMap(() => this.gameService.ready()
-      .pipe(
-        map(response => ({type: readyUpSuccess().type, payload: response})),
-        catchError(() => EMPTY)
-      )
-    ))
-  );
+    ofType(readyUp), exhaustMap(() => this.gameService.ready())),
+    {dispatch: false});
   /**
    * Starts a game (will only work if dispatched by host).
    */
   startGame$ = createEffect(() => this.actions$.pipe(
     ofType(startGame().type),
-    mergeMap(() => this.gameService.startGame()
-      .pipe(
-        map(response => {
-          return {type: startGameSuccess().type, payload: response};
-        }), catchError(() => EMPTY)
-      )
-    ))
-  );
+    mergeMap(() => this.gameService.startGame())), {dispatch: false});
   /**
    * Draws a card.
    */
   drawCard$ = createEffect(() => this.actions$.pipe(
-    ofType(drawCard),
-    exhaustMap(() => this.handService.draw()
-      .pipe(
-        map(response => ({type: drawCardSuccess().type, payload: response})),
-        catchError(() => EMPTY)
-      )
-    ))
-  );
+    ofType(drawCard), exhaustMap(() => this.handService.draw())), {dispatch: false});
   /**
    * Sets the away status of the player.
    */
   setAwayStatus$ = createEffect(() => this.actions$.pipe(
     ofType(setAwayStatus),
-    exhaustMap((action: ActiveStatusModel) => this.gameService.setActiveStatus({body: action})
-      .pipe(
-        map(
-          () => updateAwayStatus(action),
-          catchError(() => of({type: setActiveStatusFail().type}))
-        )
-      )
-    ))
-  );
+    exhaustMap((action: ActiveStatusModel) =>
+      this.gameService.setActiveStatus({body: action}))), {dispatch: false});
   /**
    * Creates a game.
    */
@@ -117,7 +81,32 @@ export class GameEffects {
    */
   gameCreated$ = createEffect(() => this.actions$.pipe(
     ofType(gameCreated),
-    tap((action => this.lobbyJoined(action.message)))
+    tap((action => {
+      this.subscribeToGameTopics(action.message);
+      this.requestGameTopicUpdatesInLobbyPhase();
+      this.router.navigate([`${APP_ROUTES.GAME_PREFIX.path}/${action.message}`]).then();
+    }))
+  ), {dispatch: false});
+  /**
+   * Effect that will unsubscribe from game topics (typically dispatched when leaving the game
+   * page).
+   */
+  unsubscribeFromGameTopics$ = createEffect(() => this.actions$.pipe(
+    ofType(unsubscribeFromGameTopics),
+    tap(() => this.unsubscribeFromGameTopics())), {dispatch: false});
+  /**
+   * Effect that will request a game data and hand update when the game starts. This is needed by
+   * the UI in order to display the game data table correctly as soon as the game begins.
+   */
+  gamePhaseChanged$ = createEffect(() => this.actions$.pipe(
+    ofType(gamePhaseChanged),
+    tap((action: { phase: GamePhase }) => {
+      if (action.phase === GamePhase.Play) {
+        this.webSocketService.requestGameTopicUpdate(MessageType.Hand);
+        this.webSocketService.requestGameTopicUpdate(MessageType.GameData);
+        this.webSocketService.requestPlayerDataUpdate();
+      }
+    })
   ), {dispatch: false});
   /**
    * JWT for the logged in user.
@@ -131,7 +120,10 @@ export class GameEffects {
     ofType(joinLobby),
     tap(action => {
         this.webSocketService.send('/topic/game/join', {jwt: this.jwt, gameId: action.id});
-        this.lobbyJoined(action.id);
+        // this.lobbyJoined(action.id);
+        this.subscribeToGameTopics(action.id);
+        this.requestGameTopicUpdatesInLobbyPhase();
+        this.router.navigate([`${APP_ROUTES.GAME_PREFIX.path}/${action.id}`]).then();
       }
     )
   ), {dispatch: false});
@@ -143,7 +135,10 @@ export class GameEffects {
    */
   leaveGame$ = createEffect(() => this.actions$.pipe(
     ofType(leaveGame),
-    tap(() => this.webSocketService.send('/topic/game/leave', {jwt: this.jwt}))
+    tap(() => {
+      this.webSocketService.send('/topic/game/leave', {jwt: this.jwt});
+      this.unsubscribeFromGameTopics();
+    })
   ), {dispatch: false});
   /**
    * Effect when a player rejoins an active game that they have left. Note that only a game in the
@@ -153,7 +148,9 @@ export class GameEffects {
     ofType(rejoinGame),
     tap((action: RejoinModel & TypedAction<'[Lobby Component] RejoinGame'>) => {
       this.webSocketService.send('/topic/game/rejoin', {jwt: this.jwt});
-      this.gameRejoined(action.gameId);
+      this.subscribeToGameTopics(action.gameId);
+      this.requestGameTopicUpdatesInPlayPhase();
+      this.router.navigate([`${APP_ROUTES.GAME_PREFIX.path}/${action.gameId}`]).then();
     })
   ), {dispatch: false});
 
@@ -169,30 +166,39 @@ export class GameEffects {
   }
 
   /**
-   * Helper that will subscribe to various topics and request any updates that are required by the
-   * UI when a player joins a lobby.
-   * @param gameId The ID of the lobby (lobby ID is the same as game ID) that was joined.
+   * Helper that will subscribe to all game topics required by the UI.
+   * @param gameId ID of the game, used to determine which topic to subscribe to.
    */
-  private lobbyJoined(gameId: string): void {
+  private subscribeToGameTopics(gameId: string): void {
     this.webSocketService.subscribeToGameTopic(gameId);
-    this.webSocketService.requestGameTopicUpdate(MessageType.Game);
-    this.webSocketService.requestGameTopicUpdate(MessageType.Lobby);
-    this.webSocketService.gameListTopicUnsubscribe();
-    this.router.navigate([`${APP_ROUTES.GAME_PREFIX.path}/${gameId}`]).then();
+    this.webSocketService.subscribeToPlayerDataTopic();
+    this.webSocketService.subscribeToDrawnCardsTopic(gameId);
   }
 
   /**
-   * Helper that will subscribe to various topics and request any updates that are required by the
-   * UI when a player rejoins an active game (i.e. a game that is in 'Play' phase).
-   * @param gameId The ID of the game being rejoined.
+   * Requests updates that are required to load the UI in the 'Lobby' phase of the game.
    */
-  private gameRejoined(gameId: string): void {
-    this.webSocketService.subscribeToGameTopic(gameId);
-    this.webSocketService.subscribeToPlayerDataTopic();
+  private requestGameTopicUpdatesInLobbyPhase(): void {
+    this.webSocketService.requestGameTopicUpdate(MessageType.Game);
+    this.webSocketService.requestGameTopicUpdate(MessageType.Lobby);
+  }
+
+  /**
+   * Requests updates that are required to load the UI in the 'Play' phase of the game.
+   */
+  private requestGameTopicUpdatesInPlayPhase(): void {
     this.webSocketService.requestGameTopicUpdate(MessageType.Game);
     this.webSocketService.requestGameTopicUpdate(MessageType.GameData);
     this.webSocketService.requestGameTopicUpdate(MessageType.Hand);
     this.webSocketService.requestPlayerDataUpdate();
-    this.router.navigate([`${APP_ROUTES.GAME_PREFIX.path}/${gameId}`]).then();
+  }
+
+  /**
+   * Helper that unsubscribes from all game topics.
+   */
+  private unsubscribeFromGameTopics(): void {
+    this.webSocketService.gameTopicUnsubscribe();
+    this.webSocketService.playerDataTopicUnsubscribe();
+    this.webSocketService.drawnCardsTopicUnsubscribe();
   }
 }

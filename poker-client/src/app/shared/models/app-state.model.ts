@@ -1,6 +1,7 @@
 import {TopBarLobbyModel} from './top-bar-lobby.model';
 import {
   CardModel,
+  ChatMessageModel,
   CurrentGameModel,
   DrawGameDataContainerModel,
   GameModel,
@@ -61,4 +62,13 @@ export interface DrawnCardsContainer {
 
 export interface ToastStateContainer {
   lastToast: ToastModel;
+}
+
+export interface ChatStateContainer {
+  chats: ChatContainer;
+}
+
+export interface ChatContainer {
+  generalChat?: ChatMessageModel;
+  gameChat?: ChatMessageModel;
 }

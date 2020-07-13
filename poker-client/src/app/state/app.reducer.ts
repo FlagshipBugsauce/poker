@@ -2,11 +2,14 @@ import {createReducer, on} from '@ngrx/store';
 import {
   actingPlayerChanged,
   cardDrawn,
+  closeChat,
+  gameChatMessageReceived,
   gameDataUpdated,
   gameListUpdated,
   gameModelUpdated,
   gamePhaseChanged,
   gameToastReceived,
+  generalChatMessageReceived,
   handActionPerformed,
   handCompleted,
   handModelUpdated,
@@ -27,11 +30,12 @@ import {
   signOut,
   updateCurrentGame
 } from './app.actions';
-import {AppState, DrawnCardsContainer} from '../shared/models/app-state.model';
+import {AppState, ChatContainer, DrawnCardsContainer} from '../shared/models/app-state.model';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
   AuthResponseModel,
   CardModel,
+  ChatMessageModel,
   CurrentGameModel,
   DrawGameDataContainerModel,
   GameModel,
@@ -46,7 +50,7 @@ import {GameListContainerModel} from '../shared/models/game-list-container.model
 import {GamePhase} from '../shared/models/game-phase.enum';
 
 /**
- * Reducer for general application state.
+ * Initial application state.
  */
 export const initialState: AppState = {
   showSignInFail: false,
@@ -180,7 +184,7 @@ export function lobbyModelReducer(state: LobbyModel, action) {
 }
 
 /**
- * HandDocument reducer and initial state.
+ * HandDocument initial state.
  */
 export const handModelInitialState: HandModel = {
   actions: [] as HandActionModel[]
@@ -202,7 +206,7 @@ export function handModelReducer(state: HandModel, action) {
 }
 
 /**
- * GameList reducer and initial state.
+ * GameList initial state.
  */
 export const gameListInitialState: GameListContainerModel = {gameList: []};
 const gameListReducerInternal = createReducer<GameListContainerModel>(
@@ -215,7 +219,7 @@ export function gameListReducer(state: GameListContainerModel, action) {
 }
 
 /**
- * GameList reducer and initial state.
+ * Player data initial state.
  */
 export const playerDataInitialState: GamePlayerModel = {} as GamePlayerModel;
 const playerDataReducerInternal = createReducer<GamePlayerModel>(
@@ -234,7 +238,6 @@ const drawnCardsReducerInternal = createReducer<DrawnCardsContainer>(
     (state: DrawnCardsContainer, card: CardModel) => {
       const cards: CardModel[] = state.drawnCards.map((c: CardModel) => ({...c}));
       cards.push(card);
-      // state.drawnCards.push(card);
       return {drawnCards: cards};
     }),
   on(handOver, () => ({drawnCards: []}))
@@ -252,4 +255,34 @@ const toastDataReducerInternal = createReducer<ToastModel>(
 
 export function toastDataReducer(state, action) {
   return toastDataReducerInternal(state, action);
+}
+
+/**
+ * Chat initial state.
+ */
+export const chatInitialState: ChatContainer = {
+  generalChat: {
+    timestamp: null,
+    author: null,
+    message: null
+  },
+  gameChat: {
+    timestamp: null,
+    author: null,
+    message: null
+  }
+};
+const chatReducerInternal = createReducer<ChatContainer>(
+  chatInitialState,
+  on(generalChatMessageReceived,
+    (state: ChatContainer, message: ChatMessageModel) =>
+      ({...chatInitialState, generalChat: message})),
+  on(gameChatMessageReceived,
+    (state: ChatContainer, message: ChatMessageModel) =>
+      ({...chatInitialState, gameChat: message})),
+  on(closeChat, (state: ChatContainer) => chatInitialState)
+);
+
+export function chatReducer(state, action) {
+  return chatReducerInternal(state, action);
 }

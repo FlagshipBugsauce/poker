@@ -1,6 +1,8 @@
 import {
   AppState,
   AppStateContainer,
+  ChatContainer,
+  ChatStateContainer,
   DrawnCardsContainer,
   DrawnCardsStateContainer,
   GameDataStateContainer,
@@ -20,7 +22,10 @@ import {
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
 
-export const selectAuthenticated = (state: AppStateContainer) => state.appState.authenticated;
+export const authenticatedFeature =
+  createFeatureSelector<AppStateContainer, AppState>('appState');
+export const selectAuthenticated = createSelector(
+  authenticatedFeature, (state: AppState) => state.authenticated);
 
 export const loggedInUserFeature =
   createFeatureSelector<AppStateContainer, AppState>('appState');
@@ -136,3 +141,14 @@ export const selectActingStatus = createSelector(
   actingStatusFeature,
   (state: GamePlayerModel) => state.acting
 );
+
+export const generalChatFeature =
+  createFeatureSelector<ChatStateContainer, ChatContainer>('chats');
+/** General chat selector. */
+export const selectGeneralChat = createSelector(
+  generalChatFeature, (state: ChatContainer) => state.generalChat);
+
+export const gameChatFeature =
+  createFeatureSelector<ChatStateContainer, ChatContainer>('chats');
+export const selectGameChat = createSelector(
+  gameChatFeature, (state: ChatContainer) => state.gameChat);

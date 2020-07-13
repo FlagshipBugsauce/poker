@@ -8,8 +8,6 @@ import {AppStateContainer, GameStateContainer} from '../../shared/models/app-sta
 import {Store} from '@ngrx/store';
 import {leaveGame, leaveLobby} from '../../state/app.actions';
 import {selectGameModel, selectJwt} from '../../state/app.selector';
-import {WebSocketService} from '../../shared/web-socket/web-socket.service';
-import {ActionModel} from '../../api/models/action-model';
 import {GameModel} from '../../api/models';
 
 @Injectable({
@@ -32,7 +30,6 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
   private jwt: string;
 
   constructor(
-    private webSocketService: WebSocketService,
     private router: Router,
     private gameService: GameService,
     private appStore: Store<AppStateContainer>,
@@ -54,7 +51,6 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
       import('@angular/router').UrlTree> {
     // If state is null or the game is over, then we should just let the player leave the page.
     if (!this.gameModel.phase || this.gameModel.phase === GamePhase.Over) {
-      this.unsubscribe();
       return true;
     }
 
@@ -68,16 +64,12 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
     if (!this.canLeave && this.confirmationPopup) {
       this.confirmationPopup.okCloseProcedure = () => {
         this.canLeave = true;
-        this.unsubscribe();
 
         if (this.gameModel.phase && this.gameModel.phase === GamePhase.Lobby) {
           this.appStore.dispatch(leaveLobby());  // Leave the lobby.
         }
         if (this.gameModel.phase && this.gameModel.phase === GamePhase.Play) {
-          this.appStore.dispatch(leaveGame({
-            jwt: this.jwt,
-            actionType: 'LeaveGame'
-          } as ActionModel));
+          this.appStore.dispatch(leaveGame({actionType: 'LeaveGame'}));
         }
 
         this.router.navigate([this.link]).then();
@@ -87,11 +79,5 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
       return false;
     }
     return true;
-  }
-
-  /** Helper which will unsubscribe from websocket topics when they aren't needed. */
-  private unsubscribe(): void {
-    this.webSocketService.gameTopicUnsubscribe();
-    this.webSocketService.playerDataTopicUnsubscribe();
   }
 }

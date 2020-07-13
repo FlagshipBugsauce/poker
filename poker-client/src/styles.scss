@@ -3,6 +3,12 @@
 /* Importing Bootstrap SCSS file. */
 @import '~bootstrap/scss/bootstrap';
 
+/* We're using a green theme here, so let's make input focus green */
+.form-control:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
 $top-bar-height: 70px;
 
 $button-width: 130px;

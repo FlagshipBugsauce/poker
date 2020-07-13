@@ -29,7 +29,6 @@ import com.poker.poker.models.websocket.CurrentGameModel;
 import com.poker.poker.models.websocket.GenericServerMessage;
 import com.poker.poker.repositories.GameRepository;
 import com.poker.poker.repositories.UserRepository;
-import com.poker.poker.services.UuidService;
 import com.poker.poker.services.WebSocketService;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
@@ -68,8 +67,6 @@ public class GameService {
   private final GameConstants gameConstants;
 
   private final LobbyService lobbyService;
-
-  private final UuidService uuidService;
 
   private final HandService handService;
 
@@ -415,16 +412,19 @@ public class GameService {
     if (games.get(gameId) == null) {
       throw gameConstants.getGameNotFoundException();
     }
-    final GameModel gameModel = games.get(gameId);
-    lobbyService.startGame(gameModel); // Lobby related housekeeping.
-    gameModel.setPhase(GamePhase.Play); // Transition game state.
+    final GameModel game = games.get(gameId);
+    lobbyService.startGame(game); // Lobby related housekeeping.
+    game.setPhase(GamePhase.Play); // Transition game state.
     handService.setDeck(gameId, new DeckModel()); // Give hand service the deck.
-    handService.newHand(gameModel); // Create the hand.
-    initializeGameData(gameModel); // Initialize game data for client.
+    handService.newHand(game); // Create the hand.
+    initializeGameData(game); // Initialize game data for client.
     // May as well broadcast full game model instead of players list + phase change.
-    broadcastGameUpdate(gameModel); // Broadcast the game model.
+    broadcastGameUpdate(game); // Broadcast the game model.
+    webSocketService.sendPublicMessage(
+        appConfig.getGameTopic() + game.getId(),
+        new GenericServerMessage<>(MessageType.GamePhaseChanged, GamePhase.Play));
     // Update Current game topic
-    updateCurrentGameTopic(gameModel, false);
+    updateCurrentGameTopic(game, false);
 
     return new ApiSuccessModel("The game has been started successfully.");
   }

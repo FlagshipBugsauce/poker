@@ -6,6 +6,7 @@ import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.HandActionEvent;
 import com.poker.poker.events.PlayerAfkEvent;
 import com.poker.poker.events.PublishMessageEvent;
+import com.poker.poker.events.SystemChatMessageEvent;
 import com.poker.poker.events.WaitForPlayerEvent;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.enums.HandAction;
@@ -337,7 +338,9 @@ public class HandService {
     applicationEventPublisher.publishEvent(
         new PublishMessageEvent<>(
             this, appConfig.getGameTopic() + hand.getGameId() + "/drawn-cards", card));
-    webSocketService.sendGameToast(hand.getGameId(), toastMessage, "lg");
+    applicationEventPublisher.publishEvent(
+        new SystemChatMessageEvent(this, hand.getGameId(), toastMessage));
+
     applicationEventPublisher.publishEvent(
         new HandActionEvent(this, hand.getGameId(), hand.getId(), HandAction.Draw));
     return new ApiSuccessModel("Card was drawn successfully.");
@@ -367,10 +370,11 @@ public class HandService {
     Collections.reverse(actions);
     actions.get(0).getPlayer().setScore(actions.get(0).getPlayer().getScore() + 1);
     winner = actions.get(0).getPlayer();
-    webSocketService.sendGameToast(
-        hand.getGameId(),
-        winner.getFirstName() + " " + winner.getLastName() + " won the round!",
-        "lg");
+    applicationEventPublisher.publishEvent(
+        new SystemChatMessageEvent(
+            this,
+            hand.getGameId(),
+            winner.getFirstName() + " " + winner.getLastName() + " won the round!"));
     return winner;
   }
 

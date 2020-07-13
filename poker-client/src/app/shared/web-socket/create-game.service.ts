@@ -1,6 +1,6 @@
 import {Injectable, OnDestroy} from '@angular/core';
 import {WebSocketService} from './web-socket.service';
-import {Observable, Subject} from 'rxjs';
+import {Subject} from 'rxjs';
 import {AppStateContainer} from '../models/app-state.model';
 import {Store} from '@ngrx/store';
 import {selectJwt, selectLoggedInUser} from '../../state/app.selector';
@@ -50,10 +50,6 @@ export class CreateGameService implements OnDestroy {
       this.createGameTopicUnsubscribe$.next();
       this.createGameTopicUnsubscribe$.complete();
     }
-  }
-
-  public sendFromStore(): Observable<any> {
-    return this.webSocketService.sendFromStore();
   }
 
   public createGamePayload(data: GameParameterModel): ClientMessageModel {

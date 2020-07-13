@@ -1,12 +1,5 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {
-  ActionModel,
-  CardModel,
-  DrawGameDataModel,
-  GameModel,
-  HandModel,
-  UserModel,
-} from '../../api/models';
+import {CardModel, DrawGameDataModel, GameModel, HandModel, UserModel} from '../../api/models';
 import {
   AppStateContainer,
   DrawnCardsStateContainer,
@@ -16,7 +9,7 @@ import {
   PlayerDataStateContainer
 } from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
-import {drawCard, leaveGame, setAwayStatus} from '../../state/app.actions';
+import {drawCard, setAwayStatus} from '../../state/app.actions';
 import {
   selectActingStatus,
   selectAwayStatus,
@@ -31,7 +24,6 @@ import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 import {GamePhase} from '../../shared/models/game-phase.enum';
-import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 
 @Component({
   selector: 'pkr-play',
@@ -39,6 +31,16 @@ import {WebSocketService} from '../../shared/web-socket/web-socket.service';
   styleUrls: ['./play.component.scss']
 })
 export class PlayComponent implements OnInit, OnDestroy {
+
+  constructor(
+    private appStore: Store<AppStateContainer>,
+    private gameDataStore: Store<GameDataStateContainer>,
+    private gameStore: Store<GameStateContainer>,
+    private handStore: Store<HandStateContainer>,
+    private playerDataStore: Store<PlayerDataStateContainer>,
+    private drawnCardsStore: Store<DrawnCardsStateContainer>) {
+  }
+
   @ViewChild('afkPopup') afkPopup: PopupAfkComponent;
   /**
    * Path to AFK icon.
@@ -55,7 +57,7 @@ export class PlayComponent implements OnInit, OnDestroy {
   /**
    * Used to ensure we're not maintaining multiple subscriptions.
    */
-  public ngDestroyed$ = new Subject();
+  public ngDestroyed$ = new Subject<any>();
   /**
    * Getter for the model representing the current hand.
    */
@@ -89,19 +91,9 @@ export class PlayComponent implements OnInit, OnDestroy {
    */
   private user: UserModel;
 
-  constructor(
-    private appStore: Store<AppStateContainer>,
-    private gameDataStore: Store<GameDataStateContainer>,
-    private gameStore: Store<GameStateContainer>,
-    private handStore: Store<HandStateContainer>,
-    private playerDataStore: Store<PlayerDataStateContainer>,
-    private drawnCardsStore: Store<DrawnCardsStateContainer>,
-    private webSocketService: WebSocketService) {
-  }
-
   public ngOnDestroy() {
     this.ngDestroyed$.next();
-    this.webSocketService.drawnCardsTopicUnsubscribe();
+    this.ngDestroyed$.complete();
   }
 
   public ngOnInit(): void {
@@ -126,7 +118,7 @@ export class PlayComponent implements OnInit, OnDestroy {
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((hand: HandModel) => {
       this.hand = hand;
-
+      // TODO: Timer needs a better trigger
       if (this.hand.acting && this.hand.acting.id) {
         if (this.gameModel.phase !== GamePhase.Over) {
           this.startTurnTimer().then();
@@ -146,7 +138,7 @@ export class PlayComponent implements OnInit, OnDestroy {
         this.afkPopup.open();
       }
     });
-    this.webSocketService.subscribeToDrawnCardsTopic(this.gameModel.id);
+
     this.drawnCardsStore.select(selectDrawnCards)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((cards: CardModel[]) => this.drawnCards = cards);
@@ -172,13 +164,6 @@ export class PlayComponent implements OnInit, OnDestroy {
    */
   public draw(): void {
     this.appStore.dispatch(drawCard());
-  }
-
-  public leaveGame(): void {
-    this.gameStore.dispatch(leaveGame({
-      jwt: this.jwt,
-      actionType: 'LeaveGame'
-    } as ActionModel));
   }
 
   /**

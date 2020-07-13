@@ -3,16 +3,15 @@ import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {UsersService} from '../api/services/users.service';
 import {
   requestCurrentGameUpdate,
-  requestCurrentGameUpdateSuccess,
   signIn,
   signInFail,
   signInSuccess,
   signInWithJwt,
   signOut
 } from './app.actions';
-import {catchError, exhaustMap, map, mergeMap, switchMap, tap} from 'rxjs/operators';
+import {catchError, exhaustMap, switchMap, tap} from 'rxjs/operators';
 import {AuthRequestModel} from '../api/models/auth-request-model';
-import {EMPTY, of} from 'rxjs';
+import {of} from 'rxjs';
 import {AuthResponseModel} from '../api/models/auth-response-model';
 import {ToastService} from '../shared/toast.service';
 import {Router} from '@angular/router';
@@ -49,6 +48,14 @@ export class AppEffects {
     tap(() => this.cookieService.deleteAll())
   ), {dispatch: false});
   /**
+   * Effect that will request an update in the current game topic.
+   */
+  requestCurrentGameUpdate$ = createEffect(() => this.actions$.pipe(
+    ofType(requestCurrentGameUpdate),
+    tap((action: ActionModel) => this.webSocketService.send(
+      '/topic/game/current/update', {userId: action.userId}))
+  ), {dispatch: false});
+  /**
    * 2 weeks.
    */
   private twoWeeks: number = 12096e5;
@@ -75,17 +82,6 @@ export class AppEffects {
       )
     ))
   );
-
-  requestCurrentGameUpdate$ = createEffect(() => this.actions$.pipe(
-    ofType(requestCurrentGameUpdate),
-    mergeMap((action: ActionModel) => this.webSocketService.sendFromStore()
-    .pipe(map(client => {
-      client.send('/topic/game/current/update', {}, JSON.stringify({
-        userId: action.userId
-      } as ActionModel));
-      return {type: requestCurrentGameUpdateSuccess.type};
-    }, catchError(() => EMPTY))))
-  ));
 
   constructor(
     private actions$: Actions,
