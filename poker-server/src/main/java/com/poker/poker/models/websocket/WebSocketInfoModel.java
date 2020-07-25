@@ -1,4 +1,4 @@
-package com.poker.poker.models;
+package com.poker.poker.models.websocket;
 
 import java.util.Date;
 import java.util.UUID;

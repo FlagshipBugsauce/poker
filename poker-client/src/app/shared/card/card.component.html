@@ -1,11 +1,9 @@
 <img
+  [ngStyle]="{
+        'width': cardService.cardSizeToPxSize(size) + 'px',
+        'height': 'auto'
+      }"
   [alt]="cardText"
-  [ngClass]="{
-    'xs': size === 'xs',
-    'sm': size === 'sm',
-    'md': size === 'md',
-    'lg': size === 'lg',
-    'xl': size === 'xl'
-    }"
+  [src]="faceDown ? cardService.getFlippedPath() : cardService.getCardImagePath(card)"
   [ngbTooltip]="cardText"
-  [src]="cardService.getCardImagePath(card)">
+  class="back">

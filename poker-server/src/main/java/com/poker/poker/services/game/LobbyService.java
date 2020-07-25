@@ -107,6 +107,7 @@ public class LobbyService {
             MessageType.GameList, useCachedGameList ? gameList : getLobbyList()));
   }
 
+  // TODO: Refactor this to be event driven, API call only as backup
   /**
    * Performs necessary actions to start the game.
    *
@@ -137,12 +138,42 @@ public class LobbyService {
     Collections.shuffle(game.getPlayers());
     game.getPlayers().get(0).setActing(true);
 
-    // Send to game list topic
+    // Set game list cached flag to false, since game list data is different.
     useCachedGameList = false;
-    applicationEventPublisher.publishEvent(
-        new SystemChatMessageEvent(this, game.getId(), "The game has started!"));
+    publishSystemChatMessageEvent(game, "The game has started!");
 
     lobbyRepository.save(lobbyModel);
+  }
+
+  /**
+   * Publishes a message to system chat for specified lobby.
+   *
+   * @param lobby   The lobby the message should be published to.
+   * @param message The message to publish.
+   */
+  public void publishSystemChatMessageEvent(final LobbyModel lobby, final String message) {
+    publishSystemChatMessageEvent(lobby.getId(), message);
+  }
+
+  /**
+   * Publishes a message to system chat for specified game.
+   *
+   * @param game    The lobby the message should be published to.
+   * @param message The message to publish.
+   */
+  public void publishSystemChatMessageEvent(final GameModel game, final String message) {
+    publishSystemChatMessageEvent(game.getId(), message);
+  }
+
+  /**
+   * Publishes a message to system chat for specified game ID.
+   *
+   * @param gameId  The lobby the message should be published to.
+   * @param message The message to publish.
+   */
+  public void publishSystemChatMessageEvent(final UUID gameId, final String message) {
+    applicationEventPublisher.publishEvent(
+        new SystemChatMessageEvent(this, gameId, message));
   }
 
   /**
@@ -227,31 +258,25 @@ public class LobbyService {
     final LobbyModel lobby = getUsersLobbyModel(user.getId());
 
     // Find the playerModel, throw if not found, otherwise, remove player from game.
-    final Optional<LobbyPlayerModel> player =
-        lobby.getPlayers().stream()
-            .filter(playerModel -> playerModel.getId().equals(user.getId()))
-            .findFirst();
-    if (!player.isPresent()) {
-      log.error("Failed to set player's status to ready (user ID: {}).", user.getId().toString());
-      throw gameConstants.getReadyStatusUpdateFailException();
-    }
+    final LobbyPlayerModel player = lobby.getPlayers().stream()
+        .filter(p -> p.getId().equals(user.getId()))
+        .findFirst()
+        .orElseThrow(gameConstants::getReadyStatusUpdateFailException);
 
-    // Toggle the players ready status
-    player.get().setReady(!player.get().isReady());
+    player.setReady(!player.isReady());
     final String message =
         String.format(
             "%s %s %s ready.",
-            player.get().getFirstName(),
-            player.get().getLastName(),
-            player.get().isReady() ? "is" : "is not");
+            player.getFirstName(),
+            player.getLastName(),
+            player.isReady() ? "is" : "is not");
 
-    applicationEventPublisher.publishEvent(
-        new SystemChatMessageEvent(this, lobby.getId(), message));
+    publishSystemChatMessageEvent(lobby, message);
 
     log.debug("Player status set to ready (ID: {}).", user.getId().toString());
     webSocketService.sendPublicMessage(
         appConfig.getGameTopic() + lobby.getId(),
-        new GenericServerMessage<>(MessageType.ReadyToggled, player.get()));
+        new GenericServerMessage<>(MessageType.ReadyToggled, player));
     return new ApiSuccessModel("Player ready status was toggled.");
   }
 
@@ -281,8 +306,8 @@ public class LobbyService {
       final GameParameterModel gameParameterModel, final UserDocument user, final UUID id) {
     checkWhetherUserIsInLobbyAndThrow(user.getId(), false);
     final LobbyPlayerModel host = new LobbyPlayerModel(user, false, true);
-    final List<LobbyPlayerModel> players =
-        Collections.synchronizedList(new ArrayList<>(Collections.singletonList(host)));
+    final List<LobbyPlayerModel> players = Collections.synchronizedList(new ArrayList<>());
+    players.add(host);
     final LobbyModel lobbyModel = new LobbyModel(id, host, gameParameterModel, players);
     log.info("User: {} created a game.", user.getId());
     lobbys.put(lobbyModel.getId(), lobbyModel);

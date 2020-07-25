@@ -25,6 +25,7 @@ import com.poker.poker.models.game.GameParameterModel;
 import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.HandModel;
 import com.poker.poker.models.game.PlayerModel;
+import com.poker.poker.models.game.PokerTableModel;
 import com.poker.poker.models.websocket.CurrentGameModel;
 import com.poker.poker.models.websocket.GenericServerMessage;
 import com.poker.poker.repositories.GameRepository;
@@ -55,14 +56,22 @@ public class GameService {
 
   private final UserRepository userRepository;
 
-  /** Mapping of user Id to game Id. */
+  /**
+   * Mapping of user Id to game Id.
+   */
   private final Map<UUID, UUID> userIdToGameIdMap;
 
-  /** Mapping of game Id to game document. */
+  /**
+   * Mapping of game Id to game document.
+   */
   private final Map<UUID, GameModel> games;
 
-  /** Mapping of game Id to game data. */
+  /**
+   * Mapping of game Id to game data.
+   */
   private final Map<UUID, DrawGameDataContainerModel> gameIdToGameDataMap;
+
+  private final Map<UUID, PokerTableModel> gameIdToPokerTableMap;
 
   private final GameConstants gameConstants;
 
@@ -76,8 +85,19 @@ public class GameService {
 
   private final WebSocketService webSocketService;
 
+  private final GameDataService data;
+
   public CurrentGameModel getCurrentGameModel(final UUID userId) {
     final CurrentGameModel currentGameModel = new CurrentGameModel();
+
+//    if (data.isUserInGame(userId) && data.getUsersGame(userId).getPhase() == GamePhase.Play) {
+//      currentGameModel.setId(data.getUsersGame(userId).getId());
+//      currentGameModel.setInGame(true);
+//    } else {
+//      currentGameModel.setId(null);
+//      currentGameModel.setInGame(false);
+//    }
+
     if (userIdToGameIdMap.get(userId) != null
         && games.get(userIdToGameIdMap.get(userId)) != null
         && games.get(userIdToGameIdMap.get(userId)).getPhase() == GamePhase.Play) {
@@ -113,6 +133,38 @@ public class GameService {
       throw gameConstants.getGameDataNotFoundException();
     }
     return gameIdToGameDataMap.get(gameId);
+  }
+
+  // TODO: Add docs
+  public PokerTableModel getPokerTable(final GameModel game) {
+    return getPokerTable(game.getId());
+  }
+
+  public PokerTableModel getPokerTable(final UUID gameId) {
+    if (gameIdToPokerTableMap.get(gameId) == null) {
+      throw gameConstants.getGameDataNotFoundException(); // TODO: Use more relevant exception?
+    }
+    return gameIdToPokerTableMap.get(gameId);
+  }
+
+  public void initializePokerData(final GameModel game) {
+    gameIdToPokerTableMap.put(game.getId(), new PokerTableModel(
+        game.getPlayers(),
+        0,
+        -1,
+        0,
+        false,
+        0));
+  }
+
+  public void broadcastPokerTable(final GameModel game) {
+    broadcastPokerTable(game.getId());
+  }
+
+  public void broadcastPokerTable(final UUID gameId) {
+    webSocketService.sendPublicMessage(
+        appConfig.getGameTopic() + gameId,
+        new GenericServerMessage<>(MessageType.PokerTable, getPokerTable(gameId)));
   }
 
   /**
@@ -326,6 +378,8 @@ public class GameService {
         appConfig.getGameTopic() + playerId,
         new GenericServerMessage<>(MessageType.PlayerData, getPlayerData(playerId)));
 
+    broadcastPokerTable(game);
+
     log.debug("Updating away status to {} for player {}.", status, playerId);
   }
 
@@ -415,6 +469,11 @@ public class GameService {
     final GameModel game = games.get(gameId);
     lobbyService.startGame(game); // Lobby related housekeeping.
     game.setPhase(GamePhase.Play); // Transition game state.
+
+    // Initialize
+    initializePokerData(game);
+    broadcastPokerTable(game);
+
     handService.setDeck(gameId, new DeckModel()); // Give hand service the deck.
     handService.newHand(game); // Create the hand.
     initializeGameData(game); // Initialize game data for client.
@@ -446,7 +505,21 @@ public class GameService {
                         new CurrentGameModel(!over, over ? null : game.getId()))));
   }
 
-  /** Regularly broadcasts player data to clients, to ensure they have an accurate model. */
+  /**
+   * Regularly broadcasts poker table data to clients, to ensure they have an accurate model.
+   */
+  @Scheduled(cron = "0/10 * * * * ?")
+  public void broadcastPokerTableUpdates() {
+    this.games.values().forEach(game -> {
+      if (game.getPhase() == GamePhase.Play) {
+        broadcastPokerTable(game);
+      }
+    });
+  }
+
+  /**
+   * Regularly broadcasts player data to clients, to ensure they have an accurate model.
+   */
   @Scheduled(cron = "0/10 * * * * ?")
   public void broadcastPlayerUpdates() {
     this.games
@@ -507,6 +580,18 @@ public class GameService {
         new GenericServerMessage<>(MessageType.Game, game));
   }
 
+  // TODO: ADD DOCS
+  @Async
+  @EventListener
+  public void handleWaitForPlayerEvent(final WaitForPlayerEvent waitForPlayerEvent) {
+    final GamePlayerModel player = waitForPlayerEvent.getPlayer();
+    final GameModel game = getUsersGameModel(player.getId());
+    final PokerTableModel table = getPokerTable(game);
+    table.setActingPlayer(table.getPlayers().indexOf(player));
+    table.startTurnTimer();
+    broadcastPokerTable(game);
+  }
+
   /**
    * Asynchronous event listener that handles HandActionEvents.
    *
@@ -518,9 +603,13 @@ public class GameService {
     log.debug("{} event detected by game service.", handActionEvent.getType());
     final GameModel game = games.get(handActionEvent.getGameId());
     final HandModel hand = handService.getHand(handActionEvent.getHandId());
+    final PokerTableModel table = getPokerTable(game);
     final int playerThatActed = game.getPlayers().indexOf(hand.getActing());
     final GamePlayerModel nextPlayerToAct =
         game.getPlayers().get((playerThatActed + 1) % game.getPlayers().size());
+
+    // Add card to players cards list
+    game.getPlayers().get(playerThatActed).getCards().add(handActionEvent.getCardDrawn());
 
     // Update acting field and update players
     game.getPlayers().get(playerThatActed).setActing(false);
@@ -546,6 +635,17 @@ public class GameService {
         appConfig.getGameTopic() + game.getId(),
         new GenericServerMessage<>(MessageType.ActingPlayerChanged, nextPlayerToAct));
 
+    // Broadcast the player who drew a card.
+    webSocketService.sendPublicMessage(
+        appConfig.getGameTopic() + game.getId(),
+        new GenericServerMessage<>(MessageType.GamePlayer, game.getPlayers().get(playerThatActed)));
+
+    // Broadcast table position of player who drew to assist client animation.
+    webSocketService.sendPublicMessage(
+        appConfig.getGameTopic() + game.getId(),
+        new GenericServerMessage<>(MessageType.CardDrawnByPlayer, playerThatActed + 1));
+    table.playedActed();
+
     /*
          Temporary logic here to help design game flow for later. Most of this will be gone. Just
          trying to work out the kinks with waiting for players to act, etc...
@@ -565,11 +665,24 @@ public class GameService {
       broadcastGameDataUpdate(game);
     } else if (currentRound <= game.getTotalHands()) {
       log.debug("Hand ended. Beginning new hand.");
+
       // Update game data
       setWinnerInGameData(game.getId(), handService.determineWinner(hand), game.getHands().size());
 
       // Update scores
       handService.endHand(game);
+
+      table.setDisplayHandSummary(true);
+      broadcastPokerTable(game);
+      // Pause for a few seconds TODO: Should refactor this.
+      try {
+        Thread.sleep(3000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+
+      table.setDisplayHandSummary(false);
+
       handService.newHand(game);
       broadcastGameUpdate(game);
       broadcastGameDataUpdate(game);
@@ -591,6 +704,7 @@ public class GameService {
   public void endGame(final GameModel game) {
     handService.endHand(game); // End hand.
     handService.removeDeck(game);
+    broadcastPokerTable(game);
     game.setPhase(GamePhase.Over); // Transition game state.
     gameRepository.save(game); // Save game document.
     games.remove(game.getId()); // Remove mapping.
@@ -602,6 +716,7 @@ public class GameService {
         new GenericServerMessage<>(MessageType.GamePhaseChanged, GamePhase.Over));
 
     gameIdToGameDataMap.remove(game.getId()); // Remove mapping.
+    gameIdToPokerTableMap.remove(game.getId()); // Remove mapping.
     updateCurrentGameTopic(game, true);
   }
 }

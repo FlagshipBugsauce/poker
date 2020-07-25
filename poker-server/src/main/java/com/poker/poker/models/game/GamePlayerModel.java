@@ -3,6 +3,8 @@ package com.poker.poker.models.game;
 import com.poker.poker.documents.UserDocument;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -29,10 +31,14 @@ public class GamePlayerModel extends PlayerModel {
   @Schema(description = "Size of the players bank roll.", implementation = BigDecimal.class)
   protected BigDecimal bankRoll;
 
+  @Schema(description = "Cards")
+  protected List<CardModel> cards;
+
   public GamePlayerModel(PlayerModel playerModel) {
     super(playerModel);
     this.away = false;
     this.acting = false;
+    this.cards = new ArrayList<>();
   }
 
   public GamePlayerModel(UserDocument userDocument) {

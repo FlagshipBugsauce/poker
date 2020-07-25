@@ -1,0 +1,38 @@
+<div [ngStyle]="{
+    'width': width + 'px',
+    'height': height + 'px'
+  }" class="poker-table-container mx-3">
+  <div [ngStyle]="{
+    'width': tableWidth + 'px',
+    'height': tableHeight + 'px',
+    'border-radius': tableBorderRadius + 'px',
+    'left': leftTableOffset + 'px',
+    'top': topTableOffset + 'px'
+  }" class="poker-table">
+    <div [ngStyle]="{
+      'top': logoPosition.top + 'px',
+      'left': logoPosition.left + 'px'
+    }" class="table-logo">
+      <img [ngStyle]="{'width': logoPosition.logoWidth + 'px'}" [src]="'assets/icons/aces.svg'"
+           alt="">
+    </div>
+    <pkr-deck [ngStyle]="{
+      'position': 'absolute',
+      'top': deckPosition.top + 'px',
+      'left': deckPosition.left + 'px'
+    }" [width]="deckPosition.width"></pkr-deck>
+    <pkr-player-box
+      *ngFor="let playerBox of playerBoxes"
+      [ngStyle]="{
+      'position': 'absolute',
+      'top': playerBox.top + 'px',
+      'left': playerBox.left + 'px'
+    }"
+      [player]="playerBox.number"></pkr-player-box>
+  </div>
+  <div class="button-box">
+    <span class="turn-timer">{{timeToAct}}</span>
+    <button (click)="away()" [disabled]="(away$ | async)" class="btn btn-success">Away</button>
+    <button (click)="draw()" [disabled]="!(acting$ | async)" class="btn btn-success">Draw</button>
+  </div>
+</div>

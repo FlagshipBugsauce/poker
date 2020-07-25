@@ -217,6 +217,9 @@ public class HandService {
     log.debug("Creating new hand for game {}.", game.getId());
     final HandModel hand = new HandModel(UUID.randomUUID(), game.getId(), new ArrayList<>(), null);
 
+    // Clear cards list
+    game.getPlayers().forEach(p -> p.setCards(new ArrayList<>()));
+
     // Adding hand to list of hands in game document.
     game.getHands().add(hand.getId());
 
@@ -272,7 +275,7 @@ public class HandService {
     try {
       // Wait for time defined in config if player's status is active, otherwise wait for 500 ms.
       Thread.sleep(
-          waitForPlayerEvent.getPlayer().isAway() ? 500 : appConfig.getTimeToActInMillis());
+          waitForPlayerEvent.getPlayer().isAway() ? 100 : appConfig.getTimeToActInMillis());
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
@@ -342,7 +345,7 @@ public class HandService {
         new SystemChatMessageEvent(this, hand.getGameId(), toastMessage));
 
     applicationEventPublisher.publishEvent(
-        new HandActionEvent(this, hand.getGameId(), hand.getId(), HandAction.Draw));
+        new HandActionEvent(this, hand.getGameId(), hand.getId(), HandAction.Draw, card));
     return new ApiSuccessModel("Card was drawn successfully.");
   }
 
@@ -381,27 +384,29 @@ public class HandService {
   /**
    * Ends the active hand associated with the specified game.
    *
-   * @param gameModel The game associated with the hand being ended.
+   * @param game The game associated with the hand being ended.
    * @throws BadRequestException If there is no active hand associated with the game specified.
    */
-  public void endHand(final GameModel gameModel) throws BadRequestException {
+  public void endHand(final GameModel game) throws BadRequestException {
     // Get the ID of the most recent hand in the game.
-    final UUID handId = gameModel.getHands().get(gameModel.getHands().size() - 1);
+    final UUID handId = game.getHands().get(game.getHands().size() - 1);
 
     // Verify that this is an active hand.
     getHand(handId); // This will throw if the hand does not exist
-    getHand(gameModel);
+    getHand(game);
+
+    // Empty cards list for each player
 
     applicationEventPublisher.publishEvent(
         new PublishMessageEvent<>(
             this,
-            appConfig.getGameTopic() + gameModel.getId() + "/drawn-cards",
+            appConfig.getGameTopic() + game.getId() + "/drawn-cards",
             new CardModel() // Send a blank card model to indicate the hand is over.
-            ));
+        ));
 
     // Save the hand to the database.
     handRepository.save(hands.remove(handId));
-    gameIdToHandIdMap.remove(gameModel.getId());
-    gameModel.getPlayers().forEach(p -> userIdToGameIdMap.remove(p.getId()));
+    gameIdToHandIdMap.remove(game.getId());
+    game.getPlayers().forEach(p -> userIdToGameIdMap.remove(p.getId()));
   }
 }

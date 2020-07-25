@@ -1,15 +1,9 @@
+/* tslint:disable */
 import {Component, Input, OnInit} from '@angular/core';
 import {CardModel} from '../../api/models';
-import {CardService} from '../card.service';
+import {CardService, CardSize} from '../card.service';
 import {CardSuit, CardValue} from '../models/card.enum';
 
-export enum CardSize {
-  ExtraSmall = 'xs',
-  Small = 'sm',
-  Medium = 'md',
-  Large = 'lg',
-  ExtraLarge = 'xl'
-}
 
 @Component({
   selector: 'pkr-card',
@@ -26,6 +20,9 @@ export class CardComponent implements OnInit {
    * Size of the card.
    */
   @Input() size: CardSize;
+  @Input() pxSize: number;
+  @Input() faceDown: boolean = false;
+  public rotateY: number = 0;
 
   constructor(public cardService: CardService) {
   }

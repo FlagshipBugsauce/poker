@@ -18,6 +18,7 @@ import {
   HandModel,
   LobbyModel,
   LobbyPlayerModel,
+  PokerTableModel,
   ToastModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
@@ -69,6 +70,14 @@ export const gameToastReceived = createAction(
 export const unsubscribeFromGameTopics =
   createAction('[Game Components] UnsubscribeFromGameTopics');
 
+// Poker Table:
+export const gamePlayerUpdated = createAction(
+  '[WebSocketService] GamePlayerUpdated', props<GamePlayerModel>());
+export const pokerTableUpdate = createAction(
+  '[WebSocketService] PokerTableUpdate', props<PokerTableModel>());
+export const requestPokerTableUpdate = createAction(
+  '[WebSocketService] RequestPokerTableUpdate');
+
 // Lobby Actions
 export const playerReadyToggled = createAction(
   '[WebSocketService] PlayerReadyToggled', props<LobbyPlayerModel>());
@@ -94,6 +103,7 @@ export const updateCurrentGame = createAction(
   '[TopBar Component] UpdateCurrentGame', props<CurrentGameModel>());
 export const requestCurrentGameUpdate = createAction(
   '[TopBar Component] RequestCurrentGameUpdate', props<ActionModel>());
+export const requestGameModelUpdate = createAction('[PokerTable] RequestGameUpdate');
 
 // Hand Actions
 export const handActionPerformed = createAction(
@@ -103,6 +113,8 @@ export const actingPlayerChanged = createAction(
 export const drawCard = createAction('[Play Component] DrawCard');
 export const cardDrawn = createAction('[WebSocketService] CardDrawn', props<CardModel>());
 export const handOver = createAction('[WebSocketService] HandOver');
+export const cardDrawnByPlayer = createAction(
+  '[Poker Table] CardDrawnByPlayer', props<{ position: number }>());
 
 // Chat Actions
 export const startChat = createAction('[ChatBox] StartChat', props<{ gameId: string }>());

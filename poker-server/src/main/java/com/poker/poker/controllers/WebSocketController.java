@@ -8,17 +8,18 @@ import com.poker.poker.events.CurrentGameEvent;
 import com.poker.poker.events.JoinGameEvent;
 import com.poker.poker.events.LeaveGameEvent;
 import com.poker.poker.events.RejoinGameEvent;
-import com.poker.poker.models.WebSocketUpdateModel;
 import com.poker.poker.models.game.GameParameterModel;
 import com.poker.poker.models.websocket.ActionModel;
 import com.poker.poker.models.websocket.ClientMessageModel;
 import com.poker.poker.models.websocket.GenericServerMessage;
+import com.poker.poker.models.websocket.WebSocketUpdateModel;
 import com.poker.poker.services.JwtService;
 import com.poker.poker.services.UserService;
 import com.poker.poker.services.WebSocketService;
 import com.poker.poker.services.game.GameService;
 import com.poker.poker.services.game.HandService;
 import com.poker.poker.services.game.LobbyService;
+import com.poker.poker.validation.exceptions.BadRequestException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,31 +46,38 @@ public class WebSocketController {
   public void getUpdate(final WebSocketUpdateModel updateModel) {
     log.debug(
         "Sending update of type: {} to topic: {}.", updateModel.getType(), updateModel.getTopic());
-    final Object data;
-    switch (updateModel.getType()) {
-      case GameList:
-        data = lobbyService.getLobbyList();
-        break;
-      case Lobby:
-        data = lobbyService.getLobbyModel(updateModel.getId());
-        break;
-      case Game:
-        data = gameService.getGameModel(updateModel.getId());
-        break;
-      case Hand:
-        data = handService.getHand(gameService.getGameModel(updateModel.getId()));
-        break;
-      case GameData:
-        data = gameService.getGameData(updateModel.getId());
-        break;
-      case PlayerData:
-        data = gameService.getPlayerData(updateModel.getId());
-        break;
-      default:
-        data = null;
+    try {
+      final Object data;
+      switch (updateModel.getType()) {
+        case GameList:
+          data = lobbyService.getLobbyList();
+          break;
+        case Lobby:
+          data = lobbyService.getLobbyModel(updateModel.getId());
+          break;
+        case Game:
+          data = gameService.getGameModel(updateModel.getId());
+          break;
+        case Hand:
+          data = handService.getHand(gameService.getGameModel(updateModel.getId()));
+          break;
+        case GameData:
+          data = gameService.getGameData(updateModel.getId());
+          break;
+        case PlayerData:
+          data = gameService.getPlayerData(updateModel.getId());
+          break;
+        case PokerTable:
+          data = gameService.getPokerTable(updateModel.getId());
+          break;
+        default:
+          data = null;
+      }
+      webSocketService.sendPublicMessage(
+          updateModel.getTopic(), new GenericServerMessage<>(updateModel.getType(), data));
+    } catch (BadRequestException e) {
+      log.error("Error retrieving data on {} update request.", updateModel.getType());
     }
-    webSocketService.sendPublicMessage(
-        updateModel.getTopic(), new GenericServerMessage<>(updateModel.getType(), data));
   }
 
   @MessageMapping("/chat/send")

@@ -1,4 +1,5 @@
 /* tslint:disable */
+import {CardModel} from './card-model';
 
 /**
  * Model representing a player in a game.
@@ -19,6 +20,11 @@ export interface GamePlayerModel {
    * Size of the players bank roll.
    */
   bankRoll?: number;
+
+  /**
+   * Cards
+   */
+  cards?: Array<CardModel>;
 
   /**
    * User's first name.

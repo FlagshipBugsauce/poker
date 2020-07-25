@@ -8,6 +8,7 @@ import {
   GamePlayerModel,
   HandModel,
   LobbyModel,
+  PokerTableModel,
   ToastModel,
   UserModel
 } from '../../api/models';
@@ -71,4 +72,8 @@ export interface ChatStateContainer {
 export interface ChatContainer {
   generalChat?: ChatMessageModel;
   gameChat?: ChatMessageModel;
+}
+
+export interface PokerTableStateContainer {
+  tableState: PokerTableModel;
 }

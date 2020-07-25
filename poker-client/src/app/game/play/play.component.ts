@@ -167,7 +167,8 @@ export class PlayComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Begins a timer which will display how much time a player has to perform an action, before the action is performed for them.
+   * Begins a timer which will display how much time a player has to perform an action, before the
+   * action is performed for them.
    */
   private async startTurnTimer(): Promise<void> {
     const numHandActions = this.hand.actions.length;

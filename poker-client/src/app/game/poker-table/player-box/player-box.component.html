@@ -1,0 +1,33 @@
+<div class="player-box-container">
+  <div class="player-box-avatar">
+    {{initials}}
+  </div>
+  <div class="card-box">
+    <div *ngIf="cards[0]" class="card-container left">
+      <pkr-card #card1 [card]="cards[0]" size="md"></pkr-card>
+    </div>
+    <!--    <div class="card-container right">-->
+    <!--      <pkr-card size="md" [card]="cards[1]" [faceDown]="!dealer"></pkr-card>-->
+    <!--    </div>-->
+  </div>
+  <div class="name-box">
+    <div class="name">
+      {{name}}
+    </div>
+    <div class="chips">
+      {{bankRoll | currency}} {{score}}
+    </div>
+  </div>
+  <div *ngIf="true" [ngStyle]="{
+      'left': iconBoxPosition.left + 'px',
+      'top': iconBoxPosition.top + 'px'
+    }" class="icon-containers">
+    <img *ngIf="dealer" [src]="dealerButtonPath" alt="" ngbTooltip="Dealer">
+    <img *ngIf="away" [ngStyle]="{
+      'position': 'absolute',
+      'top': awayIconPosition.top + 'px',
+      'left': awayIconPosition.left + 'px'
+    }" [src]="awayIconPath" alt="" ngbTooltip="Away">
+  </div>
+
+</div>

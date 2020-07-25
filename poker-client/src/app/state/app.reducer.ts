@@ -8,6 +8,7 @@ import {
   gameListUpdated,
   gameModelUpdated,
   gamePhaseChanged,
+  gamePlayerUpdated,
   gameToastReceived,
   generalChatMessageReceived,
   handActionPerformed,
@@ -24,6 +25,7 @@ import {
   playerJoinedLobby,
   playerLeftLobby,
   playerReadyToggled,
+  pokerTableUpdate,
   readyUp,
   signInFail,
   signInSuccess,
@@ -44,6 +46,7 @@ import {
   HandModel,
   LobbyModel,
   LobbyPlayerModel,
+  PokerTableModel,
   ToastModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
@@ -129,6 +132,16 @@ const gameModelReducerInternal = createReducer<GameModel>(
     return ({...state, hands});
   }),
   on(playerAwayToggled, (state: GameModel, player: GamePlayerModel) => {
+    const players: GamePlayerModel[] = state
+    .players.map(p => p.id === player.id ? player : ({...p}));
+    return ({...state, players});
+  }),
+  on(gamePlayerUpdated, (state: GameModel, player: GamePlayerModel) => {
+    const players: GamePlayerModel[] = state
+    .players.map(p => p.id === player.id ? player : ({...p}));
+    return ({...state, players});
+  }),
+  on(actingPlayerChanged, (state: GameModel, player: GamePlayerModel) => {
     const players: GamePlayerModel[] = state
     .players.map(p => p.id === player.id ? player : ({...p}));
     return ({...state, players});
@@ -283,6 +296,20 @@ const chatReducerInternal = createReducer<ChatContainer>(
   on(closeChat, (state: ChatContainer) => chatInitialState)
 );
 
+export const pokerTableInitialState: PokerTableModel = {
+  players: []
+} as PokerTableModel;
+
 export function chatReducer(state, action) {
   return chatReducerInternal(state, action);
+}
+
+const pokerTableReducerInternal = createReducer<PokerTableModel>(
+  pokerTableInitialState,
+  on(pokerTableUpdate,
+    (state: PokerTableModel, table: PokerTableModel) => table)
+);
+
+export function pokerTableReducer(state, action) {
+  return pokerTableReducerInternal(state, action);
 }
