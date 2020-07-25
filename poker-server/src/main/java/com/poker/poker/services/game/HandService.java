@@ -402,7 +402,7 @@ public class HandService {
             this,
             appConfig.getGameTopic() + game.getId() + "/drawn-cards",
             new CardModel() // Send a blank card model to indicate the hand is over.
-        ));
+            ));
 
     // Save the hand to the database.
     handRepository.save(hands.remove(handId));

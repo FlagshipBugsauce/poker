@@ -148,7 +148,7 @@ public class LobbyService {
   /**
    * Publishes a message to system chat for specified lobby.
    *
-   * @param lobby   The lobby the message should be published to.
+   * @param lobby The lobby the message should be published to.
    * @param message The message to publish.
    */
   public void publishSystemChatMessageEvent(final LobbyModel lobby, final String message) {
@@ -158,7 +158,7 @@ public class LobbyService {
   /**
    * Publishes a message to system chat for specified game.
    *
-   * @param game    The lobby the message should be published to.
+   * @param game The lobby the message should be published to.
    * @param message The message to publish.
    */
   public void publishSystemChatMessageEvent(final GameModel game, final String message) {
@@ -168,12 +168,11 @@ public class LobbyService {
   /**
    * Publishes a message to system chat for specified game ID.
    *
-   * @param gameId  The lobby the message should be published to.
+   * @param gameId The lobby the message should be published to.
    * @param message The message to publish.
    */
   public void publishSystemChatMessageEvent(final UUID gameId, final String message) {
-    applicationEventPublisher.publishEvent(
-        new SystemChatMessageEvent(this, gameId, message));
+    applicationEventPublisher.publishEvent(new SystemChatMessageEvent(this, gameId, message));
   }
 
   /**
@@ -258,18 +257,17 @@ public class LobbyService {
     final LobbyModel lobby = getUsersLobbyModel(user.getId());
 
     // Find the playerModel, throw if not found, otherwise, remove player from game.
-    final LobbyPlayerModel player = lobby.getPlayers().stream()
-        .filter(p -> p.getId().equals(user.getId()))
-        .findFirst()
-        .orElseThrow(gameConstants::getReadyStatusUpdateFailException);
+    final LobbyPlayerModel player =
+        lobby.getPlayers().stream()
+            .filter(p -> p.getId().equals(user.getId()))
+            .findFirst()
+            .orElseThrow(gameConstants::getReadyStatusUpdateFailException);
 
     player.setReady(!player.isReady());
     final String message =
         String.format(
             "%s %s %s ready.",
-            player.getFirstName(),
-            player.getLastName(),
-            player.isReady() ? "is" : "is not");
+            player.getFirstName(), player.getLastName(), player.isReady() ? "is" : "is not");
 
     publishSystemChatMessageEvent(lobby, message);
 

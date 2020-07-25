@@ -10,7 +10,4 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-public class HandService2 {
-
-
-}
+public class HandService2 {}

@@ -56,19 +56,13 @@ public class GameService {
 
   private final UserRepository userRepository;
 
-  /**
-   * Mapping of user Id to game Id.
-   */
+  /** Mapping of user Id to game Id. */
   private final Map<UUID, UUID> userIdToGameIdMap;
 
-  /**
-   * Mapping of game Id to game document.
-   */
+  /** Mapping of game Id to game document. */
   private final Map<UUID, GameModel> games;
 
-  /**
-   * Mapping of game Id to game data.
-   */
+  /** Mapping of game Id to game data. */
   private final Map<UUID, DrawGameDataContainerModel> gameIdToGameDataMap;
 
   private final Map<UUID, PokerTableModel> gameIdToPokerTableMap;
@@ -90,13 +84,13 @@ public class GameService {
   public CurrentGameModel getCurrentGameModel(final UUID userId) {
     final CurrentGameModel currentGameModel = new CurrentGameModel();
 
-//    if (data.isUserInGame(userId) && data.getUsersGame(userId).getPhase() == GamePhase.Play) {
-//      currentGameModel.setId(data.getUsersGame(userId).getId());
-//      currentGameModel.setInGame(true);
-//    } else {
-//      currentGameModel.setId(null);
-//      currentGameModel.setInGame(false);
-//    }
+    //    if (data.isUserInGame(userId) && data.getUsersGame(userId).getPhase() == GamePhase.Play) {
+    //      currentGameModel.setId(data.getUsersGame(userId).getId());
+    //      currentGameModel.setInGame(true);
+    //    } else {
+    //      currentGameModel.setId(null);
+    //      currentGameModel.setInGame(false);
+    //    }
 
     if (userIdToGameIdMap.get(userId) != null
         && games.get(userIdToGameIdMap.get(userId)) != null
@@ -148,13 +142,8 @@ public class GameService {
   }
 
   public void initializePokerData(final GameModel game) {
-    gameIdToPokerTableMap.put(game.getId(), new PokerTableModel(
-        game.getPlayers(),
-        0,
-        -1,
-        0,
-        false,
-        0));
+    gameIdToPokerTableMap.put(
+        game.getId(), new PokerTableModel(game.getPlayers(), 0, -1, 0, false, 0));
   }
 
   public void broadcastPokerTable(final GameModel game) {
@@ -505,21 +494,20 @@ public class GameService {
                         new CurrentGameModel(!over, over ? null : game.getId()))));
   }
 
-  /**
-   * Regularly broadcasts poker table data to clients, to ensure they have an accurate model.
-   */
+  /** Regularly broadcasts poker table data to clients, to ensure they have an accurate model. */
   @Scheduled(cron = "0/10 * * * * ?")
   public void broadcastPokerTableUpdates() {
-    this.games.values().forEach(game -> {
-      if (game.getPhase() == GamePhase.Play) {
-        broadcastPokerTable(game);
-      }
-    });
+    this.games
+        .values()
+        .forEach(
+            game -> {
+              if (game.getPhase() == GamePhase.Play) {
+                broadcastPokerTable(game);
+              }
+            });
   }
 
-  /**
-   * Regularly broadcasts player data to clients, to ensure they have an accurate model.
-   */
+  /** Regularly broadcasts player data to clients, to ensure they have an accurate model. */
   @Scheduled(cron = "0/10 * * * * ?")
   public void broadcastPlayerUpdates() {
     this.games

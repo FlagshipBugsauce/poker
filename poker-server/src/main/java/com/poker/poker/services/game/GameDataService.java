@@ -29,10 +29,9 @@ public class GameDataService {
   private final Map<UUID, DeckModel> decks;
   private final Map<UUID, PokerTableModel> tables;
 
-  /**
-   * Mapping from user ID to game ID. Can be used to retrieve the game a user is in.
-   */
+  /** Mapping from user ID to game ID. Can be used to retrieve the game a user is in. */
   private final Map<UUID, UUID> userIdToGameIdMap;
+
   private final Map<UUID, UUID> gameIdToHandIdMap;
 
   public void newGame(final GameModel game) {

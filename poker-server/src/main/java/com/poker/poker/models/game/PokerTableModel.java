@@ -10,26 +10,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PokerTableModel {
 
-  /**
-   * List of players at the table. Contains player names, bank roll, score, etc...
-   */
+  /** List of players at the table. Contains player names, bank roll, score, etc... */
   private List<GamePlayerModel> players;
 
-  /**
-   * Position of the player who is acting.
-   */
+  /** Position of the player who is acting. */
   private int actingPlayer;
 
   private int playerThatActed;
 
-  /**
-   * Position of the dealer.
-   */
+  /** Position of the dealer. */
   private int dealer;
 
-  /**
-   * Summary of winning hand is display
-   */
+  /** Summary of winning hand is display */
   private boolean displayHandSummary;
 
   /**
