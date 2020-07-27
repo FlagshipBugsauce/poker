@@ -95,8 +95,7 @@ export const gamePhaseFeature =
 /** Game state selector. */
 export const selectGamePhase = createSelector(
   gamePhaseFeature,
-  (state: GameModel) => state.phase
-);
+  (state: GameModel) => state.phase);
 
 export const gamePlayersFeature =
   createFeatureSelector<GameStateContainer, GameModel>('gameModel');

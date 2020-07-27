@@ -1,6 +1,8 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {PlayerBoxComponent} from './player-box.component';
+import {SharedModule} from '../../../shared/shared.module';
+import {provideMockStore} from '@ngrx/store/testing';
 
 describe('PlayerBoxComponent', () => {
   let component: PlayerBoxComponent;
@@ -8,7 +10,13 @@ describe('PlayerBoxComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [PlayerBoxComponent]
+      declarations: [PlayerBoxComponent],
+      providers: [
+        provideMockStore()
+      ],
+      imports: [
+        SharedModule
+      ]
     })
     .compileComponents();
   }));

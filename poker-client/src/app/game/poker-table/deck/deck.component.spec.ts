@@ -1,6 +1,7 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {DeckComponent} from './deck.component';
+import {provideMockStore} from '@ngrx/store/testing';
 
 describe('DeckComponent', () => {
   let component: DeckComponent;
@@ -8,7 +9,9 @@ describe('DeckComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [DeckComponent]
+      declarations: [DeckComponent],
+      imports: [],
+      providers: [provideMockStore()]
     })
     .compileComponents();
   }));
