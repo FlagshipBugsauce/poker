@@ -1,0 +1,50 @@
+:host {
+  .poker-table-container {
+    background: linear-gradient(180deg, rgb(104, 6, 6) 0%, rgb(28, 2, 2) 100%);
+    border: 2px solid rgb(17, 17, 17);
+    border-radius: 3px;
+    position: relative;
+
+    .poker-table {
+      background: #28a745;
+      background: radial-gradient(
+          ellipse,
+          rgba(40, 167, 69, 1) 0%,
+          rgb(22, 94, 41) 70%,
+          rgb(0, 0, 0) 100%);
+      border: 20px solid rgb(47, 30, 6);
+      position: absolute;
+      box-shadow: 0 0 100px 50px #000000;
+
+      .table-logo {
+        position: absolute;
+
+        img {
+          opacity: 0.2;
+        }
+      }
+    }
+
+    .button-box {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+
+      button {
+        width: 100px;
+        margin: 5px;
+      }
+
+      .turn-timer {
+        position: absolute;
+        right: 230px;
+        bottom: -1px;
+        color: white;
+        font-size: 40px;
+        font-weight: bolder;
+        padding-top: 5px;
+        padding-right: 10px;
+      }
+    }
+  }
+}

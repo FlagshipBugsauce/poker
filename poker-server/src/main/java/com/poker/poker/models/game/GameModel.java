@@ -33,9 +33,14 @@ public class GameModel {
   @ArraySchema(schema = @Schema(implementation = GamePlayerModel.class))
   private List<GamePlayerModel> players;
 
+  // TODO: Most likely deprecated, can probably remove...
   /** List of hand IDs, up to and including the current hand. */
   @ArraySchema(schema = @Schema(implementation = UUID.class))
   private List<UUID> hands;
+
+  /** The current hand being played in the game. */
+  @Schema(description = "Current hand being played.", example = "5")
+  private int currentHand;
 
   /** The total number of hands that will be played in the game. */
   @Schema(description = "Total number of hands in the game.", example = "5")
@@ -44,4 +49,8 @@ public class GameModel {
   /** Amount of time each player has to act. */
   @Schema(description = "Amount of time each player has to act.", example = "17")
   private int timeToAct;
+
+  public void incrementCurrentHand() {
+    currentHand++;
+  }
 }

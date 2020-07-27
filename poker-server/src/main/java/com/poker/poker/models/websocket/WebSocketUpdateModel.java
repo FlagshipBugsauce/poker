@@ -1,4 +1,4 @@
-package com.poker.poker.models;
+package com.poker.poker.models.websocket;
 
 import com.poker.poker.models.enums.MessageType;
 import io.swagger.v3.oas.annotations.media.Schema;

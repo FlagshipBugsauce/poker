@@ -13,5 +13,9 @@ export enum MessageType {
   HandStarted = 'HandStarted',
   PlayerAwayToggled = 'PlayerAwayToggled',
   HandActionPerformed = 'HandActionPerformed',
-  ActingPlayerChanged = 'ActingPlayerChanged'
+  ActingPlayerChanged = 'ActingPlayerChanged',
+  GamePlayer = 'GamePlayer',
+  CardDrawnByPlayer = 'CardDrawnByPlayer',
+  StartTurnTimer = 'StartTurnTimer',
+  PokerTable = 'PokerTable'
 }

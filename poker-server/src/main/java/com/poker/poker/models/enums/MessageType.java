@@ -15,5 +15,9 @@ public enum MessageType {
   HandStarted,
   PlayerAwayToggled,
   HandActionPerformed,
-  ActingPlayerChanged
+  ActingPlayerChanged,
+  GamePlayer,
+  CardDrawnByPlayer,
+  StartTurnTimer,
+  PokerTable
 }

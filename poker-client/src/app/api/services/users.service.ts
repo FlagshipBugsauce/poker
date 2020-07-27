@@ -143,9 +143,64 @@ export class UsersService extends BaseService {
   }
 
   /**
+   * Path part for operation authorize
+   */
+  static readonly AuthorizePath = '/user/auth';
+
+  /**
    * Path part for operation authorizeWithJwt
    */
   static readonly AuthorizeWithJwtPath = '/user/auth-with-jwt';
+
+  /**
+   * Authenticate.
+   *
+   * The client must call this endpoint in order to obtain a JWT, which must be passed in the header of most requests.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `authorize()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  authorize$Response(params: {
+    body: AuthRequestModel
+  }): Observable<StrictHttpResponse<AuthResponseModel>> {
+
+    const rb = new RequestBuilder(this.rootUrl, UsersService.AuthorizePath, 'post');
+    if (params) {
+
+
+      rb.body(params.body, 'application/json');
+    }
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<AuthResponseModel>;
+      })
+    );
+  }
+
+  /**
+   * Authenticate.
+   *
+   * The client must call this endpoint in order to obtain a JWT, which must be passed in the header of most requests.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `authorize$Response()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  authorize(params: {
+    body: AuthRequestModel
+  }): Observable<AuthResponseModel> {
+
+    return this.authorize$Response(params).pipe(
+      map((r: StrictHttpResponse<AuthResponseModel>) => r.body as AuthResponseModel)
+    );
+  }
 
   /**
    * Authenticate With JWT.
@@ -158,7 +213,7 @@ export class UsersService extends BaseService {
    * This method sends `application/json` and handles request body of type `application/json`.
    */
   authorizeWithJwt$Response(params: {
-      body: JwtAuthRequestModel
+    body: JwtAuthRequestModel
   }): Observable<StrictHttpResponse<AuthResponseModel>> {
 
     const rb = new RequestBuilder(this.rootUrl, UsersService.AuthorizeWithJwtPath, 'post');
@@ -193,61 +248,6 @@ export class UsersService extends BaseService {
   }): Observable<AuthResponseModel> {
 
     return this.authorizeWithJwt$Response(params).pipe(
-      map((r: StrictHttpResponse<AuthResponseModel>) => r.body as AuthResponseModel)
-    );
-  }
-
-  /**
-   * Path part for operation authorize
-   */
-  static readonly AuthorizePath = '/user/auth';
-
-  /**
-   * Authenticate.
-   *
-   * The client must call this endpoint in order to obtain a JWT, which must be passed in the header of most requests.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `authorize()` instead.
-   *
-   * This method sends `application/json` and handles request body of type `application/json`.
-   */
-  authorize$Response(params: {
-      body: AuthRequestModel
-  }): Observable<StrictHttpResponse<AuthResponseModel>> {
-
-    const rb = new RequestBuilder(this.rootUrl, UsersService.AuthorizePath, 'post');
-    if (params) {
-
-
-      rb.body(params.body, 'application/json');
-    }
-    return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<AuthResponseModel>;
-      })
-    );
-  }
-
-  /**
-   * Authenticate.
-   *
-   * The client must call this endpoint in order to obtain a JWT, which must be passed in the header of most requests.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `authorize$Response()` instead.
-   *
-   * This method sends `application/json` and handles request body of type `application/json`.
-   */
-  authorize(params: {
-      body: AuthRequestModel
-  }): Observable<AuthResponseModel> {
-
-    return this.authorize$Response(params).pipe(
       map((r: StrictHttpResponse<AuthResponseModel>) => r.body as AuthResponseModel)
     );
   }

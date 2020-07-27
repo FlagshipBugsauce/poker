@@ -5,6 +5,11 @@ import {GamePlayerModel} from './game-player-model';
  * Information that defines the game state, such as phase, players, etc...
  */
 export interface GameModel {
+
+  /**
+   * Current hand being played.
+   */
+  currentHand?: number;
   hands?: Array<string>;
 
   /**

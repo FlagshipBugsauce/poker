@@ -9,6 +9,10 @@ import {HandComponent} from './hand/hand.component';
 import {PlayComponent} from './play/play.component';
 import {EndComponent} from './end/end.component';
 import {PopupAfkComponent} from './popup-afk/popup-afk.component';
+import {PokerTableComponent} from './poker-table/poker-table.component';
+import {PlayerBoxComponent} from './poker-table/player-box/player-box.component';
+import {DeckComponent} from './poker-table/deck/deck.component';
+import {HandSummaryComponent} from './poker-table/hand-summary/hand-summary.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +23,14 @@ import {PopupAfkComponent} from './popup-afk/popup-afk.component';
     HandComponent,
     PlayComponent,
     EndComponent,
-    PopupAfkComponent
+    PopupAfkComponent,
+    PokerTableComponent,
+    PlayerBoxComponent,
+    DeckComponent,
+    HandSummaryComponent
+  ],
+  exports: [
+    PokerTableComponent
   ],
   imports: [
     CommonModule,

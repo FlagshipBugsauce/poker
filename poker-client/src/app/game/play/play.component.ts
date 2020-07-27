@@ -9,21 +9,16 @@ import {
   PlayerDataStateContainer
 } from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
-import {drawCard, setAwayStatus} from '../../state/app.actions';
+import {drawCard} from '../../state/app.actions';
 import {
-  selectActingStatus,
-  selectAwayStatus,
-  selectDrawnCards,
   selectGameData,
   selectGameModel,
-  selectHandModel,
   selectJwt,
   selectLoggedInUser,
 } from '../../state/app.selector';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
-import {GamePhase} from '../../shared/models/game-phase.enum';
 
 @Component({
   selector: 'pkr-play',
@@ -103,60 +98,20 @@ export class PlayComponent implements OnInit, OnDestroy {
     this.gameDataStore.select(selectGameData)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((data: DrawGameDataModel[]) => {
-      // TODO: Investigate why data is sometimes undefined.
-      this.gameData = data ? data : this.gameData;
-      if (this.numbers.length === 0 && data && data[0] && data[0].draws) {
-        this.numbers = Array(data[0].draws.length).fill('').map((v, i) => i + 1);
-      }
+      // // TODO: Investigate why data is sometimes undefined.
+      // this.gameData = data ? data : this.gameData;
+      // if (this.numbers.length === 0 && data && data[0] && data[0].draws) {
+      //   this.numbers = Array(data[0].draws.length).fill('').map((v, i) => i + 1);
+      // }
     });
 
     this.gameStore.select(selectGameModel)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((game: GameModel) => this.gameModel = game);
 
-    this.handStore.select(selectHandModel)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((hand: HandModel) => {
-      this.hand = hand;
-      // TODO: Timer needs a better trigger
-      if (this.hand.acting && this.hand.acting.id) {
-        if (this.gameModel.phase !== GamePhase.Over) {
-          this.startTurnTimer().then();
-        }
-      }
-    });
-
-    this.playerDataStore.select(selectActingStatus)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((acting: boolean) => this.canRoll = acting);
-
-    this.playerDataStore.select(selectAwayStatus)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((status: boolean) => {
-      this.awayStatus = status;
-      if (this.awayStatus && this.afkPopup) {
-        this.afkPopup.open();
-      }
-    });
-
-    this.drawnCardsStore.select(selectDrawnCards)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((cards: CardModel[]) => this.drawnCards = cards);
-  }
-
-  /**
-   * Toggles the players away status.
-   */
-  public toggleStatus(): void {
-    this.playerDataStore.dispatch(setAwayStatus({away: !this.awayStatus}));
-  }
-
-  /**
-   * Checks if player with specified ID is active.
-   * @param id ID being checked.
-   */
-  public isPlayerAway(id: string): boolean {
-    return this.gameModel.players.filter(player => player.id === id)[0].away;
+    // this.drawnCardsStore.select(selectDrawnCards)
+    // .pipe(takeUntil(this.ngDestroyed$))
+    // .subscribe((cards: CardModel[]) => this.drawnCards = cards);
   }
 
   /**
@@ -164,21 +119,5 @@ export class PlayComponent implements OnInit, OnDestroy {
    */
   public draw(): void {
     this.appStore.dispatch(drawCard());
-  }
-
-  /**
-   * Begins a timer which will display how much time a player has to perform an action, before the action is performed for them.
-   */
-  private async startTurnTimer(): Promise<void> {
-    const numHandActions = this.hand.actions.length;
-    let currentTime = this.hand.acting.away ? 1 : this.gameModel.timeToAct;
-    while (currentTime >= 0) {
-      this.timeToAct = currentTime;
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      if (this.hand && this.hand.actions && this.hand.actions.length !== numHandActions) {
-        break;
-      }
-      this.timeToAct = --currentTime;
-    }
   }
 }

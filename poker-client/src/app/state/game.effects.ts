@@ -12,6 +12,8 @@ import {
   leaveLobby,
   readyUp,
   rejoinGame,
+  requestGameModelUpdate,
+  requestPokerTableUpdate,
   setAwayStatus,
   startGame,
   unsubscribeFromGameTopics
@@ -152,6 +154,16 @@ export class GameEffects {
       this.requestGameTopicUpdatesInPlayPhase();
       this.router.navigate([`${APP_ROUTES.GAME_PREFIX.path}/${action.gameId}`]).then();
     })
+  ), {dispatch: false});
+
+  requestUpdate$ = createEffect(() => this.actions$.pipe(
+    ofType(requestGameModelUpdate),
+    tap(() => this.webSocketService.requestGameTopicUpdate(MessageType.Game))),
+    {dispatch: false});
+
+  requestPokerTableUpdate$ = createEffect(() => this.actions$.pipe(
+    ofType(requestPokerTableUpdate),
+    tap(() => this.webSocketService.requestGameTopicUpdate(MessageType.PokerTable))
   ), {dispatch: false});
 
   constructor(

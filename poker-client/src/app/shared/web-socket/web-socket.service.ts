@@ -14,7 +14,8 @@ import {
   GameStateContainer,
   HandStateContainer,
   LobbyStateContainer,
-  PlayerDataStateContainer
+  PlayerDataStateContainer,
+  PokerTableStateContainer
 } from '../models/app-state.model';
 import {MessageType} from '../models/message-types.enum';
 import {
@@ -24,6 +25,7 @@ import {
   gameListUpdated,
   gameModelUpdated,
   gamePhaseChanged,
+  gamePlayerUpdated,
   handActionPerformed,
   handCompleted,
   handModelUpdated,
@@ -34,6 +36,7 @@ import {
   playerJoinedLobby,
   playerLeftLobby,
   playerReadyToggled,
+  pokerTableUpdate,
   updateCurrentGame
 } from '../../state/app.actions';
 import {selectLoggedInUser} from '../../state/app.selector';
@@ -78,7 +81,8 @@ export class WebSocketService implements OnDestroy {
     private lobbyStore: Store<LobbyStateContainer>,
     private gameListStore: Store<GameListStateContainer>,
     private playerDataStore: Store<PlayerDataStateContainer>,
-    private drawnCardsStore: Store<DrawnCardsStateContainer>
+    private drawnCardsStore: Store<DrawnCardsStateContainer>,
+    private pokerTableStore: Store<PokerTableStateContainer>
   ) {
     this.client = over(new SockJS(environment.api));
     this.client.debug = () => {
@@ -167,13 +171,23 @@ export class WebSocketService implements OnDestroy {
           this.gameStore.dispatch(handCompleted({id: data.data}));
           break;
         case MessageType.PlayerAwayToggled:
-          this.gameStore.dispatch(playerAwayToggled(data.data));
+          this.pokerTableStore.dispatch(playerAwayToggled(data.data));
           break;
         case MessageType.HandActionPerformed:
           this.handStore.dispatch(handActionPerformed(data.data));
           break;
         case MessageType.ActingPlayerChanged:
           this.handStore.dispatch(actingPlayerChanged(data.data));
+          this.gameStore.dispatch(actingPlayerChanged(data.data));
+          break;
+        case MessageType.GamePlayer:
+          this.gameStore.dispatch(gamePlayerUpdated(data.data));
+          break;
+        // case MessageType.CardDrawnByPlayer:
+        //   this.pokerTableStore.dispatch(data.data);
+        //   break;
+        case MessageType.PokerTable:
+          this.pokerTableStore.dispatch(pokerTableUpdate(data.data));
           break;
       }
     });

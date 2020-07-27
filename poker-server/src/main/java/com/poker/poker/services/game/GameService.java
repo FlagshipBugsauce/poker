@@ -1,40 +1,43 @@
 package com.poker.poker.services.game;
 
 import com.poker.poker.config.AppConfig;
-import com.poker.poker.config.constants.GameConstants;
 import com.poker.poker.documents.UserDocument;
+import com.poker.poker.events.AwayStatusEvent;
 import com.poker.poker.events.CreateGameEvent;
 import com.poker.poker.events.CurrentGameEvent;
-import com.poker.poker.events.HandActionEvent;
+import com.poker.poker.events.DrawCardEvent;
+import com.poker.poker.events.GameMessageEvent;
+import com.poker.poker.events.GameOverEvent;
+import com.poker.poker.events.HandEvent;
 import com.poker.poker.events.JoinGameEvent;
 import com.poker.poker.events.LeaveGameEvent;
-import com.poker.poker.events.PlayerAfkEvent;
+import com.poker.poker.events.LeaveLobbyEvent;
+import com.poker.poker.events.PublishCurrentGameEvent;
 import com.poker.poker.events.PublishMessageEvent;
+import com.poker.poker.events.ReadyEvent;
 import com.poker.poker.events.RejoinGameEvent;
+import com.poker.poker.events.StartGameEvent;
+import com.poker.poker.events.StartHandEvent;
+import com.poker.poker.events.SystemChatMessageEvent;
+import com.poker.poker.events.ToastMessageEvent;
 import com.poker.poker.events.WaitForPlayerEvent;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.enums.GamePhase;
 import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.game.CardModel;
 import com.poker.poker.models.game.DeckModel;
-import com.poker.poker.models.game.DrawGameDataContainerModel;
-import com.poker.poker.models.game.DrawGameDataModel;
-import com.poker.poker.models.game.DrawGameDrawModel;
 import com.poker.poker.models.game.GameModel;
 import com.poker.poker.models.game.GameParameterModel;
 import com.poker.poker.models.game.GamePlayerModel;
-import com.poker.poker.models.game.HandModel;
-import com.poker.poker.models.game.PlayerModel;
+import com.poker.poker.models.game.HandSummaryModel;
+import com.poker.poker.models.game.LobbyModel;
+import com.poker.poker.models.game.LobbyPlayerModel;
+import com.poker.poker.models.game.PokerTableModel;
 import com.poker.poker.models.websocket.CurrentGameModel;
-import com.poker.poker.models.websocket.GenericServerMessage;
-import com.poker.poker.repositories.GameRepository;
-import com.poker.poker.repositories.UserRepository;
-import com.poker.poker.services.WebSocketService;
-import com.poker.poker.validation.exceptions.BadRequestException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -42,7 +45,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -52,381 +54,175 @@ import org.springframework.stereotype.Service;
 public class GameService {
 
   private final AppConfig appConfig;
-
-  private final UserRepository userRepository;
-
-  /** Mapping of user Id to game Id. */
-  private final Map<UUID, UUID> userIdToGameIdMap;
-
-  /** Mapping of game Id to game document. */
-  private final Map<UUID, GameModel> games;
-
-  /** Mapping of game Id to game data. */
-  private final Map<UUID, DrawGameDataContainerModel> gameIdToGameDataMap;
-
-  private final GameConstants gameConstants;
-
-  private final LobbyService lobbyService;
-
-  private final HandService handService;
-
-  private final GameRepository gameRepository;
-
-  private final ApplicationEventPublisher applicationEventPublisher;
-
-  private final WebSocketService webSocketService;
-
-  public CurrentGameModel getCurrentGameModel(final UUID userId) {
-    final CurrentGameModel currentGameModel = new CurrentGameModel();
-    if (userIdToGameIdMap.get(userId) != null
-        && games.get(userIdToGameIdMap.get(userId)) != null
-        && games.get(userIdToGameIdMap.get(userId)).getPhase() == GamePhase.Play) {
-      currentGameModel.setId(games.get(userIdToGameIdMap.get(userId)).getId());
-      currentGameModel.setInGame(true);
-    } else {
-      currentGameModel.setInGame(false);
-      currentGameModel.setId(null);
-    }
-    return currentGameModel;
-  }
+  private final GameDataService data;
+  private final CardService cardService;
+  private final ApplicationEventPublisher publisher;
 
   /**
-   * Retrieves the game data needed for the client to display a summary of what has occurred in the
-   * specified game.
+   * Publishes a message to system chat for specified game ID.
    *
-   * @param gameModel The specified game.
-   * @return Data representing what has occurred in the game.
+   * @param gameId The lobby the message should be published to.
+   * @param message The message to publish.
    */
-  public DrawGameDataContainerModel getGameData(final GameModel gameModel) {
-    return getGameData(gameModel.getId());
+  public void publishSystemChatMessageEvent(final UUID gameId, final String message) {
+    publisher.publishEvent(new SystemChatMessageEvent(this, gameId, message));
   }
 
   /**
-   * Retrieves the game data needed for the client to display a summary of what has occurred in the
-   * specified game.
+   * Publishes current game info so client has information needed to rejoin an active game.
    *
-   * @param gameId The specified game.
-   * @return Data representing what has occurred in the game.
-   */
-  public DrawGameDataContainerModel getGameData(final UUID gameId) {
-    if (gameIdToGameDataMap.get(gameId) == null) {
-      throw gameConstants.getGameDataNotFoundException();
-    }
-    return gameIdToGameDataMap.get(gameId);
-  }
-
-  /**
-   * Returns information about a player.
-   *
-   * @param userId The ID of the player.
-   * @return Model representing the player.
-   */
-  public GamePlayerModel getPlayerData(final UUID userId) {
-    return getUsersGameModel(userId).getPlayers().stream()
-        .filter(player -> player.getId().equals(userId))
-        .findFirst()
-        .orElseThrow(gameConstants::getPlayerDataNotFoundException);
-  }
-
-  /**
-   * Initializes game data for the specified game, so the client can parse it easily.
-   *
-   * @param gameModel The specified game.
-   */
-  private void initializeGameData(final GameModel gameModel) {
-    if (games.get(gameModel.getId()) == null) {
-      throw gameConstants.getGameNotFoundException();
-    }
-    final List<DrawGameDataModel> gameData = new ArrayList<>(gameModel.getPlayers().size());
-    for (final GamePlayerModel player : gameModel.getPlayers()) {
-      final DrawGameDataModel drawGameDataModel =
-          new DrawGameDataModel(player, false, new ArrayList<>(appConfig.getNumRoundsInRollGame()));
-      for (int i = 0; i < appConfig.getNumRoundsInRollGame(); i++) {
-        drawGameDataModel.getDraws().add(new DrawGameDrawModel(null, false, false));
-      }
-      gameData.add(drawGameDataModel);
-    }
-    // Set the first players status to active.
-    gameData.get(0).setActing(true);
-    // Set the first draw to acting so it is highlighted.
-    gameData.get(0).getDraws().get(0).setActing(true);
-    gameIdToGameDataMap.put(gameModel.getId(), new DrawGameDataContainerModel(gameData, 1));
-  }
-
-  /**
-   * Helper that updates game data for the specified game. Specifically, sets the winner so the
-   * player can be highlighted in some way.
-   *
-   * @param gameId The ID of the specified game.
-   * @param player The player who won.
-   * @param hand The hand the player won in.
-   */
-  private void setWinnerInGameData(final UUID gameId, final PlayerModel player, final int hand) {
-    getGameData(gameId).incrementHand(appConfig.getNumRoundsInRollGame());
-    getGameData(gameId).getGameData().stream()
-        .filter(data -> data.getPlayer().getId().equals(player.getId()))
-        .findFirst()
-        .ifPresent(data -> data.getDraws().get(hand - 1).setWinner(true));
-  }
-
-  /**
-   * Helper that updates game data for a specified game, after a player performs an action.
-   *
-   * @param gameId The ID of the specified game.
-   * @param player The player that acted.
-   * @param card The card the player drew.
-   * @param hand The current hand of the game.
-   */
-  private void updateGameData(
-      final UUID gameId, final GamePlayerModel player, final CardModel card, final int hand) {
-    final List<DrawGameDataModel> gameData = getGameData(gameId).getGameData();
-    int playerIndex = -1;
-    for (int i = 0; i < gameData.size(); i++) {
-      if (gameData.get(i).getPlayer().getId().equals(player.getId())) {
-        playerIndex = i;
-        break;
-      }
-    }
-
-    // Make sure playerIndex was set.
-    assert (playerIndex != -1);
-
-    // The player has acted, so acting should be false and the card they drew should be filled in.
-    gameData.get(playerIndex).setActing(false);
-    gameData.get(playerIndex).getDraws().get(hand - 1).setActing(false);
-    gameData.get(playerIndex).getDraws().get(hand - 1).setCard(card);
-
-    // Also need to update the acting fields for the row and column.
-    if (playerIndex == gameData.size() - 1 && hand < appConfig.getNumRoundsInRollGame()) {
-      gameData.get(0).getDraws().get(hand).setActing(true);
-      gameData.get(0).setActing(true);
-    } else if (hand < appConfig.getNumRoundsInRollGame()) {
-      gameData.get(playerIndex + 1).getDraws().get(hand - 1).setActing(true);
-      gameData.get(playerIndex + 1).setActing(true);
-    }
-  }
-
-  /**
-   * Retrieves the game document for the game the specified user is in.
-   *
-   * @param userId ID of the user whose game document is being sought.
-   * @return The game document for the game the specified user.
-   * @throws BadRequestException If there is no game document associated with the specified user.
-   */
-  public GameModel getUsersGameModel(final UUID userId) throws BadRequestException {
-    if (userIdToGameIdMap.get(userId) == null) {
-      throw gameConstants.getNoUserIdToGameIdMappingFound();
-    }
-    if (games.get(userIdToGameIdMap.get(userId)) == null) {
-      throw gameConstants.getGameNotFoundException();
-    }
-    return games.get(userIdToGameIdMap.get(userId));
-  }
-
-  /**
-   * Retrieves the game document associated with the specified ID. Throws if game can't be found.
-   *
-   * @param gameId The specified ID.
-   * @return GameDocument associated with the specified ID.
-   * @throws BadRequestException If there is no game with the specified ID.
-   */
-  public GameModel getGameModel(final UUID gameId) throws BadRequestException {
-    if (games.get(gameId) == null) {
-      throw gameConstants.getGameNotFoundException();
-    }
-    return games.get(gameId);
-  }
-
-  /**
-   * Listens for create game events, then creates the game.
-   *
-   * @param createGameEvent Event object with information required to create the game.
-   * @throws BadRequestException If the request fails.
+   * @param event Event containing data needed by the client.
    */
   @EventListener
-  public void createGame(final CreateGameEvent createGameEvent) throws BadRequestException {
-    final GameParameterModel gameParameterModel = createGameEvent.getGameParameterModel();
-    final UserDocument user = createGameEvent.getHost();
-    if (userIdToGameIdMap.get(user.getId()) != null) {
-      throw gameConstants.getCreateGamePlayerAlreadyInGameException();
-    }
-
-    // Create game document with state set to "Lobby"
-    GameModel gameModel =
-        new GameModel(
-            UUID.randomUUID(),
-            GamePhase.Lobby,
-            new ArrayList<>(), // List of player models is only updated after game begins.
-            new ArrayList<>(),
-            appConfig.getNumRoundsInRollGame(),
-            appConfig.getTimeToActInMillis() / 1000);
-
-    userIdToGameIdMap.put(user.getId(), gameModel.getId());
-    games.put(gameModel.getId(), gameModel);
-
-    // Create the lobby.
-    lobbyService.createLobby(gameParameterModel, user, gameModel.getId());
-
-    applicationEventPublisher.publishEvent(
-        new PublishMessageEvent<>(
+  public void publishCurrentGameInfo(final PublishCurrentGameEvent event) {
+    publisher.publishEvent(
+        new CurrentGameEvent(
             this,
-            "/topic/game/create/" + user.getId(),
-            new ApiSuccessModel(gameModel.getId().toString())));
+            event.getId(),
+            new CurrentGameModel(
+                data.isUserInGame(event.getId()),
+                data.isUserInGame(event.getId())
+                    ? data.getUsersGame(event.getId()).getId()
+                    : null)));
   }
 
   /**
-   * Event listener to handle an event triggered in HandService. Need an event listener here to
-   * avoid circular dependency.
+   * Creates a game.
    *
-   * @param playerAfkEvent Event being handled (contains reference to AFK player).
+   * @param event Event containing data needed to create a game.
    */
-  @Async
   @EventListener
-  public void handlePlayerAfkEvent(final PlayerAfkEvent playerAfkEvent) {
-    setPlayerActiveStatusInternal(playerAfkEvent.getPlayer().getId(), true);
+  public void createGame(final CreateGameEvent event) {
+    final GameParameterModel params = event.getGameParameterModel();
+    final UserDocument user = event.getHost();
+
+    if (data.isUserInGame(user.getId())) {
+      return; // User can only be in one game at a time.
+    }
+
+    final UUID gameId = data.newGame(params, user);
+
+    // TODO: Refactor this to use generic message (requires client refactor also).
+    publisher.publishEvent(
+        new PublishMessageEvent<>(
+            this, "/topic/game/create/" + user.getId(), new ApiSuccessModel(gameId.toString())));
   }
 
   /**
-   * Transitions the specified player's "active" status to the value provided. When a player is
-   * inactive, their moves are made for them as soon as it is their turn to act, rather than waiting
-   * until the timer has elapsed.
+   * Handles a player joining a game lobby.
    *
-   * @param playerId The ID of the player whose status is being transitioned.
-   * @param status The away status being set.
+   * @param event Event containing data needed to handle a join event.
    */
-  public ApiSuccessModel setPlayerActiveStatus(final UUID playerId, final boolean status) {
-    setPlayerActiveStatusInternal(playerId, status);
-    return new ApiSuccessModel("PLayers status changed successfully.");
+  @EventListener
+  public void joinLobby(final JoinGameEvent event) {
+    final LobbyModel lobby = data.getLobby(event.getGameId());
+    final UserDocument user = event.getUser();
+    final LobbyPlayerModel player = new LobbyPlayerModel(user, false, false);
+    lobby.getPlayers().add(player);
+    data.userJoinedGame(user.getId(), lobby.getId());
+
+    final String toastMessage =
+        String.format("%s %s has joined the game.", player.getFirstName(), player.getLastName());
+    publisher.publishEvent(new ToastMessageEvent(this, lobby.getId(), toastMessage, "lg"));
+    publisher.publishEvent(
+        new GameMessageEvent<>(this, MessageType.PlayerJoinedLobby, lobby.getId(), player));
+    data.cachedGameListIsOutdated();
   }
 
   /**
-   * Internal implementation with no return value.
+   * Handles a player leaving a game lobby.
    *
-   * @param playerId The ID of the player whose status is being transitioned.
+   * @param event Event containing data needed to handle a leave lobby event.
    */
-  private void setPlayerActiveStatusInternal(final UUID playerId, final boolean status) {
-    final GameModel game = getUsersGameModel(playerId);
-    final GamePlayerModel player =
-        game.getPlayers().stream()
-            .filter(p -> p.getId().equals(playerId))
+  @EventListener
+  public void leaveLobby(final LeaveLobbyEvent event) {
+    if (!data.isUserInGame(event.getUser().getId())) {
+      return;
+    }
+    final UserDocument user = event.getUser();
+    final LobbyModel lobby = data.getUsersLobby(user.getId());
+    final LobbyPlayerModel player =
+        lobby.getPlayers().stream()
+            .filter(p -> p.getId().equals(user.getId()))
             .findFirst()
-            .orElseThrow(gameConstants::getPlayerNotInGameException);
-    player.setAway(status);
-    final UserDocument user = userRepository.findUserDocumentById(playerId);
-    if (status && handService.getHand(user).getActing().getId().equals(playerId)) {
-      handService.draw(user);
+            .orElse(null);
+
+    if (player == null) {
+      return;
     }
 
-    //    broadcastGameUpdate(game);
-    webSocketService.sendPublicMessage(
-        appConfig.getGameTopic() + game.getId(),
-        new GenericServerMessage<>(MessageType.PlayerAwayToggled, player));
+    lobby.getPlayers().removeIf(p -> p.getId().equals(user.getId()));
+    data.removeUserIdToGameIdMapping(user.getId());
 
-    webSocketService.sendPublicMessage(
-        appConfig.getGameTopic() + playerId,
-        new GenericServerMessage<>(MessageType.PlayerData, getPlayerData(playerId)));
+    if (lobby.getPlayers().size() > 0) {
+      lobby.setHost(lobby.getPlayers().get(0));
+      lobby.getPlayers().get(0).setHost(true);
+    } else {
+      data.endLobby(lobby.getId());
+      return;
+    }
 
-    log.debug("Updating away status to {} for player {}.", status, playerId);
+    final String toastMessage =
+        String.format("%s %s has left the lobby.", player.getFirstName(), player.getLastName());
+    publisher.publishEvent(new ToastMessageEvent(this, lobby.getId(), toastMessage, "lg"));
+    publisher.publishEvent(
+        new GameMessageEvent<>(this, MessageType.PlayerLeftLobby, lobby.getId(), player));
+
+    data.cachedGameListIsOutdated();
   }
 
   /**
-   * Once a game has started, a player can't be removed like they are when they leave a lobby.
-   * Instead, their status is set to AFK mode. If the player rejoins, their status will be
-   * transitioned from AFK mode to normal.
+   * Handles the event triggered when a player's ready status is toggled.
    *
-   * @param leaveGameEvent Event that is dispatched when a user leaves a game.
+   * @param event Event containing data necessary to toggle a player's ready status.
    */
   @EventListener
-  public void leaveGame(final LeaveGameEvent leaveGameEvent) {
-    setPlayerActiveStatus(leaveGameEvent.getUser().getId(), true);
+  public void ready(final ReadyEvent event) {
+    final UUID userId = event.getId();
+    if (!data.isUserInGame(userId)) {
+      return;
+    }
+    final LobbyModel lobby = data.getUsersLobby(userId);
+    synchronized (lobby.getPlayers()) {
+      final LobbyPlayerModel player =
+          data.getUsersLobby(userId).getPlayers().stream()
+              .filter(p -> p.getId().equals(userId))
+              .findFirst()
+              .orElse(null);
+      if (player == null) {
+        return;
+      }
+      player.setReady(!player.isReady());
+      publishSystemChatMessageEvent(
+          lobby.getId(),
+          String.format(
+              "%s %s %s ready.",
+              player.getFirstName(), player.getLastName(), player.isReady() ? "is" : "is not"));
+      publisher.publishEvent(
+          new GameMessageEvent<>(this, MessageType.ReadyToggled, lobby.getId(), player));
+    }
   }
 
   /**
-   * If a player leaves a game that has started, they may be able to rejoin in. This method
-   * determines whether the player can still rejoin and will perform the appropriate steps to add
-   * them back into the game if they can.
+   * Handles a start game event.
    *
-   * @param rejoinGameEvent Event that is dispatched when a user rejoins a game.
+   * @param event Event containing data necessary to start a game.
    */
   @EventListener
-  public void rejoinGame(final RejoinGameEvent rejoinGameEvent) {
-    setPlayerActiveStatus(rejoinGameEvent.getUser().getId(), false);
-  }
+  public void start(final StartGameEvent event) {
+    final GameModel game = data.getUsersGame(event.getId());
+    final LobbyModel lobby = data.getUsersLobby(event.getId());
 
-  public void checkIfGameExists(final UUID gameId) {
-    if (games.get(gameId) == null) {
-      throw gameConstants.getGameNotFoundException();
+    // Check that all players are ready.
+    if (lobby.getPlayers().stream().anyMatch(p -> !p.isReady())) {
+      return;
     }
-  }
 
-  public void checkIfGameIsInLobbyState(final UUID gameId) {
-    if (getGameModel(gameId).getPhase() != GamePhase.Lobby) {
-      throw gameConstants.getCanOnlyJoinLobbyException();
-    }
-  }
-
-  public boolean isUserInSpecifiedGame(final UUID gameId, final UUID userId) {
-    return lobbyService.isUserInLobby(userId) && userIdToGameIdMap.get(userId).equals(gameId);
-  }
-
-  public void checkIfUserIsInGame(final UUID userId) {
-    // Check if they're in a game. If they are, then throw.
-    if (userIdToGameIdMap.get(userId) != null) {
-      throw gameConstants.getJoinGamePlayerAlreadyJoinedException();
-    }
-  }
-
-  /**
-   * Listener that adds a player to a specified game.
-   *
-   * @param joinGameEvent Event that triggers the method.
-   */
-  @EventListener
-  public void joinLobby(final JoinGameEvent joinGameEvent) {
-    userIdToGameIdMap.put(
-        joinGameEvent.getUser().getId(), getGameModel(joinGameEvent.getGameId()).getId());
-  }
-
-  /**
-   * Removes specified user from a game lobby by reversing what was done when the player joined.
-   *
-   * @param user The user being removed.
-   * @return An ApiSuccessModel indicating the request was successful.
-   * @throws BadRequestException If the request is invalid.
-   */
-  public ApiSuccessModel removePlayerFromLobby(UserDocument user) throws BadRequestException {
-    userIdToGameIdMap.remove(user.getId()); // Remove mapping.
-    return lobbyService.removePlayerFromLobby(user); // Let LobbyService do the rest.
-  }
-
-  /**
-   * Starts the game associated with the provided ID, provided all pre-conditions are satisfied.
-   *
-   * @param user The ID of the game to start.
-   * @return An ApiSuccessModel indicating the request was successful.
-   * @throws BadRequestException If some pre-condition was not satisfied, or something went wrong.
-   */
-  public ApiSuccessModel startGame(UserDocument user) throws BadRequestException {
-    log.debug("User {} has attempted to start a game.", user.getId());
-    final UUID gameId = userIdToGameIdMap.get(user.getId());
-    if (games.get(gameId) == null) {
-      throw gameConstants.getGameNotFoundException();
-    }
-    final GameModel game = games.get(gameId);
-    lobbyService.startGame(game); // Lobby related housekeeping.
-    game.setPhase(GamePhase.Play); // Transition game state.
-    handService.setDeck(gameId, new DeckModel()); // Give hand service the deck.
-    handService.newHand(game); // Create the hand.
-    initializeGameData(game); // Initialize game data for client.
-    // May as well broadcast full game model instead of players list + phase change.
-    broadcastGameUpdate(game); // Broadcast the game model.
-    webSocketService.sendPublicMessage(
-        appConfig.getGameTopic() + game.getId(),
-        new GenericServerMessage<>(MessageType.GamePhaseChanged, GamePhase.Play));
-    // Update Current game topic
+    data.startGame(game.getId());
+    publishSystemChatMessageEvent(game.getId(), "The game has started.");
     updateCurrentGameTopic(game, false);
 
-    return new ApiSuccessModel("The game has been started successfully.");
+    publisher.publishEvent(new StartHandEvent(this, game.getId()));
   }
 
   /**
@@ -439,169 +235,224 @@ public class GameService {
     game.getPlayers()
         .forEach(
             player ->
-                applicationEventPublisher.publishEvent(
+                publisher.publishEvent(
                     new CurrentGameEvent(
                         this,
                         player.getId(),
                         new CurrentGameModel(!over, over ? null : game.getId()))));
   }
 
-  /** Regularly broadcasts player data to clients, to ensure they have an accurate model. */
-  @Scheduled(cron = "0/10 * * * * ?")
-  public void broadcastPlayerUpdates() {
-    this.games
-        .values()
-        .forEach(
-            game -> {
-              if (game.getPhase() == GamePhase.Play) {
-                game.getPlayers()
-                    .forEach(
-                        p ->
-                            webSocketService.sendPublicMessage(
-                                appConfig.getGameTopic() + p.getId(),
-                                new GenericServerMessage<>(MessageType.PlayerData, p)));
-              }
-            });
-  }
-
-  /** Regularly broadcasts hand updates to clients, to ensure they have an accurate model. */
-  @Scheduled(cron = "0/20 * * * * ?")
-  public void broadcastHandUpdates() {
-    games
-        .values()
-        .forEach(
-            game -> {
-              if (game.getPhase() == GamePhase.Play) {
-                this.handService.broadcastHandUpdate(game);
-              }
-            });
-  }
-
-  /** Regularly broadcasts game updates to client, to ensure they have an accurate model. */
-  @Scheduled(cron = "0/20 * * * * ?")
-  public void broadcastGameUpdates() {
-    this.games.values().forEach(this::broadcastGameUpdate);
-  }
-
   /**
-   * Broadcasts the game data for the specified game to relevant players.
+   * Handles leave game events.
    *
-   * @param game The specified game.
-   */
-  public void broadcastGameDataUpdate(final GameModel game) {
-    // Broadcast to game topic
-    webSocketService.sendPublicMessage(
-        appConfig.getGameTopic() + game.getId(),
-        new GenericServerMessage<>(MessageType.GameData, getGameData(game)));
-  }
-
-  /**
-   * Broadcasts the specified game document to relevant players.
-   *
-   * @param game The data being broadcast to players.
-   */
-  public void broadcastGameUpdate(final GameModel game) {
-    // Broadcast to game topic
-    webSocketService.sendPublicMessage(
-        appConfig.getGameTopic() + game.getId(),
-        new GenericServerMessage<>(MessageType.Game, game));
-  }
-
-  /**
-   * Asynchronous event listener that handles HandActionEvents.
-   *
-   * @param handActionEvent The event object representing a hand action.
+   * @param event Event containing data necessary for a player to leave a game.
    */
   @Async
   @EventListener
-  public void handleHandActionEvent(final HandActionEvent handActionEvent) {
-    log.debug("{} event detected by game service.", handActionEvent.getType());
-    final GameModel game = games.get(handActionEvent.getGameId());
-    final HandModel hand = handService.getHand(handActionEvent.getHandId());
-    final int playerThatActed = game.getPlayers().indexOf(hand.getActing());
-    final GamePlayerModel nextPlayerToAct =
-        game.getPlayers().get((playerThatActed + 1) % game.getPlayers().size());
+  public void leaveGame(final LeaveGameEvent event) {
+    publisher.publishEvent(new AwayStatusEvent(this, event.getUser().getId(), true));
+  }
 
-    // Update acting field and update players
-    game.getPlayers().get(playerThatActed).setActing(false);
-    // Broadcast player data to game topic
-    webSocketService.sendPublicMessage(
-        appConfig.getGameTopic() + game.getPlayers().get(playerThatActed).getId(),
-        new GenericServerMessage<>(
-            MessageType.PlayerData, getPlayerData(game.getPlayers().get(playerThatActed).getId())));
+  /**
+   * Handles rejoin game events.
+   *
+   * @param event Event containing data necessary for a player to rejoin a game.
+   */
+  @Async
+  @EventListener
+  public void rejoinGame(final RejoinGameEvent event) {
+    publisher.publishEvent(new AwayStatusEvent(this, event.getUser().getId(), false));
+  }
 
-    // Set acting to true for player who needs to act.
-    nextPlayerToAct.setActing(true);
-    // Broadcast player data to game topic
-    webSocketService.sendPublicMessage(
-        appConfig.getGameTopic() + nextPlayerToAct.getId(),
-        new GenericServerMessage<>(MessageType.PlayerData, getPlayerData(nextPlayerToAct.getId())));
+  /**
+   * Handles event when a player's away status is toggled.
+   *
+   * @param event Event containing data necessary to toggle a player's away status.
+   */
+  @Async
+  @EventListener
+  public void afk(final AwayStatusEvent event) {
+    final GameModel game = data.getUsersGame(event.getId());
+    final PokerTableModel table = data.getPokerTable(game.getId());
+    final GamePlayerModel player =
+        game.getPlayers().stream()
+            .filter(p -> p.getId().equals(event.getId()))
+            .findFirst()
+            .orElse(null);
+    final GamePlayerModel acting = table.getPlayers().get(table.getActingPlayer());
 
-    // Set player to act:
-    log.debug("Next player to act is {}.", nextPlayerToAct.getId());
-    hand.setActing(nextPlayerToAct);
+    if (player == null) {
+      return;
+    }
 
-    // Broadcast which player is acting.
-    webSocketService.sendPublicMessage(
-        appConfig.getGameTopic() + game.getId(),
-        new GenericServerMessage<>(MessageType.ActingPlayerChanged, nextPlayerToAct));
+    player.setAway(event.isAway());
 
-    /*
-         Temporary logic here to help design game flow for later. Most of this will be gone. Just
-         trying to work out the kinks with waiting for players to act, etc...
-    */
-    final boolean handOver = hand.getActing().equals(game.getPlayers().get(0));
-    final int currentRound = handOver ? 1 + game.getHands().size() : game.getHands().size();
+    // If the players away status is true, and it's their turn, draw their card for them.
+    if (player.getId().equals(acting.getId()) && player.isAway()) {
+      publisher.publishEvent(new DrawCardEvent(this, player.getId()));
+    }
 
-    // Update game data needed for UI.
-    updateGameData(
+    publisher.publishEvent(
+        new GameMessageEvent<>(this, MessageType.PlayerData, player.getId(), player));
+    publisher.publishEvent(
+        new GameMessageEvent<>(this, MessageType.PlayerAwayToggled, game.getId(), player));
+    data.broadcastPokerTable(game.getId());
+    // TODO: Refine what we're sending out here
+  }
+
+  /**
+   * Handle a start hand event.
+   *
+   * @param event Event containing data necessary to start a hand.
+   */
+  @Async
+  @EventListener
+  public void startHand(final StartHandEvent event) {
+    final GameModel game = data.getGame(event.getId());
+    final PokerTableModel table = data.getPokerTable(game.getId());
+    game.incrementCurrentHand();
+    table.getPlayers().forEach(p -> p.setCards(new ArrayList<>())); // Clear drawn cards.
+    data.getDeck(game.getId()).restoreAndShuffle(); // Restore and shuffle the deck.
+    table.setActingPlayer(0);
+    table.setDisplayHandSummary(false);
+    publisher.publishEvent(new WaitForPlayerEvent(this, table.getPlayers().get(0)));
+    // Note: No need to broadcast table update until next player draws.
+    data.broadcastGame(game.getId());
+  }
+
+  /**
+   * Handles a draw card event.
+   *
+   * @param event Event containing data necessary to draw a card.
+   */
+  @Async
+  @EventListener
+  public void drawCard(final DrawCardEvent event) {
+    final GameModel game = data.getUsersGame(event.getId());
+    final PokerTableModel table = data.getPokerTable(game.getId());
+    final GamePlayerModel player = table.getPlayers().get(table.getActingPlayer());
+    if (!player.getId().equals(event.getId())) {
+      log.error(
+          "Player {} attempted to draw a card when it was not this player's turn.", event.getId());
+      return;
+    }
+    final DeckModel deck = data.getDeck(game.getId());
+    final CardModel card = deck.draw();
+    player.getCards().add(card);
+
+    // Need to do a few table updates.
+    table.playerActed();
+
+    // Broadcast table -- TODO: Refine what is being sent out
+    data.broadcastPokerTable(game.getId());
+    publishSystemChatMessageEvent(
         game.getId(),
-        game.getPlayers().get(playerThatActed),
-        hand.getActions().get(hand.getActions().size() - 1).getDrawnCard(),
-        game.getHands().size());
+        String.format(
+            "%s %s drew the %s of %s",
+            player.getFirstName(), player.getLastName(), card.getValue(), card.getSuit()));
 
-    if (!handOver) {
-      applicationEventPublisher.publishEvent(new WaitForPlayerEvent(this, nextPlayerToAct));
-      broadcastGameDataUpdate(game);
-    } else if (currentRound <= game.getTotalHands()) {
-      log.debug("Hand ended. Beginning new hand.");
-      // Update game data
-      setWinnerInGameData(game.getId(), handService.determineWinner(hand), game.getHands().size());
+    publisher.publishEvent(new HandEvent(this, player.getId()));
+  }
 
-      // Update scores
-      handService.endHand(game);
-      handService.newHand(game);
-      broadcastGameUpdate(game);
-      broadcastGameDataUpdate(game);
+  /**
+   * Waits for a player to perform an action (i.e. drawing a card).
+   *
+   * @param event Event containing data required to determine whether player acts/does not act.
+   * @throws InterruptedException Throws if the Thread.sleep is interrupted for some reason.
+   */
+  @Async
+  @EventListener
+  public void waitForAction(final WaitForPlayerEvent event) throws InterruptedException {
+    final GameModel game = data.getUsersGame(event.getPlayer().getId());
+    final PokerTableModel table = data.getPokerTable(game.getId());
+    final int actingPlayer = table.getActingPlayer();
+
+    Thread.sleep(event.getPlayer().isAway() ? 100 : appConfig.getTimeToActInMillis());
+    if (table.getActingPlayer() != actingPlayer) {
+      return;
+    }
+
+    if (event.getPlayer().isAway()) {
+      publisher.publishEvent(new DrawCardEvent(this, event.getPlayer().getId()));
     } else {
-      // If the round is over and the current round > total rounds, then the game must be over.
-      log.debug("The game has ended.");
-      setWinnerInGameData(game.getId(), handService.determineWinner(hand), game.getHands().size());
-      endGame(game);
+      publisher.publishEvent(new AwayStatusEvent(this, event.getPlayer().getId(), true));
     }
   }
 
   /**
-   * Procedure that transitions the game to its final state, informs players that the game is over
-   * and who won, provides some basic statistics about the game and performs a few housekeeping
-   * tasks like removing relevant mappings, etc...
+   * Handles a player action.
    *
-   * @param game The game document associated with the game that is ending.
+   * @param event Event containing information needed to handle a player action.
+   * @throws InterruptedException Throws if the Thread.sleep is interrupted for some reason.
    */
-  public void endGame(final GameModel game) {
-    handService.endHand(game); // End hand.
-    handService.removeDeck(game);
-    game.setPhase(GamePhase.Over); // Transition game state.
-    gameRepository.save(game); // Save game document.
-    games.remove(game.getId()); // Remove mapping.
-    game.getPlayers().forEach(p -> userIdToGameIdMap.remove(p.getId())); // Remove mappings.
-    broadcastGameDataUpdate(game); // Broadcast final update.
+  @Async
+  @EventListener
+  public void handleHandEvent(final HandEvent event) throws InterruptedException {
+    final GameModel game = data.getUsersGame(event.getId());
+    final PokerTableModel table = data.getPokerTable(game.getId());
+    final int currentHand = game.getCurrentHand();
+    final int totalHands = game.getTotalHands();
 
-    webSocketService.sendPublicMessage(
-        appConfig.getGameTopic() + game.getId(),
-        new GenericServerMessage<>(MessageType.GamePhaseChanged, GamePhase.Over));
+    if (table.getActingPlayer() != 0 && currentHand <= totalHands) {
+      // Hand is not over, wait for another action.
+      publisher.publishEvent(
+          new WaitForPlayerEvent(this, table.getPlayers().get(table.getActingPlayer())));
+    } else if (table.getActingPlayer() == 0 && currentHand <= totalHands) {
+      // Hand is over, pause to display a summary, then start a new hand.
+      table.setDisplayHandSummary(true);
+      table.setSummary(getHandSummary(game.getId()));
+      data.broadcastPokerTable(game.getId());
 
-    gameIdToGameDataMap.remove(game.getId()); // Remove mapping.
-    updateCurrentGameTopic(game, true);
+      // Pause for 3 seconds while summary is displayed to UI.
+      Thread.sleep(3000);
+
+      // Remove summary.
+      table.setDisplayHandSummary(false);
+      final GamePlayerModel winner = table.getPlayers().get(table.getSummary().getWinner());
+      publishSystemChatMessageEvent(
+          game.getId(),
+          String.format("%s %s won the hand.", winner.getFirstName(), winner.getLastName()));
+      table.setSummary(null);
+
+      publisher.publishEvent(new StartHandEvent(this, game.getId()));
+    } else {
+      // Game is over, run the end game sequence.
+      publisher.publishEvent(new GameOverEvent(this, game.getId()));
+    }
+  }
+
+  /**
+   * Helper that returns a HandSummaryModel to help the UI display a hand summary.
+   *
+   * @param id ID of the game the summary is for.
+   * @return
+   */
+  private HandSummaryModel getHandSummary(final UUID id) {
+    final PokerTableModel table = data.getPokerTable(id);
+    final List<GamePlayerModel> players =
+        table.getPlayers().stream()
+            .map(GamePlayerModel::new)
+            .sorted((a, b) -> -cardService.compare(a.getCards().get(0), b.getCards().get(0)))
+            .collect(Collectors.toList());
+    final int winningIndex = table.getPlayers().indexOf(players.get(0));
+    // Update winners score
+    final GamePlayerModel winningPlayer = table.getPlayers().get(winningIndex);
+    winningPlayer.setScore(winningPlayer.getScore() + 1);
+    return new HandSummaryModel(players.get(0).getCards().get(0), winningIndex);
+  }
+
+  /**
+   * Handles game over events.
+   *
+   * @param event Event containing data necessary to end a game.
+   */
+  @Async
+  @EventListener
+  public void gameOver(final GameOverEvent event) {
+    final GameModel game = data.getGame(event.getId());
+    game.setPhase(GamePhase.Over);
+
+    // TODO: Save game in DB
+    data.endGame(game.getId());
   }
 }

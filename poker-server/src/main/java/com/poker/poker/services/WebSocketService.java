@@ -3,12 +3,14 @@ package com.poker.poker.services;
 import com.poker.poker.config.AppConfig;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.CurrentGameEvent;
+import com.poker.poker.events.GameMessageEvent;
 import com.poker.poker.events.PublishMessageEvent;
-import com.poker.poker.models.WebSocketInfoModel;
+import com.poker.poker.events.ToastMessageEvent;
 import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.websocket.GenericServerMessage;
 import com.poker.poker.models.websocket.ToastClassModel;
 import com.poker.poker.models.websocket.ToastModel;
+import com.poker.poker.models.websocket.WebSocketInfoModel;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -110,6 +112,25 @@ public class WebSocketService {
    */
   public <T> void sendPublicMessage(final String topic, final GenericServerMessage<T> data) {
     template.convertAndSend(topic, data);
+  }
+
+  /**
+   * Handles message events that are destined for the /topic/game/{id} topic. These could be
+   * messages that are being sent to a game ID, or a player ID.
+   *
+   * @param event Message event.
+   * @param <T> Data type.
+   */
+  @EventListener
+  public <T> void gameMessageEventHandler(final GameMessageEvent<T> event) {
+    template.convertAndSend(appConfig.getGameTopic() + event.getId(), event.getMessage());
+  }
+
+  @EventListener
+  public void toastMessageEventHandler(final ToastMessageEvent event) {
+    template.convertAndSend(
+        appConfig.getGameTopic() + event.getId(),
+        new GenericServerMessage<>(MessageType.Toast, event.getToast()));
   }
 
   /**
