@@ -53,6 +53,10 @@ export class CardService {
     return `${this.valueMapping[card.value]}${this.suitMapping[card.suit]}`;
   }
 
+  public cardName(card: CardModel): string {
+    return `${card.value} of ${card.suit}`;
+  }
+
   /**
    * Returns the path to the image of a card.
    * @param card The card.

@@ -171,7 +171,7 @@ export class WebSocketService implements OnDestroy {
           this.gameStore.dispatch(handCompleted({id: data.data}));
           break;
         case MessageType.PlayerAwayToggled:
-          this.gameStore.dispatch(playerAwayToggled(data.data));
+          this.pokerTableStore.dispatch(playerAwayToggled(data.data));
           break;
         case MessageType.HandActionPerformed:
           this.handStore.dispatch(handActionPerformed(data.data));

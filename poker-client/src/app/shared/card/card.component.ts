@@ -20,7 +20,7 @@ export class CardComponent implements OnInit {
    * Size of the card.
    */
   @Input() size: CardSize;
-  @Input() pxSize: number;
+  @Input() pxSize: number = -1;
   @Input() faceDown: boolean = false;
   public rotateY: number = 0;
 

@@ -1,0 +1,16 @@
+<div *ngIf="summary" class="hand-summary-container">
+  <div
+    [ngStyle]="{
+      'left': -(width / 2) + 'px',
+      'top': -(width * 7 / 10) + 'px'
+    }"
+    class="hand-summary-card">
+    <pkr-card
+      [card]="summary.card"
+      [pxSize]="width"></pkr-card>
+  </div>
+  <div
+    class="hand-summary-caption">
+    {{name}} won the round!
+  </div>
+</div>

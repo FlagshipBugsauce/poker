@@ -1,7 +1,7 @@
 export {ApiErrorModel} from './models/api-error-model';
 export {ApiSuccessModel} from './models/api-success-model';
-export {GameParameterModel} from './models/game-parameter-model';
 export {GameListModel} from './models/game-list-model';
+export {GameParameterModel} from './models/game-parameter-model';
 export {LobbyPlayerModel} from './models/lobby-player-model';
 export {ActiveStatusModel} from './models/active-status-model';
 export {PlayerModel} from './models/player-model';
@@ -23,6 +23,7 @@ export {GameSummaryModel} from './models/game-summary-model';
 export {GenericServerMessage} from './models/generic-server-message';
 export {HandActionModel} from './models/hand-action-model';
 export {HandModel} from './models/hand-model';
+export {HandSummaryModel} from './models/hand-summary-model';
 export {JwtAuthRequestModel} from './models/jwt-auth-request-model';
 export {LobbyModel} from './models/lobby-model';
 export {ModelModel} from './models/model-model';

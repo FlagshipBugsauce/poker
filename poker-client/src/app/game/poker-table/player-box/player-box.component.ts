@@ -1,13 +1,13 @@
-/* tslint:disable */
+/* tslint:disable:no-bitwise */
 import {AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {CardModel, GamePlayerModel} from "../../../api/models";
-import {CardSuit, CardValue} from "../../../shared/models/card.enum";
-import {Store} from "@ngrx/store";
-import {GameStateContainer, PokerTableStateContainer} from "../../../shared/models/app-state.model";
-import {selectPlayers} from "../../../state/app.selector";
-import {Subject} from "rxjs";
-import {takeUntil} from "rxjs/operators";
-import {CardComponent} from "../../../shared/card/card.component";
+import {CardModel, GamePlayerModel} from '../../../api/models';
+import {CardSuit, CardValue} from '../../../shared/models/card.enum';
+import {Store} from '@ngrx/store';
+import {GameStateContainer, PokerTableStateContainer} from '../../../shared/models/app-state.model';
+import {selectPlayers} from '../../../state/app.selector';
+import {Subject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
+import {CardComponent} from '../../../shared/card/card.component';
 
 @Component({
   selector: 'pkr-player-box',
@@ -99,7 +99,7 @@ export class PlayerBoxComponent implements OnInit, AfterViewInit, OnDestroy {
         break;
       case 8:
       case 9:
-        position.left = -45
+        position.left = -45;
         break;
     }
     return position;
@@ -126,7 +126,7 @@ export class PlayerBoxComponent implements OnInit, AfterViewInit, OnDestroy {
         break;
       case 8:
       case 9:
-        position.top = 33
+        position.top = 33;
         break;
     }
     return position;

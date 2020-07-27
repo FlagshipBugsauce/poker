@@ -43,19 +43,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessModel'
-  /game/create:
-    post:
+  /game/get-list:
+    get:
       tags:
         - game
-      summary: Create a new game
-      description: Creates a new game and returns the UUID to the client.
-      operationId: createGame
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GameParameterModel'
-        required: true
+      summary: Get game list
+      description: Retrieves a list of games which are not full and have not yet started.
+      operationId: getGameList
       responses:
         "400":
           description: Bad request.
@@ -70,63 +64,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiErrorModel'
         "200":
-          description: Creation of game was successful.
+          description: Getting game active list was successful. A GetGameModel should
+            be returned
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiSuccessModel'
-  /game/start:
-    post:
-      tags:
-        - game
-      summary: Start Game
-      description: Starts the game, provided all preconditions are satisfied..
-      operationId: startGame
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: Game started successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessModel'
-  /game/leave-lobby:
-    post:
-      tags:
-        - game
-      summary: Leave Game Lobby
-      description: Request sent when a player leaves a game lobby.
-      operationId: leaveLobby
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: Request handled successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessModel'
+                type: array
+                items:
+                  $ref: '#/components/schemas/GameListModel'
   /game/join/{gameId}:
     post:
       tags:
@@ -159,13 +104,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessModel'
-  /game/get-list:
-    get:
+  /game/create:
+    post:
       tags:
         - game
-      summary: Get game list
-      description: Retrieves a list of games which are not full and have not yet started.
-      operationId: getGameList
+      summary: Create a new game
+      description: Creates a new game and returns the UUID to the client.
+      operationId: createGame
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameParameterModel'
+        required: true
       responses:
         "400":
           description: Bad request.
@@ -180,14 +131,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiErrorModel'
         "200":
-          description: Getting game active list was successful. A GetGameModel should
-            be returned
+          description: Creation of game was successful.
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/GameListModel'
+                $ref: '#/components/schemas/ApiSuccessModel'
   /game/active:
     post:
       tags:
@@ -220,13 +168,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessModel'
-  /game/hand/draw:
+  /game/leave-lobby:
     post:
       tags:
-        - hand
-      summary: Draws a card.
-      description: Draws a card from the top of the deck.
-      operationId: draw
+        - game
+      summary: Leave Game Lobby
+      description: Request sent when a player leaves a game lobby.
+      operationId: leaveLobby
       responses:
         "400":
           description: Bad request.
@@ -241,7 +189,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiErrorModel'
         "200":
-          description: Draw was successful.
+          description: Request handled successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
+  /game/start:
+    post:
+      tags:
+        - game
+      summary: Start Game
+      description: Starts the game, provided all preconditions are satisfied..
+      operationId: startGame
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Game started successfully.
           content:
             application/json:
               schema:
@@ -279,6 +253,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlayerModel'
+  /game/hand/draw:
+    post:
+      tags:
+        - hand
+      summary: Draws a card.
+      description: Draws a card from the top of the deck.
+      operationId: draw
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Draw was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
   /test/models:
     get:
       tags:
@@ -458,6 +458,22 @@ components:
           type: string
           description: Returned to indicate API call was successful
           example: Account created successfully.
+    GameListModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the game.
+          format: uuid
+          example: 0a7d95ef-94ba-47bc-b591-febb365bc543
+        parameters:
+          $ref: '#/components/schemas/GameParameterModel'
+        host:
+          $ref: '#/components/schemas/LobbyPlayerModel'
+        currentPlayers:
+          type: number
+          description: The current number of players in the game
+          example: 4
     GameParameterModel:
       required:
         - buyIn
@@ -482,22 +498,6 @@ components:
           description: Buy-in required to play in the game.
           example: 25
       description: The parameters of a game.
-    GameListModel:
-      type: object
-      properties:
-        id:
-          type: string
-          description: The ID of the game.
-          format: uuid
-          example: 0a7d95ef-94ba-47bc-b591-febb365bc543
-        parameters:
-          $ref: '#/components/schemas/GameParameterModel'
-        host:
-          $ref: '#/components/schemas/LobbyPlayerModel'
-        currentPlayers:
-          type: number
-          description: The current number of players in the game
-          example: 4
     LobbyPlayerModel:
       type: object
       properties:
@@ -787,6 +787,11 @@ components:
           items:
             type: string
             format: uuid
+        currentHand:
+          type: integer
+          description: Current hand being played.
+          format: int32
+          example: 5
         totalHands:
           type: integer
           description: Total number of hands in the game.
@@ -906,6 +911,14 @@ components:
             $ref: '#/components/schemas/HandActionModel'
         acting:
           $ref: '#/components/schemas/GamePlayerModel'
+    HandSummaryModel:
+      type: object
+      properties:
+        card:
+          $ref: '#/components/schemas/CardModel'
+        winner:
+          type: integer
+          format: int32
     JwtAuthRequestModel:
       type: object
       properties:
@@ -1036,6 +1049,8 @@ components:
           $ref: '#/components/schemas/GamePlayerModel'
         handModel:
           $ref: '#/components/schemas/HandModel'
+        handSummaryModel:
+          $ref: '#/components/schemas/HandSummaryModel'
         lobbyModel:
           $ref: '#/components/schemas/LobbyModel'
         lobbyPlayerModel:
@@ -1117,6 +1132,8 @@ components:
           format: int32
         displayHandSummary:
           type: boolean
+        summary:
+          $ref: '#/components/schemas/HandSummaryModel'
         startTurnTimer:
           type: integer
           format: int32

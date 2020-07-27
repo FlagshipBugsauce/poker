@@ -1,6 +1,6 @@
 <img
   [ngStyle]="{
-        'width': cardService.cardSizeToPxSize(size) + 'px',
+        'width': (pxSize !== -1 ? pxSize : cardService.cardSizeToPxSize(size)) + 'px',
         'height': 'auto'
       }"
   [alt]="cardText"

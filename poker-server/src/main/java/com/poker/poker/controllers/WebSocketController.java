@@ -4,9 +4,9 @@ import com.poker.poker.config.AppConfig;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.ChatMessageEvent;
 import com.poker.poker.events.CreateGameEvent;
-import com.poker.poker.events.CurrentGameEvent;
 import com.poker.poker.events.JoinGameEvent;
 import com.poker.poker.events.LeaveGameEvent;
+import com.poker.poker.events.PublishCurrentGameEvent;
 import com.poker.poker.events.RejoinGameEvent;
 import com.poker.poker.models.game.GameParameterModel;
 import com.poker.poker.models.websocket.ActionModel;
@@ -16,9 +16,7 @@ import com.poker.poker.models.websocket.WebSocketUpdateModel;
 import com.poker.poker.services.JwtService;
 import com.poker.poker.services.UserService;
 import com.poker.poker.services.WebSocketService;
-import com.poker.poker.services.game.GameService;
-import com.poker.poker.services.game.HandService;
-import com.poker.poker.services.game.LobbyService;
+import com.poker.poker.services.game.GameDataService;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
@@ -36,11 +34,10 @@ public class WebSocketController {
   private final AppConfig appConfig;
   private final UserService userService;
   private final JwtService jwtService;
-  private final ApplicationEventPublisher applicationEventPublisher;
+  private final ApplicationEventPublisher publisher;
   private final WebSocketService webSocketService;
-  private final LobbyService lobbyService;
-  private final GameService gameService;
-  private final HandService handService;
+
+  private final GameDataService data;
 
   @MessageMapping("/game/update")
   public void getUpdate(final WebSocketUpdateModel updateModel) {
@@ -50,25 +47,32 @@ public class WebSocketController {
       final Object data;
       switch (updateModel.getType()) {
         case GameList:
-          data = lobbyService.getLobbyList();
+//          data = lobbyService.getLobbyList();
+          data = this.data.getLobbyList();
           break;
         case Lobby:
-          data = lobbyService.getLobbyModel(updateModel.getId());
+//          data = lobbyService.getLobbyModel(updateModel.getId());
+          data = this.data.getLobby(updateModel.getId());
           break;
         case Game:
-          data = gameService.getGameModel(updateModel.getId());
+//          data = gameService.getGameModel(updateModel.getId());
+          data = this.data.getGame(updateModel.getId());
           break;
         case Hand:
-          data = handService.getHand(gameService.getGameModel(updateModel.getId()));
+//          data = handService.getHand(gameService.getGameModel(updateModel.getId()));
+          data = null;
           break;
         case GameData:
-          data = gameService.getGameData(updateModel.getId());
+//          data = gameService.getGameData(updateModel.getId());
+          data = null;
           break;
         case PlayerData:
-          data = gameService.getPlayerData(updateModel.getId());
+//          data = gameService.getPlayerData(updateModel.getId());
+          data = this.data.getPlayerData(updateModel.getId());
           break;
         case PokerTable:
-          data = gameService.getPokerTable(updateModel.getId());
+//          data = gameService.getPokerTable(updateModel.getId());
+          data = this.data.getPokerTable(updateModel.getId());
           break;
         default:
           data = null;
@@ -83,7 +87,7 @@ public class WebSocketController {
   @MessageMapping("/chat/send")
   public void chatMessage(final ClientMessageModel<String> messageModel) {
     userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
-    applicationEventPublisher.publishEvent(
+    publisher.publishEvent(
         new ChatMessageEvent(
             this,
             jwtService.getUserDocument(messageModel.getJwt()),
@@ -94,23 +98,26 @@ public class WebSocketController {
   @MessageMapping("/game/leave")
   public void leaveGame(final ClientMessageModel<Void> messageModel) {
     userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
-    applicationEventPublisher.publishEvent(
+    publisher.publishEvent(
         new LeaveGameEvent(this, jwtService.getUserDocument(messageModel.getJwt())));
   }
 
   @MessageMapping("/game/rejoin")
   public void rejoinGame(final ClientMessageModel<Void> messageModel) {
     userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
-    applicationEventPublisher.publishEvent(
+    publisher.publishEvent(
         new RejoinGameEvent(this, jwtService.getUserDocument(messageModel.getJwt())));
   }
 
   @MessageMapping("/game/current/update")
   public void requestCurrentGameUpdate(final ActionModel action) {
     log.debug("User {} requesting update.", action.getUserId());
-    applicationEventPublisher.publishEvent(
-        new CurrentGameEvent(
-            this, action.getUserId(), gameService.getCurrentGameModel(action.getUserId())));
+
+    publisher.publishEvent(new PublishCurrentGameEvent(this, action.getUserId()));
+//
+//    publisher.publishEvent(
+//        new CurrentGameEvent(
+//            this, action.getUserId(), gameService.getCurrentGameModel(action.getUserId())));
   }
 
   @MessageMapping("/game/create")
@@ -118,7 +125,7 @@ public class WebSocketController {
     userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
     final UserDocument user = jwtService.getUserDocument(messageModel.getJwt());
     log.debug("User {} attempting to create a game.", user.getId());
-    applicationEventPublisher.publishEvent(new CreateGameEvent(this, messageModel.getData(), user));
+    publisher.publishEvent(new CreateGameEvent(this, messageModel.getData(), user));
   }
 
   @MessageMapping("/game/join")
@@ -127,13 +134,13 @@ public class WebSocketController {
     final UserDocument user = jwtService.getUserDocument(messageModel.getJwt());
     log.debug("User {} attempting to join a game.", user.getId());
 
-    gameService.checkIfGameExists(messageModel.getGameId());
-    gameService.checkIfGameIsInLobbyState(messageModel.getGameId());
-    if (gameService.isUserInSpecifiedGame(messageModel.getGameId(), user.getId())) {
-      return;
-    }
-    gameService.checkIfUserIsInGame(user.getId());
+//    gameService.checkIfGameExists(messageModel.getGameId());
+//    gameService.checkIfGameIsInLobbyState(messageModel.getGameId());
+//    if (gameService.isUserInSpecifiedGame(messageModel.getGameId(), user.getId())) {
+//      return;
+//    }
+//    gameService.checkIfUserIsInGame(user.getId());
 
-    applicationEventPublisher.publishEvent(new JoinGameEvent(this, messageModel.getGameId(), user));
+    publisher.publishEvent(new JoinGameEvent(this, messageModel.getGameId(), user));
   }
 }

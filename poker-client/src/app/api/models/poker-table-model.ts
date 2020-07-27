@@ -1,5 +1,6 @@
 /* tslint:disable */
 import {GamePlayerModel} from './game-player-model';
+import {HandSummaryModel} from './hand-summary-model';
 
 export interface PokerTableModel {
   actingPlayer?: number;
@@ -8,4 +9,5 @@ export interface PokerTableModel {
   playerThatActed?: number;
   players?: Array<GamePlayerModel>;
   startTurnTimer?: number;
+  summary?: HandSummaryModel;
 }

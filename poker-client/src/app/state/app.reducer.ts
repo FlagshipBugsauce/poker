@@ -307,7 +307,12 @@ export function chatReducer(state, action) {
 const pokerTableReducerInternal = createReducer<PokerTableModel>(
   pokerTableInitialState,
   on(pokerTableUpdate,
-    (state: PokerTableModel, table: PokerTableModel) => table)
+    (state: PokerTableModel, table: PokerTableModel) => table),
+  on(playerAwayToggled, (state: PokerTableModel, player: GamePlayerModel) => {
+    const players: GamePlayerModel[] = state
+    .players.map(p => p.id === player.id ? player : ({...p}));
+    return ({...state, players});
+  })
 );
 
 export function pokerTableReducer(state, action) {

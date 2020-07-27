@@ -181,3 +181,5 @@ export const selectDisplayHandSummary = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state.displayHandSummary);
 export const selectActingPlayer = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state.actingPlayer);
+export const selectHandSummary = createSelector(
+  pokerTableFeature, (state: PokerTableModel) => state.summary);

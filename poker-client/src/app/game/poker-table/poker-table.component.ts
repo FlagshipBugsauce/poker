@@ -1,31 +1,30 @@
-/* tslint:disable */
 import {AfterViewInit, Component, HostListener, Input, OnDestroy, OnInit} from '@angular/core';
-import {Store} from "@ngrx/store";
+import {Store} from '@ngrx/store';
 import {
   AppStateContainer,
   GameStateContainer,
   PlayerDataStateContainer,
   PokerTableStateContainer
-} from "../../shared/models/app-state.model";
+} from '../../shared/models/app-state.model';
 import {
   drawCard,
   requestGameModelUpdate,
   requestPokerTableUpdate,
   setAwayStatus
-} from "../../state/app.actions";
-import {Observable, Subject} from "rxjs";
+} from '../../state/app.actions';
+import {Subject} from 'rxjs';
 import {
   selectActingPlayer,
-  selectActingStatus,
-  selectAwayStatus,
   selectDisplayHandSummary,
   selectGameModel,
+  selectLoggedInUser,
   selectPlayers
-} from "../../state/app.selector";
-import {takeUntil} from "rxjs/operators";
-import {HandModel} from "../../api/models/hand-model";
-import {GameModel} from "../../api/models/game-model";
-import {GamePlayerModel} from "../../api/models/game-player-model";
+} from '../../state/app.selector';
+import {takeUntil} from 'rxjs/operators';
+import {HandModel} from '../../api/models/hand-model';
+import {GameModel} from '../../api/models/game-model';
+import {GamePlayerModel} from '../../api/models/game-player-model';
+import {UserModel} from '../../api/models/user-model';
 
 @Component({
   selector: 'pkr-poker-table',
@@ -36,7 +35,6 @@ export class PokerTableComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() numPlayers: number;
   public width: number = 1;
   public playerBoxes: { number: number; top: number; left: number }[];
-  public away$: Observable<boolean>;
   public game: GameModel;
   public hand: HandModel;
   public timeToAct: number;
@@ -44,9 +42,8 @@ export class PokerTableComponent implements OnInit, AfterViewInit, OnDestroy {
    * Used to ensure we're not maintaining multiple subscriptions.
    */
   public ngDestroyed$ = new Subject<any>();
-  public acting$: Observable<boolean>;
   public players: GamePlayerModel[] = [];
-  public acting: number;
+  public actingIndex: number;
   public displaySummary: boolean = false;
   public logoPosition: { top: number; left: number; logoWidth: number; } = {
     logoWidth: 0,
@@ -56,6 +53,8 @@ export class PokerTableComponent implements OnInit, AfterViewInit, OnDestroy {
   public deckPosition: { top: number; left: number; width: number } = {top: 0, left: 0, width: 200};
   private sizeRatio: number = 5 / 3;
   private minWidth: number = 1300;
+
+  private user;
 
   constructor(
     private appStore: Store<AppStateContainer>,
@@ -88,14 +87,31 @@ export class PokerTableComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.height * (1 / 6);
   }
 
+  public get safeToCheck(): boolean {
+    return this.user && this.user.id && this.players && this.players.length > 0 && this.players[0].id != null;
+  }
+
+  public get acting(): boolean {
+    return this.safeToCheck ? this.players[this.actingIndex].id === this.user.id && !this.displaySummary : false;
+  }
+
+  public get playersIndex(): number {
+    return this.safeToCheck ? this.players.findIndex(p => p.id === this.user.id) : -1;
+  }
+
+  public get away(): boolean {
+    return this.playersIndex !== -1 ? this.players[this.playersIndex].away : false;
+  }
+
   public ngOnDestroy() {
     this.ngDestroyed$.next();
     this.ngDestroyed$.complete();
   }
 
   ngOnInit(): void {
-    this.acting$ = this.playerDataStore.select(selectActingStatus).pipe(takeUntil(this.ngDestroyed$));
-    this.away$ = this.playerDataStore.select(selectAwayStatus).pipe(takeUntil(this.ngDestroyed$));
+    this.appStore.select(selectLoggedInUser)
+    .pipe(takeUntil(this.ngDestroyed$))
+    .subscribe((user: UserModel) => this.user = user);
 
     this.delay(100).then(() => this.gameStore.dispatch(requestGameModelUpdate()));
     this.gameStore.select(selectGameModel)
@@ -108,8 +124,8 @@ export class PokerTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.pokerTableStore.select(selectActingPlayer)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((acting: number) => {
-      this.acting = acting;
+    .subscribe((actingIndex: number) => {
+      this.actingIndex = actingIndex;
       this.startTurnTimer().then();
     });
 
@@ -142,7 +158,7 @@ export class PokerTableComponent implements OnInit, AfterViewInit, OnDestroy {
     this.appStore.dispatch(drawCard());
   }
 
-  public away(): void {
+  public setStatusToAway(): void {
     this.playerDataStore.dispatch(setAwayStatus({away: true}));
   }
 
@@ -152,9 +168,9 @@ export class PokerTableComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   private async startTurnTimer(): Promise<void> {
     if (this.players && this.players.length > 0) {
-      const acting = this.acting;
-      let currentTime = this.players[this.acting].away ? 0 : this.game.timeToAct;
-      while (currentTime > 0 && this.acting === acting && !this.displaySummary) {
+      const acting = this.actingIndex;
+      let currentTime = this.players[this.actingIndex].away ? 0 : this.game.timeToAct;
+      while (currentTime > 0 && this.actingIndex === acting && !this.displaySummary) {
         this.timeToAct = currentTime--;
         await this.delay(1000);
       }

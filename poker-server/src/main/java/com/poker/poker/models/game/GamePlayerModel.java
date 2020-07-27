@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -39,6 +40,16 @@ public class GamePlayerModel extends PlayerModel {
     this.away = false;
     this.acting = false;
     this.cards = new ArrayList<>();
+  }
+
+  public GamePlayerModel(final GamePlayerModel player) {
+    super(player);
+    this.score = player.score;
+    this.away = player.away;
+    this.acting = player.acting;
+    this.bankRoll = player.bankRoll;
+    this.cards = player.cards.stream().map(c -> new CardModel(c.getSuit(), c.getValue())).collect(
+        Collectors.toList());
   }
 
   public GamePlayerModel(UserDocument userDocument) {

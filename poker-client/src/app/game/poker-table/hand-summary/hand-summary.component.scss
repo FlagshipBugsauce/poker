@@ -1,0 +1,21 @@
+:host {
+  .hand-summary-container {
+    position: relative;
+
+    .hand-summary-card {
+      position: absolute;
+      width: 300px;
+    }
+
+    .hand-summary-caption {
+      position: absolute;
+      top: -200px;
+      left: -300px;
+      font-size: 35px;
+      font-weight: bolder;
+      color: rgba(255, 255, 255, 0.85);
+      width: 600px;
+      text-align: center;
+    }
+  }
+}

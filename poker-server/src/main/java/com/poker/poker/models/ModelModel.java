@@ -19,6 +19,7 @@ import com.poker.poker.models.game.GameModel;
 import com.poker.poker.models.game.GameParameterModel;
 import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.HandModel;
+import com.poker.poker.models.game.HandSummaryModel;
 import com.poker.poker.models.game.LobbyModel;
 import com.poker.poker.models.game.LobbyPlayerModel;
 import com.poker.poker.models.game.PlayerModel;
@@ -71,6 +72,7 @@ public class ModelModel {
   private GameParameterModel gameParameterModel;
   private GamePlayerModel gamePlayerModel;
   private HandModel handModel;
+  private HandSummaryModel handSummaryModel;
   private LobbyModel lobbyModel;
   private LobbyPlayerModel lobbyPlayerModel;
   private PlayerModel playerModel;

@@ -21,6 +21,7 @@ import {GameSummaryModel} from './game-summary-model';
 import {GenericServerMessage} from './generic-server-message';
 import {HandActionModel} from './hand-action-model';
 import {HandModel} from './hand-model';
+import {HandSummaryModel} from './hand-summary-model';
 import {JwtAuthRequestModel} from './jwt-auth-request-model';
 import {LobbyModel} from './lobby-model';
 import {LobbyPlayerModel} from './lobby-player-model';
@@ -62,6 +63,7 @@ export interface ModelModel {
   handAction?: 'Start' | 'Roll' | 'Draw';
   handActionModel?: HandActionModel;
   handModel?: HandModel;
+  handSummaryModel?: HandSummaryModel;
   jwtAuthRequestModel?: JwtAuthRequestModel;
   lobbyModel?: LobbyModel;
   lobbyPlayerModel?: LobbyPlayerModel;

@@ -3,7 +3,9 @@ package com.poker.poker.services;
 import com.poker.poker.config.AppConfig;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.CurrentGameEvent;
+import com.poker.poker.events.GameMessageEvent;
 import com.poker.poker.events.PublishMessageEvent;
+import com.poker.poker.events.ToastMessageEvent;
 import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.websocket.GenericServerMessage;
 import com.poker.poker.models.websocket.ToastClassModel;
@@ -113,12 +115,31 @@ public class WebSocketService {
   }
 
   /**
+   * Handles message events that are destined for the /topic/game/{id} topic. These could be
+   * messages that are being sent to a game ID, or a player ID.
+   *
+   * @param event Message event.
+   * @param <T>   Data type.
+   */
+  @EventListener
+  public <T> void gameMessageEventHandler(final GameMessageEvent<T> event) {
+    template.convertAndSend(appConfig.getGameTopic() + event.getId(), event.getMessage());
+  }
+
+  @EventListener
+  public void toastMessageEventHandler(final ToastMessageEvent event) {
+    template.convertAndSend(
+        appConfig.getGameTopic() + event.getId(),
+        new GenericServerMessage<>(MessageType.Toast, event.getToast()));
+  }
+
+  /**
    * Handles publish message events. Unlike sendPublicMessage, this method will broadcast raw data,
    * as in, it will not place the data in a container with a type enum indicating what kind of data
    * is being sent.
    *
    * @param publishMessageEvent Event that is published when server should send raw data.
-   * @param <T> Type of data being sent.
+   * @param <T>                 Type of data being sent.
    */
   @EventListener
   public <T> void messageEventHandler(final PublishMessageEvent<T> publishMessageEvent) {

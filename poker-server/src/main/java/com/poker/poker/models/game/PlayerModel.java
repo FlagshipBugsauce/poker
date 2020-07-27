@@ -2,16 +2,15 @@ package com.poker.poker.models.game;
 
 import com.poker.poker.documents.UserDocument;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "Player of a game.")
@@ -53,5 +52,22 @@ public abstract class PlayerModel {
     id = playerModel.getId();
     firstName = playerModel.getFirstName();
     lastName = playerModel.getLastName();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof PlayerModel)) {
+      return false;
+    }
+    PlayerModel that = (PlayerModel) o;
+    return getId().equals(that.getId());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getId());
   }
 }

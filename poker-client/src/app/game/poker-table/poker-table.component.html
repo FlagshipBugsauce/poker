@@ -30,9 +30,16 @@
     }"
       [player]="playerBox.number"></pkr-player-box>
   </div>
+  <pkr-hand-summary
+    [ngStyle]="{
+        'position': 'absolute',
+        'top': height / 2 + 'px',
+        'left': width / 2 + 'px'
+    }"
+    [width]="deckPosition.width"></pkr-hand-summary>
   <div class="button-box">
     <span class="turn-timer">{{timeToAct}}</span>
-    <button (click)="away()" [disabled]="(away$ | async)" class="btn btn-success">Away</button>
-    <button (click)="draw()" [disabled]="!(acting$ | async)" class="btn btn-success">Draw</button>
+    <button (click)="setStatusToAway()" [disabled]="away" class="btn btn-success">Away</button>
+    <button (click)="draw()" [disabled]="!acting" class="btn btn-success">Draw</button>
   </div>
 </div>

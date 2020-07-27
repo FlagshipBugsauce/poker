@@ -1,11 +1,10 @@
-/* tslint:disable */
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {Store} from "@ngrx/store";
-import {GameStateContainer, PokerTableStateContainer} from "../../../shared/models/app-state.model";
-import {Subject} from "rxjs";
-import {selectCardPosition, selectGamePhase} from "../../../state/app.selector";
-import {takeUntil} from "rxjs/operators";
-import {GamePhase} from "../../../shared/models/game-phase.enum";
+import {Store} from '@ngrx/store';
+import {GameStateContainer, PokerTableStateContainer} from '../../../shared/models/app-state.model';
+import {Subject} from 'rxjs';
+import {selectCardPosition, selectGamePhase} from '../../../state/app.selector';
+import {takeUntil} from 'rxjs/operators';
+import {GamePhase} from '../../../shared/models/game-phase.enum';
 
 @Component({
   selector: 'pkr-deck',
@@ -40,7 +39,7 @@ export class DeckComponent implements OnInit, OnDestroy {
     {down: -1, right: 10},
     {down: 1, right: 10},
     {down: 2.5, right: 6}
-  ]
+  ];
 
   constructor(
     private pokerTableStore: Store<PokerTableStateContainer>,
@@ -56,7 +55,9 @@ export class DeckComponent implements OnInit, OnDestroy {
     this.pokerTableStore.select(selectCardPosition)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((pos: number) => {
-      if (pos !== -1 && this.phase === GamePhase.Play) this.sendCardToPosition(pos + 1).then();
+      if (pos !== -1 && this.phase === GamePhase.Play) {
+        this.sendCardToPosition(pos + 1).then();
+      }
     });
   }
 

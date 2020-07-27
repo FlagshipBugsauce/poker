@@ -146,6 +146,7 @@ export class UsersService extends BaseService {
    * Path part for operation authorize
    */
   static readonly AuthorizePath = '/user/auth';
+
   /**
    * Path part for operation authorizeWithJwt
    */
