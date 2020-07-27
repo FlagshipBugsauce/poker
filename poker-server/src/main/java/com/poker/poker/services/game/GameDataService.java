@@ -51,10 +51,9 @@ public class GameDataService {
   private final Map<UUID, PokerTableModel> tables;
   private List<GameListModel> gameList;
   private boolean useCachedGameList = false;
-  /**
-   * Mapping from user ID to game ID. Can be used to retrieve the game a user is in.
-   */
+  /** Mapping from user ID to game ID. Can be used to retrieve the game a user is in. */
   private final Map<UUID, UUID> userIdToGameIdMap;
+
   private final Map<UUID, UUID> gameIdToHandIdMap;
 
   public GameDataService(
@@ -81,22 +80,20 @@ public class GameDataService {
     useCachedGameList = false;
   }
 
-  /**
-   * Every 3 seconds, broadcasts the list of joinable games to the game list topic.
-   */
+  /** Every 3 seconds, broadcasts the list of joinable games to the game list topic. */
   @Scheduled(cron = "0/3 * * * * ?")
   public void broadcastGameList() {
     webSocketService.sendPublicMessage(
         appConfig.getGameListTopic(),
         new GenericServerMessage<>(
             MessageType.GameList, useCachedGameList ? gameList : getLobbyList()));
-//    publisher.publishEvent(new GameMessageEvent<>(this, MessageType.GameList, ));
+    //    publisher.publishEvent(new GameMessageEvent<>(this, MessageType.GameList, ));
   }
 
   public void broadcastPokerTable(final UUID id) {
     assert tables.get(id) != null;
-    publisher
-        .publishEvent(new GameMessageEvent<>(this, MessageType.PokerTable, id, tables.get(id)));
+    publisher.publishEvent(
+        new GameMessageEvent<>(this, MessageType.PokerTable, id, tables.get(id)));
   }
 
   public void broadcastGame(final UUID id) {
@@ -127,7 +124,7 @@ public class GameDataService {
    * Sets up all the required mappings when a game is created and returns the ID of the new game.
    *
    * @param params Parameters of the new game.
-   * @param user   User who created the game.
+   * @param user User who created the game.
    * @return ID of the new game.
    */
   public UUID newGame(final GameParameterModel params, final UserDocument user) {
@@ -138,14 +135,15 @@ public class GameDataService {
     assert tables.get(gameId) == null;
     assert userIdToGameIdMap.get(user.getId()) == null;
 
-    final GameModel game = new GameModel(
-        gameId,
-        GamePhase.Lobby,
-        new ArrayList<>(),
-        new ArrayList<>(),
-        0,
-        appConfig.getNumRoundsInRollGame(),
-        appConfig.getTimeToActInMillis() / 1000);
+    final GameModel game =
+        new GameModel(
+            gameId,
+            GamePhase.Lobby,
+            new ArrayList<>(),
+            new ArrayList<>(),
+            0,
+            appConfig.getNumRoundsInRollGame(),
+            appConfig.getTimeToActInMillis() / 1000);
 
     final LobbyPlayerModel host = new LobbyPlayerModel(user, false, true);
     final List<LobbyPlayerModel> players = Collections.synchronizedList(new ArrayList<>());
@@ -229,9 +227,7 @@ public class GameDataService {
     assert tables.get(id) != null;
     final GameModel game = games.get(id);
     game.setPlayers(
-        lobbys.get(id)
-            .getPlayers()
-            .stream()
+        lobbys.get(id).getPlayers().stream()
             .map(GamePlayerModel::new)
             .collect(Collectors.toList()));
     Collections.shuffle(game.getPlayers());
@@ -280,10 +276,10 @@ public class GameDataService {
   public GamePlayerModel getPlayerData(final UUID userId) {
     assert userIdToGameIdMap != null;
     assert games.get(userIdToGameIdMap.get(userId)) != null;
-    return games.get(userIdToGameIdMap.get(userId)).getPlayers()
-        .stream()
+    return games.get(userIdToGameIdMap.get(userId)).getPlayers().stream()
         .filter(p -> p.getId().equals(userId))
-        .findFirst().orElse(null);
+        .findFirst()
+        .orElse(null);
   }
 
   public DeckModel getDeck(final UUID id) {

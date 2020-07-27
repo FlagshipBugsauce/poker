@@ -48,8 +48,10 @@ public class GamePlayerModel extends PlayerModel {
     this.away = player.away;
     this.acting = player.acting;
     this.bankRoll = player.bankRoll;
-    this.cards = player.cards.stream().map(c -> new CardModel(c.getSuit(), c.getValue())).collect(
-        Collectors.toList());
+    this.cards =
+        player.cards.stream()
+            .map(c -> new CardModel(c.getSuit(), c.getValue()))
+            .collect(Collectors.toList());
   }
 
   public GamePlayerModel(UserDocument userDocument) {

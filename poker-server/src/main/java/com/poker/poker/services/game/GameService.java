@@ -61,7 +61,7 @@ public class GameService {
   /**
    * Publishes a message to system chat for specified game ID.
    *
-   * @param gameId  The lobby the message should be published to.
+   * @param gameId The lobby the message should be published to.
    * @param message The message to publish.
    */
   public void publishSystemChatMessageEvent(final UUID gameId, final String message) {
@@ -75,10 +75,15 @@ public class GameService {
    */
   @EventListener
   public void publishCurrentGameInfo(final PublishCurrentGameEvent event) {
-    publisher.publishEvent(new CurrentGameEvent(
-        this, event.getId(), new CurrentGameModel(
-        data.isUserInGame(event.getId()),
-        data.isUserInGame(event.getId()) ? data.getUsersGame(event.getId()).getId() : null)));
+    publisher.publishEvent(
+        new CurrentGameEvent(
+            this,
+            event.getId(),
+            new CurrentGameModel(
+                data.isUserInGame(event.getId()),
+                data.isUserInGame(event.getId())
+                    ? data.getUsersGame(event.getId()).getId()
+                    : null)));
   }
 
   /**
@@ -98,10 +103,9 @@ public class GameService {
     final UUID gameId = data.newGame(params, user);
 
     // TODO: Refactor this to use generic message (requires client refactor also).
-    publisher.publishEvent(new PublishMessageEvent<>(
-        this,
-        "/topic/game/create/" + user.getId(),
-        new ApiSuccessModel(gameId.toString())));
+    publisher.publishEvent(
+        new PublishMessageEvent<>(
+            this, "/topic/game/create/" + user.getId(), new ApiSuccessModel(gameId.toString())));
   }
 
   /**
@@ -137,12 +141,11 @@ public class GameService {
     }
     final UserDocument user = event.getUser();
     final LobbyModel lobby = data.getUsersLobby(user.getId());
-    final LobbyPlayerModel player = lobby
-        .getPlayers()
-        .stream()
-        .filter(p -> p.getId().equals(user.getId()))
-        .findFirst()
-        .orElse(null);
+    final LobbyPlayerModel player =
+        lobby.getPlayers().stream()
+            .filter(p -> p.getId().equals(user.getId()))
+            .findFirst()
+            .orElse(null);
 
     if (player == null) {
       return;
@@ -159,8 +162,8 @@ public class GameService {
       return;
     }
 
-    final String toastMessage = String.format(
-        "%s %s has left the lobby.", player.getFirstName(), player.getLastName());
+    final String toastMessage =
+        String.format("%s %s has left the lobby.", player.getFirstName(), player.getLastName());
     publisher.publishEvent(new ToastMessageEvent(this, lobby.getId(), toastMessage, "lg"));
     publisher.publishEvent(
         new GameMessageEvent<>(this, MessageType.PlayerLeftLobby, lobby.getId(), player));
@@ -181,20 +184,20 @@ public class GameService {
     }
     final LobbyModel lobby = data.getUsersLobby(userId);
     synchronized (lobby.getPlayers()) {
-      final LobbyPlayerModel player = data.getUsersLobby(userId).getPlayers()
-          .stream()
-          .filter(p -> p.getId().equals(userId))
-          .findFirst()
-          .orElse(null);
+      final LobbyPlayerModel player =
+          data.getUsersLobby(userId).getPlayers().stream()
+              .filter(p -> p.getId().equals(userId))
+              .findFirst()
+              .orElse(null);
       if (player == null) {
         return;
       }
       player.setReady(!player.isReady());
-      publishSystemChatMessageEvent(lobby.getId(), String.format(
-          "%s %s %s ready.",
-          player.getFirstName(),
-          player.getLastName(),
-          player.isReady() ? "is" : "is not"));
+      publishSystemChatMessageEvent(
+          lobby.getId(),
+          String.format(
+              "%s %s %s ready.",
+              player.getFirstName(), player.getLastName(), player.isReady() ? "is" : "is not"));
       publisher.publishEvent(
           new GameMessageEvent<>(this, MessageType.ReadyToggled, lobby.getId(), player));
     }
@@ -229,8 +232,14 @@ public class GameService {
    * @param over Indicates whether the game is over.
    */
   public void updateCurrentGameTopic(final GameModel game, final boolean over) {
-    game.getPlayers().forEach(player -> publisher.publishEvent(new CurrentGameEvent(
-        this, player.getId(), new CurrentGameModel(!over, over ? null : game.getId()))));
+    game.getPlayers()
+        .forEach(
+            player ->
+                publisher.publishEvent(
+                    new CurrentGameEvent(
+                        this,
+                        player.getId(),
+                        new CurrentGameModel(!over, over ? null : game.getId()))));
   }
 
   /**
@@ -265,11 +274,11 @@ public class GameService {
   public void afk(final AwayStatusEvent event) {
     final GameModel game = data.getUsersGame(event.getId());
     final PokerTableModel table = data.getPokerTable(game.getId());
-    final GamePlayerModel player = game.getPlayers()
-        .stream()
-        .filter(p -> p.getId().equals(event.getId()))
-        .findFirst()
-        .orElse(null);
+    final GamePlayerModel player =
+        game.getPlayers().stream()
+            .filter(p -> p.getId().equals(event.getId()))
+            .findFirst()
+            .orElse(null);
     final GamePlayerModel acting = table.getPlayers().get(table.getActingPlayer());
 
     if (player == null) {
@@ -283,10 +292,10 @@ public class GameService {
       publisher.publishEvent(new DrawCardEvent(this, player.getId()));
     }
 
-    publisher
-        .publishEvent(new GameMessageEvent<>(this, MessageType.PlayerData, player.getId(), player));
-    publisher.publishEvent(new GameMessageEvent<>(
-        this, MessageType.PlayerAwayToggled, game.getId(), player));
+    publisher.publishEvent(
+        new GameMessageEvent<>(this, MessageType.PlayerData, player.getId(), player));
+    publisher.publishEvent(
+        new GameMessageEvent<>(this, MessageType.PlayerAwayToggled, game.getId(), player));
     data.broadcastPokerTable(game.getId());
     // TODO: Refine what we're sending out here
   }
@@ -323,8 +332,8 @@ public class GameService {
     final PokerTableModel table = data.getPokerTable(game.getId());
     final GamePlayerModel player = table.getPlayers().get(table.getActingPlayer());
     if (!player.getId().equals(event.getId())) {
-      log.error("Player {} attempted to draw a card when it was not this player's turn.",
-          event.getId());
+      log.error(
+          "Player {} attempted to draw a card when it was not this player's turn.", event.getId());
       return;
     }
     final DeckModel deck = data.getDeck(game.getId());
@@ -336,8 +345,11 @@ public class GameService {
 
     // Broadcast table -- TODO: Refine what is being sent out
     data.broadcastPokerTable(game.getId());
-    publishSystemChatMessageEvent(game.getId(), String.format("%s %s drew the %s of %s",
-        player.getFirstName(), player.getLastName(), card.getValue(), card.getSuit()));
+    publishSystemChatMessageEvent(
+        game.getId(),
+        String.format(
+            "%s %s drew the %s of %s",
+            player.getFirstName(), player.getLastName(), card.getValue(), card.getSuit()));
 
     publisher.publishEvent(new HandEvent(this, player.getId()));
   }
@@ -397,7 +409,8 @@ public class GameService {
       // Remove summary.
       table.setDisplayHandSummary(false);
       final GamePlayerModel winner = table.getPlayers().get(table.getSummary().getWinner());
-      publishSystemChatMessageEvent(game.getId(),
+      publishSystemChatMessageEvent(
+          game.getId(),
           String.format("%s %s won the hand.", winner.getFirstName(), winner.getLastName()));
       table.setSummary(null);
 
@@ -416,9 +429,11 @@ public class GameService {
    */
   private HandSummaryModel getHandSummary(final UUID id) {
     final PokerTableModel table = data.getPokerTable(id);
-    final List<GamePlayerModel> players = table.getPlayers().stream().map(GamePlayerModel::new)
-        .sorted((a, b) -> -cardService.compare(a.getCards().get(0), b.getCards().get(0)))
-        .collect(Collectors.toList());
+    final List<GamePlayerModel> players =
+        table.getPlayers().stream()
+            .map(GamePlayerModel::new)
+            .sorted((a, b) -> -cardService.compare(a.getCards().get(0), b.getCards().get(0)))
+            .collect(Collectors.toList());
     final int winningIndex = table.getPlayers().indexOf(players.get(0));
     // Update winners score
     final GamePlayerModel winningPlayer = table.getPlayers().get(winningIndex);

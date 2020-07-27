@@ -60,26 +60,26 @@ public class HandController {
     return ResponseEntity.ok(new ApiSuccessModel("Card drawn."));
   }
 
-//  @Operation(
-//      summary = "Determines winner of hand.",
-//      description = "Responds with the player model of the winner of a hand.",
-//      tags = "game")
-//  @ApiResponses(
-//      value = {
-//        @ApiResponse(
-//            responseCode = "200",
-//            description = "Draw was successful.",
-//            content =
-//                @Content(
-//                    schema = @Schema(implementation = PlayerModel.class),
-//                    mediaType = MediaType.APPLICATION_JSON_VALUE))
-//      })
-//  @RequestMapping(value = "/determine-winner/{handId}", method = RequestMethod.POST)
-//  public ResponseEntity<PlayerModel> determineWinner(
-//      @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
-//      @PathVariable UUID handId) {
-//    userService.validate(jwt, constants.getClientGroups());
-//    return ResponseEntity.ok(
-//        handService.determineWinner(handRepository.findHandDocumentById(handId)));
-//  }
+  //  @Operation(
+  //      summary = "Determines winner of hand.",
+  //      description = "Responds with the player model of the winner of a hand.",
+  //      tags = "game")
+  //  @ApiResponses(
+  //      value = {
+  //        @ApiResponse(
+  //            responseCode = "200",
+  //            description = "Draw was successful.",
+  //            content =
+  //                @Content(
+  //                    schema = @Schema(implementation = PlayerModel.class),
+  //                    mediaType = MediaType.APPLICATION_JSON_VALUE))
+  //      })
+  //  @RequestMapping(value = "/determine-winner/{handId}", method = RequestMethod.POST)
+  //  public ResponseEntity<PlayerModel> determineWinner(
+  //      @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
+  //      @PathVariable UUID handId) {
+  //    userService.validate(jwt, constants.getClientGroups());
+  //    return ResponseEntity.ok(
+  //        handService.determineWinner(handRepository.findHandDocumentById(handId)));
+  //  }
 }

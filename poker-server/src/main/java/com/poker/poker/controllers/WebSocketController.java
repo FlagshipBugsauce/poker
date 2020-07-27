@@ -47,31 +47,31 @@ public class WebSocketController {
       final Object data;
       switch (updateModel.getType()) {
         case GameList:
-//          data = lobbyService.getLobbyList();
+          //          data = lobbyService.getLobbyList();
           data = this.data.getLobbyList();
           break;
         case Lobby:
-//          data = lobbyService.getLobbyModel(updateModel.getId());
+          //          data = lobbyService.getLobbyModel(updateModel.getId());
           data = this.data.getLobby(updateModel.getId());
           break;
         case Game:
-//          data = gameService.getGameModel(updateModel.getId());
+          //          data = gameService.getGameModel(updateModel.getId());
           data = this.data.getGame(updateModel.getId());
           break;
         case Hand:
-//          data = handService.getHand(gameService.getGameModel(updateModel.getId()));
+          //          data = handService.getHand(gameService.getGameModel(updateModel.getId()));
           data = null;
           break;
         case GameData:
-//          data = gameService.getGameData(updateModel.getId());
+          //          data = gameService.getGameData(updateModel.getId());
           data = null;
           break;
         case PlayerData:
-//          data = gameService.getPlayerData(updateModel.getId());
+          //          data = gameService.getPlayerData(updateModel.getId());
           data = this.data.getPlayerData(updateModel.getId());
           break;
         case PokerTable:
-//          data = gameService.getPokerTable(updateModel.getId());
+          //          data = gameService.getPokerTable(updateModel.getId());
           data = this.data.getPokerTable(updateModel.getId());
           break;
         default:
@@ -114,10 +114,10 @@ public class WebSocketController {
     log.debug("User {} requesting update.", action.getUserId());
 
     publisher.publishEvent(new PublishCurrentGameEvent(this, action.getUserId()));
-//
-//    publisher.publishEvent(
-//        new CurrentGameEvent(
-//            this, action.getUserId(), gameService.getCurrentGameModel(action.getUserId())));
+    //
+    //    publisher.publishEvent(
+    //        new CurrentGameEvent(
+    //            this, action.getUserId(), gameService.getCurrentGameModel(action.getUserId())));
   }
 
   @MessageMapping("/game/create")
@@ -134,12 +134,12 @@ public class WebSocketController {
     final UserDocument user = jwtService.getUserDocument(messageModel.getJwt());
     log.debug("User {} attempting to join a game.", user.getId());
 
-//    gameService.checkIfGameExists(messageModel.getGameId());
-//    gameService.checkIfGameIsInLobbyState(messageModel.getGameId());
-//    if (gameService.isUserInSpecifiedGame(messageModel.getGameId(), user.getId())) {
-//      return;
-//    }
-//    gameService.checkIfUserIsInGame(user.getId());
+    //    gameService.checkIfGameExists(messageModel.getGameId());
+    //    gameService.checkIfGameIsInLobbyState(messageModel.getGameId());
+    //    if (gameService.isUserInSpecifiedGame(messageModel.getGameId(), user.getId())) {
+    //      return;
+    //    }
+    //    gameService.checkIfUserIsInGame(user.getId());
 
     publisher.publishEvent(new JoinGameEvent(this, messageModel.getGameId(), user));
   }

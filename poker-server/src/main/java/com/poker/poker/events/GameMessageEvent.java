@@ -13,10 +13,7 @@ public class GameMessageEvent<T> extends ApplicationEvent {
   private final GenericServerMessage<T> message;
 
   public GameMessageEvent(
-      final Object source,
-      final MessageType type,
-      final UUID id,
-      final T data) {
+      final Object source, final MessageType type, final UUID id, final T data) {
     super(source);
     message = new GenericServerMessage<>(type, data);
     this.id = id;

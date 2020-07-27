@@ -119,7 +119,7 @@ public class WebSocketService {
    * messages that are being sent to a game ID, or a player ID.
    *
    * @param event Message event.
-   * @param <T>   Data type.
+   * @param <T> Data type.
    */
   @EventListener
   public <T> void gameMessageEventHandler(final GameMessageEvent<T> event) {
@@ -139,7 +139,7 @@ public class WebSocketService {
    * is being sent.
    *
    * @param publishMessageEvent Event that is published when server should send raw data.
-   * @param <T>                 Type of data being sent.
+   * @param <T> Type of data being sent.
    */
   @EventListener
   public <T> void messageEventHandler(final PublishMessageEvent<T> publishMessageEvent) {

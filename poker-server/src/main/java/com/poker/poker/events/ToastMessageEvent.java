@@ -13,13 +13,9 @@ public class ToastMessageEvent extends ApplicationEvent {
   private final ToastModel toast;
 
   public ToastMessageEvent(
-      final Object source,
-      final UUID id,
-      final String message,
-      final String size) {
+      final Object source, final UUID id, final String message, final String size) {
     super(source);
     this.id = id;
-    toast = new ToastModel(
-        message, new ToastClassModel("bg-light toast-" + size, 5000));
+    toast = new ToastModel(message, new ToastClassModel("bg-light toast-" + size, 5000));
   }
 }
