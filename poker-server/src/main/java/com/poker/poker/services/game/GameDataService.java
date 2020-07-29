@@ -52,10 +52,9 @@ public class GameDataService {
   private final Map<UUID, DeckModel> decks;
   private final Map<UUID, PokerTableModel> tables;
   private final Map<UUID, DrawGameDataContainerModel> summaries;
-  /**
-   * Mapping from user ID to game ID. Can be used to retrieve the game a user is in.
-   */
+  /** Mapping from user ID to game ID. Can be used to retrieve the game a user is in. */
   private final Map<UUID, UUID> userIdToGameIdMap;
+
   private final Map<UUID, UUID> gameIdToHandIdMap;
   private List<GameListModel> gameList;
   private boolean useCachedGameList = false;
@@ -85,9 +84,7 @@ public class GameDataService {
     useCachedGameList = false;
   }
 
-  /**
-   * Every 3 seconds, broadcasts the list of joinable games to the game list topic.
-   */
+  /** Every 3 seconds, broadcasts the list of joinable games to the game list topic. */
   @Scheduled(cron = "0/3 * * * * ?")
   public void broadcastGameList() {
     webSocketService.sendPublicMessage(
@@ -109,8 +106,8 @@ public class GameDataService {
 
   public void broadcastGameSummary(final UUID id) {
     assert summaries.get(id) != null;
-    publisher
-        .publishEvent(new GameMessageEvent<>(this, MessageType.GameData, id, summaries.get(id)));
+    publisher.publishEvent(
+        new GameMessageEvent<>(this, MessageType.GameData, id, summaries.get(id)));
   }
 
   /**
@@ -136,7 +133,7 @@ public class GameDataService {
    * Sets up all the required mappings when a game is created and returns the ID of the new game.
    *
    * @param params Parameters of the new game.
-   * @param user   User who created the game.
+   * @param user User who created the game.
    * @return ID of the new game.
    */
   public UUID newGame(final GameParameterModel params, final UserDocument user) {
@@ -250,9 +247,12 @@ public class GameDataService {
             .collect(Collectors.toList()));
     Collections.shuffle(game.getPlayers());
 
-    summaries.get(id).setGameData(game.getPlayers().stream()
-        .map(p -> new DrawGameDataModel(p, false, new ArrayList<>())).collect(
-            Collectors.toList()));
+    summaries
+        .get(id)
+        .setGameData(
+            game.getPlayers().stream()
+                .map(p -> new DrawGameDataModel(p, false, new ArrayList<>()))
+                .collect(Collectors.toList()));
 
     lobbys.remove(id);
     game.setPhase(GamePhase.Play);
@@ -300,10 +300,11 @@ public class GameDataService {
     assert userIdToGameIdMap != null;
     assert games.get(userIdToGameIdMap.get(userId)) != null;
     assert games.get(userIdToGameIdMap.get(userId)).getPlayers() != null;
-    final GamePlayerModel player = games.get(userIdToGameIdMap.get(userId)).getPlayers().stream()
-        .filter(p -> p.getId().equals(userId))
-        .findFirst()
-        .orElse(null);
+    final GamePlayerModel player =
+        games.get(userIdToGameIdMap.get(userId)).getPlayers().stream()
+            .filter(p -> p.getId().equals(userId))
+            .findFirst()
+            .orElse(null);
     assert player != null;
     return player;
   }
