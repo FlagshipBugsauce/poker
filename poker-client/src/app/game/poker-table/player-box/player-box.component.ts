@@ -1,5 +1,5 @@
 /* tslint:disable:no-bitwise */
-import {AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CardModel, GamePlayerModel} from '../../../api/models';
 import {CardSuit, CardValue} from '../../../shared/models/card.enum';
 import {Store} from '@ngrx/store';
@@ -14,29 +14,17 @@ import {CardComponent} from '../../../shared/card/card.component';
   templateUrl: './player-box.component.html',
   styleUrls: ['./player-box.component.scss']
 })
-export class PlayerBoxComponent implements OnInit, AfterViewInit, OnDestroy {
-  /*
-        Player positions:
+export class PlayerBoxComponent implements OnInit, OnDestroy {
+  /*    Player positions:
 
             5     6     7
         4                   8
         3                   9
-            2     1     10
+            2     1     10      */
 
-        Need to have dealer button & chips positioned based off of this number.
-   */
   @Input() player: number;
   @ViewChild('card1') card1: CardComponent;
-  public cards: CardModel[] = [
-    {
-      value: CardValue.Ace,
-      suit: CardSuit.Spades
-    },
-    {
-      value: CardValue.Ace,
-      suit: CardSuit.Hearts
-    }
-  ];
+  public cards: CardModel[] = [{value: CardValue.Ace, suit: CardSuit.Spades}];
 
   public playerModel: GamePlayerModel = {} as GamePlayerModel;
 
@@ -132,97 +120,12 @@ export class PlayerBoxComponent implements OnInit, AfterViewInit, OnDestroy {
     return position;
   }
 
-  public getInitialsAndName(): string[] {
-    switch (this.player - 1) {
-      case 0:
-        return ['GD', 'Gul Dukat'];
-      case 1:
-        return ['MO', 'Miles O\'Brien'];
-      case 2:
-        return ['BS', 'Benjamin Sisko'];
-      case 3:
-        return ['JB', 'Julian Bashir'];
-      case 4:
-        return ['JD', 'Jadzia Dax'];
-      case 5:
-        return ['JP', 'Jean-Luc Picard'];
-      case 6:
-        return ['GL', 'Geordie La Forge'];
-      case 7:
-        return ['WR', 'William Riker'];
-      case 8:
-        return ['BC', 'Beverly Crusher'];
-      case 9:
-        return ['DT', 'Deanna Troi'];
-    }
-  }
-
-  public getCardSuit(suit: number): CardSuit {
-    switch (suit) {
-      case 1:
-        return CardSuit.Spades;
-      case 2:
-        return CardSuit.Hearts;
-      case 3:
-        return CardSuit.Clubs;
-      case 4:
-        return CardSuit.Diamonds;
-    }
-  }
-
-  public getCardValue(value: number): CardValue {
-    switch (value) {
-      case 1:
-        return CardValue.Ace;
-      case 2:
-        return CardValue.Two;
-      case 3:
-        return CardValue.Three;
-      case 4:
-        return CardValue.Four;
-      case 5:
-        return CardValue.Five;
-      case 6:
-        return CardValue.Six;
-      case 7:
-        return CardValue.Seven;
-      case 8:
-        return CardValue.Eight;
-      case 9:
-        return CardValue.Nine;
-      case 10:
-        return CardValue.Ten;
-      case 11:
-        return CardValue.Jack;
-      case 12:
-        return CardValue.Queen;
-      case 13:
-        return CardValue.King;
-    }
-  }
-
   ngOnInit(): void {
-    // this.gameStore.select(selectGamePlayers)
-    // .pipe(takeUntil(this.ngDestroyed$))
-    // .subscribe((players: GamePlayerModel[]) => {
-    //   this.playerModel = players[this.player - 1];
-    //   if (this.playerModel) {
-    //     this.initials = this.playerModel.firstName.substring(0, 1) +
-    //       this.playerModel.lastName.substring(0, 1);
-    //     this.name = `${this.playerModel.firstName} ${this.playerModel.lastName}`;
-    //     this.bankRoll = this.playerModel.bankRoll;
-    //     this.dealerInternal = this.playerModel.acting;
-    //     this.cards = this.playerModel.cards;
-    //     this.score = this.playerModel.score;
-    //     this.away = this.playerModel.away;
-    //   }
-    // });
-
     this.pokerTableStore.select(selectPlayers)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((players: GamePlayerModel[]) => {
       this.players = players;
-      this.playerModel = players[this.player - 1];
+      this.playerModel = players ? players[this.player - 1] : null;
       if (this.playerModel) {
         this.initials =
           `${this.playerModel.firstName.substring(0, 1)}${this.playerModel.lastName.substring(0, 1)}`;
@@ -236,31 +139,8 @@ export class PlayerBoxComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  ngAfterViewInit(): void {
-    this.delay(100).then(() => {
-        this.cards = [
-          {
-            value: this.getCardValue((Math.random() * 13 + 1) | 0),
-            suit: this.getCardSuit((Math.random() * 4 + 1) | 0)
-          },
-          {
-            value: this.getCardValue((Math.random() * 13 + 1) | 0),
-            suit: this.getCardSuit((Math.random() * 4 + 1) | 0)
-          }
-        ];
-        const profile = this.getInitialsAndName();
-        this.initials = profile[0];
-        this.name = profile[1];
-      }
-    );
-  }
-
   ngOnDestroy(): void {
     this.ngDestroyed$.next();
     this.ngDestroyed$.complete();
-  }
-
-  private async delay(time: number): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, time));
   }
 }

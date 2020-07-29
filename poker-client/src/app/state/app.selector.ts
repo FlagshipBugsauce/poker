@@ -11,7 +11,9 @@ import {
   HandStateContainer,
   LobbyStateContainer,
   PlayerDataStateContainer,
-  PokerTableStateContainer
+  PokerTableStateContainer,
+  TimerState,
+  TimerStateContainer
 } from '../shared/models/app-state.model';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {
@@ -168,7 +170,7 @@ export const pokerTableFeature =
   createFeatureSelector<PokerTableStateContainer, PokerTableModel>('tableState');
 export const selectPokerTable = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state);
-export const selectCardPosition = createSelector(
+export const selectPlayerThatActed = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state.playerThatActed);
 export const selectStartTurnTimer = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state.startTurnTimer);
@@ -182,3 +184,6 @@ export const selectActingPlayer = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state.actingPlayer);
 export const selectHandSummary = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state.summary);
+
+export const timerFeature = createFeatureSelector<TimerStateContainer, TimerState>('timerState');
+export const selectTimer = createSelector(timerFeature, (state: TimerState) => state.timer);

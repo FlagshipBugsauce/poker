@@ -32,12 +32,21 @@ public class PokerTableModel {
    */
   private int startTurnTimer = 0;
 
-  public void startTurnTimer() {
+  public void actionPerformed() {
     startTurnTimer++;
   }
 
   public void playerActed() {
+    incActingPlayer();
+    incPlayerThatActed();
+    actionPerformed();
+  }
+
+  public void incPlayerThatActed() {
     playerThatActed = (playerThatActed + 1) % players.size();
+  }
+
+  public void incActingPlayer() {
     actingPlayer = (actingPlayer + 1) % players.size();
   }
 }

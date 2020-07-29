@@ -4,14 +4,13 @@ import {LobbyComponent} from '../lobby/lobby.component';
 import {LeaveGameGuardService} from './leave-game-guard.service';
 import {PopupComponent, PopupContentModel} from 'src/app/shared/popup/popup.component';
 import {GamePhase} from 'src/app/shared/models/game-phase.enum';
-import {PlayComponent} from '../play/play.component';
 import {
   AppStateContainer,
   GameDataStateContainer,
   GameStateContainer
 } from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
-import {selectGameData, selectGameModel} from '../../state/app.selector';
+import {selectGameData, selectGameModel, selectGamePhase} from '../../state/app.selector';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {leaveGame, leaveLobby, unsubscribeFromGameTopics} from '../../state/app.actions';
@@ -27,8 +26,6 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /** Reference to the lobby component. */
   @ViewChild(LobbyComponent) lobbyComponent: LobbyComponent;
-  /** Reference to the play component. */
-  @ViewChild(PlayComponent) playComponent: PlayComponent;
   /**
    * Popup that will appear if a player clicks on a link to warn them that they will be removed
    * from the game if they navigate to another page.
@@ -48,6 +45,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   public ngDestroyed$ = new Subject();
   /** The model representing the state of the game at any given point in time. */
   public gameModel: GameModel;
+  public phase: GamePhase = GamePhase.Lobby;
 
   constructor(
     private leaveGameGuardService: LeaveGameGuardService,
@@ -78,9 +76,15 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     this.gameStore.select(selectGameModel).pipe(takeUntil(this.ngDestroyed$)).subscribe(
       (game: GameModel) => this.gameModel = game);
 
+    this.gameStore.select(selectGamePhase)
+    .pipe(takeUntil(this.ngDestroyed$))
+    .subscribe((phase: GamePhase) => {
+      this.phase = phase;
+      console.log(this.phase);
+    });
+
     this.gameDataStore.select(selectGameData).pipe(takeUntil(this.ngDestroyed$)).subscribe(
-      (data: DrawGameDataModel[]) => this.gameData = data
-    );
+      (data: DrawGameDataModel[]) => this.gameData = data ? data : this.gameData);
   }
 
   /**

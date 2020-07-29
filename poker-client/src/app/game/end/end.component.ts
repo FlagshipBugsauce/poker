@@ -41,5 +41,6 @@ export class EndComponent implements OnInit, OnDestroy {
       this.gameModel = gameModel;
       this.numbers = Array(gameModel.totalHands).fill('').map((v, i) => i + 1);
     });
+    console.log(this.gameData);
   }
 }

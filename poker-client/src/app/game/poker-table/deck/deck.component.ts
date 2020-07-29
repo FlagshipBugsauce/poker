@@ -2,7 +2,7 @@ import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {GameStateContainer, PokerTableStateContainer} from '../../../shared/models/app-state.model';
 import {Subject} from 'rxjs';
-import {selectCardPosition, selectGamePhase} from '../../../state/app.selector';
+import {selectGamePhase, selectPlayerThatActed} from '../../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
 import {GamePhase} from '../../../shared/models/game-phase.enum';
 
@@ -52,7 +52,7 @@ export class DeckComponent implements OnInit, OnDestroy {
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((phase: GamePhase) => this.phase = phase);
 
-    this.pokerTableStore.select(selectCardPosition)
+    this.pokerTableStore.select(selectPlayerThatActed)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((pos: number) => {
       if (pos !== -1 && this.phase === GamePhase.Play) {
@@ -68,7 +68,6 @@ export class DeckComponent implements OnInit, OnDestroy {
 
   public async sendCardToPosition(pos: number): Promise<void> {
     if (pos > 0) {
-      // console.log("Flinging card to position: " + pos);
       this.showMovingCard = true;
       let timer = 0;
       this.movingCardStyle.opacity = 1;

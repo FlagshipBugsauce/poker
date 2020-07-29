@@ -17,7 +17,6 @@ import com.poker.poker.services.JwtService;
 import com.poker.poker.services.UserService;
 import com.poker.poker.services.WebSocketService;
 import com.poker.poker.services.game.GameDataService;
-import com.poker.poker.validation.exceptions.BadRequestException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,31 +46,21 @@ public class WebSocketController {
       final Object data;
       switch (updateModel.getType()) {
         case GameList:
-          //          data = lobbyService.getLobbyList();
           data = this.data.getLobbyList();
           break;
         case Lobby:
-          //          data = lobbyService.getLobbyModel(updateModel.getId());
           data = this.data.getLobby(updateModel.getId());
           break;
         case Game:
-          //          data = gameService.getGameModel(updateModel.getId());
           data = this.data.getGame(updateModel.getId());
           break;
-        case Hand:
-          //          data = handService.getHand(gameService.getGameModel(updateModel.getId()));
-          data = null;
-          break;
         case GameData:
-          //          data = gameService.getGameData(updateModel.getId());
-          data = null;
+          data = this.data.getGameSummary(updateModel.getId());
           break;
         case PlayerData:
-          //          data = gameService.getPlayerData(updateModel.getId());
           data = this.data.getPlayerData(updateModel.getId());
           break;
         case PokerTable:
-          //          data = gameService.getPokerTable(updateModel.getId());
           data = this.data.getPokerTable(updateModel.getId());
           break;
         default:
@@ -79,7 +68,7 @@ public class WebSocketController {
       }
       webSocketService.sendPublicMessage(
           updateModel.getTopic(), new GenericServerMessage<>(updateModel.getType(), data));
-    } catch (BadRequestException e) {
+    } catch (Exception e) {
       log.error("Error retrieving data on {} update request.", updateModel.getType());
     }
   }

@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class ChatService {
 
-  private final ApplicationEventPublisher applicationEventPublisher;
+  private final ApplicationEventPublisher publisher;
 
   /**
    * Handles a chat message event, where a user sends a message to a particular chat. Users can chat
@@ -37,7 +37,7 @@ public class ChatService {
     // If a game ID is provided, then broadcast to that game only, otherwise, broadcast to general.
     final String topic =
         event.getGameId() == null ? "/topic/chat/general" : "/topic/chat/" + event.getGameId();
-    applicationEventPublisher.publishEvent(new PublishMessageEvent<>(this, topic, message));
+    publisher.publishEvent(new PublishMessageEvent<>(this, topic, message));
   }
 
   /**
@@ -52,6 +52,6 @@ public class ChatService {
     // If a game ID is provided, then broadcast to that game only, otherwise, broadcast to general.
     final String topic =
         event.getGameId() == null ? "/topic/chat/general" : "/topic/chat/" + event.getGameId();
-    applicationEventPublisher.publishEvent(new PublishMessageEvent<>(this, topic, message));
+    publisher.publishEvent(new PublishMessageEvent<>(this, topic, message));
   }
 }

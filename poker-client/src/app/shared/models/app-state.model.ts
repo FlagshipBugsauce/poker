@@ -13,6 +13,7 @@ import {
   UserModel
 } from '../../api/models';
 import {GameListContainerModel} from './game-list-container.model';
+import {TimerModel} from '../../state/app.actions';
 
 export interface AppState {
   showSignInFail: boolean;
@@ -76,4 +77,12 @@ export interface ChatContainer {
 
 export interface PokerTableStateContainer {
   tableState: PokerTableModel;
+}
+
+export interface TimerStateContainer {
+  timerState: TimerState;
+}
+
+export interface TimerState {
+  timer?: TimerModel;
 }

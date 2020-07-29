@@ -125,3 +125,12 @@ export const generalChatMessageReceived = createAction(
   '[WebSocketService] GeneralMessageReceived', props<ChatMessageModel>());
 export const gameChatMessageReceived = createAction(
   '[WebSocketService] GameMessageReceived', props<ChatMessageModel>());
+
+// Timer Actions
+export const startTimer = createAction('[WebSocketService] StartTimer', props<TimerModel>());
+
+// TODO: TEMPORARY UNTIL MODEL GENERATION
+export interface TimerModel {
+  id?: string;
+  duration?: number;
+}

@@ -15,7 +15,8 @@ import {
   HandStateContainer,
   LobbyStateContainer,
   PlayerDataStateContainer,
-  PokerTableStateContainer
+  PokerTableStateContainer,
+  TimerStateContainer
 } from '../models/app-state.model';
 import {MessageType} from '../models/message-types.enum';
 import {
@@ -37,6 +38,7 @@ import {
   playerLeftLobby,
   playerReadyToggled,
   pokerTableUpdate,
+  startTimer,
   updateCurrentGame
 } from '../../state/app.actions';
 import {selectLoggedInUser} from '../../state/app.selector';
@@ -82,7 +84,8 @@ export class WebSocketService implements OnDestroy {
     private gameListStore: Store<GameListStateContainer>,
     private playerDataStore: Store<PlayerDataStateContainer>,
     private drawnCardsStore: Store<DrawnCardsStateContainer>,
-    private pokerTableStore: Store<PokerTableStateContainer>
+    private pokerTableStore: Store<PokerTableStateContainer>,
+    private timerStore: Store<TimerStateContainer>
   ) {
     this.client = over(new SockJS(environment.api));
     this.client.debug = () => {
@@ -188,6 +191,9 @@ export class WebSocketService implements OnDestroy {
         //   break;
         case MessageType.PokerTable:
           this.pokerTableStore.dispatch(pokerTableUpdate(data.data));
+          break;
+        case MessageType.Timer:
+          this.timerStore.dispatch(startTimer(data.data));
           break;
       }
     });

@@ -30,9 +30,16 @@ import {
   signInFail,
   signInSuccess,
   signOut,
+  startTimer,
+  TimerModel,
   updateCurrentGame
 } from './app.actions';
-import {AppState, ChatContainer, DrawnCardsContainer} from '../shared/models/app-state.model';
+import {
+  AppState,
+  ChatContainer,
+  DrawnCardsContainer,
+  TimerState
+} from '../shared/models/app-state.model';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
   AuthResponseModel,
@@ -317,4 +324,14 @@ const pokerTableReducerInternal = createReducer<PokerTableModel>(
 
 export function pokerTableReducer(state, action) {
   return pokerTableReducerInternal(state, action);
+}
+
+export const timerInitialState: TimerState = {timer: {id: '0', duration: -1}};
+
+const timerReducerInternal = createReducer<TimerState>(
+  timerInitialState,
+  on(startTimer, (state: TimerState, timer: TimerModel) => ({timer: ({...timer})})));
+
+export function timerReducer(state, action) {
+  return timerReducerInternal(state, action);
 }
