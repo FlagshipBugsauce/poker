@@ -16,7 +16,4 @@ public class DrawGameDrawModel {
 
   @Schema(description = "Flag that is true if this draw won the hand.", example = "true")
   private boolean winner;
-
-  @Schema(description = "Flag that is true if this draw is next.", example = "true")
-  private boolean acting;
 }

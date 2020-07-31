@@ -12,7 +12,6 @@ import com.poker.poker.models.game.GameListModel;
 import com.poker.poker.models.game.GameModel;
 import com.poker.poker.models.game.GameParameterModel;
 import com.poker.poker.models.game.GamePlayerModel;
-import com.poker.poker.models.game.HandModel;
 import com.poker.poker.models.game.LobbyModel;
 import com.poker.poker.models.game.LobbyPlayerModel;
 import com.poker.poker.models.game.PokerTableModel;
@@ -48,7 +47,6 @@ public class GameDataService {
   private final WebSocketService webSocketService;
   private final Map<UUID, GameModel> games;
   private final Map<UUID, LobbyModel> lobbys;
-  private final Map<UUID, HandModel> hands;
   private final Map<UUID, DeckModel> decks;
   private final Map<UUID, PokerTableModel> tables;
   private final Map<UUID, DrawGameDataContainerModel> summaries;
@@ -68,7 +66,6 @@ public class GameDataService {
     this.webSocketService = webSocketService;
     games = Collections.synchronizedMap(new HashMap<>());
     lobbys = Collections.synchronizedMap(new HashMap<>());
-    hands = Collections.synchronizedMap(new HashMap<>());
     decks = Collections.synchronizedMap(new HashMap<>());
     tables = Collections.synchronizedMap(new HashMap<>());
     summaries = Collections.synchronizedMap(new HashMap<>());
@@ -163,7 +160,7 @@ public class GameDataService {
     lobbys.put(gameId, new LobbyModel(gameId, host, params, players));
     decks.put(gameId, new DeckModel());
     tables.put(gameId, new PokerTableModel());
-    summaries.put(gameId, new DrawGameDataContainerModel(new ArrayList<>(), -1));
+    summaries.put(gameId, new DrawGameDataContainerModel(new ArrayList<>()));
     userIdToGameIdMap.put(host.getId(), gameId);
 
     cachedGameListIsOutdated();
@@ -268,32 +265,6 @@ public class GameDataService {
   public PokerTableModel getPokerTable(final UUID id) {
     assert tables.get(id) != null;
     return tables.get(id);
-  }
-
-  public void newHand(final UUID id, final HandModel hand) {
-    assert hands.get(hand.getId()) == null;
-    assert gameIdToHandIdMap.get(id) == null;
-    hands.put(hand.getId(), hand);
-    gameIdToHandIdMap.put(id, hand.getId());
-  }
-
-  public void removeHand(final UUID id) {
-    assert hands.get(id) != null;
-    hands.remove(id);
-  }
-
-  public void endHand(final UUID gameId) {
-    assert gameIdToHandIdMap.get(gameId) != null;
-    assert hands.get(gameIdToHandIdMap.get(gameId)) != null;
-    hands.remove(gameIdToHandIdMap.get(gameId));
-    gameIdToHandIdMap.remove(gameId);
-  }
-
-  public void endHand(final HandModel hand) {
-    assert hands.get(hand.getId()) != null;
-    assert gameIdToHandIdMap.get(hand.getGameId()) != null;
-    hands.remove(hand.getId());
-    gameIdToHandIdMap.remove(hand.getGameId());
   }
 
   public GamePlayerModel getPlayerData(final UUID userId) {

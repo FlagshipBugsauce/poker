@@ -21,7 +21,6 @@ public class GameParameterModel {
   @NotNull(message = "Game name cannot be null.")
   @NotEmpty(message = "Game name cannot be empty.")
   @Schema(description = "The name of the game to be created", example = "Friends Night Out Poker")
-  // TODO: Adding this but leaving a note which I'll remove once I'm sure this works as intended.
   @JsonProperty(required = true)
   private String name;
 

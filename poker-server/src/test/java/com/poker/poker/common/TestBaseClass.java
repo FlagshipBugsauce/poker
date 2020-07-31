@@ -5,10 +5,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.ApiSuccessModel;
-import com.poker.poker.models.AuthRequestModel;
-import com.poker.poker.models.AuthResponseModel;
 import com.poker.poker.models.enums.UserGroup;
 import com.poker.poker.models.game.GameParameterModel;
+import com.poker.poker.models.user.AuthRequestModel;
+import com.poker.poker.models.user.AuthResponseModel;
 import com.poker.poker.models.user.NewAccountModel;
 import com.poker.poker.models.user.UserModel;
 import java.math.BigDecimal;

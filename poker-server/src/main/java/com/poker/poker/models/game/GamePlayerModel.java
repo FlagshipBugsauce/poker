@@ -35,7 +35,7 @@ public class GamePlayerModel extends PlayerModel {
   @Schema(description = "Cards")
   protected List<CardModel> cards;
 
-  public GamePlayerModel(PlayerModel playerModel) {
+  public GamePlayerModel(final PlayerModel playerModel) {
     super(playerModel);
     this.away = false;
     this.acting = false;
@@ -54,7 +54,7 @@ public class GamePlayerModel extends PlayerModel {
             .collect(Collectors.toList());
   }
 
-  public GamePlayerModel(UserDocument userDocument) {
+  public GamePlayerModel(final UserDocument userDocument) {
     super(userDocument);
   }
 }

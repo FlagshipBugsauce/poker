@@ -55,14 +55,14 @@ public abstract class PlayerModel {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) {
       return true;
     }
     if (!(o instanceof PlayerModel)) {
       return false;
     }
-    PlayerModel that = (PlayerModel) o;
+    final PlayerModel that = (PlayerModel) o;
     return getId().equals(that.getId());
   }
 

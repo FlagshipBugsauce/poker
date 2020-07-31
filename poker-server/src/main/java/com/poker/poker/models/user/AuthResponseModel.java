@@ -1,6 +1,5 @@
-package com.poker.poker.models;
+package com.poker.poker.models.user;
 
-import com.poker.poker.models.user.UserModel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;

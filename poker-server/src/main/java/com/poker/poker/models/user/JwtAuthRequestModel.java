@@ -1,4 +1,4 @@
-package com.poker.poker.models;
+package com.poker.poker.models.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

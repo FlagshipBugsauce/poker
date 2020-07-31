@@ -1,7 +1,7 @@
 package com.poker.poker.controllers;
 
 import com.poker.poker.common.TestBaseClass;
-import com.poker.poker.models.AuthRequestModel;
+import com.poker.poker.models.user.AuthRequestModel;
 import com.poker.poker.services.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

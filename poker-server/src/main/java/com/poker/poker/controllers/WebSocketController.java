@@ -101,12 +101,7 @@ public class WebSocketController {
   @MessageMapping("/game/current/update")
   public void requestCurrentGameUpdate(final ActionModel action) {
     log.debug("User {} requesting update.", action.getUserId());
-
     publisher.publishEvent(new PublishCurrentGameEvent(this, action.getUserId()));
-    //
-    //    publisher.publishEvent(
-    //        new CurrentGameEvent(
-    //            this, action.getUserId(), gameService.getCurrentGameModel(action.getUserId())));
   }
 
   @MessageMapping("/game/create")
@@ -122,14 +117,6 @@ public class WebSocketController {
     userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
     final UserDocument user = jwtService.getUserDocument(messageModel.getJwt());
     log.debug("User {} attempting to join a game.", user.getId());
-
-    //    gameService.checkIfGameExists(messageModel.getGameId());
-    //    gameService.checkIfGameIsInLobbyState(messageModel.getGameId());
-    //    if (gameService.isUserInSpecifiedGame(messageModel.getGameId(), user.getId())) {
-    //      return;
-    //    }
-    //    gameService.checkIfUserIsInGame(user.getId());
-
     publisher.publishEvent(new JoinGameEvent(this, messageModel.getGameId(), user));
   }
 }

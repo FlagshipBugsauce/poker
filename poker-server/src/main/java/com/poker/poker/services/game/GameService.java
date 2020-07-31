@@ -117,6 +117,11 @@ public class GameService {
   @EventListener
   public void joinLobby(final JoinGameEvent event) {
     final LobbyModel lobby = data.getLobby(event.getGameId());
+    if (data.isUserInGame(lobby.getId())) {
+      if (!data.getUsersGame(event.getUser().getId()).getId().equals(lobby.getId())) {
+        return;
+      }
+    }
     final UserDocument user = event.getUser();
     final LobbyPlayerModel player = new LobbyPlayerModel(user, false, false);
     lobby.getPlayers().add(player);
@@ -361,7 +366,7 @@ public class GameService {
       table.setSummary(null);
       data.broadcastPokerTable(game.getId());
 
-      if (currentHand <= totalHands) {
+      if (currentHand < totalHands) {
         publisher.publishEvent(new StartHandEvent(this, game.getId()));
       } else {
         publisher.publishEvent(new GameOverEvent(this, game.getId()));
@@ -408,7 +413,7 @@ public class GameService {
   public void waitForAction(final WaitForPlayerEvent event) throws InterruptedException {
     final GameModel game = data.getUsersGame(event.getPlayer().getId());
     final PokerTableModel table = data.getPokerTable(game.getId());
-    final int action = table.getStartTurnTimer();
+    final int action = table.getEventTracker();
     publishTimerMessage(
         game.getId(), event.getPlayer().isAway() ? 100 : appConfig.getTimeToActInMs());
 
@@ -419,7 +424,7 @@ public class GameService {
         .equals(event.getPlayer().getId());
 
     Thread.sleep(event.getPlayer().isAway() ? 100 : appConfig.getTimeToActInMs());
-    if (table.getStartTurnTimer() != action) {
+    if (table.getEventTracker() != action) {
       log.debug("Player acted.");
       return;
     }
@@ -436,7 +441,7 @@ public class GameService {
    * Helper that returns a HandSummaryModel to help the UI display a hand summary.
    *
    * @param id ID of the game the summary is for.
-   * @return
+   * @return Hand summary.
    */
   private HandSummaryModel getHandSummary(final UUID id) {
     final PokerTableModel table = data.getPokerTable(id);
@@ -465,7 +470,7 @@ public class GameService {
     for (final DrawGameDataModel d : gameData.getGameData()) {
       final boolean winner =
           table.getPlayers().get(winningIndex).getId().equals(d.getPlayer().getId());
-      d.getDraws().add(new DrawGameDrawModel(d.getPlayer().getCards().get(0), winner, false));
+      d.getDraws().add(new DrawGameDrawModel(d.getPlayer().getCards().get(0), winner));
     }
 
     return new HandSummaryModel(players.get(0).getCards().get(0), winningIndex);

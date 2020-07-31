@@ -3,7 +3,6 @@ package com.poker.poker.controllers;
 import com.poker.poker.config.constants.GameConstants;
 import com.poker.poker.events.DrawCardEvent;
 import com.poker.poker.models.ApiSuccessModel;
-import com.poker.poker.repositories.HandRepository;
 import com.poker.poker.services.JwtService;
 import com.poker.poker.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,7 +33,6 @@ public class HandController {
   private final UserService userService;
   private final GameConstants constants;
   private final JwtService jwtService;
-  private final HandRepository handRepository;
   private final ApplicationEventPublisher publisher;
 
   @Operation(
@@ -59,27 +57,4 @@ public class HandController {
     publisher.publishEvent(new DrawCardEvent(this, id));
     return ResponseEntity.ok(new ApiSuccessModel("Card drawn."));
   }
-
-  //  @Operation(
-  //      summary = "Determines winner of hand.",
-  //      description = "Responds with the player model of the winner of a hand.",
-  //      tags = "game")
-  //  @ApiResponses(
-  //      value = {
-  //        @ApiResponse(
-  //            responseCode = "200",
-  //            description = "Draw was successful.",
-  //            content =
-  //                @Content(
-  //                    schema = @Schema(implementation = PlayerModel.class),
-  //                    mediaType = MediaType.APPLICATION_JSON_VALUE))
-  //      })
-  //  @RequestMapping(value = "/determine-winner/{handId}", method = RequestMethod.POST)
-  //  public ResponseEntity<PlayerModel> determineWinner(
-  //      @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
-  //      @PathVariable UUID handId) {
-  //    userService.validate(jwt, constants.getClientGroups());
-  //    return ResponseEntity.ok(
-  //        handService.determineWinner(handRepository.findHandDocumentById(handId)));
-  //  }
 }

@@ -1,5 +1,7 @@
 package com.poker.poker.models.game;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,35 +13,52 @@ import lombok.NoArgsConstructor;
 public class PokerTableModel {
 
   /** List of players at the table. Contains player names, bank roll, score, etc... */
+  @ArraySchema(schema = @Schema(implementation = GamePlayerModel.class))
   private List<GamePlayerModel> players;
 
-  /** Position of the player who is acting. */
+  /**
+   * Position of the player who is acting.
+   */
+  @Schema(description = "Position of the player who is acting.", example = "3")
   private int actingPlayer = 0;
 
+  @Schema(description = "Position of the player that acted.", example = "3")
   private int playerThatActed = -1;
 
-  /** Position of the dealer. */
+  /**
+   * Position of the dealer.
+   */
+  @Schema(description = "Position of the dealer.", example = "3")
   private int dealer = 0;
 
-  /** Summary of winning hand is display */
+  /**
+   * Flag to determine whether the summary of winning hand should be displayed.
+   */
+  @Schema(
+      description = "Flag to determine whether the summary of winning hand should be displayed.",
+      example = "true")
   private boolean displayHandSummary = false;
 
+  /**
+   * Hand summary.
+   */
+  @Schema(implementation = HandSummaryModel.class)
   private HandSummaryModel summary = null;
 
   /**
-   * This will be incremented whenever a player's turn begins so that the client knows when to begin
-   * the turn timer.
+   * This is incremented whenever some action is performed.
    */
-  private int startTurnTimer = 0;
-
-  public void actionPerformed() {
-    startTurnTimer++;
-  }
+  @Schema(description = "This is incremented whenever some action is performed.", example = "69")
+  private int eventTracker = 0;
 
   public void playerActed() {
     incActingPlayer();
     incPlayerThatActed();
     actionPerformed();
+  }
+
+  public void actionPerformed() {
+    eventTracker++;
   }
 
   public void incPlayerThatActed() {
