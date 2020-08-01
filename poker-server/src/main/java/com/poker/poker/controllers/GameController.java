@@ -1,7 +1,6 @@
 package com.poker.poker.controllers;
 
 import com.poker.poker.config.constants.GameConstants;
-import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.AwayStatusEvent;
 import com.poker.poker.events.CreateGameEvent;
 import com.poker.poker.events.JoinGameEvent;
@@ -11,6 +10,7 @@ import com.poker.poker.events.StartGameEvent;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.game.ActiveStatusModel;
 import com.poker.poker.models.game.GameParameterModel;
+import com.poker.poker.models.user.UserModel;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.services.JwtService;
 import com.poker.poker.services.UserService;
@@ -81,7 +81,7 @@ public class GameController {
   public ResponseEntity<ApiSuccessModel> createGame(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
       @Valid @RequestBody GameParameterModel gameParameterModel) {
-    final UserDocument host = jwtService.getUserDocument(jwt);
+    final UserModel host = jwtService.getUserDocument(jwt);
     userService.validate(jwt, gameConstants.getClientGroups());
     publisher.publishEvent(new CreateGameEvent(this, gameParameterModel, host));
     return ResponseEntity.ok(
@@ -116,7 +116,7 @@ public class GameController {
       @PathVariable String gameId) {
     userService.validate(jwt, gameConstants.getClientGroups());
     uuidService.checkIfValidAndThrowBadRequest(gameId);
-    final UserDocument user = jwtService.getUserDocument(jwt);
+    final UserModel user = jwtService.getUserDocument(jwt);
     final UUID game = UUID.fromString(gameId);
     publisher.publishEvent(new JoinGameEvent(this, game, user));
     return ResponseEntity.ok(new ApiSuccessModel("Request Completed."));
@@ -194,7 +194,7 @@ public class GameController {
   public ResponseEntity<ApiSuccessModel> startGame(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
     userService.validate(jwt, gameConstants.getClientGroups());
-    final UserDocument user = userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt));
+    final UserModel user = userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt));
     publisher.publishEvent(new StartGameEvent(this, user.getId()));
     return ResponseEntity.ok(new ApiSuccessModel("The game has been started successfully."));
   }

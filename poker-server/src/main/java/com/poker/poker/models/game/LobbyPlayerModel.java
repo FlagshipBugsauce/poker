@@ -1,6 +1,6 @@
 package com.poker.poker.models.game;
 
-import com.poker.poker.documents.UserDocument;
+import com.poker.poker.models.user.UserModel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,13 +24,13 @@ public class LobbyPlayerModel extends PlayerModel {
   protected boolean host;
 
   /**
-   * Constructor that takes in a UserDocument as well as the ready status and whether this player is
+   * Constructor that takes in a UserModel as well as the ready status and whether this player is
    * currently the host of game.
    *
-   * @param userDocument UserDocument representing a player.
+   * @param userModel UserModel representing a player.
    */
-  public LobbyPlayerModel(UserDocument userDocument, boolean ready, boolean host) {
-    super(userDocument);
+  public LobbyPlayerModel(UserModel userModel, boolean ready, boolean host) {
+    super(userModel);
     this.ready = ready;
     this.host = host;
   }

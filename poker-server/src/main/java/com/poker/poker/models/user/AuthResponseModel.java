@@ -17,6 +17,6 @@ public class AuthResponseModel {
               + "OTQyODl9.u9Uo7Al_a6vu_Rydt1zkhOYWFsIDPR5BgMxJjWRty9w")
   private String jwt;
 
-  @Schema(implementation = UserModel.class, description = "The user's information.")
-  private UserModel userDetails;
+  @Schema(implementation = ClientUserModel.class, description = "The user's information.")
+  private ClientUserModel userDetails;
 }

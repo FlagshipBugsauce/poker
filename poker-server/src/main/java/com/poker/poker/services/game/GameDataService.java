@@ -1,7 +1,6 @@
 package com.poker.poker.services.game;
 
 import com.poker.poker.config.AppConfig;
-import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.GameMessageEvent;
 import com.poker.poker.models.enums.GamePhase;
 import com.poker.poker.models.enums.MessageType;
@@ -15,6 +14,7 @@ import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.LobbyModel;
 import com.poker.poker.models.game.LobbyPlayerModel;
 import com.poker.poker.models.game.PokerTableModel;
+import com.poker.poker.models.user.UserModel;
 import com.poker.poker.models.websocket.GenericServerMessage;
 import com.poker.poker.services.WebSocketService;
 import java.util.ArrayList;
@@ -130,10 +130,10 @@ public class GameDataService {
    * Sets up all the required mappings when a game is created and returns the ID of the new game.
    *
    * @param params Parameters of the new game.
-   * @param user User who created the game.
+   * @param user   User who created the game.
    * @return ID of the new game.
    */
-  public UUID newGame(final GameParameterModel params, final UserDocument user) {
+  public UUID newGame(final GameParameterModel params, final UserModel user) {
     final UUID gameId = UUID.randomUUID();
     assert games.get(gameId) == null;
     assert lobbys.get(gameId) == null;
@@ -267,19 +267,6 @@ public class GameDataService {
     return tables.get(id);
   }
 
-  public GamePlayerModel getPlayerData(final UUID userId) {
-    assert userIdToGameIdMap != null;
-    assert games.get(userIdToGameIdMap.get(userId)) != null;
-    assert games.get(userIdToGameIdMap.get(userId)).getPlayers() != null;
-    final GamePlayerModel player =
-        games.get(userIdToGameIdMap.get(userId)).getPlayers().stream()
-            .filter(p -> p.getId().equals(userId))
-            .findFirst()
-            .orElse(null);
-    assert player != null;
-    return player;
-  }
-
   public DeckModel getDeck(final UUID id) {
     assert decks.get(id) != null;
     return decks.get(id);
@@ -288,5 +275,49 @@ public class GameDataService {
   public DrawGameDataContainerModel getGameSummary(final UUID id) {
     assert summaries.get(id) != null;
     return summaries.get(id);
+  }
+
+  public LobbyPlayerModel getLobbyPlayer(final UUID playerId) {
+    assert isUserInGame(playerId);
+    assert lobbys.get(userIdToGameIdMap.get(playerId)) != null;
+    return getLobbyPlayer(userIdToGameIdMap.get(playerId), playerId);
+  }
+
+  public LobbyPlayerModel getLobbyPlayer(final UUID lobbyId, final UUID playerId) {
+    assert lobbys.get(lobbyId) != null;
+    assert lobbys.get(lobbyId).getPlayers() != null;
+    assert isUserInGame(playerId);
+    assert userIdToGameIdMap.get(playerId).equals(lobbyId);
+
+    final LobbyPlayerModel player = lobbys.get(lobbyId).getPlayers()
+        .stream()
+        .filter(p -> p.getId().equals(playerId))
+        .findFirst()
+        .orElse(null);
+
+    assert player != null;
+    return player;
+  }
+
+  public GamePlayerModel getPlayer(final UUID playerId) {
+    assert isUserInGame(playerId);
+    assert games.get(userIdToGameIdMap.get(playerId)) != null;
+    return getPlayer(userIdToGameIdMap.get(playerId), playerId);
+  }
+
+  public GamePlayerModel getPlayer(final UUID gameId, final UUID playerId) {
+    assert games.get(gameId) != null;
+    assert games.get(gameId).getPlayers() != null;
+    assert isUserInGame(playerId);
+    assert userIdToGameIdMap.get(playerId).equals(gameId);
+
+    final GamePlayerModel player = games.get(gameId).getPlayers()
+        .stream()
+        .filter(p -> p.getId().equals(playerId))
+        .findFirst()
+        .orElse(null);
+
+    assert player != null;
+    return player;
   }
 }

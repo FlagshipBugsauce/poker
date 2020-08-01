@@ -4,9 +4,9 @@ import com.poker.poker.config.constants.AppConstants;
 import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.user.AuthRequestModel;
 import com.poker.poker.models.user.AuthResponseModel;
+import com.poker.poker.models.user.ClientUserModel;
 import com.poker.poker.models.user.JwtAuthRequestModel;
 import com.poker.poker.models.user.NewAccountModel;
-import com.poker.poker.models.user.UserModel;
 import com.poker.poker.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -120,16 +120,16 @@ public class UserController {
       tags = "getUserInfo")
   @ApiResponses(
       value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "User information retrieved successfully.",
-            content =
-                @Content(
-                    schema = @Schema(implementation = UserModel.class),
-                    mediaType = MediaType.APPLICATION_JSON_VALUE))
+          @ApiResponse(
+              responseCode = "200",
+              description = "User information retrieved successfully.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = ClientUserModel.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @GetMapping("/getUserInfo/{userId}")
-  public ResponseEntity<UserModel> getUserInfo(
+  public ResponseEntity<ClientUserModel> getUserInfo(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
       @PathVariable String userId) {
     userService.validate(jwt, appConstants.getAllUsers());

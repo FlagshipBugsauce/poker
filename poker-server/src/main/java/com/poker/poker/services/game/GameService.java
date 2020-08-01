@@ -1,7 +1,6 @@
 package com.poker.poker.services.game;
 
 import com.poker.poker.config.AppConfig;
-import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.AwayStatusEvent;
 import com.poker.poker.events.CreateGameEvent;
 import com.poker.poker.events.CurrentGameEvent;
@@ -24,6 +23,7 @@ import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.enums.GamePhase;
 import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.game.CardModel;
+import com.poker.poker.models.game.CurrentGameModel;
 import com.poker.poker.models.game.DeckModel;
 import com.poker.poker.models.game.DrawGameDataContainerModel;
 import com.poker.poker.models.game.DrawGameDataModel;
@@ -36,7 +36,7 @@ import com.poker.poker.models.game.LobbyModel;
 import com.poker.poker.models.game.LobbyPlayerModel;
 import com.poker.poker.models.game.PokerTableModel;
 import com.poker.poker.models.game.TimerModel;
-import com.poker.poker.models.websocket.CurrentGameModel;
+import com.poker.poker.models.user.UserModel;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -95,7 +95,7 @@ public class GameService {
   @EventListener
   public void createGame(final CreateGameEvent event) {
     final GameParameterModel params = event.getGameParameterModel();
-    final UserDocument user = event.getHost();
+    final UserModel user = event.getHost();
 
     if (data.isUserInGame(user.getId())) {
       return; // User can only be in one game at a time.
@@ -120,7 +120,7 @@ public class GameService {
     if (data.isUserInGame(event.getUser().getId())) {
       return;
     }
-    final UserDocument user = event.getUser();
+    final UserModel user = event.getUser();
     final LobbyPlayerModel player = new LobbyPlayerModel(user, false, false);
     lobby.getPlayers().add(player);
     data.userJoinedGame(user.getId(), lobby.getId());
@@ -143,17 +143,9 @@ public class GameService {
     if (!data.isUserInGame(event.getUser().getId())) {
       return;
     }
-    final UserDocument user = event.getUser();
+    final UserModel user = event.getUser();
     final LobbyModel lobby = data.getUsersLobby(user.getId());
-    final LobbyPlayerModel player =
-        lobby.getPlayers().stream()
-            .filter(p -> p.getId().equals(user.getId()))
-            .findFirst()
-            .orElse(null);
-
-    if (player == null) {
-      return;
-    }
+    final LobbyPlayerModel player = data.getLobbyPlayer(user.getId());
 
     lobby.getPlayers().removeIf(p -> p.getId().equals(user.getId()));
     data.removeUserIdToGameIdMapping(user.getId());
@@ -162,6 +154,7 @@ public class GameService {
       lobby.setHost(lobby.getPlayers().get(0));
       lobby.getPlayers().get(0).setHost(true);
     } else {
+      log.debug("There are no players left in lobby {}, ending game.", lobby.getId());
       data.endLobby(lobby.getId());
       return;
     }
@@ -188,14 +181,7 @@ public class GameService {
     }
     final LobbyModel lobby = data.getUsersLobby(userId);
     synchronized (lobby.getPlayers()) {
-      final LobbyPlayerModel player =
-          data.getUsersLobby(userId).getPlayers().stream()
-              .filter(p -> p.getId().equals(userId))
-              .findFirst()
-              .orElse(null);
-      if (player == null) {
-        return;
-      }
+      final LobbyPlayerModel player = data.getLobbyPlayer(userId);
       player.setReady(!player.isReady());
       publishSystemChatMessageEvent(
           lobby.getId(),
@@ -271,17 +257,8 @@ public class GameService {
   public void afk(final AwayStatusEvent event) {
     final GameModel game = data.getUsersGame(event.getId());
     final PokerTableModel table = data.getPokerTable(game.getId());
-    final GamePlayerModel player =
-        game.getPlayers().stream()
-            .filter(p -> p.getId().equals(event.getId()))
-            .findFirst()
-            .orElse(null);
+    final GamePlayerModel player = data.getPlayer(event.getId());
     final GamePlayerModel acting = table.getPlayers().get(table.getActingPlayer());
-
-    if (player == null) {
-      return;
-    }
-
     player.setAway(event.isAway());
 
     // If the players away status is true, and it's their turn, draw their card for them.

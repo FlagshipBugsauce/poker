@@ -1,6 +1,6 @@
 package com.poker.poker.models.game;
 
-import com.poker.poker.documents.UserDocument;
+import com.poker.poker.models.user.UserModel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ public class GamePlayerModel extends PlayerModel {
             .collect(Collectors.toList());
   }
 
-  public GamePlayerModel(final UserDocument userDocument) {
-    super(userDocument);
+  public GamePlayerModel(final UserModel userModel) {
+    super(userModel);
   }
 }

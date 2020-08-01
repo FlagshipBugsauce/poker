@@ -1,6 +1,6 @@
 package com.poker.poker.models.game;
 
-import com.poker.poker.documents.UserDocument;
+import com.poker.poker.models.user.UserModel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Objects;
 import java.util.UUID;
@@ -32,14 +32,14 @@ public abstract class PlayerModel {
   protected String lastName;
 
   /**
-   * Constructor that takes in a UserDocument and fill in the fields the two classes have in common.
+   * Constructor that takes in a UserModel and fill in the fields the two classes have in common.
    *
-   * @param userDocument UserDocument representing a player.
+   * @param userModel UserModel representing a player.
    */
-  public PlayerModel(final UserDocument userDocument) {
-    id = userDocument.getId();
-    firstName = userDocument.getFirstName();
-    lastName = userDocument.getLastName();
+  public PlayerModel(final UserModel userModel) {
+    id = userModel.getId();
+    firstName = userModel.getFirstName();
+    lastName = userModel.getLastName();
   }
 
   /**

@@ -1,12 +1,12 @@
 package com.poker.poker.repositories;
 
-import com.poker.poker.documents.ServerStateDocument;
+import com.poker.poker.models.ServerStateModel;
 import java.util.UUID;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
-public interface ServerStateRepository extends MongoRepository<ServerStateDocument, UUID> {
+public interface ServerStateRepository extends MongoRepository<ServerStateModel, UUID> {
 
   @Query("{ _id: ?0 }")
-  ServerStateDocument findServerStateById(UUID id);
+  ServerStateModel findServerStateById(UUID id);
 }

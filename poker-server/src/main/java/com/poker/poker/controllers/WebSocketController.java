@@ -1,7 +1,6 @@
 package com.poker.poker.controllers;
 
 import com.poker.poker.config.AppConfig;
-import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.ChatMessageEvent;
 import com.poker.poker.events.CreateGameEvent;
 import com.poker.poker.events.JoinGameEvent;
@@ -9,6 +8,7 @@ import com.poker.poker.events.LeaveGameEvent;
 import com.poker.poker.events.PublishCurrentGameEvent;
 import com.poker.poker.events.RejoinGameEvent;
 import com.poker.poker.models.game.GameParameterModel;
+import com.poker.poker.models.user.UserModel;
 import com.poker.poker.models.websocket.ClientMessageModel;
 import com.poker.poker.models.websocket.GenericServerMessage;
 import com.poker.poker.models.websocket.WebSocketUpdateModel;
@@ -57,7 +57,7 @@ public class WebSocketController {
           data = this.data.getGameSummary(updateModel.getId());
           break;
         case PlayerData:
-          data = this.data.getPlayerData(updateModel.getId());
+          data = this.data.getPlayer(updateModel.getId());
           break;
         case PokerTable:
           data = this.data.getPokerTable(updateModel.getId());
@@ -106,7 +106,7 @@ public class WebSocketController {
   @MessageMapping("/game/create")
   public void createGame(final ClientMessageModel<GameParameterModel> messageModel) {
     userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
-    final UserDocument user = jwtService.getUserDocument(messageModel.getJwt());
+    final UserModel user = jwtService.getUserDocument(messageModel.getJwt());
     log.debug("User {} attempting to create a game.", user.getId());
     publisher.publishEvent(new CreateGameEvent(this, messageModel.getData(), user));
   }
@@ -114,7 +114,7 @@ public class WebSocketController {
   @MessageMapping("/game/join")
   public void joinGame(final ClientMessageModel<Void> messageModel) {
     userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
-    final UserDocument user = jwtService.getUserDocument(messageModel.getJwt());
+    final UserModel user = jwtService.getUserDocument(messageModel.getJwt());
     log.debug("User {} attempting to join a game.", user.getId());
     publisher.publishEvent(new JoinGameEvent(this, messageModel.getGameId(), user));
   }

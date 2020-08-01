@@ -1,15 +1,15 @@
 package com.poker.poker.events;
 
-import com.poker.poker.documents.UserDocument;
+import com.poker.poker.models.user.UserModel;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
 @Getter
 public class RejoinGameEvent extends ApplicationEvent {
 
-  private final UserDocument user;
+  private final UserModel user;
 
-  public RejoinGameEvent(final Object source, final UserDocument user) {
+  public RejoinGameEvent(final Object source, final UserModel user) {
     super(source);
     this.user = user;
   }

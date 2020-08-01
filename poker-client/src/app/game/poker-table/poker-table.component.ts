@@ -24,7 +24,7 @@ import {
   selectTimer
 } from '../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
-import {GameModel, GamePlayerModel, TimerModel, UserModel} from '../../api/models';
+import {ClientUserModel, GameModel, GamePlayerModel, TimerModel} from '../../api/models';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 
 @Component({
@@ -130,7 +130,7 @@ export class PokerTableComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.appStore.select(selectLoggedInUser)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((user: UserModel) => this.user = user);
+    .subscribe((user: ClientUserModel) => this.user = user);
 
     this.delay(100).then(() => this.gameStore.dispatch(requestGameModelUpdate()));
     this.gameStore.select(selectGameModel)

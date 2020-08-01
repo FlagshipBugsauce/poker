@@ -25,52 +25,20 @@ paths:
       description: Request sent when a player is ready for the game to start.
       operationId: ready
       responses:
-        "400":
-          description: Bad request.
+        "403":
+          description: Forbidden.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
+        "400":
+          description: Bad request.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorModel'
         "200":
           description: Request handled successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessModel'
-  /game/active:
-    post:
-      tags:
-        - game
-      summary: Set Active Status
-      description: Sets the status that indicates whether a player is active or not.
-      operationId: setActiveStatus
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ActiveStatusModel'
-        required: true
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: Creation of game was successful.
           content:
             application/json:
               schema:
@@ -83,78 +51,20 @@ paths:
       description: Request sent when a player leaves a game lobby.
       operationId: leaveLobby
       responses:
-        "400":
-          description: Bad request.
+        "403":
+          description: Forbidden.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
+        "400":
+          description: Bad request.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorModel'
         "200":
           description: Request handled successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessModel'
-  /game/start:
-    post:
-      tags:
-        - game
-      summary: Start Game
-      description: Starts the game, provided all preconditions are satisfied..
-      operationId: startGame
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: Game started successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessModel'
-  /game/create:
-    post:
-      tags:
-        - game
-      summary: Create a new game
-      description: Creates a new game and returns the UUID to the client.
-      operationId: createGame
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GameParameterModel'
-        required: true
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: Creation of game was successful.
           content:
             application/json:
               schema:
@@ -173,20 +83,110 @@ paths:
           schema:
             type: string
       responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
         "403":
           description: Forbidden.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorModel'
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
         "200":
           description: Game was joined successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
+  /game/start:
+    post:
+      tags:
+        - game
+      summary: Start Game
+      description: Starts the game, provided all preconditions are satisfied..
+      operationId: startGame
+      responses:
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Game started successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
+  /game/active:
+    post:
+      tags:
+        - game
+      summary: Set Active Status
+      description: Sets the status that indicates whether a player is active or not.
+      operationId: setActiveStatus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActiveStatusModel'
+        required: true
+      responses:
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Creation of game was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
+  /game/create:
+    post:
+      tags:
+        - game
+      summary: Create a new game
+      description: Creates a new game and returns the UUID to the client.
+      operationId: createGame
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameParameterModel'
+        required: true
+      responses:
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Creation of game was successful.
           content:
             application/json:
               schema:
@@ -199,14 +199,14 @@ paths:
       description: Draws a card from the top of the deck.
       operationId: draw
       responses:
-        "400":
-          description: Bad request.
+        "403":
+          description: Forbidden.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
+        "400":
+          description: Bad request.
           content:
             application/json:
               schema:
@@ -223,14 +223,14 @@ paths:
         - test-controller
       operationId: models
       responses:
-        "400":
-          description: Bad request.
+        "403":
+          description: Forbidden.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
+        "400":
+          description: Bad request.
           content:
             application/json:
               schema:
@@ -255,14 +255,14 @@ paths:
               $ref: '#/components/schemas/NewAccountModel'
         required: true
       responses:
-        "400":
-          description: Bad request.
+        "403":
+          description: Forbidden.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
+        "400":
+          description: Bad request.
           content:
             application/json:
               schema:
@@ -287,14 +287,14 @@ paths:
         schema:
           type: string
       responses:
-        "400":
-          description: Bad request.
+        "403":
+          description: Forbidden.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
+        "400":
+          description: Bad request.
           content:
             application/json:
               schema:
@@ -304,7 +304,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserModel'
+                $ref: '#/components/schemas/ClientUserModel'
   /user/auth:
     post:
       tags:
@@ -320,14 +320,14 @@ paths:
               $ref: '#/components/schemas/AuthRequestModel'
         required: true
       responses:
-        "400":
-          description: Bad request.
+        "403":
+          description: Forbidden.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
+        "400":
+          description: Bad request.
           content:
             application/json:
               schema:
@@ -354,14 +354,14 @@ paths:
               $ref: '#/components/schemas/JwtAuthRequestModel'
         required: true
       responses:
-        "400":
-          description: Bad request.
+        "403":
+          description: Forbidden.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorModel'
-        "403":
-          description: Forbidden.
+        "400":
+          description: Bad request.
           content:
             application/json:
               schema:
@@ -448,7 +448,7 @@ components:
           description: JSON Web Token that can be used to access secured endpoints.
           example: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBkb21haW4uY29tIiwiZXhwIjoxNTg4OTAzODg5LCJpYXQiOjE1ODc2OTQyODl9.u9Uo7Al_a6vu_Rydt1zkhOYWFsIDPR5BgMxJjWRty9w
         userDetails:
-          $ref: '#/components/schemas/UserModel'
+          $ref: '#/components/schemas/ClientUserModel'
     CardModel:
       type: object
       properties:
@@ -517,6 +517,35 @@ components:
           type: object
           description: Data being sent by the client.
       description: Generic model used to send data to the server.
+    ClientUserModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: User's ID.
+          format: uuid
+          example: 0a7d95ef-94ba-47bc-b591-febb365bc543
+        email:
+          type: string
+          description: User's email address.
+          example: user@domain.com
+        group:
+          type: string
+          description: User's user group.
+          example: Administrator
+          enum:
+            - Administrator
+            - Client
+            - Guest
+        firstName:
+          type: string
+          description: User's first name.
+          example: Fred
+        lastName:
+          type: string
+          description: User's last name.
+          example: Flintstone
+      description: The user's information.
     CurrentGameModel:
       type: object
       properties:
@@ -845,10 +874,10 @@ components:
           $ref: '#/components/schemas/PokerTableModel'
         timerModel:
           $ref: '#/components/schemas/TimerModel'
-        userDocument:
-          $ref: '#/components/schemas/UserDocument'
         userModel:
           $ref: '#/components/schemas/UserModel'
+        clientUserModel:
+          $ref: '#/components/schemas/ClientUserModel'
         newAccountModel:
           $ref: '#/components/schemas/NewAccountModel'
         authRequestModel:
@@ -982,7 +1011,7 @@ components:
         options:
           $ref: '#/components/schemas/ToastClassModel'
       description: Contains the message to display and the duration of the toast.
-    UserDocument:
+    UserModel:
       type: object
       properties:
         id:
@@ -1002,35 +1031,6 @@ components:
           type: string
         lastName:
           type: string
-    UserModel:
-      type: object
-      properties:
-        id:
-          type: string
-          description: User's ID.
-          format: uuid
-          example: 0a7d95ef-94ba-47bc-b591-febb365bc543
-        email:
-          type: string
-          description: User's email address.
-          example: user@domain.com
-        group:
-          type: string
-          description: User's user group.
-          example: Administrator
-          enum:
-          - Administrator
-          - Client
-          - Guest
-        firstName:
-          type: string
-          description: User's first name.
-          example: Fred
-        lastName:
-          type: string
-          description: User's last name.
-          example: Flintstone
-      description: The user's information.
     WebSocketInfoModel:
       type: object
       properties:

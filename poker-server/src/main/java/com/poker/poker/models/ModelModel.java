@@ -1,6 +1,5 @@
 package com.poker.poker.models;
 
-import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.enums.CardSuit;
 import com.poker.poker.models.enums.CardValue;
 import com.poker.poker.models.enums.GamePhase;
@@ -8,6 +7,7 @@ import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.enums.UserGroup;
 import com.poker.poker.models.game.ActiveStatusModel;
 import com.poker.poker.models.game.CardModel;
+import com.poker.poker.models.game.CurrentGameModel;
 import com.poker.poker.models.game.DeckModel;
 import com.poker.poker.models.game.DrawGameDataContainerModel;
 import com.poker.poker.models.game.DrawGameDrawModel;
@@ -23,12 +23,12 @@ import com.poker.poker.models.game.PokerTableModel;
 import com.poker.poker.models.game.TimerModel;
 import com.poker.poker.models.user.AuthRequestModel;
 import com.poker.poker.models.user.AuthResponseModel;
+import com.poker.poker.models.user.ClientUserModel;
 import com.poker.poker.models.user.JwtAuthRequestModel;
 import com.poker.poker.models.user.NewAccountModel;
 import com.poker.poker.models.user.UserModel;
 import com.poker.poker.models.websocket.ChatMessageModel;
 import com.poker.poker.models.websocket.ClientMessageModel;
-import com.poker.poker.models.websocket.CurrentGameModel;
 import com.poker.poker.models.websocket.GenericServerMessage;
 import com.poker.poker.models.websocket.ToastClassModel;
 import com.poker.poker.models.websocket.ToastModel;
@@ -73,8 +73,8 @@ public class ModelModel {
   private TimerModel timerModel;
 
   // User Models
-  private UserDocument userDocument;
   private UserModel userModel;
+  private ClientUserModel clientUserModel;
   private NewAccountModel newAccountModel;
   private AuthRequestModel authRequestModel;
   private AuthResponseModel authResponseModel;

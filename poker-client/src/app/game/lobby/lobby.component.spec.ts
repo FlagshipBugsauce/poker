@@ -7,14 +7,14 @@ import {MemoizedSelector} from '@ngrx/store';
 import {AppStateContainer, LobbyStateContainer} from '../../shared/models/app-state.model';
 import * as selectors from '../../state/app.selector';
 import {mockLobbyModel, mockUser} from '../../testing/mock-models';
-import {UserModel} from '../../api/models/user-model';
+import {ClientUserModel} from '../../api/models/client-user-model';
 import {By} from '@angular/platform-browser';
 import {LobbyModel} from '../../api/models/lobby-model';
 
 describe('LobbyComponent', () => {
   let mockStore: MockStore;
   let mockReadySelector: MemoizedSelector<AppStateContainer, boolean>;
-  let mockUserSelector: MemoizedSelector<AppStateContainer, UserModel>;
+  let mockUserSelector: MemoizedSelector<AppStateContainer, ClientUserModel>;
   let mockLobbySelector: MemoizedSelector<LobbyStateContainer, LobbyModel>;
   let component: LobbyComponent;
   let fixture: ComponentFixture<LobbyComponent>;

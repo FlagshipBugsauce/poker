@@ -11,9 +11,9 @@ import {filter, map} from 'rxjs/operators';
 import {ApiSuccessModel} from '../models/api-success-model';
 import {AuthRequestModel} from '../models/auth-request-model';
 import {AuthResponseModel} from '../models/auth-response-model';
+import {ClientUserModel} from '../models/client-user-model';
 import {JwtAuthRequestModel} from '../models/jwt-auth-request-model';
 import {NewAccountModel} from '../models/new-account-model';
-import {UserModel} from '../models/user-model';
 
 
 /**
@@ -91,6 +91,11 @@ export class UsersService extends BaseService {
   static readonly GetUserInfoPath = '/user/getUserInfo/{userId}';
 
   /**
+   * Path part for operation authorizeWithJwt
+   */
+  static readonly AuthorizeWithJwtPath = '/user/auth-with-jwt';
+
+  /**
    * Get User Info.
    *
    * Retrieve user information for user with provided ID.
@@ -103,7 +108,7 @@ export class UsersService extends BaseService {
   getUserInfo$Response(params: {
     userId: string;
 
-  }): Observable<StrictHttpResponse<UserModel>> {
+  }): Observable<StrictHttpResponse<ClientUserModel>> {
 
     const rb = new RequestBuilder(this.rootUrl, UsersService.GetUserInfoPath, 'get');
     if (params) {
@@ -117,28 +122,8 @@ export class UsersService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<UserModel>;
+        return r as StrictHttpResponse<ClientUserModel>;
       })
-    );
-  }
-
-  /**
-   * Get User Info.
-   *
-   * Retrieve user information for user with provided ID.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `getUserInfo$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  getUserInfo(params: {
-    userId: string;
-
-  }): Observable<UserModel> {
-
-    return this.getUserInfo$Response(params).pipe(
-      map((r: StrictHttpResponse<UserModel>) => r.body as UserModel)
     );
   }
 
@@ -179,9 +164,24 @@ export class UsersService extends BaseService {
   }
 
   /**
-   * Path part for operation authorizeWithJwt
+   * Get User Info.
+   *
+   * Retrieve user information for user with provided ID.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `getUserInfo$Response()` instead.
+   *
+   * This method doesn't expect any request body.
    */
-  static readonly AuthorizeWithJwtPath = '/user/auth-with-jwt';
+  getUserInfo(params: {
+    userId: string;
+
+  }): Observable<ClientUserModel> {
+
+    return this.getUserInfo$Response(params).pipe(
+      map((r: StrictHttpResponse<ClientUserModel>) => r.body as ClientUserModel)
+    );
+  }
 
   /**
    * Authenticate.

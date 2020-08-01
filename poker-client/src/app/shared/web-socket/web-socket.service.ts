@@ -37,7 +37,7 @@ import {
   updateCurrentGame
 } from '../../state/app.actions';
 import {selectLoggedInUser} from '../../state/app.selector';
-import {UserModel} from '../../api/models/user-model';
+import {ClientUserModel} from '../../api/models/client-user-model';
 import {WebSocketUpdateModel} from '../../api/models/web-socket-update-model';
 import {ToastService} from "../toast.service";
 
@@ -67,7 +67,7 @@ export class WebSocketService implements OnDestroy {
   /** Socket state. */
   private state: BehaviorSubject<SocketClientState>;
   /** Model for the logged in user. */
-  private user: UserModel;
+  private user: ClientUserModel;
 
   constructor(
     private toastService: ToastService,
@@ -92,7 +92,7 @@ export class WebSocketService implements OnDestroy {
 
     this.appStore.select(selectLoggedInUser)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((user: UserModel) => this.user = user);
+    .subscribe((user: ClientUserModel) => this.user = user);
   }
 
   public ngOnDestroy(): void {

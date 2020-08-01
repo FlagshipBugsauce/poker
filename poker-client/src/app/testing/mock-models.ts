@@ -1,4 +1,4 @@
-import {UserModel} from '../api/models/user-model';
+import {ClientUserModel} from '../api/models/client-user-model';
 import {DrawGameDataModel} from '../api/models/draw-game-data-model';
 import {GameModel} from '../api/models/game-model';
 import {LobbyModel} from '../api/models/lobby-model';
@@ -11,7 +11,7 @@ import {CardSuit, CardValue} from '../shared/models/card.enum';
 
 export const mockHandDocument: HandModel = {};
 
-export const mockUser: UserModel = {
+export const mockUser: ClientUserModel = {
   id: 'abc123'
 };
 

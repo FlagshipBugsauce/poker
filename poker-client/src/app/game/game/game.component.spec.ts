@@ -27,7 +27,7 @@ import {
 } from '../../testing/mock-models';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 import {WebSocketService} from '../../shared/web-socket/web-socket.service';
-import {UserModel} from '../../api/models/user-model';
+import {ClientUserModel} from '../../api/models/client-user-model';
 import {MockChatService, MockWebSocketService} from '../../testing/mock-services';
 import {ChatService} from '../../shared/web-socket/chat.service';
 import {ChatMessageModel} from '../../api/models/chat-message-model';
@@ -44,7 +44,7 @@ describe('GameComponent', () => {
   let mockStore: MockStore;
   let mockGameDataSelector: MemoizedSelector<GameDataStateContainer, DrawGameDataModel[]>;
   let mockGameStateSelector: MemoizedSelector<GameStateContainer, string>;
-  let mockLoggedInUserSelector: MemoizedSelector<AppStateContainer, UserModel>;
+  let mockLoggedInUserSelector: MemoizedSelector<AppStateContainer, ClientUserModel>;
   let mockJwtSelector: MemoizedSelector<AppStateContainer, string>;
   let mockGeneralChatSelector: MemoizedSelector<ChatStateContainer, ChatMessageModel>;
   let mockAuthenticatedSelector: MemoizedSelector<AppStateContainer, boolean>;
