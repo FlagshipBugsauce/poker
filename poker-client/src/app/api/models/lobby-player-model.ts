@@ -1,8 +1,4 @@
 /* tslint:disable */
-
-/**
- * The ID of the host.
- */
 export interface LobbyPlayerModel {
 
   /**

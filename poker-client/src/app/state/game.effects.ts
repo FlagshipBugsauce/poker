@@ -21,7 +21,7 @@ import {
 import {Router} from '@angular/router';
 import {APP_ROUTES} from '../app-routes';
 import {HandService} from '../api/services/hand.service';
-import {ActiveStatusModel} from '../api/models/active-status-model';
+import {ActiveStatusModel, GameParameterModel} from '../api/models';
 import {WebSocketService} from '../shared/web-socket/web-socket.service';
 import {MessageType} from '../shared/models/message-types.enum';
 import {RejoinModel} from '../shared/models/rejoin.model';
@@ -30,7 +30,6 @@ import {AppStateContainer} from '../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {selectJwt} from './app.selector';
 import {TypedAction} from '@ngrx/store/src/models';
-import {GameParameterModel} from '../api/models/game-parameter-model';
 import {GamePhase} from '../shared/models/game-phase.enum';
 
 @Injectable()
@@ -71,7 +70,7 @@ export class GameEffects {
    */
   createGame$ = createEffect(() => this.actions$.pipe(
     ofType(createGame),
-    tap((action: GameParameterModel & TypedAction<'[Lobby Component] CreateGame'>) => {
+    tap((action: GameParameterModel) => {
       this.webSocketService.send(
         this.createGameService.createGameTopic,
         this.createGameService.createGamePayload(
@@ -109,6 +108,20 @@ export class GameEffects {
         this.webSocketService.requestPlayerDataUpdate();
       }
     })
+  ), {dispatch: false});
+  /**
+   * Requests update of game model.
+   */
+  requestUpdate$ = createEffect(() => this.actions$.pipe(
+    ofType(requestGameModelUpdate),
+    tap(() => this.webSocketService.requestGameTopicUpdate(MessageType.Game))),
+    {dispatch: false});
+  /**
+   * Requests update of poker table.
+   */
+  requestPokerTableUpdate$ = createEffect(() => this.actions$.pipe(
+    ofType(requestPokerTableUpdate),
+    tap(() => this.webSocketService.requestGameTopicUpdate(MessageType.PokerTable))
   ), {dispatch: false});
   /**
    * JWT for the logged in user.
@@ -156,16 +169,6 @@ export class GameEffects {
     })
   ), {dispatch: false});
 
-  requestUpdate$ = createEffect(() => this.actions$.pipe(
-    ofType(requestGameModelUpdate),
-    tap(() => this.webSocketService.requestGameTopicUpdate(MessageType.Game))),
-    {dispatch: false});
-
-  requestPokerTableUpdate$ = createEffect(() => this.actions$.pipe(
-    ofType(requestPokerTableUpdate),
-    tap(() => this.webSocketService.requestGameTopicUpdate(MessageType.PokerTable))
-  ), {dispatch: false});
-
   constructor(
     private actions$: Actions,
     private webSocketService: WebSocketService,
@@ -184,7 +187,6 @@ export class GameEffects {
   private subscribeToGameTopics(gameId: string): void {
     this.webSocketService.subscribeToGameTopic(gameId);
     this.webSocketService.subscribeToPlayerDataTopic();
-    this.webSocketService.subscribeToDrawnCardsTopic(gameId);
   }
 
   /**
@@ -211,6 +213,5 @@ export class GameEffects {
   private unsubscribeFromGameTopics(): void {
     this.webSocketService.gameTopicUnsubscribe();
     this.webSocketService.playerDataTopicUnsubscribe();
-    this.webSocketService.drawnCardsTopicUnsubscribe();
   }
 }

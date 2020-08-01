@@ -4,7 +4,7 @@ import {ChatStateContainer} from '../models/app-state.model';
 import {Store} from '@ngrx/store';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
-import {gameChatMessageReceived, generalChatMessageReceived} from '../../state/app.actions';
+import {gameChatMsgReceived, generalChatMsgReceived} from '../../state/app.actions';
 
 @Injectable({
   providedIn: 'root'
@@ -33,9 +33,9 @@ export class ChatService implements OnDestroy {
     .pipe(takeUntil(this.chatTopicUnsubscribe$))
     .subscribe(data => {
       if (!gameId) {
-        this.chatStore.dispatch(generalChatMessageReceived(data));
+        this.chatStore.dispatch(generalChatMsgReceived(data));
       } else {
-        this.chatStore.dispatch(gameChatMessageReceived(data));
+        this.chatStore.dispatch(gameChatMsgReceived(data));
       }
     });
   }

@@ -11,8 +11,7 @@ import {
   drawCard,
   requestGameModelUpdate,
   requestPokerTableUpdate,
-  setAwayStatus,
-  TimerModel
+  setAwayStatus
 } from '../../state/app.actions';
 import {Subject} from 'rxjs';
 import {
@@ -25,10 +24,7 @@ import {
   selectTimer
 } from '../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
-import {HandModel} from '../../api/models/hand-model';
-import {GameModel} from '../../api/models/game-model';
-import {GamePlayerModel} from '../../api/models/game-player-model';
-import {UserModel} from '../../api/models/user-model';
+import {GameModel, GamePlayerModel, TimerModel, UserModel} from '../../api/models';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 
 @Component({
@@ -43,7 +39,6 @@ export class PokerTableComponent implements OnInit, OnDestroy {
   public width: number = 1;
   public playerBoxes: { number: number; top: number; left: number }[];
   public game: GameModel;
-  public hand: HandModel;
   /**
    * Used to ensure we're not maintaining multiple subscriptions.
    */

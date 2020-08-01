@@ -20,6 +20,7 @@ import com.poker.poker.models.game.LobbyModel;
 import com.poker.poker.models.game.LobbyPlayerModel;
 import com.poker.poker.models.game.PlayerModel;
 import com.poker.poker.models.game.PokerTableModel;
+import com.poker.poker.models.game.TimerModel;
 import com.poker.poker.models.user.AuthRequestModel;
 import com.poker.poker.models.user.AuthResponseModel;
 import com.poker.poker.models.user.JwtAuthRequestModel;
@@ -70,6 +71,7 @@ public class ModelModel {
   private LobbyPlayerModel lobbyPlayerModel;
   private PlayerModel playerModel;
   private PokerTableModel pokerTableModel;
+  private TimerModel timerModel;
 
   // User Models
   private UserDocument userDocument;

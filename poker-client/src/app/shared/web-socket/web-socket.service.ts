@@ -20,17 +20,12 @@ import {
 } from '../models/app-state.model';
 import {MessageType} from '../models/message-types.enum';
 import {
-  actingPlayerChanged,
-  cardDrawn,
   gameDataUpdated,
   gameListUpdated,
   gameModelUpdated,
   gamePhaseChanged,
   gamePlayerUpdated,
-  handActionPerformed,
   handCompleted,
-  handModelUpdated,
-  handOver,
   lobbyModelUpdated,
   playerAwayToggled,
   playerDataUpdated,
@@ -149,9 +144,6 @@ export class WebSocketService implements OnDestroy {
         case MessageType.Game:
           this.gameStore.dispatch(gameModelUpdated(data.data));
           break;
-        case MessageType.Hand:
-          this.handStore.dispatch(handModelUpdated(data.data));
-          break;
         case MessageType.GameData:
           this.gameDataStore.dispatch(gameDataUpdated(data.data));
           break;
@@ -176,19 +168,9 @@ export class WebSocketService implements OnDestroy {
         case MessageType.PlayerAwayToggled:
           this.pokerTableStore.dispatch(playerAwayToggled(data.data));
           break;
-        case MessageType.HandActionPerformed:
-          this.handStore.dispatch(handActionPerformed(data.data));
-          break;
-        case MessageType.ActingPlayerChanged:
-          this.handStore.dispatch(actingPlayerChanged(data.data));
-          this.gameStore.dispatch(actingPlayerChanged(data.data));
-          break;
         case MessageType.GamePlayer:
           this.gameStore.dispatch(gamePlayerUpdated(data.data));
           break;
-        // case MessageType.CardDrawnByPlayer:
-        //   this.pokerTableStore.dispatch(data.data);
-        //   break;
         case MessageType.PokerTable:
           this.pokerTableStore.dispatch(pokerTableUpdate(data.data));
           break;
@@ -227,20 +209,6 @@ export class WebSocketService implements OnDestroy {
     await new Promise(resolve => setTimeout(resolve, 100));
     this.send(`/topic/game/update`, {type, topic, id} as WebSocketUpdateModel);
     return null;
-  }
-
-  public drawnCardsTopicUnsubscribe$: Subject<any>;
-  public subscribeToDrawnCardsTopic(gameId: string): void {
-    this.drawnCardsTopicUnsubscribe$ = new Subject<any>();
-    this.onMessage(`/topic/game/${gameId}/drawn-cards`)
-    .pipe(takeUntil(this.drawnCardsTopicUnsubscribe$))
-    .subscribe(data => this.drawnCardsStore.dispatch(data.suit ? cardDrawn(data) : handOver()))
-  }
-  public drawnCardsTopicUnsubscribe() {
-    if (this.drawnCardsTopicUnsubscribe$) {
-      this.drawnCardsTopicUnsubscribe$.next();
-      this.drawnCardsTopicUnsubscribe$.complete();
-    }
   }
 
   /** Subscribes to the game list topic. */

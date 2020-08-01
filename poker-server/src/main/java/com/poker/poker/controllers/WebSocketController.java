@@ -9,7 +9,6 @@ import com.poker.poker.events.LeaveGameEvent;
 import com.poker.poker.events.PublishCurrentGameEvent;
 import com.poker.poker.events.RejoinGameEvent;
 import com.poker.poker.models.game.GameParameterModel;
-import com.poker.poker.models.websocket.ActionModel;
 import com.poker.poker.models.websocket.ClientMessageModel;
 import com.poker.poker.models.websocket.GenericServerMessage;
 import com.poker.poker.models.websocket.WebSocketUpdateModel;
@@ -99,9 +98,9 @@ public class WebSocketController {
   }
 
   @MessageMapping("/game/current/update")
-  public void requestCurrentGameUpdate(final ActionModel action) {
-    log.debug("User {} requesting update.", action.getUserId());
-    publisher.publishEvent(new PublishCurrentGameEvent(this, action.getUserId()));
+  public void requestCurrentGameUpdate(final ClientMessageModel<Void> messageModel) {
+    log.debug("User {} requesting update.", messageModel.getUserId());
+    publisher.publishEvent(new PublishCurrentGameEvent(this, messageModel.getUserId()));
   }
 
   @MessageMapping("/game/create")

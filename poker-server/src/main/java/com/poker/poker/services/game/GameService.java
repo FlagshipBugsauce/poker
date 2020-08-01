@@ -117,10 +117,8 @@ public class GameService {
   @EventListener
   public void joinLobby(final JoinGameEvent event) {
     final LobbyModel lobby = data.getLobby(event.getGameId());
-    if (data.isUserInGame(lobby.getId())) {
-      if (!data.getUsersGame(event.getUser().getId()).getId().equals(lobby.getId())) {
-        return;
-      }
+    if (data.isUserInGame(event.getUser().getId())) {
+      return;
     }
     final UserDocument user = event.getUser();
     final LobbyPlayerModel player = new LobbyPlayerModel(user, false, false);

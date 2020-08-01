@@ -1,20 +1,15 @@
 import {createReducer, on} from '@ngrx/store';
 import {
-  actingPlayerChanged,
-  cardDrawn,
   closeChat,
-  gameChatMessageReceived,
+  gameChatMsgReceived,
   gameDataUpdated,
   gameListUpdated,
   gameModelUpdated,
   gamePhaseChanged,
   gamePlayerUpdated,
   gameToastReceived,
-  generalChatMessageReceived,
-  handActionPerformed,
+  generalChatMsgReceived,
   handCompleted,
-  handModelUpdated,
-  handOver,
   hideFailedSignInWarning,
   joinLobby,
   leaveLobby,
@@ -31,29 +26,21 @@ import {
   signInSuccess,
   signOut,
   startTimer,
-  TimerModel,
   updateCurrentGame
 } from './app.actions';
-import {
-  AppState,
-  ChatContainer,
-  DrawnCardsContainer,
-  TimerState
-} from '../shared/models/app-state.model';
+import {AppState, ChatContainer, TimerState} from '../shared/models/app-state.model';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
   AuthResponseModel,
-  CardModel,
   ChatMessageModel,
   CurrentGameModel,
   DrawGameDataContainerModel,
   GameModel,
   GamePlayerModel,
-  HandActionModel,
-  HandModel,
   LobbyModel,
   LobbyPlayerModel,
   PokerTableModel,
+  TimerModel,
   ToastModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
@@ -110,7 +97,6 @@ export function appReducer(state: AppState, action) {
  * GameData reducer and initial state.
  */
 export const gameDataInitialState: DrawGameDataContainerModel = {
-  currentHand: 0,
   gameData: []
 };
 const gameDataReducerInternal = createReducer<DrawGameDataContainerModel>(
@@ -144,11 +130,6 @@ const gameModelReducerInternal = createReducer<GameModel>(
     return ({...state, players});
   }),
   on(gamePlayerUpdated, (state: GameModel, player: GamePlayerModel) => {
-    const players: GamePlayerModel[] = state
-    .players.map(p => p.id === player.id ? player : ({...p}));
-    return ({...state, players});
-  }),
-  on(actingPlayerChanged, (state: GameModel, player: GamePlayerModel) => {
     const players: GamePlayerModel[] = state
     .players.map(p => p.id === player.id ? player : ({...p}));
     return ({...state, players});
@@ -204,28 +185,6 @@ export function lobbyModelReducer(state: LobbyModel, action) {
 }
 
 /**
- * HandDocument initial state.
- */
-export const handModelInitialState: HandModel = {
-  actions: [] as HandActionModel[]
-} as HandModel;
-const handModelReducerInternal = createReducer<HandModel>(
-  handModelInitialState,
-  on(handModelUpdated, (state: HandModel, newState: HandModel) => newState),
-  on(handActionPerformed, (state: HandModel, action: HandActionModel) => {
-    const actions: HandActionModel[] = state.actions.map(a => ({...a}));
-    actions.push(action);
-    return ({...state, actions});
-  }),
-  on(actingPlayerChanged, (state: HandModel, player: GamePlayerModel) =>
-    ({...state, acting: player}))
-);
-
-export function handModelReducer(state: HandModel, action) {
-  return handModelReducerInternal(state, action);
-}
-
-/**
  * GameList initial state.
  */
 export const gameListInitialState: GameListContainerModel = {gameList: []};
@@ -249,22 +208,6 @@ const playerDataReducerInternal = createReducer<GamePlayerModel>(
 
 export function playerDataReducer(state: GamePlayerModel, action) {
   return playerDataReducerInternal(state, action);
-}
-
-export const drawnCardsInitialState: DrawnCardsContainer = {drawnCards: []};
-const drawnCardsReducerInternal = createReducer<DrawnCardsContainer>(
-  drawnCardsInitialState,
-  on(cardDrawn,
-    (state: DrawnCardsContainer, card: CardModel) => {
-      const cards: CardModel[] = state.drawnCards.map((c: CardModel) => ({...c}));
-      cards.push(card);
-      return {drawnCards: cards};
-    }),
-  on(handOver, () => ({drawnCards: []}))
-);
-
-export function drawnCardsReducer(state: DrawnCardsContainer, action) {
-  return drawnCardsReducerInternal(state, action);
 }
 
 // TODO: Don't think I actually need this...
@@ -294,10 +237,10 @@ export const chatInitialState: ChatContainer = {
 };
 const chatReducerInternal = createReducer<ChatContainer>(
   chatInitialState,
-  on(generalChatMessageReceived,
+  on(generalChatMsgReceived,
     (state: ChatContainer, message: ChatMessageModel) =>
       ({...chatInitialState, generalChat: message})),
-  on(gameChatMessageReceived,
+  on(gameChatMsgReceived,
     (state: ChatContainer, message: ChatMessageModel) =>
       ({...chatInitialState, gameChat: message})),
   on(closeChat, (state: ChatContainer) => chatInitialState)

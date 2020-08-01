@@ -163,7 +163,7 @@ export class UsersService extends BaseService {
    * This method sends `application/json` and handles request body of type `application/json`.
    */
   authorize$Response(params: {
-    body: AuthRequestModel
+      body: AuthRequestModel
   }): Observable<StrictHttpResponse<AuthResponseModel>> {
 
     const rb = new RequestBuilder(this.rootUrl, UsersService.AuthorizePath, 'post');

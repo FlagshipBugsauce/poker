@@ -17,8 +17,8 @@ import {ToastService} from '../shared/toast.service';
 import {Router} from '@angular/router';
 import {APP_ROUTES} from '../app-routes';
 import {WebSocketService} from '../shared/web-socket/web-socket.service';
-import {ActionModel} from '../api/models/action-model';
 import {CookieService} from 'ngx-cookie-service';
+import {ClientMessageModel} from '../api/models/client-message-model';
 
 @Injectable()
 export class AppEffects {
@@ -52,8 +52,8 @@ export class AppEffects {
    */
   requestCurrentGameUpdate$ = createEffect(() => this.actions$.pipe(
     ofType(requestCurrentGameUpdate),
-    tap((action: ActionModel) => this.webSocketService.send(
-      '/topic/game/current/update', {userId: action.userId}))
+    tap((messageModel: ClientMessageModel) => this.webSocketService.send(
+      '/topic/game/current/update', {userId: messageModel.userId}))
   ), {dispatch: false});
   /**
    * 2 weeks.

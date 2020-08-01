@@ -9,11 +9,9 @@ import {StoreModule} from '@ngrx/store';
 import {
   appReducer,
   chatReducer,
-  drawnCardsReducer,
   gameDataReducer,
   gameListReducer,
   gameModelReducer,
-  handModelReducer,
   lobbyModelReducer,
   playerDataReducer,
   pokerTableReducer,
@@ -39,11 +37,9 @@ import {ChatEffects} from './state/chat.effects';
         gameData: gameDataReducer,
         lobbyModel: lobbyModelReducer,
         gameModel: gameModelReducer,
-        handModel: handModelReducer,
         gameList: gameListReducer,
         playerData: playerDataReducer,
         lastToast: toastDataReducer,
-        drawnCards: drawnCardsReducer,
         chats: chatReducer,
         tableState: pokerTableReducer,
         timerState: timerReducer
