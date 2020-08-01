@@ -94,7 +94,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
       this.appStore.dispatch(leaveLobby());
     }
     if (this.gameModel.phase === GamePhase.Play) {
-      this.appStore.dispatch(leaveGame({actionType: 'LeaveGame'}));
+      this.appStore.dispatch(leaveGame());
     }
   }
 }

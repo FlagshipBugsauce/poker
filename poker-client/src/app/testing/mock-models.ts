@@ -2,14 +2,11 @@ import {ClientUserModel} from '../api/models/client-user-model';
 import {DrawGameDataModel} from '../api/models/draw-game-data-model';
 import {GameModel} from '../api/models/game-model';
 import {LobbyModel} from '../api/models/lobby-model';
-import {HandModel} from '../api/models/hand-model';
 import {ChatMessageModel} from '../api/models/chat-message-model';
 import {PokerTableModel} from '../api/models/poker-table-model';
 import {HandSummaryModel} from '../api/models/hand-summary-model';
 import {GamePlayerModel} from '../api/models';
 import {CardSuit, CardValue} from '../shared/models/card.enum';
-
-export const mockHandDocument: HandModel = {};
 
 export const mockUser: ClientUserModel = {
   id: 'abc123'

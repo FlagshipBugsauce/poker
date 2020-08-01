@@ -27,18 +27,21 @@ import {
 } from '../../testing/mock-models';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 import {WebSocketService} from '../../shared/web-socket/web-socket.service';
-import {ClientUserModel} from '../../api/models/client-user-model';
+import {
+  ChatMessageModel,
+  ClientUserModel,
+  GameModel,
+  GamePlayerModel,
+  HandSummaryModel,
+  TimerModel
+} from '../../api/models';
 import {MockChatService, MockWebSocketService} from '../../testing/mock-services';
 import {ChatService} from '../../shared/web-socket/chat.service';
-import {ChatMessageModel} from '../../api/models/chat-message-model';
-import {GameModel} from '../../api/models/game-model';
-import {GamePlayerModel, HandSummaryModel} from '../../api/models';
 import {PokerTableComponent} from '../poker-table/poker-table.component';
 import {PlayerBoxComponent} from '../poker-table/player-box/player-box.component';
 import {HandSummaryComponent} from '../poker-table/hand-summary/hand-summary.component';
 import {DeckComponent} from '../poker-table/deck/deck.component';
 import {GamePhase} from '../../shared/models/game-phase.enum';
-import {TimerModel} from '../../state/app.actions';
 
 describe('GameComponent', () => {
   let mockStore: MockStore;

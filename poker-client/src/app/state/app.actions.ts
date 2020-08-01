@@ -1,7 +1,6 @@
 import {createAction, props} from '@ngrx/store';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
-  ActionModel,
   ActiveStatusModel,
   ApiSuccessModel,
   AuthRequestModel,
@@ -65,7 +64,7 @@ export const handCompleted = createAction('handCompleted', props<{ id: string }>
 export const playerAwayToggled = createAction('playerAwayToggled', props<GamePlayerModel>());
 export const setAwayStatus = createAction('setAwayStatus', props<ActiveStatusModel>());
 export const rejoinGame = createAction('[Lobby Component] RejoinGame', props<RejoinModel>());
-export const leaveGame = createAction('[Game Component] LeaveGame', props<ActionModel>());
+export const leaveGame = createAction('[Game Component] LeaveGame');
 export const updateCurrentGame = createAction('updateCurrentGame', props<CurrentGameModel>());
 export const requestCurrentGameUpdate = createAction('requestCurrentGameUpdate', props<ClientMessageModel>());
 export const requestGameModelUpdate = createAction('requestGameModelUpdate');
