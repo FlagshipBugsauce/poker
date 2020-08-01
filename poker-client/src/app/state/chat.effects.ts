@@ -16,7 +16,7 @@ export class ChatEffects {
 
   startChat$ = createEffect(() => this.actions$.pipe(
     ofType(startChat),
-    tap((action: { gameId: string }) => this.chatService.subscribeToChatTopic(action.gameId))
+    tap((action: ClientMessageModel) => this.chatService.subscribeToChatTopic(action.gameId))
   ), {dispatch: false});
 
   closeChat$ = createEffect(() => this.actions$.pipe(

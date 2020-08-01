@@ -7,13 +7,12 @@ import {
   DrawGameDataContainerModel,
   GameModel,
   GamePlayerModel,
-  HandModel,
   LobbyModel,
   PokerTableModel,
+  TimerModel,
   ToastModel
 } from '../../api/models';
 import {GameListContainerModel} from './game-list-container.model';
-import {TimerModel} from '../../state/app.actions';
 
 export interface AppState {
   showSignInFail: boolean;
@@ -44,10 +43,6 @@ export interface GameStateContainer {
 
 export interface GameListStateContainer {
   gameList: GameListContainerModel;
-}
-
-export interface HandStateContainer {
-  handModel: HandModel;
 }
 
 export interface PlayerDataStateContainer {
