@@ -120,13 +120,13 @@ public class UserController {
       tags = "getUserInfo")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "User information retrieved successfully.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = ClientUserModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+        @ApiResponse(
+            responseCode = "200",
+            description = "User information retrieved successfully.",
+            content =
+                @Content(
+                    schema = @Schema(implementation = ClientUserModel.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE))
       })
   @GetMapping("/getUserInfo/{userId}")
   public ResponseEntity<ClientUserModel> getUserInfo(

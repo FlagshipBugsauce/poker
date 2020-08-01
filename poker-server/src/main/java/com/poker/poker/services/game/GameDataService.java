@@ -130,7 +130,7 @@ public class GameDataService {
    * Sets up all the required mappings when a game is created and returns the ID of the new game.
    *
    * @param params Parameters of the new game.
-   * @param user   User who created the game.
+   * @param user User who created the game.
    * @return ID of the new game.
    */
   public UUID newGame(final GameParameterModel params, final UserModel user) {
@@ -289,11 +289,11 @@ public class GameDataService {
     assert isUserInGame(playerId);
     assert userIdToGameIdMap.get(playerId).equals(lobbyId);
 
-    final LobbyPlayerModel player = lobbys.get(lobbyId).getPlayers()
-        .stream()
-        .filter(p -> p.getId().equals(playerId))
-        .findFirst()
-        .orElse(null);
+    final LobbyPlayerModel player =
+        lobbys.get(lobbyId).getPlayers().stream()
+            .filter(p -> p.getId().equals(playerId))
+            .findFirst()
+            .orElse(null);
 
     assert player != null;
     return player;
@@ -311,11 +311,11 @@ public class GameDataService {
     assert isUserInGame(playerId);
     assert userIdToGameIdMap.get(playerId).equals(gameId);
 
-    final GamePlayerModel player = games.get(gameId).getPlayers()
-        .stream()
-        .filter(p -> p.getId().equals(playerId))
-        .findFirst()
-        .orElse(null);
+    final GamePlayerModel player =
+        games.get(gameId).getPlayers().stream()
+            .filter(p -> p.getId().equals(playerId))
+            .findFirst()
+            .orElse(null);
 
     assert player != null;
     return player;
