@@ -30,10 +30,10 @@ public class LobbyServiceTests extends TestBaseClass {
   //    withRandomGame(
   //        (args) -> {
   //          for (int i = 0; i < numPlayers; i++) {
-  //            UserDocument newPlayer = randomUserDocument();
+  //            UserModel newPlayer = randomUserDocument();
   //            lobbyService.joinLobby((UUID) args.get(2), newPlayer);
   //            if (args.get(3) instanceof List) {
-  //              ((List<UserDocument>) args.get(3)).add(newPlayer);
+  //              ((List<UserModel>) args.get(3)).add(newPlayer);
   //            }
   //          }
   //          actions.accept(args);
@@ -65,8 +65,8 @@ public class LobbyServiceTests extends TestBaseClass {
   //   * @param newGame CreateGameModel used when creating the game.
   //   */
   //  private void withSpecifiedGame(Consumer<List<Object>> actions, CreateGameModel newGame) {
-  //    UserDocument host =
-  //        new UserDocument(
+  //    UserModel host =
+  //        new UserModel(
   //            UUID.randomUUID(), "host@most.com", null, UserGroup.Administrator, "Billy", "Bob");
   //    withSpecifiedGameAndHost(actions, newGame, host);
   //  }
@@ -79,7 +79,7 @@ public class LobbyServiceTests extends TestBaseClass {
   //   * @param host The model for the host of the game.
   //   */
   //  private void withSpecifiedGameAndHost(
-  //      Consumer<List<Object>> actions, CreateGameModel newGame, UserDocument host) {
+  //      Consumer<List<Object>> actions, CreateGameModel newGame, UserModel host) {
   //    UUID gameId = UUID.randomUUID();
   //    lobbyService.createLobby(newGame, host, gameId);
   //    List<Object> arguments =
@@ -140,7 +140,7 @@ public class LobbyServiceTests extends TestBaseClass {
   //  @Test
   //  public void testCreateGame_succeeds_whenParametersAreValid() {
   //    // Given
-  //    final UserDocument host = getUserDocument();
+  //    final UserModel host = getUserModel();
   //    final CreateGameModel newGame = getSampleCreateGameModel();
   //    final UUID gameId = UUID.randomUUID();
   //
@@ -174,7 +174,7 @@ public class LobbyServiceTests extends TestBaseClass {
   //  @Test
   //  public void testCreateGame_fails_whenHostIsAlreadyInGame() {
   //    // Given
-  //    final UserDocument host = getUserDocument();
+  //    final UserModel host = getUserModel();
   //    final CreateGameModel newGame = getSampleCreateGameModel();
   //    final UUID gameId = UUID.randomUUID();
   //    lobbyService.createLobby(newGame, host, gameId);
@@ -193,14 +193,14 @@ public class LobbyServiceTests extends TestBaseClass {
   //  /*
   //   * Join Game:
   //   * Pre-conditions:
-  //   *  1) UserDocument refers to a valid user.
+  //   *  1) UserModel refers to a valid user.
   //   *  2) Game ID is valid (validated in GameService).
   //   *
   //   * Post-conditions:
   //   *  1) BadRequestException is thrown if gameId is invalid UUID.
-  //   *  2) ApiSuccessModel is returned if UserDocument refers to a user that is already in the
+  //   *  2) ApiSuccessModel is returned if UserModel refers to a user that is already in the
   // game.
-  //   *  3) BadRequestException is thrown if UserDocument refers to a user that is in another game.
+  //   *  3) BadRequestException is thrown if UserModel refers to a user that is in another game.
   //   *  4) BadRequestException is thrown if there is no game with the gameId provided.
   //   *  5) PlayerModel is created and added to list of players in the GameDocument associated with
   //   *     the game.
@@ -208,7 +208,7 @@ public class LobbyServiceTests extends TestBaseClass {
   // list
   //   *     of game actions in the GameDocument associated with the game.
   //   *  7) userIdToGameMap is updated to reflect the fact that the user associated with the
-  //   *     UserDocument argument has joined a game.
+  //   *     UserModel argument has joined a game.
   //   *  8) Updated GameDocuments are sent out to clients who have requested a game update SSE
   // emitter.
   //   *  9) Updated GetGameModels are sent out to client who have requested a game list SSE
@@ -222,9 +222,9 @@ public class LobbyServiceTests extends TestBaseClass {
   //    // Assuming that createGame function works correctly here.
   //    // Given
   //    final UUID gameId = UUID.randomUUID();
-  //    lobbyService.createLobby(getSampleCreateGameModel(), getUserDocument(), gameId);
+  //    lobbyService.createLobby(getSampleCreateGameModel(), getUserModel(), gameId);
   //
-  //    final UserDocument user = new UserDocument();
+  //    final UserModel user = new UserModel();
   //    user.setId(UUID.randomUUID());
   //
   //    // When
@@ -248,8 +248,8 @@ public class LobbyServiceTests extends TestBaseClass {
   //  //    // Given
   //  //    final UUID badId = UUID.randomUUID();
   //  //    final UUID realGameId = UUID.randomUUID();
-  //  //    lobbyService.createLobby(getSampleCreateGameModel(), getUserDocument(), realGameId);
-  //  //    final UserDocument user = new UserDocument();
+  //  //    lobbyService.createLobby(getSampleCreateGameModel(), getUserModel(), realGameId);
+  //  //    final UserModel user = new UserModel();
   //  //    user.setId(UUID.randomUUID());
   //  //
   //  //    // When/Then
@@ -261,7 +261,7 @@ public class LobbyServiceTests extends TestBaseClass {
   //  //    // Check that only the user that created the game is in a game.
   //  //    userIdToGameIdMap
   //  //        .keySet()
-  //  //        .forEach(id -> Assertions.assertEquals(getUserDocument().getId(), id));
+  //  //        .forEach(id -> Assertions.assertEquals(getUserModel().getId(), id));
   //  //    Assertions.assertEquals(1, activeGames.get(realGameId).getPlayers().size());
   //  //  }
   //
@@ -269,7 +269,7 @@ public class LobbyServiceTests extends TestBaseClass {
   //  public void testReady_succeeds_whenPlayerIsInGame() {
   //    withRandomGameWithPlayers(
   //        (args) -> {
-  //          lobbyService.ready((UserDocument) args.get(1));
+  //          lobbyService.ready((UserModel) args.get(1));
   //          Assertions.assertTrue(activeGames.get(args.get(2)).getPlayers().get(0).isReady());
   //        },
   //        2);
@@ -289,8 +289,8 @@ public class LobbyServiceTests extends TestBaseClass {
   //    withRandomGameWithPlayers(
   //        (args) -> {
   //          LobbyDocument game = activeGames.get(args.get(2));
-  //          List<UserDocument> users = (List<UserDocument>) args.get(3);
-  //          UserDocument user = users.get(1);
+  //          List<UserModel> users = (List<UserModel>) args.get(3);
+  //          UserModel user = users.get(1);
   //          game.getPlayers().removeIf(player -> player.getId().equals(user.getId()));
   //          Assertions.assertThrows(BadRequestException.class, () -> lobbyService.ready(user));
   //        },

@@ -1,12 +1,10 @@
 import {createAction, props} from '@ngrx/store';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
-  ActionModel,
   ActiveStatusModel,
   ApiSuccessModel,
   AuthRequestModel,
   AuthResponseModel,
-  CardModel,
   ChatMessageModel,
   ClientMessageModel,
   CurrentGameModel,
@@ -14,114 +12,70 @@ import {
   GameModel,
   GameParameterModel,
   GamePlayerModel,
-  HandActionModel,
-  HandModel,
   LobbyModel,
   LobbyPlayerModel,
   PokerTableModel,
+  TimerModel,
   ToastModel
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
 import {RejoinModel} from '../shared/models/rejoin.model';
 import {GamePhase} from '../shared/models/game-phase.enum';
 
-export const navigate = createAction('[Router Service] Navigate');
-
 // Authentication:
-export const signIn = createAction('[Auth Service] SignIn', props<AuthRequestModel>());
-export const signInWithJwt = createAction(
-  '[AuthGuardService] SignInWithJwt', props<{ jwt: string }>());
-export const signInSuccess = createAction(
-  '[Auth Service] SignInSuccess',
-  props<AuthResponseModel>()
-);
-export const signInFail = createAction('[Auth Service] SignInFail');
-export const hideFailedSignInWarning = createAction('[Login Component] HideFailWarning');
-export const signOut = createAction('[Auth Service] SignOut');
+export const signIn = createAction('signIn', props<AuthRequestModel>());
+export const signInWithJwt = createAction('signInWithJwt', props<{ jwt: string }>());
+export const signInSuccess = createAction('signInSuccess', props<AuthResponseModel>());
+export const signInFail = createAction('signInFail');
+export const hideFailedSignInWarning = createAction('hideFailedSignInWarning');
+export const signOut = createAction('signOut');
 
 // Lobby:
-export const joinLobby = createAction('[Join Component] JoinLobby', props<TopBarLobbyModel>());
-export const leaveLobby = createAction('[Lobby Component] LeaveLobby');
-export const createGame = createAction(
-  '[Lobby Component] CreateGame',
-  props<GameParameterModel>()
-);
-export const gameCreated = createAction(
-  '[CreateGameService] GameCreated', props<ApiSuccessModel>());
-export const startGame = createAction('[Game Component] StartGame');
-export const readyUp = createAction('[Lobby Component] ReadyUp');
-export const notReady = createAction('[Lobby Component] NotReady');
+export const joinLobby = createAction('joinLobby', props<TopBarLobbyModel>());
+export const leaveLobby = createAction('leaveLobby');
+export const createGame = createAction('createGame', props<GameParameterModel>());
+export const gameCreated = createAction('gameCreated', props<ApiSuccessModel>());
+export const startGame = createAction('startGame');
+export const readyUp = createAction('readyUp');
+export const notReady = createAction('notReady');
 
 // Game Data:
-export const gameModelUpdated = createAction(
-  '[WebSocketService] GameModelUpdated', props<GameModel>());
-export const gameListUpdated = createAction(
-  '[WebSocketService] GameListDataUpdated', props<GameListContainerModel>());
-export const lobbyModelUpdated = createAction(
-  '[WebSocketService] LobbyModelUpdated', props<LobbyModel>());
-export const handModelUpdated = createAction(
-  '[WebSocketService] HandDocumentUpdated', props<HandModel>());
-export const gameDataUpdated = createAction(
-  '[WebSocketService] GameDataUpdated', props<DrawGameDataContainerModel>());
-export const playerDataUpdated = createAction(
-  '[WebSocketService] PlayerDataUpdated', props<GamePlayerModel>());
-export const gameToastReceived = createAction(
-  '[WebSocketService] GameToastReceived', props<ToastModel>());
-export const unsubscribeFromGameTopics =
-  createAction('[Game Components] UnsubscribeFromGameTopics');
+export const gameModelUpdated = createAction('gameModelUpdated', props<GameModel>());
+export const gameListUpdated = createAction('gameListUpdated', props<GameListContainerModel>());
+export const lobbyModelUpdated = createAction('lobbyModelUpdated', props<LobbyModel>());
+export const gameDataUpdated = createAction('gameDataUpdated', props<DrawGameDataContainerModel>());
+export const playerDataUpdated = createAction('playerDataUpdated', props<GamePlayerModel>());
+export const gameToastReceived = createAction('gameToastReceived', props<ToastModel>());
+export const unsubscribeFromGameTopics = createAction('unsubscribeFromGameTopics');
 
 // Poker Table:
-export const gamePlayerUpdated = createAction(
-  '[WebSocketService] GamePlayerUpdated', props<GamePlayerModel>());
-export const pokerTableUpdate = createAction(
-  '[WebSocketService] PokerTableUpdate', props<PokerTableModel>());
-export const requestPokerTableUpdate = createAction(
-  '[WebSocketService] RequestPokerTableUpdate');
+export const gamePlayerUpdated = createAction('gamePlayerUpdated', props<GamePlayerModel>());
+export const pokerTableUpdate = createAction('pokerTableUpdate', props<PokerTableModel>());
+export const requestPokerTableUpdate = createAction('requestPokerTableUpdate');
 
 // Lobby Actions
-export const playerReadyToggled = createAction(
-  '[WebSocketService] PlayerReadyToggled', props<LobbyPlayerModel>());
-export const playerJoinedLobby = createAction(
-  '[WebSocketService] PlayerJoinedLobby', props<LobbyPlayerModel>());
-export const playerLeftLobby = createAction(
-  '[WebSocketService] PlayerLeftLobby', props<LobbyPlayerModel>());
+export const playerReadyToggled = createAction('playerReadyToggled', props<LobbyPlayerModel>());
+export const playerJoinedLobby = createAction('playerJoinedLobby', props<LobbyPlayerModel>());
+export const playerLeftLobby = createAction('playerLeftLobby', props<LobbyPlayerModel>());
 
 // Game Actions
-export const gamePhaseChanged = createAction(
-  '[WebSocketService] GamePhaseChanged', props<{ phase: GamePhase }>());
-export const handCompleted = createAction(
-  '[WebSocketService] HandCompleted', props<{ id: string }>());
-export const playerAwayToggled = createAction(
-  '[WebSocketService] PlayerAwayToggled', props<GamePlayerModel>());
-export const setAwayStatus = createAction(
-  '[Play Component] SetActiveStatus',
-  props<ActiveStatusModel>()
-);
+export const gamePhaseChanged = createAction('gamePhaseChanged', props<{ phase: GamePhase }>());
+export const handCompleted = createAction('handCompleted', props<{ id: string }>());
+export const playerAwayToggled = createAction('playerAwayToggled', props<GamePlayerModel>());
+export const setAwayStatus = createAction('setAwayStatus', props<ActiveStatusModel>());
 export const rejoinGame = createAction('[Lobby Component] RejoinGame', props<RejoinModel>());
-export const leaveGame = createAction('[Game Component] LeaveGame', props<ActionModel>());
-export const updateCurrentGame = createAction(
-  '[TopBar Component] UpdateCurrentGame', props<CurrentGameModel>());
-export const requestCurrentGameUpdate = createAction(
-  '[TopBar Component] RequestCurrentGameUpdate', props<ActionModel>());
-export const requestGameModelUpdate = createAction('[PokerTable] RequestGameUpdate');
-
-// Hand Actions
-export const handActionPerformed = createAction(
-  '[WebSocketService] HandActionPerformed', props<HandActionModel>());
-export const actingPlayerChanged = createAction(
-  '[WebSocketService] ActingPlayerChanged', props<GamePlayerModel>());
-export const drawCard = createAction('[Play Component] DrawCard');
-export const cardDrawn = createAction('[WebSocketService] CardDrawn', props<CardModel>());
-export const handOver = createAction('[WebSocketService] HandOver');
-export const cardDrawnByPlayer = createAction(
-  '[Poker Table] CardDrawnByPlayer', props<{ position: number }>());
+export const leaveGame = createAction('[Game Component] LeaveGame');
+export const updateCurrentGame = createAction('updateCurrentGame', props<CurrentGameModel>());
+export const requestCurrentGameUpdate = createAction('requestCurrentGameUpdate', props<ClientMessageModel>());
+export const requestGameModelUpdate = createAction('requestGameModelUpdate');
+export const drawCard = createAction('drawCard');
 
 // Chat Actions
-export const startChat = createAction('[ChatBox] StartChat', props<{ gameId: string }>());
-export const closeChat = createAction('[ChatBox] CloseChat');
-export const sendChatMessage = createAction(
-  '[ChatBox] SendMessage', props<ClientMessageModel>());
-export const generalChatMessageReceived = createAction(
-  '[WebSocketService] GeneralMessageReceived', props<ChatMessageModel>());
-export const gameChatMessageReceived = createAction(
-  '[WebSocketService] GameMessageReceived', props<ChatMessageModel>());
+export const startChat = createAction('startChat', props<ClientMessageModel>());
+export const closeChat = createAction('closeChat');
+export const sendChatMessage = createAction('sendChatMessage', props<ClientMessageModel>());
+export const generalChatMsgReceived = createAction('generalChatMsgReceived', props<ChatMessageModel>());
+export const gameChatMsgReceived = createAction('gameChatMsgReceived', props<ChatMessageModel>());
+
+// Timer Actions
+export const startTimer = createAction('[WebSocketService] StartTimer', props<TimerModel>());

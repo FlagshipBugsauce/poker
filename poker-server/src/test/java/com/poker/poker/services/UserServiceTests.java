@@ -2,9 +2,9 @@ package com.poker.poker.services;
 
 import com.poker.poker.common.TestBaseClass;
 import com.poker.poker.config.constants.AppConstants;
-import com.poker.poker.documents.UserDocument;
-import com.poker.poker.models.AuthResponseModel;
 import com.poker.poker.models.enums.UserGroup;
+import com.poker.poker.models.user.AuthResponseModel;
+import com.poker.poker.models.user.UserModel;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import com.poker.poker.validation.exceptions.ForbiddenException;
@@ -53,7 +53,7 @@ public class UserServiceTests extends TestBaseClass {
     Mockito.when(jwtService.generateToken(Mockito.any(UserDetails.class)))
         .thenReturn(getSampleJwt());
     Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail()))
-        .thenReturn(getUserDocument());
+        .thenReturn(getUserModel());
 
     // When
     AuthResponseModel response = userService.authenticate(getSampleAuthRequestModel());
@@ -77,9 +77,9 @@ public class UserServiceTests extends TestBaseClass {
   public void testRegistrationWithUniqueEmail() {
     // Given
     Mockito.when(userRepository.findUserDocumentByEmail(Mockito.anyString()))
-        .thenReturn(getUserDocument());
+        .thenReturn(getUserModel());
     Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail())).thenReturn(null);
-    Mockito.when(userRepository.save(getUserDocument())).thenReturn(null);
+    Mockito.when(userRepository.save(getUserModel())).thenReturn(null);
 
     // When/Then
     Assertions.assertNotNull(userService.register(getSampleNewAccountModel()));
@@ -90,8 +90,8 @@ public class UserServiceTests extends TestBaseClass {
     // Given
     Mockito.when(userRepository.findUserDocumentByEmail(Mockito.anyString())).thenReturn(null);
     Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail()))
-        .thenReturn(getUserDocument());
-    Mockito.when(userRepository.save(getUserDocument())).thenReturn(null);
+        .thenReturn(getUserModel());
+    Mockito.when(userRepository.save(getUserModel())).thenReturn(null);
 
     // When/Then
     Assertions.assertThrows(
@@ -105,7 +105,7 @@ public class UserServiceTests extends TestBaseClass {
     final String jwt = "token";
     Mockito.when(jwtService.extractEmail(jwt)).thenReturn(getSampleEmail());
     Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail()))
-        .thenReturn(getUserDocument());
+        .thenReturn(getUserModel());
 
     // When/Then
     Assertions.assertThrows(
@@ -119,8 +119,8 @@ public class UserServiceTests extends TestBaseClass {
   public void testUserGroupValidation02() {
     // Given
     final String jwt = "token";
-    final UserDocument guestUser =
-        new UserDocument(
+    final UserModel guestUser =
+        new UserModel(
             UUID.randomUUID(),
             getSampleEmail(),
             passwordEncoder.encode(getSamplePassword()),
@@ -143,8 +143,8 @@ public class UserServiceTests extends TestBaseClass {
   public void testUserGroupValidation03() {
     // Given
     final String jwt = "token";
-    final UserDocument adminUser =
-        new UserDocument(
+    final UserModel adminUser =
+        new UserModel(
             UUID.randomUUID(),
             getSampleEmail(),
             passwordEncoder.encode(getSamplePassword()),

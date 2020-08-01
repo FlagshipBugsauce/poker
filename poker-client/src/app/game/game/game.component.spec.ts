@@ -3,7 +3,6 @@ import {GameComponent} from './game.component';
 import {SharedModule} from '../../shared/shared.module';
 import {RouterTestingModule} from '@angular/router/testing';
 import {LobbyComponent} from '../lobby/lobby.component';
-import {PlayComponent} from '../play/play.component';
 import {EndComponent} from '../end/end.component';
 import {MockStore, provideMockStore} from '@ngrx/store/testing';
 import {MemoizedSelector} from '@ngrx/store';
@@ -12,7 +11,9 @@ import {
   ChatStateContainer,
   GameDataStateContainer,
   GameStateContainer,
-  PokerTableStateContainer
+  PlayerDataStateContainer,
+  PokerTableStateContainer,
+  TimerStateContainer
 } from '../../shared/models/app-state.model';
 import * as selectors from '../../state/app.selector';
 import {DrawGameDataModel} from '../../api/models/draw-game-data-model';
@@ -26,12 +27,16 @@ import {
 } from '../../testing/mock-models';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 import {WebSocketService} from '../../shared/web-socket/web-socket.service';
-import {UserModel} from '../../api/models/user-model';
+import {
+  ChatMessageModel,
+  ClientUserModel,
+  GameModel,
+  GamePlayerModel,
+  HandSummaryModel,
+  TimerModel
+} from '../../api/models';
 import {MockChatService, MockWebSocketService} from '../../testing/mock-services';
 import {ChatService} from '../../shared/web-socket/chat.service';
-import {ChatMessageModel} from '../../api/models/chat-message-model';
-import {GameModel} from '../../api/models/game-model';
-import {GamePlayerModel, HandSummaryModel} from '../../api/models';
 import {PokerTableComponent} from '../poker-table/poker-table.component';
 import {PlayerBoxComponent} from '../poker-table/player-box/player-box.component';
 import {HandSummaryComponent} from '../poker-table/hand-summary/hand-summary.component';
@@ -42,7 +47,7 @@ describe('GameComponent', () => {
   let mockStore: MockStore;
   let mockGameDataSelector: MemoizedSelector<GameDataStateContainer, DrawGameDataModel[]>;
   let mockGameStateSelector: MemoizedSelector<GameStateContainer, string>;
-  let mockLoggedInUserSelector: MemoizedSelector<AppStateContainer, UserModel>;
+  let mockLoggedInUserSelector: MemoizedSelector<AppStateContainer, ClientUserModel>;
   let mockJwtSelector: MemoizedSelector<AppStateContainer, string>;
   let mockGeneralChatSelector: MemoizedSelector<ChatStateContainer, ChatMessageModel>;
   let mockAuthenticatedSelector: MemoizedSelector<AppStateContainer, boolean>;
@@ -53,6 +58,8 @@ describe('GameComponent', () => {
   let mockGamePhaseSelector: MemoizedSelector<GameStateContainer, string>;
   let mockPlayerThatActedSelector: MemoizedSelector<PokerTableStateContainer, number>;
   let mockHandSummarySelector: MemoizedSelector<PokerTableStateContainer, HandSummaryModel>;
+  let mockAwayStatusSelector: MemoizedSelector<PlayerDataStateContainer, boolean>;
+  let mockSelectStartTimer: MemoizedSelector<TimerStateContainer, TimerModel>;
   let component: GameComponent;
   let fixture: ComponentFixture<GameComponent>;
 
@@ -61,7 +68,6 @@ describe('GameComponent', () => {
       declarations: [
         GameComponent,
         LobbyComponent,
-        PlayComponent,
         EndComponent,
         PopupAfkComponent,
         PokerTableComponent,
@@ -94,8 +100,10 @@ describe('GameComponent', () => {
     mockActingPlayerSelector = mockStore.overrideSelector(selectors.selectActingPlayer, 0);
     mockDisplayHandSummarySelector = mockStore.overrideSelector(selectors.selectDisplayHandSummary, false);
     mockGamePhaseSelector = mockStore.overrideSelector(selectors.selectGamePhase, GamePhase.Play);
-    mockPlayerThatActedSelector = mockStore.overrideSelector(selectors.selectCardPosition, 0);
+    mockPlayerThatActedSelector = mockStore.overrideSelector(selectors.selectPlayerThatActed, 0);
     mockHandSummarySelector = mockStore.overrideSelector(selectors.selectHandSummary, mockHandSummaryModel);
+    mockAwayStatusSelector = mockStore.overrideSelector(selectors.selectAwayStatus, false);
+    mockSelectStartTimer = mockStore.overrideSelector(selectors.selectTimer, {});
     fixture = TestBed.createComponent(GameComponent);
     fixture.detectChanges();
   }));

@@ -1,14 +1,12 @@
 package com.poker.poker.services.game;
 
 import com.poker.poker.config.AppConfig;
-import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.AwayStatusEvent;
 import com.poker.poker.events.CreateGameEvent;
 import com.poker.poker.events.CurrentGameEvent;
 import com.poker.poker.events.DrawCardEvent;
 import com.poker.poker.events.GameMessageEvent;
 import com.poker.poker.events.GameOverEvent;
-import com.poker.poker.events.HandEvent;
 import com.poker.poker.events.JoinGameEvent;
 import com.poker.poker.events.LeaveGameEvent;
 import com.poker.poker.events.LeaveLobbyEvent;
@@ -25,7 +23,11 @@ import com.poker.poker.models.ApiSuccessModel;
 import com.poker.poker.models.enums.GamePhase;
 import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.game.CardModel;
+import com.poker.poker.models.game.CurrentGameModel;
 import com.poker.poker.models.game.DeckModel;
+import com.poker.poker.models.game.DrawGameDataContainerModel;
+import com.poker.poker.models.game.DrawGameDataModel;
+import com.poker.poker.models.game.DrawGameDrawModel;
 import com.poker.poker.models.game.GameModel;
 import com.poker.poker.models.game.GameParameterModel;
 import com.poker.poker.models.game.GamePlayerModel;
@@ -33,7 +35,10 @@ import com.poker.poker.models.game.HandSummaryModel;
 import com.poker.poker.models.game.LobbyModel;
 import com.poker.poker.models.game.LobbyPlayerModel;
 import com.poker.poker.models.game.PokerTableModel;
-import com.poker.poker.models.websocket.CurrentGameModel;
+import com.poker.poker.models.game.TimerModel;
+import com.poker.poker.models.user.UserModel;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -75,15 +80,11 @@ public class GameService {
    */
   @EventListener
   public void publishCurrentGameInfo(final PublishCurrentGameEvent event) {
+    final UUID id =
+        data.isUserInGame(event.getId()) ? data.getUsersGame(event.getId()).getId() : null;
     publisher.publishEvent(
         new CurrentGameEvent(
-            this,
-            event.getId(),
-            new CurrentGameModel(
-                data.isUserInGame(event.getId()),
-                data.isUserInGame(event.getId())
-                    ? data.getUsersGame(event.getId()).getId()
-                    : null)));
+            this, event.getId(), new CurrentGameModel(data.isUserInGame(event.getId()), id)));
   }
 
   /**
@@ -94,7 +95,7 @@ public class GameService {
   @EventListener
   public void createGame(final CreateGameEvent event) {
     final GameParameterModel params = event.getGameParameterModel();
-    final UserDocument user = event.getHost();
+    final UserModel user = event.getHost();
 
     if (data.isUserInGame(user.getId())) {
       return; // User can only be in one game at a time.
@@ -116,7 +117,10 @@ public class GameService {
   @EventListener
   public void joinLobby(final JoinGameEvent event) {
     final LobbyModel lobby = data.getLobby(event.getGameId());
-    final UserDocument user = event.getUser();
+    if (data.isUserInGame(event.getUser().getId())) {
+      return;
+    }
+    final UserModel user = event.getUser();
     final LobbyPlayerModel player = new LobbyPlayerModel(user, false, false);
     lobby.getPlayers().add(player);
     data.userJoinedGame(user.getId(), lobby.getId());
@@ -139,17 +143,9 @@ public class GameService {
     if (!data.isUserInGame(event.getUser().getId())) {
       return;
     }
-    final UserDocument user = event.getUser();
+    final UserModel user = event.getUser();
     final LobbyModel lobby = data.getUsersLobby(user.getId());
-    final LobbyPlayerModel player =
-        lobby.getPlayers().stream()
-            .filter(p -> p.getId().equals(user.getId()))
-            .findFirst()
-            .orElse(null);
-
-    if (player == null) {
-      return;
-    }
+    final LobbyPlayerModel player = data.getLobbyPlayer(user.getId());
 
     lobby.getPlayers().removeIf(p -> p.getId().equals(user.getId()));
     data.removeUserIdToGameIdMapping(user.getId());
@@ -158,6 +154,7 @@ public class GameService {
       lobby.setHost(lobby.getPlayers().get(0));
       lobby.getPlayers().get(0).setHost(true);
     } else {
+      log.debug("There are no players left in lobby {}, ending game.", lobby.getId());
       data.endLobby(lobby.getId());
       return;
     }
@@ -184,14 +181,7 @@ public class GameService {
     }
     final LobbyModel lobby = data.getUsersLobby(userId);
     synchronized (lobby.getPlayers()) {
-      final LobbyPlayerModel player =
-          data.getUsersLobby(userId).getPlayers().stream()
-              .filter(p -> p.getId().equals(userId))
-              .findFirst()
-              .orElse(null);
-      if (player == null) {
-        return;
-      }
+      final LobbyPlayerModel player = data.getLobbyPlayer(userId);
       player.setReady(!player.isReady());
       publishSystemChatMessageEvent(
           lobby.getId(),
@@ -220,8 +210,7 @@ public class GameService {
 
     data.startGame(game.getId());
     publishSystemChatMessageEvent(game.getId(), "The game has started.");
-    updateCurrentGameTopic(game, false);
-
+    updateCurrentGameTopic(game);
     publisher.publishEvent(new StartHandEvent(this, game.getId()));
   }
 
@@ -229,17 +218,11 @@ public class GameService {
    * Updates the current game topic to ensure the client knows when a player is in a game.
    *
    * @param game The game the player is in.
-   * @param over Indicates whether the game is over.
    */
-  public void updateCurrentGameTopic(final GameModel game, final boolean over) {
+  public void updateCurrentGameTopic(final GameModel game) {
     game.getPlayers()
         .forEach(
-            player ->
-                publisher.publishEvent(
-                    new CurrentGameEvent(
-                        this,
-                        player.getId(),
-                        new CurrentGameModel(!over, over ? null : game.getId()))));
+            player -> publisher.publishEvent(new PublishCurrentGameEvent(this, player.getId())));
   }
 
   /**
@@ -274,17 +257,8 @@ public class GameService {
   public void afk(final AwayStatusEvent event) {
     final GameModel game = data.getUsersGame(event.getId());
     final PokerTableModel table = data.getPokerTable(game.getId());
-    final GamePlayerModel player =
-        game.getPlayers().stream()
-            .filter(p -> p.getId().equals(event.getId()))
-            .findFirst()
-            .orElse(null);
+    final GamePlayerModel player = data.getPlayer(event.getId());
     final GamePlayerModel acting = table.getPlayers().get(table.getActingPlayer());
-
-    if (player == null) {
-      return;
-    }
-
     player.setAway(event.isAway());
 
     // If the players away status is true, and it's their turn, draw their card for them.
@@ -315,9 +289,10 @@ public class GameService {
     data.getDeck(game.getId()).restoreAndShuffle(); // Restore and shuffle the deck.
     table.setActingPlayer(0);
     table.setDisplayHandSummary(false);
-    publisher.publishEvent(new WaitForPlayerEvent(this, table.getPlayers().get(0)));
     // Note: No need to broadcast table update until next player draws.
     data.broadcastGame(game.getId());
+    data.broadcastPokerTable(game.getId());
+    publisher.publishEvent(new WaitForPlayerEvent(this, table.getPlayers().get(0)));
   }
 
   /**
@@ -327,31 +302,79 @@ public class GameService {
    */
   @Async
   @EventListener
-  public void drawCard(final DrawCardEvent event) {
+  public void drawCard(final DrawCardEvent event) throws InterruptedException {
     final GameModel game = data.getUsersGame(event.getId());
     final PokerTableModel table = data.getPokerTable(game.getId());
     final GamePlayerModel player = table.getPlayers().get(table.getActingPlayer());
+
     if (!player.getId().equals(event.getId())) {
-      log.error(
-          "Player {} attempted to draw a card when it was not this player's turn.", event.getId());
+      log.error("Player {} acted when it was not this player's turn.", event.getId());
       return;
     }
+
     final DeckModel deck = data.getDeck(game.getId());
     final CardModel card = deck.draw();
     player.getCards().add(card);
-
-    // Need to do a few table updates.
     table.playerActed();
 
     // Broadcast table -- TODO: Refine what is being sent out
     data.broadcastPokerTable(game.getId());
+    publishCardDrawnChatMessage(game.getId(), card, player);
+
+    final int currentHand = game.getCurrentHand();
+    final int totalHands = game.getTotalHands();
+
+    if (table.getActingPlayer() != 0) { // Hand is not over, wait for another action.
+      data.broadcastPokerTable(game.getId());
+      publisher.publishEvent(
+          new WaitForPlayerEvent(this, table.getPlayers().get(table.getActingPlayer())));
+    } else { // Hand is over, pause to display a summary, then start a new hand.
+      table.setDisplayHandSummary(true);
+      table.setSummary(getHandSummary(game.getId()));
+      data.broadcastPokerTable(game.getId());
+
+      // Pause for 3 seconds while summary is displayed to UI.
+      publishTimerMessage(game.getId(), appConfig.getHandSummaryDurationInMs());
+      Thread.sleep(appConfig.getHandSummaryDurationInMs());
+      publishPlayerWonHandChatMessage(game.getId());
+      table.setDisplayHandSummary(false);
+      table.setSummary(null);
+      data.broadcastPokerTable(game.getId());
+
+      if (currentHand < totalHands) {
+        publisher.publishEvent(new StartHandEvent(this, game.getId()));
+      } else {
+        publisher.publishEvent(new GameOverEvent(this, game.getId()));
+      }
+    }
+  }
+
+  private void publishPlayerWonHandChatMessage(final UUID id) {
+    final PokerTableModel table = data.getPokerTable(id);
+    assert table.getSummary() != null;
+    assert table.isDisplayHandSummary();
+    final GamePlayerModel winner = table.getPlayers().get(table.getSummary().getWinner());
+    publishSystemChatMessageEvent(
+        id, String.format("%s %s won the hand.", winner.getFirstName(), winner.getLastName()));
+  }
+
+  private void publishCardDrawnChatMessage(
+      final UUID id, final CardModel card, final GamePlayerModel player) {
+    final GameModel game = data.getGame(id);
     publishSystemChatMessageEvent(
         game.getId(),
         String.format(
             "%s %s drew the %s of %s",
             player.getFirstName(), player.getLastName(), card.getValue(), card.getSuit()));
+  }
 
-    publisher.publishEvent(new HandEvent(this, player.getId()));
+  private void publishTimerMessage(final UUID id, final int durationInMs) {
+    final GameModel game = data.getGame(id);
+    final BigDecimal duration =
+        new BigDecimal(durationInMs).divide(new BigDecimal(1000), 10, RoundingMode.HALF_UP);
+    publisher.publishEvent(
+        new GameMessageEvent<>(
+            this, MessageType.Timer, game.getId(), new TimerModel(UUID.randomUUID(), duration)));
   }
 
   /**
@@ -365,13 +388,23 @@ public class GameService {
   public void waitForAction(final WaitForPlayerEvent event) throws InterruptedException {
     final GameModel game = data.getUsersGame(event.getPlayer().getId());
     final PokerTableModel table = data.getPokerTable(game.getId());
-    final int actingPlayer = table.getActingPlayer();
+    final int action = table.getEventTracker();
+    publishTimerMessage(
+        game.getId(), event.getPlayer().isAway() ? 100 : appConfig.getTimeToActInMs());
 
-    Thread.sleep(event.getPlayer().isAway() ? 100 : appConfig.getTimeToActInMillis());
-    if (table.getActingPlayer() != actingPlayer) {
+    assert table
+        .getPlayers()
+        .get(table.getActingPlayer())
+        .getId()
+        .equals(event.getPlayer().getId());
+
+    Thread.sleep(event.getPlayer().isAway() ? 100 : appConfig.getTimeToActInMs());
+    if (table.getEventTracker() != action) {
+      log.debug("Player acted.");
       return;
     }
 
+    log.debug("Player did not act - performing default action.");
     if (event.getPlayer().isAway()) {
       publisher.publishEvent(new DrawCardEvent(this, event.getPlayer().getId()));
     } else {
@@ -380,64 +413,41 @@ public class GameService {
   }
 
   /**
-   * Handles a player action.
-   *
-   * @param event Event containing information needed to handle a player action.
-   * @throws InterruptedException Throws if the Thread.sleep is interrupted for some reason.
-   */
-  @Async
-  @EventListener
-  public void handleHandEvent(final HandEvent event) throws InterruptedException {
-    final GameModel game = data.getUsersGame(event.getId());
-    final PokerTableModel table = data.getPokerTable(game.getId());
-    final int currentHand = game.getCurrentHand();
-    final int totalHands = game.getTotalHands();
-
-    if (table.getActingPlayer() != 0 && currentHand <= totalHands) {
-      // Hand is not over, wait for another action.
-      publisher.publishEvent(
-          new WaitForPlayerEvent(this, table.getPlayers().get(table.getActingPlayer())));
-    } else if (table.getActingPlayer() == 0 && currentHand <= totalHands) {
-      // Hand is over, pause to display a summary, then start a new hand.
-      table.setDisplayHandSummary(true);
-      table.setSummary(getHandSummary(game.getId()));
-      data.broadcastPokerTable(game.getId());
-
-      // Pause for 3 seconds while summary is displayed to UI.
-      Thread.sleep(3000);
-
-      // Remove summary.
-      table.setDisplayHandSummary(false);
-      final GamePlayerModel winner = table.getPlayers().get(table.getSummary().getWinner());
-      publishSystemChatMessageEvent(
-          game.getId(),
-          String.format("%s %s won the hand.", winner.getFirstName(), winner.getLastName()));
-      table.setSummary(null);
-
-      publisher.publishEvent(new StartHandEvent(this, game.getId()));
-    } else {
-      // Game is over, run the end game sequence.
-      publisher.publishEvent(new GameOverEvent(this, game.getId()));
-    }
-  }
-
-  /**
    * Helper that returns a HandSummaryModel to help the UI display a hand summary.
    *
    * @param id ID of the game the summary is for.
-   * @return
+   * @return Hand summary.
    */
   private HandSummaryModel getHandSummary(final UUID id) {
     final PokerTableModel table = data.getPokerTable(id);
+
+    // TODO: Assertion for debugging purposes.
+    table
+        .getPlayers()
+        .forEach(
+            p -> {
+              assert p.getCards().size() == 1;
+              assert p.getCards().get(0) != null;
+            });
+
     final List<GamePlayerModel> players =
         table.getPlayers().stream()
             .map(GamePlayerModel::new)
             .sorted((a, b) -> -cardService.compare(a.getCards().get(0), b.getCards().get(0)))
             .collect(Collectors.toList());
     final int winningIndex = table.getPlayers().indexOf(players.get(0));
-    // Update winners score
+    // Update winners score.
     final GamePlayerModel winningPlayer = table.getPlayers().get(winningIndex);
     winningPlayer.setScore(winningPlayer.getScore() + 1);
+
+    /// Update game data.
+    final DrawGameDataContainerModel gameData = data.getGameSummary(id);
+    for (final DrawGameDataModel d : gameData.getGameData()) {
+      final boolean winner =
+          table.getPlayers().get(winningIndex).getId().equals(d.getPlayer().getId());
+      d.getDraws().add(new DrawGameDrawModel(d.getPlayer().getCards().get(0), winner));
+    }
+
     return new HandSummaryModel(players.get(0).getCards().get(0), winningIndex);
   }
 
@@ -454,5 +464,6 @@ public class GameService {
 
     // TODO: Save game in DB
     data.endGame(game.getId());
+    updateCurrentGameTopic(game);
   }
 }

@@ -1,11 +1,11 @@
 package com.poker.poker.services;
 
 import com.poker.poker.config.constants.AppConstants;
-import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.ApiSuccessModel;
-import com.poker.poker.models.AuthRequestModel;
-import com.poker.poker.models.AuthResponseModel;
 import com.poker.poker.models.enums.UserGroup;
+import com.poker.poker.models.user.AuthRequestModel;
+import com.poker.poker.models.user.AuthResponseModel;
+import com.poker.poker.models.user.ClientUserModel;
 import com.poker.poker.models.user.NewAccountModel;
 import com.poker.poker.models.user.UserModel;
 import com.poker.poker.repositories.UserRepository;
@@ -63,11 +63,11 @@ public class UserService {
         customUserDetailsService.loadUserByUsername(authRequestModel.getEmail());
     final String jwt = jwtService.generateToken(userDetails);
 
-    final UserDocument user = userRepository.findUserDocumentByEmail(authRequestModel.getEmail());
+    final UserModel user = userRepository.findUserDocumentByEmail(authRequestModel.getEmail());
 
     return new AuthResponseModel(
         jwt,
-        new UserModel(
+        new ClientUserModel(
             user.getId(),
             user.getEmail(),
             user.getGroup(),
@@ -86,10 +86,10 @@ public class UserService {
     final String email = jwtService.extractEmail(jwt);
     final UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
     if (jwtService.validateToken(jwt, userDetails)) {
-      final UserDocument user = userRepository.findUserDocumentByEmail(email);
+      final UserModel user = userRepository.findUserDocumentByEmail(email);
       return new AuthResponseModel(
           jwt,
-          new UserModel(
+          new ClientUserModel(
               user.getId(),
               user.getEmail(),
               user.getGroup(),
@@ -121,7 +121,7 @@ public class UserService {
 
     // Create a user with random UUID, in the "Client" user group.
     userRepository.save(
-        new UserDocument(
+        new UserModel(
             UUID.randomUUID(),
             newAccountModel.getEmail(),
             passwordEncoder.encode(newAccountModel.getPassword()),
@@ -141,22 +141,22 @@ public class UserService {
    */
   public void validate(final String jwt, final List<UserGroup> groupsAllowed)
       throws ForbiddenException {
-    final UserDocument userDocument =
+    final UserModel userModel =
         userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt));
     // User is not in the correct group.
-    if (!groupsAllowed.contains(userDocument.getGroup())) {
+    if (!groupsAllowed.contains(userModel.getGroup())) {
       log.error(
           "User: {}, was denied access. Groups allowed: {}. User's group: {}.",
-          userDocument.getId(),
+          userModel.getId(),
           groupsAllowed,
-          userDocument.getGroup());
+          userModel.getGroup());
       throw appConstants.getInvalidGroupException();
     }
     // User is in the correct group.
     else {
       log.debug(
           "User: {} attempted to validate and was successful. Groups allowed: {}.",
-          userDocument.getId(),
+          userModel.getId(),
           groupsAllowed);
     }
   }
@@ -167,21 +167,21 @@ public class UserService {
    * @param userId The UUID of the user.
    * @return A UserModel associated to the ID provided.
    */
-  public UserModel getUserInfo(final String userId) {
+  public ClientUserModel getUserInfo(final String userId) {
     // Check if the string provided is a valid UUID.
     uuidService.checkIfValidAndThrowBadRequest(userId);
     // We know the UUID is valid.
     final UUID id = UUID.fromString(userId);
-    final UserDocument userDocument = userRepository.findUserDocumentById(id);
-    if (userDocument == null) {
+    final UserModel userModel = userRepository.findUserDocumentById(id);
+    if (userModel == null) {
       log.error("Could not find user with ID of {}.", userId);
       throw appConstants.getUserInfoNotFoundException();
     }
-    return new UserModel(
+    return new ClientUserModel(
         id,
-        userDocument.getEmail(),
-        userDocument.getGroup(),
-        userDocument.getFirstName(),
-        userDocument.getLastName());
+        userModel.getEmail(),
+        userModel.getGroup(),
+        userModel.getFirstName(),
+        userModel.getLastName());
   }
 }

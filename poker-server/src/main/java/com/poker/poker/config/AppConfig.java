@@ -32,7 +32,10 @@ public class AppConfig {
   private int numRoundsInRollGame;
 
   @Value("${time-to-act-in-millis}")
-  private int timeToActInMillis;
+  private int timeToActInMs;
+
+  @Value("${hand-summary-duration-in-millis}")
+  private int handSummaryDurationInMs;
 
   @Value("${web-socket.private-socket-timeout-hours}")
   private int privateSocketTimeoutHours;

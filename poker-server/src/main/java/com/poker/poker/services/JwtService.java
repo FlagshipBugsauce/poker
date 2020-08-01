@@ -1,7 +1,7 @@
 package com.poker.poker.services;
 
 import com.poker.poker.config.constants.AppConstants;
-import com.poker.poker.documents.UserDocument;
+import com.poker.poker.models.user.UserModel;
 import com.poker.poker.repositories.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -40,14 +40,14 @@ public class JwtService {
    * Retrieves a user document from a JWT.
    *
    * @param token JWT.
-   * @return UserDocument associated with the JWT.
+   * @return UserModel associated with the JWT.
    */
-  public UserDocument getUserDocument(String token) {
-    final UserDocument userDocument = userRepository.findUserDocumentByEmail(extractEmail(token));
-    if (userDocument == null) {
+  public UserModel getUserDocument(String token) {
+    final UserModel userModel = userRepository.findUserDocumentByEmail(extractEmail(token));
+    if (userModel == null) {
       throw appConstants.getUserNotFoundException();
     }
-    return userDocument;
+    return userModel;
   }
 
   /**

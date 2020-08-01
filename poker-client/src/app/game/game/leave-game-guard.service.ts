@@ -69,7 +69,7 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
           this.appStore.dispatch(leaveLobby());  // Leave the lobby.
         }
         if (this.gameModel.phase && this.gameModel.phase === GamePhase.Play) {
-          this.appStore.dispatch(leaveGame({actionType: 'LeaveGame'}));
+          this.appStore.dispatch(leaveGame());
         }
 
         this.router.navigate([this.link]).then();

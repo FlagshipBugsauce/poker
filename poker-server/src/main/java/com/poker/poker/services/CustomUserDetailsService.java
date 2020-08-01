@@ -1,7 +1,7 @@
 package com.poker.poker.services;
 
 import com.poker.poker.config.constants.AppConstants;
-import com.poker.poker.documents.UserDocument;
+import com.poker.poker.models.user.UserModel;
 import com.poker.poker.repositories.UserRepository;
 import java.util.ArrayList;
 import lombok.AllArgsConstructor;
@@ -22,7 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
-    UserDocument user = userRepository.findUserDocumentByEmail(s);
+    UserModel user = userRepository.findUserDocumentByEmail(s);
     if (user == null) {
       log.error(appConstants.getEmailCouldNotBeFound(), s);
       throw appConstants.getBadPasswordException();

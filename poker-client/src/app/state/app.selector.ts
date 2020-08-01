@@ -8,17 +8,17 @@ import {
   GameDataStateContainer,
   GameListStateContainer,
   GameStateContainer,
-  HandStateContainer,
   LobbyStateContainer,
   PlayerDataStateContainer,
-  PokerTableStateContainer
+  PokerTableStateContainer,
+  TimerState,
+  TimerStateContainer
 } from '../shared/models/app-state.model';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {
   DrawGameDataContainerModel,
   GameModel,
   GamePlayerModel,
-  HandModel,
   LobbyModel,
   PokerTableModel
 } from '../api/models';
@@ -102,19 +102,6 @@ export const gamePlayersFeature =
 export const selectGamePlayers = createSelector(
   gamePlayersFeature, (state: GameModel) => state.players);
 
-export const handFeature =
-  createFeatureSelector<HandStateContainer, HandModel>('handModel');
-/** Hand document selector. */
-export const selectHandModel = createSelector(
-  handFeature,
-  (state: HandModel) => state
-);
-
-export const handActionFeature =
-  createFeatureSelector<HandStateContainer, HandModel>('handModel');
-export const selectHandActions = createSelector(
-  handActionFeature, (state: HandModel) => state.actions);
-
 export const drawnCardsFeature =
   createFeatureSelector<DrawnCardsStateContainer, DrawnCardsContainer>('drawnCards');
 /** Drawn cards selector. */
@@ -168,10 +155,8 @@ export const pokerTableFeature =
   createFeatureSelector<PokerTableStateContainer, PokerTableModel>('tableState');
 export const selectPokerTable = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state);
-export const selectCardPosition = createSelector(
+export const selectPlayerThatActed = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state.playerThatActed);
-export const selectStartTurnTimer = createSelector(
-  pokerTableFeature, (state: PokerTableModel) => state.startTurnTimer);
 export const selectPlayers = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state.players);
 export const selectDealer = createSelector(
@@ -182,3 +167,6 @@ export const selectActingPlayer = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state.actingPlayer);
 export const selectHandSummary = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state.summary);
+
+export const timerFeature = createFeatureSelector<TimerStateContainer, TimerState>('timerState');
+export const selectTimer = createSelector(timerFeature, (state: TimerState) => state.timer);

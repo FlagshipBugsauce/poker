@@ -12,24 +12,19 @@ import {
   GameDataStateContainer,
   GameListStateContainer,
   GameStateContainer,
-  HandStateContainer,
   LobbyStateContainer,
   PlayerDataStateContainer,
-  PokerTableStateContainer
+  PokerTableStateContainer,
+  TimerStateContainer
 } from '../models/app-state.model';
 import {MessageType} from '../models/message-types.enum';
 import {
-  actingPlayerChanged,
-  cardDrawn,
   gameDataUpdated,
   gameListUpdated,
   gameModelUpdated,
   gamePhaseChanged,
   gamePlayerUpdated,
-  handActionPerformed,
   handCompleted,
-  handModelUpdated,
-  handOver,
   lobbyModelUpdated,
   playerAwayToggled,
   playerDataUpdated,
@@ -37,10 +32,11 @@ import {
   playerLeftLobby,
   playerReadyToggled,
   pokerTableUpdate,
+  startTimer,
   updateCurrentGame
 } from '../../state/app.actions';
 import {selectLoggedInUser} from '../../state/app.selector';
-import {UserModel} from '../../api/models/user-model';
+import {ClientUserModel} from '../../api/models/client-user-model';
 import {WebSocketUpdateModel} from '../../api/models/web-socket-update-model';
 import {ToastService} from "../toast.service";
 
@@ -70,19 +66,19 @@ export class WebSocketService implements OnDestroy {
   /** Socket state. */
   private state: BehaviorSubject<SocketClientState>;
   /** Model for the logged in user. */
-  private user: UserModel;
+  private user: ClientUserModel;
 
   constructor(
     private toastService: ToastService,
     private appStore: Store<AppStateContainer>,
     private gameDataStore: Store<GameDataStateContainer>,
     private gameStore: Store<GameStateContainer>,
-    private handStore: Store<HandStateContainer>,
     private lobbyStore: Store<LobbyStateContainer>,
     private gameListStore: Store<GameListStateContainer>,
     private playerDataStore: Store<PlayerDataStateContainer>,
     private drawnCardsStore: Store<DrawnCardsStateContainer>,
-    private pokerTableStore: Store<PokerTableStateContainer>
+    private pokerTableStore: Store<PokerTableStateContainer>,
+    private timerStore: Store<TimerStateContainer>
   ) {
     this.client = over(new SockJS(environment.api));
     this.client.debug = () => {
@@ -94,7 +90,7 @@ export class WebSocketService implements OnDestroy {
 
     this.appStore.select(selectLoggedInUser)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((user: UserModel) => this.user = user);
+    .subscribe((user: ClientUserModel) => this.user = user);
   }
 
   public ngOnDestroy(): void {
@@ -146,9 +142,6 @@ export class WebSocketService implements OnDestroy {
         case MessageType.Game:
           this.gameStore.dispatch(gameModelUpdated(data.data));
           break;
-        case MessageType.Hand:
-          this.handStore.dispatch(handModelUpdated(data.data));
-          break;
         case MessageType.GameData:
           this.gameDataStore.dispatch(gameDataUpdated(data.data));
           break;
@@ -173,21 +166,14 @@ export class WebSocketService implements OnDestroy {
         case MessageType.PlayerAwayToggled:
           this.pokerTableStore.dispatch(playerAwayToggled(data.data));
           break;
-        case MessageType.HandActionPerformed:
-          this.handStore.dispatch(handActionPerformed(data.data));
-          break;
-        case MessageType.ActingPlayerChanged:
-          this.handStore.dispatch(actingPlayerChanged(data.data));
-          this.gameStore.dispatch(actingPlayerChanged(data.data));
-          break;
         case MessageType.GamePlayer:
           this.gameStore.dispatch(gamePlayerUpdated(data.data));
           break;
-        // case MessageType.CardDrawnByPlayer:
-        //   this.pokerTableStore.dispatch(data.data);
-        //   break;
         case MessageType.PokerTable:
           this.pokerTableStore.dispatch(pokerTableUpdate(data.data));
+          break;
+        case MessageType.Timer:
+          this.timerStore.dispatch(startTimer(data.data));
           break;
       }
     });
@@ -221,20 +207,6 @@ export class WebSocketService implements OnDestroy {
     await new Promise(resolve => setTimeout(resolve, 100));
     this.send(`/topic/game/update`, {type, topic, id} as WebSocketUpdateModel);
     return null;
-  }
-
-  public drawnCardsTopicUnsubscribe$: Subject<any>;
-  public subscribeToDrawnCardsTopic(gameId: string): void {
-    this.drawnCardsTopicUnsubscribe$ = new Subject<any>();
-    this.onMessage(`/topic/game/${gameId}/drawn-cards`)
-    .pipe(takeUntil(this.drawnCardsTopicUnsubscribe$))
-    .subscribe(data => this.drawnCardsStore.dispatch(data.suit ? cardDrawn(data) : handOver()))
-  }
-  public drawnCardsTopicUnsubscribe() {
-    if (this.drawnCardsTopicUnsubscribe$) {
-      this.drawnCardsTopicUnsubscribe$.next();
-      this.drawnCardsTopicUnsubscribe$.complete();
-    }
   }
 
   /** Subscribes to the game list topic. */

@@ -1,10 +1,11 @@
-import {AfterViewInit, Component, HostListener, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {
   AppStateContainer,
   GameStateContainer,
   PlayerDataStateContainer,
-  PokerTableStateContainer
+  PokerTableStateContainer,
+  TimerStateContainer
 } from '../../shared/models/app-state.model';
 import {
   drawCard,
@@ -15,29 +16,29 @@ import {
 import {Subject} from 'rxjs';
 import {
   selectActingPlayer,
+  selectAwayStatus,
   selectDisplayHandSummary,
   selectGameModel,
   selectLoggedInUser,
-  selectPlayers
+  selectPlayers,
+  selectTimer
 } from '../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
-import {HandModel} from '../../api/models/hand-model';
-import {GameModel} from '../../api/models/game-model';
-import {GamePlayerModel} from '../../api/models/game-player-model';
-import {UserModel} from '../../api/models/user-model';
+import {ClientUserModel, GameModel, GamePlayerModel, TimerModel} from '../../api/models';
+import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 
 @Component({
   selector: 'pkr-poker-table',
   templateUrl: './poker-table.component.html',
   styleUrls: ['./poker-table.component.scss']
 })
-export class PokerTableComponent implements OnInit, AfterViewInit, OnDestroy {
-  @Input() numPlayers: number;
+export class PokerTableComponent implements OnInit, OnDestroy {
+
+  numPlayers: number = 0;
+  @ViewChild('afkPopup') afkPopup: PopupAfkComponent;
   public width: number = 1;
   public playerBoxes: { number: number; top: number; left: number }[];
   public game: GameModel;
-  public hand: HandModel;
-  public timeToAct: number;
   /**
    * Used to ensure we're not maintaining multiple subscriptions.
    */
@@ -51,16 +52,19 @@ export class PokerTableComponent implements OnInit, AfterViewInit, OnDestroy {
     left: 0
   };
   public deckPosition: { top: number; left: number; width: number } = {top: 0, left: 0, width: 200};
+  public numPlayersSet: boolean = false;
+  public timerValue: number[] = [0];
+  public timerIndex: number = 0;
   private sizeRatio: number = 5 / 3;
   private minWidth: number = 1300;
-
   private user;
 
   constructor(
     private appStore: Store<AppStateContainer>,
     private playerDataStore: Store<PlayerDataStateContainer>,
     private gameStore: Store<GameStateContainer>,
-    private pokerTableStore: Store<PokerTableStateContainer>) {
+    private pokerTableStore: Store<PokerTableStateContainer>,
+    private timerStore: Store<TimerStateContainer>) {
   }
 
   public get height(): number {
@@ -108,10 +112,25 @@ export class PokerTableComponent implements OnInit, AfterViewInit, OnDestroy {
     this.ngDestroyed$.complete();
   }
 
+  public initializePlayerBoxes(num: number): void {
+    if (!this.numPlayersSet && num > 0) {
+      this.numPlayersSet = true;
+      this.numPlayers = num;
+      this.delay(100).then(() => {
+        this.width = window.innerWidth - 50;
+        this.playerBoxes = Array(this.numPlayers)
+        .fill({number: 1, top: 0, left: 0})
+        .map((v, i) => ({number: i + 1, top: 0, left: 0}));
+        this.updatePositions();
+        this.pokerTableStore.dispatch(requestPokerTableUpdate());
+      });
+    }
+  }
+
   ngOnInit(): void {
     this.appStore.select(selectLoggedInUser)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((user: UserModel) => this.user = user);
+    .subscribe((user: ClientUserModel) => this.user = user);
 
     this.delay(100).then(() => this.gameStore.dispatch(requestGameModelUpdate()));
     this.gameStore.select(selectGameModel)
@@ -120,66 +139,84 @@ export class PokerTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.pokerTableStore.select(selectPlayers)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((players: GamePlayerModel[]) => this.players = players);
+    .subscribe((players: GamePlayerModel[]) => {
+      this.players = players;
+      if (players) {
+        this.initializePlayerBoxes(players.length);
+      }
+    });
 
     this.pokerTableStore.select(selectActingPlayer)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((actingIndex: number) => {
-      this.actingIndex = actingIndex;
-      this.startTurnTimer().then();
-    });
+    .subscribe((actingIndex: number) => this.actingIndex = actingIndex);
 
     this.pokerTableStore.select(selectDisplayHandSummary)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((displaySummary: boolean) => this.displaySummary = displaySummary);
-  }
 
-  ngAfterViewInit(): void {
-    this.delay(100).then(() => {
-      this.width = window.innerWidth - 50;
-      this.playerBoxes = Array(this.numPlayers)
-      .fill({number: 1, top: 0, left: 0})
-      .map((v, i) => ({number: i + 1, top: 0, left: 0}));
-      this.updatePositions();
-      this.pokerTableStore.dispatch(requestPokerTableUpdate());
+    this.playerDataStore.select(selectAwayStatus)
+    .pipe(takeUntil(this.ngDestroyed$))
+    .subscribe((status: boolean) => {
+      if (status && this.afkPopup) {
+        this.afkPopup.open();
+      }
     });
+
+    this.timerStore.select(selectTimer)
+    .pipe(takeUntil(this.ngDestroyed$))
+    .subscribe((timer: TimerModel) => {
+      this.timerIndex++;
+      // tslint:disable-next-line:no-bitwise
+      this.timerValue.push(timer.duration | 0);
+      this.startTimer().then();
+    });
+
+    this.pokerTableStore.dispatch(requestPokerTableUpdate());
   }
 
   @HostListener('window:resize', ['$event'])
   onResize(event) {
     const lastWidth = this.width;
-    this.width = window.innerWidth > this.minWidth ? window.innerWidth - 50 : this.minWidth - 50;
+    const scrollbar: boolean = document.body.scrollHeight > document.body.clientHeight;
+    const margin: number = scrollbar ? 48 : 30;
+    this.width = window.innerWidth > this.minWidth ? window.innerWidth - margin : this.minWidth - margin;
     if (this.width !== lastWidth) {
       this.updatePositions();
     }
   }
 
+  /**
+   * Draws a card.
+   */
   public draw(): void {
     this.appStore.dispatch(drawCard());
   }
 
+  /**
+   * Sets status to away.
+   */
   public setStatusToAway(): void {
     this.playerDataStore.dispatch(setAwayStatus({away: true}));
+  }
+
+  /**
+   * Starts the timer on the poker table.
+   */
+  private async startTimer(): Promise<void> {
+    const timerIndex = this.timerIndex;
+    while (this.timerValue[timerIndex] > 0) {
+      await this.delay(1000);
+      this.timerValue[timerIndex]--;
+    }
+    this.timerValue[timerIndex] = 0;
   }
 
   /**
    * Begins a timer which will display how much time a player has to perform an action, before the
    * action is performed for them.
    */
-  private async startTurnTimer(): Promise<void> {
-    if (this.players && this.players.length > 0) {
-      const acting = this.actingIndex;
-      let currentTime = this.players[this.actingIndex].away ? 0 : this.game.timeToAct;
-      while (currentTime > 0 && this.actingIndex === acting && !this.displaySummary) {
-        this.timeToAct = currentTime--;
-        await this.delay(1000);
-      }
-      this.timeToAct = 0;
-    }
-  }
 
   private updatePositions(): void {
-    // TODO: Have player # and also table position #
     for (let i = 0; i < this.numPlayers; i++) {
       this.playerBoxes[i].top = this.dimensions(i)[0];
       this.playerBoxes[i].left = this.dimensions(i)[1];

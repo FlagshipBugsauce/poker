@@ -2,15 +2,15 @@ import {TopBarLobbyModel} from './top-bar-lobby.model';
 import {
   CardModel,
   ChatMessageModel,
+  ClientUserModel,
   CurrentGameModel,
   DrawGameDataContainerModel,
   GameModel,
   GamePlayerModel,
-  HandModel,
   LobbyModel,
   PokerTableModel,
-  ToastModel,
-  UserModel
+  TimerModel,
+  ToastModel
 } from '../../api/models';
 import {GameListContainerModel} from './game-list-container.model';
 
@@ -20,7 +20,7 @@ export interface AppState {
   jwt?: string;
   lobbyInfo?: TopBarLobbyModel;
   lastLobbyInfo?: TopBarLobbyModel;
-  loggedInUser?: UserModel;
+  loggedInUser?: ClientUserModel;
   ready: boolean;
   currentGame?: CurrentGameModel;
 }
@@ -43,10 +43,6 @@ export interface GameStateContainer {
 
 export interface GameListStateContainer {
   gameList: GameListContainerModel;
-}
-
-export interface HandStateContainer {
-  handModel: HandModel;
 }
 
 export interface PlayerDataStateContainer {
@@ -76,4 +72,12 @@ export interface ChatContainer {
 
 export interface PokerTableStateContainer {
   tableState: PokerTableModel;
+}
+
+export interface TimerStateContainer {
+  timerState: TimerState;
+}
+
+export interface TimerState {
+  timer?: TimerModel;
 }

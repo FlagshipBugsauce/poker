@@ -1,6 +1,6 @@
 package com.poker.poker.events;
 
-import com.poker.poker.documents.UserDocument;
+import com.poker.poker.models.user.UserModel;
 import java.util.UUID;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
@@ -9,9 +9,9 @@ import org.springframework.context.ApplicationEvent;
 public class JoinGameEvent extends ApplicationEvent {
 
   private final UUID gameId;
-  private final UserDocument user;
+  private final UserModel user;
 
-  public JoinGameEvent(final Object source, final UUID gameId, final UserDocument user) {
+  public JoinGameEvent(final Object source, final UUID gameId, final UserModel user) {
     super(source);
     this.gameId = gameId;
     this.user = user;

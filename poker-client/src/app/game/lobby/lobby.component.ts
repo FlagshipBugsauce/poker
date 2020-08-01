@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {LobbyModel, LobbyPlayerModel, UserModel} from 'src/app/api/models';
+import {ClientUserModel, LobbyModel, LobbyPlayerModel} from 'src/app/api/models';
 import {AppStateContainer, LobbyStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {notReady, readyUp, startGame} from '../../state/app.actions';
@@ -35,7 +35,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
   /** Observable used to determine whether a player is ready or not. */
   public ready$: Observable<boolean>;
   /** Observable of the model for the user currently logged in. */
-  public userModel$: Observable<UserModel>;
+  public userModel$: Observable<ClientUserModel>;
   /** Model representing the lobby. */
   public lobbyModel: LobbyModel;
   /** Helper subject which assists in terminating subscriptions. */

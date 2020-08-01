@@ -5,7 +5,7 @@ import {AppStateContainer} from '../models/app-state.model';
 import {Store} from '@ngrx/store';
 import {selectJwt, selectLoggedInUser} from '../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
-import {UserModel} from '../../api/models/user-model';
+import {ClientUserModel} from '../../api/models/client-user-model';
 import {ClientMessageModel} from '../../api/models/client-message-model';
 import {gameCreated} from '../../state/app.actions';
 import {GameParameterModel} from '../../api/models/game-parameter-model';
@@ -17,7 +17,7 @@ export class CreateGameService implements OnDestroy {
 
   public createGameTopic = '/topic/game/create';
   private jwt: string;
-  private user: UserModel;
+  private user: ClientUserModel;
   private ngDestroyed$: Subject<any> = new Subject<any>();
   private createGameTopicUnsubscribe$: Subject<any>;
 
@@ -30,7 +30,7 @@ export class CreateGameService implements OnDestroy {
     .subscribe(jwt => this.jwt = jwt);
     this.appStore.select(selectLoggedInUser)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((user: UserModel) => this.user = user);
+    .subscribe((user: ClientUserModel) => this.user = user);
   }
 
   public ngOnDestroy(): void {

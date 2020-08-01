@@ -9,14 +9,13 @@ import {StoreModule} from '@ngrx/store';
 import {
   appReducer,
   chatReducer,
-  drawnCardsReducer,
   gameDataReducer,
   gameListReducer,
   gameModelReducer,
-  handModelReducer,
   lobbyModelReducer,
   playerDataReducer,
   pokerTableReducer,
+  timerReducer,
   toastDataReducer
 } from './state/app.reducer';
 import {EffectsModule} from '@ngrx/effects';
@@ -38,13 +37,12 @@ import {ChatEffects} from './state/chat.effects';
         gameData: gameDataReducer,
         lobbyModel: lobbyModelReducer,
         gameModel: gameModelReducer,
-        handModel: handModelReducer,
         gameList: gameListReducer,
         playerData: playerDataReducer,
         lastToast: toastDataReducer,
-        drawnCards: drawnCardsReducer,
         chats: chatReducer,
-        tableState: pokerTableReducer
+        tableState: pokerTableReducer,
+        timerState: timerReducer
       }),
     EffectsModule.forRoot([AppEffects, GameEffects, ChatEffects])
   ],

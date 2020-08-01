@@ -1,7 +1,7 @@
 <div [ngStyle]="{
     'width': width + 'px',
     'height': height + 'px'
-  }" class="poker-table-container mx-3">
+  }" class="poker-table-container">
   <div [ngStyle]="{
     'width': tableWidth + 'px',
     'height': tableHeight + 'px',
@@ -38,8 +38,9 @@
     }"
     [width]="deckPosition.width"></pkr-hand-summary>
   <div class="button-box">
-    <span class="turn-timer">{{timeToAct}}</span>
+    <span class="turn-timer">{{timerValue[timerIndex]}}</span>
     <button (click)="setStatusToAway()" [disabled]="away" class="btn btn-success">Away</button>
     <button (click)="draw()" [disabled]="!acting" class="btn btn-success">Draw</button>
   </div>
 </div>
+<pkr-popup-afk #afkPopup></pkr-popup-afk>

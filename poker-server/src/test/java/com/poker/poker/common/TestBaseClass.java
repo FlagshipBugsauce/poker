@@ -3,12 +3,12 @@ package com.poker.poker.common;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.poker.poker.documents.UserDocument;
 import com.poker.poker.models.ApiSuccessModel;
-import com.poker.poker.models.AuthRequestModel;
-import com.poker.poker.models.AuthResponseModel;
 import com.poker.poker.models.enums.UserGroup;
 import com.poker.poker.models.game.GameParameterModel;
+import com.poker.poker.models.user.AuthRequestModel;
+import com.poker.poker.models.user.AuthResponseModel;
+import com.poker.poker.models.user.ClientUserModel;
 import com.poker.poker.models.user.NewAccountModel;
 import com.poker.poker.models.user.UserModel;
 import java.math.BigDecimal;
@@ -41,18 +41,18 @@ public class TestBaseClass {
   private final AuthRequestModel sampleAuthRequestModel =
       new AuthRequestModel(sampleEmail, samplePassword);
   private final UserDetails userDetails = new User(sampleEmail, samplePassword, new ArrayList<>());
-  private final UserDocument userDocument =
-      new UserDocument(
+  private final UserModel userModel =
+      new UserModel(
           zeroUUID,
           sampleEmail,
           sampleHashedPassword,
           sampleUserGroup,
           sampleFirstName,
           sampleLastName);
-  private final UserModel sampleUserModel =
-      new UserModel(zeroUUID, sampleEmail, sampleUserGroup, sampleFirstName, sampleLastName);
+  private final ClientUserModel sampleClientUserModel =
+      new ClientUserModel(zeroUUID, sampleEmail, sampleUserGroup, sampleFirstName, sampleLastName);
   private final AuthResponseModel sampleAuthResponseModel =
-      new AuthResponseModel(sampleJwt, sampleUserModel);
+      new AuthResponseModel(sampleJwt, sampleClientUserModel);
   private final NewAccountModel sampleNewAccountModel =
       new NewAccountModel(sampleEmail, samplePassword, sampleFirstName, sampleLastName);
   private final ApiSuccessModel sampleRegisterSuccessModel = new ApiSuccessModel("Success.");
@@ -115,12 +115,12 @@ public class TestBaseClass {
   }
 
   /**
-   * Generates a random UserDocument.
+   * Generates a random UserModel.
    *
-   * @return A random UserDocument.
+   * @return A random UserModel.
    */
-  protected UserDocument randomUserDocument() {
-    return new UserDocument(
+  protected UserModel randomUserDocument() {
+    return new UserModel(
         UUID.randomUUID(),
         "test_email_" + randomLetterString(10) + "@" + randomLetterString(7) + ".com",
         randomLetterString(50),

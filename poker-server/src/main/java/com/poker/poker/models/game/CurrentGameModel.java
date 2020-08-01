@@ -1,4 +1,4 @@
-package com.poker.poker.models.websocket;
+package com.poker.poker.models.game;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;

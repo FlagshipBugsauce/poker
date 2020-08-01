@@ -1,4 +1,4 @@
-package com.poker.poker.documents;
+package com.poker.poker.models;
 
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "server-state")
-public class ServerStateDocument {
+public class ServerStateModel {
 
   @Id private UUID id;
   private boolean initialized;

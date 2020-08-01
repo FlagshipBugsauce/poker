@@ -1,12 +1,12 @@
 package com.poker.poker.services;
 
 import com.poker.poker.config.AppConfig;
-import com.poker.poker.documents.UserDocument;
 import com.poker.poker.events.CurrentGameEvent;
 import com.poker.poker.events.GameMessageEvent;
 import com.poker.poker.events.PublishMessageEvent;
 import com.poker.poker.events.ToastMessageEvent;
 import com.poker.poker.models.enums.MessageType;
+import com.poker.poker.models.user.UserModel;
 import com.poker.poker.models.websocket.GenericServerMessage;
 import com.poker.poker.models.websocket.ToastClassModel;
 import com.poker.poker.models.websocket.ToastModel;
@@ -72,7 +72,7 @@ public class WebSocketService {
    * @param user The user requesting a private topic.
    * @return The UUID component of the topic.
    */
-  public UUID requestPrivateTopic(final UserDocument user) {
+  public UUID requestPrivateTopic(final UserModel user) {
     final UUID privateId = UUID.randomUUID();
     privateSockets.put(user.getId(), new WebSocketInfoModel(privateId, new Date()));
     return privateId;
@@ -83,7 +83,7 @@ public class WebSocketService {
    *
    * @param user The ID of the user the topic is used to communicate with.
    */
-  public void removePrivateTopic(final UserDocument user) {
+  public void removePrivateTopic(final UserModel user) {
     // TODO: Add validation
     privateSockets.remove(user.getId());
   }
