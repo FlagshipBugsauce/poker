@@ -8,7 +8,6 @@ import {
   GameDataStateContainer,
   GameListStateContainer,
   GameStateContainer,
-  HandStateContainer,
   LobbyStateContainer,
   PlayerDataStateContainer,
   PokerTableStateContainer,
@@ -20,7 +19,6 @@ import {
   DrawGameDataContainerModel,
   GameModel,
   GamePlayerModel,
-  HandModel,
   LobbyModel,
   PokerTableModel
 } from '../api/models';
@@ -104,19 +102,6 @@ export const gamePlayersFeature =
 export const selectGamePlayers = createSelector(
   gamePlayersFeature, (state: GameModel) => state.players);
 
-export const handFeature =
-  createFeatureSelector<HandStateContainer, HandModel>('handModel');
-/** Hand document selector. */
-export const selectHandModel = createSelector(
-  handFeature,
-  (state: HandModel) => state
-);
-
-export const handActionFeature =
-  createFeatureSelector<HandStateContainer, HandModel>('handModel');
-export const selectHandActions = createSelector(
-  handActionFeature, (state: HandModel) => state.actions);
-
 export const drawnCardsFeature =
   createFeatureSelector<DrawnCardsStateContainer, DrawnCardsContainer>('drawnCards');
 /** Drawn cards selector. */
@@ -172,8 +157,6 @@ export const selectPokerTable = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state);
 export const selectPlayerThatActed = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state.playerThatActed);
-export const selectStartTurnTimer = createSelector(
-  pokerTableFeature, (state: PokerTableModel) => state.startTurnTimer);
 export const selectPlayers = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state.players);
 export const selectDealer = createSelector(
