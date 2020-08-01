@@ -26,7 +26,6 @@ import com.poker.poker.models.user.AuthResponseModel;
 import com.poker.poker.models.user.JwtAuthRequestModel;
 import com.poker.poker.models.user.NewAccountModel;
 import com.poker.poker.models.user.UserModel;
-import com.poker.poker.models.websocket.ActionModel;
 import com.poker.poker.models.websocket.ChatMessageModel;
 import com.poker.poker.models.websocket.ClientMessageModel;
 import com.poker.poker.models.websocket.CurrentGameModel;
@@ -82,7 +81,6 @@ public class ModelModel {
   private JwtAuthRequestModel jwtAuthRequestModel;
 
   // WebSocket Models
-  private ActionModel actionModel;
   private ChatMessageModel chatMessageModel;
   private ClientMessageModel clientMessageModel;
   private CurrentGameModel currentGameModel;

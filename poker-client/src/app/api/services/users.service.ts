@@ -148,11 +148,6 @@ export class UsersService extends BaseService {
   static readonly AuthorizePath = '/user/auth';
 
   /**
-   * Path part for operation authorizeWithJwt
-   */
-  static readonly AuthorizeWithJwtPath = '/user/auth-with-jwt';
-
-  /**
    * Authenticate.
    *
    * The client must call this endpoint in order to obtain a JWT, which must be passed in the header of most requests.
@@ -182,6 +177,11 @@ export class UsersService extends BaseService {
       })
     );
   }
+
+  /**
+   * Path part for operation authorizeWithJwt
+   */
+  static readonly AuthorizeWithJwtPath = '/user/auth-with-jwt';
 
   /**
    * Authenticate.

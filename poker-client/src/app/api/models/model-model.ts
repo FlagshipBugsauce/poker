@@ -1,5 +1,4 @@
 /* tslint:disable */
-import {ActionModel} from './action-model';
 import {ActiveStatusModel} from './active-status-model';
 import {ApiErrorModel} from './api-error-model';
 import {ApiSuccessModel} from './api-success-model';
@@ -33,7 +32,6 @@ import {WebSocketInfoModel} from './web-socket-info-model';
 import {WebSocketUpdateModel} from './web-socket-update-model';
 
 export interface ModelModel {
-  actionModel?: ActionModel;
   activeStatusModel?: ActiveStatusModel;
   apiErrorModel?: ApiErrorModel;
   apiSuccessModel?: ApiSuccessModel;
