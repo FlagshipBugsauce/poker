@@ -12,15 +12,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TimerModel {
 
-  /**
-   * ID of the timer.
-   */
+  /** ID of the timer. */
   @Schema(description = "ID of the timer.", implementation = UUID.class)
   private UUID id;
 
-  /**
-   * Duration of the timer.
-   */
+  /** Duration of the timer. */
   @Schema(description = "Duration of the timer", example = "7")
   private BigDecimal duration;
 }
