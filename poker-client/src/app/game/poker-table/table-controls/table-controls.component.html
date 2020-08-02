@@ -1,0 +1,39 @@
+<div *ngIf="acting" class="control-container">
+  <div>
+    <button class="btn btn-danger table-button">Fold</button>
+  </div>
+  <div>
+    <button [disabled]="amountToCall > 0" class="btn btn-secondary table-button">Check</button>
+  </div>
+  <div>
+    <button
+      [disabled]="amountToCall <= 0"
+      class="btn btn-warning table-button text-light">Call {{amountToCall > 0 ? amountToCall
+      : ''}}</button>
+  </div>
+  <div>
+    <button class="btn btn-info table-button">Raise {{raise}}</button>
+  </div>
+  <div class="raise-slider-container">
+    <div class="raise-input-container">
+      <input
+        #raiseInput
+        (input)="raiseChanged($event)"
+        [max]="bankRoll"
+        [min]="minRaise"
+        [value]="raise"
+        class="form-control raise-input"
+        type="number">
+    </div>
+    <div>
+      <input
+        (input)="raiseChanged($event)"
+        [max]="bankRoll"
+        [min]="slider.min"
+        [step]="slider.step"
+        [value]="raise"
+        class="raise-slider"
+        type="range">
+    </div>
+  </div>
+</div>

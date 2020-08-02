@@ -30,17 +30,18 @@
     .button-box {
       position: absolute;
       bottom: 10px;
-      right: 10px;
+      left: 10px;
 
       button {
         width: 100px;
         margin: 5px;
+        font-weight: bolder;
       }
 
       .turn-timer {
         position: absolute;
-        right: 230px;
-        bottom: -1px;
+        left: 120px;
+        bottom: -3px;
         color: white;
         font-size: 40px;
         font-weight: bolder;

@@ -1,4 +1,4 @@
-import {Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {
   AppStateContainer,
@@ -33,6 +33,8 @@ import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
   styleUrls: ['./poker-table.component.scss']
 })
 export class PokerTableComponent implements OnInit, OnDestroy {
+  // If this is true, we'll seed the table with sample data.
+  @Input() design: boolean = false;
 
   numPlayers: number = 0;
   @ViewChild('afkPopup') afkPopup: PopupAfkComponent;
