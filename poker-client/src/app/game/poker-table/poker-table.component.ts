@@ -3,9 +3,9 @@ import {Store} from '@ngrx/store';
 import {
   AppStateContainer,
   GameStateContainer,
+  MiscEventsStateContainer,
   PlayerDataStateContainer,
-  PokerTableStateContainer,
-  TimerStateContainer
+  PokerTableStateContainer
 } from '../../shared/models/app-state.model';
 import {
   drawCard,
@@ -66,7 +66,7 @@ export class PokerTableComponent implements OnInit, OnDestroy {
     private playerDataStore: Store<PlayerDataStateContainer>,
     private gameStore: Store<GameStateContainer>,
     private pokerTableStore: Store<PokerTableStateContainer>,
-    private timerStore: Store<TimerStateContainer>) {
+    private timerStore: Store<MiscEventsStateContainer>) {
   }
 
   public get height(): number {
@@ -122,7 +122,7 @@ export class PokerTableComponent implements OnInit, OnDestroy {
         this.width = window.innerWidth - 50;
         this.playerBoxes = Array(this.numPlayers)
         .fill({number: 1, top: 0, left: 0})
-        .map((v, i) => ({number: i + 1, top: 0, left: 0}));
+        .map((v, i) => ({number: i, top: 0, left: 0}));
         this.updatePositions();
         this.pokerTableStore.dispatch(requestPokerTableUpdate());
       });

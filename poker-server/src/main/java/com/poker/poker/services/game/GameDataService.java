@@ -244,6 +244,9 @@ public class GameDataService {
             .collect(Collectors.toList()));
     Collections.shuffle(game.getPlayers());
 
+    game.getPlayers()
+        .forEach(p -> p.getControls().setBankRoll(lobbys.get(id).getParameters().getBuyIn()));
+
     summaries
         .get(id)
         .setGameData(
@@ -259,7 +262,6 @@ public class GameDataService {
     broadcastGame(id);
     publisher.publishEvent(
         new GameMessageEvent<>(this, MessageType.GamePhaseChanged, id, GamePhase.Play));
-    // TODO: May need to set player.get(0).acting = true - not sure yet.
   }
 
   public PokerTableModel getPokerTable(final UUID id) {

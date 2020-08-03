@@ -11,21 +11,34 @@ import com.poker.poker.models.game.GameParameterModel;
 import com.poker.poker.models.user.UserModel;
 import com.poker.poker.models.websocket.ClientMessageModel;
 import com.poker.poker.models.websocket.GenericServerMessage;
+import com.poker.poker.models.websocket.PrivateTopicModel;
 import com.poker.poker.models.websocket.WebSocketUpdateModel;
 import com.poker.poker.services.JwtService;
 import com.poker.poker.services.UserService;
 import com.poker.poker.services.WebSocketService;
 import com.poker.poker.services.game.GameDataService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @Controller
 @AllArgsConstructor
+@RestController   // TODO: Need to investigate whether having this messes up anything socket-related
 @Tag(name = "websocket", description = "WebSocket controller.")
 public class WebSocketController {
 
@@ -70,6 +83,28 @@ public class WebSocketController {
     } catch (Exception e) {
       log.error("Error retrieving data on {} update request.", updateModel.getType());
     }
+  }
+
+  @Operation(
+      summary = "Request a private topic.",
+      description = "Creates a private topic so that the backend can communicate securely to one client.",
+      tags = "websocket")
+  @ApiResponses(
+      value = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Private topic successfully created.",
+              content =
+              @Content(
+                  schema = @Schema(implementation = PrivateTopicModel.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE))
+      })
+  @GetMapping("/private-topic")
+  public ResponseEntity<PrivateTopicModel> getPrivateTopic(
+      @Parameter(hidden = true) @RequestHeader("Authorization") final String jwt) {
+    userService.validate(jwt, appConfig.getGeneralGroups());
+    final UserModel user = jwtService.getUserDocument(jwt);
+    return ResponseEntity.ok(webSocketService.requestPrivateTopic(user));
   }
 
   @MessageMapping("/chat/send")

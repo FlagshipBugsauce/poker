@@ -4,6 +4,7 @@ import com.poker.poker.config.AppConfig;
 import com.poker.poker.events.AwayStatusEvent;
 import com.poker.poker.events.CreateGameEvent;
 import com.poker.poker.events.CurrentGameEvent;
+import com.poker.poker.events.DealCardsEvent;
 import com.poker.poker.events.DrawCardEvent;
 import com.poker.poker.events.GameMessageEvent;
 import com.poker.poker.events.GameOverEvent;
@@ -24,6 +25,7 @@ import com.poker.poker.models.enums.GamePhase;
 import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.game.CardModel;
 import com.poker.poker.models.game.CurrentGameModel;
+import com.poker.poker.models.game.DealModel;
 import com.poker.poker.models.game.DeckModel;
 import com.poker.poker.models.game.DrawGameDataContainerModel;
 import com.poker.poker.models.game.DrawGameDataModel;
@@ -295,6 +297,13 @@ public class GameService {
     publisher.publishEvent(new WaitForPlayerEvent(this, table.getPlayers().get(0)));
   }
 
+  @Async
+  @EventListener
+  public void dealCards(final DealCardsEvent event) {
+    publisher.publishEvent(
+        new GameMessageEvent<>(this, MessageType.Deal, event.getId(), new DealModel()));
+  }
+
   /**
    * Handles a draw card event.
    *
@@ -438,7 +447,7 @@ public class GameService {
     final int winningIndex = table.getPlayers().indexOf(players.get(0));
     // Update winners score.
     final GamePlayerModel winningPlayer = table.getPlayers().get(winningIndex);
-    winningPlayer.setScore(winningPlayer.getScore() + 1);
+//    winningPlayer.setScore(winningPlayer.getScore() + 1);
 
     /// Update game data.
     final DrawGameDataContainerModel gameData = data.getGameSummary(id);

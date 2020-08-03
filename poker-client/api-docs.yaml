@@ -8,6 +8,8 @@ servers:
 security:
 - bearer: []
 tags:
+- name: websocket
+  description: WebSocket controller.
 - name: users
   description: Users API handles all user account related requests, such as authentication,
     registration, etc...
@@ -69,6 +71,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessModel'
+  /game/create:
+    post:
+      tags:
+        - game
+      summary: Create a new game
+      description: Creates a new game and returns the UUID to the client.
+      operationId: createGame
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameParameterModel'
+        required: true
+      responses:
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Creation of game was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessModel'
   /game/join/{gameId}:
     post:
       tags:
@@ -97,32 +131,6 @@ paths:
                 $ref: '#/components/schemas/ApiErrorModel'
         "200":
           description: Game was joined successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessModel'
-  /game/start:
-    post:
-      tags:
-        - game
-      summary: Start Game
-      description: Starts the game, provided all preconditions are satisfied..
-      operationId: startGame
-      responses:
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiErrorModel'
-        "200":
-          description: Game started successfully.
           content:
             application/json:
               schema:
@@ -159,19 +167,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessModel'
-  /game/create:
+  /game/start:
     post:
       tags:
         - game
-      summary: Create a new game
-      description: Creates a new game and returns the UUID to the client.
-      operationId: createGame
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GameParameterModel'
-        required: true
+      summary: Start Game
+      description: Starts the game, provided all preconditions are satisfied..
+      operationId: startGame
       responses:
         "403":
           description: Forbidden.
@@ -186,7 +188,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiErrorModel'
         "200":
-          description: Creation of game was successful.
+          description: Game started successfully.
           content:
             application/json:
               schema:
@@ -241,10 +243,63 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ModelModel'
+  /test/deal:
+    get:
+      tags:
+        - test-controller
+      operationId: dealCards
+      parameters:
+        - name: gameId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: default response
+  /test/send-private-message:
+    get:
+      tags:
+        - test-controller
+      operationId: sendPrivateMessage
+      parameters:
+        - name: message
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: default response
   /user/register:
     post:
       tags:
-      - users
+        - users
       summary: Register
       description: Create an account.
       operationId: register
@@ -372,6 +427,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponseModel'
+  /private-topic:
+    get:
+      tags:
+        - websocket
+      summary: Request a private topic.
+      description: Creates a private topic so that the backend can communicate securely
+        to one client.
+      operationId: getPrivateTopic
+      responses:
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorModel'
+        "200":
+          description: Private topic successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivateTopicModel'
 components:
   schemas:
     ApiErrorModel:
@@ -396,15 +478,6 @@ components:
           type: string
           description: Returned to indicate API call was successful
           example: Account created successfully.
-    ActiveStatusModel:
-      required:
-        - away
-      type: object
-      properties:
-        away:
-          type: boolean
-          description: Flag to determine what to set the player's active status to.
-          example: true
     GameParameterModel:
       required:
         - buyIn
@@ -429,6 +502,15 @@ components:
           description: Buy-in required to play in the game.
           example: 25
       description: The parameters of a game.
+    ActiveStatusModel:
+      required:
+        - away
+      type: object
+      properties:
+        away:
+          type: boolean
+          description: Flag to determine what to set the player's active status to.
+          example: true
     AuthRequestModel:
       type: object
       properties:
@@ -558,6 +640,19 @@ components:
           description: ID of the game a player is in, if the player is in a game.
           format: uuid
       description: Contains information regarding the game a player is currently in.
+    DealModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the deal event.
+          format: uuid
+        numCards:
+          type: integer
+          description: Number of cards to deal.
+          format: int32
+          example: 2
+      description: Deal model that is sent to the client to trigger a deal event.
     DeckModel:
       type: object
       properties:
@@ -675,27 +770,25 @@ components:
           type: string
           description: User's last name.
           example: Flintstone
-        score:
-          type: integer
-          description: The players current score.
-          format: int32
-          example: 69
         away:
           type: boolean
           description: Specifies whether a player is active.
           example: true
-        acting:
+        out:
           type: boolean
-          description: Specifies whether a player needs to act.
-          example: true
-        bankRoll:
-          type: number
-          description: Size of the players bank roll.
+          description: Specifies whether a player is out of the game.
+          example: false
         cards:
           type: array
           description: Cards
           items:
             $ref: '#/components/schemas/CardModel'
+        controls:
+          $ref: '#/components/schemas/TableControlsModel'
+        folded:
+          type: boolean
+          description: Player is no longer in the hand.
+          example: false
       description: Model representing a player in a game.
     GenericServerMessage:
       type: object
@@ -722,6 +815,7 @@ components:
             - CardDrawnByPlayer
             - StartTurnTimer
             - PokerTable
+            - Deal
             - Timer
         data:
           type: object
@@ -837,6 +931,7 @@ components:
             - CardDrawnByPlayer
             - StartTurnTimer
             - PokerTable
+            - Deal
             - Timer
         userGroup:
           type: string
@@ -848,6 +943,8 @@ components:
           $ref: '#/components/schemas/ActiveStatusModel'
         cardModel:
           $ref: '#/components/schemas/CardModel'
+        dealModel:
+          $ref: '#/components/schemas/DealModel'
         deckModel:
           $ref: '#/components/schemas/DeckModel'
         drawGameDataContainerModel:
@@ -874,6 +971,8 @@ components:
           $ref: '#/components/schemas/PokerTableModel'
         timerModel:
           $ref: '#/components/schemas/TimerModel'
+        tableControlsModel:
+          $ref: '#/components/schemas/TableControlsModel'
         userModel:
           $ref: '#/components/schemas/UserModel'
         clientUserModel:
@@ -894,6 +993,8 @@ components:
           $ref: '#/components/schemas/CurrentGameModel'
         genericServerMessage:
           $ref: '#/components/schemas/GenericServerMessage'
+        privateTopicModel:
+          $ref: '#/components/schemas/PrivateTopicModel'
         toastClassModel:
           $ref: '#/components/schemas/ToastClassModel'
         toastModel:
@@ -976,6 +1077,41 @@ components:
           description: This is incremented whenever some action is performed.
           format: int32
           example: 69
+        minRaise:
+          type: number
+          description: Minimum raise amount.
+          example: 69
+        pot:
+          type: number
+          description: Total amount in the pot.
+          example: 420.69
+        lastToAct:
+          type: integer
+          description: The round will end once this player has acted.
+          format: int32
+          example: 2
+    PrivateTopicModel:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Secure topic ID.
+          format: uuid
+      description: Specifies the ID of a topic used to communicate securely with one
+        user.
+    TableControlsModel:
+      type: object
+      properties:
+        bankRoll:
+          type: number
+          description: Size of the players bank roll.
+        currentBet:
+          type: number
+          description: Amount invested into current round of betting.
+        toCall:
+          type: number
+          description: Amount required for the player to call.
+      description: Model containing fields needed by the UI's game controls component.
     TimerModel:
       type: object
       properties:
@@ -1070,6 +1206,7 @@ components:
             - CardDrawnByPlayer
             - StartTurnTimer
             - PokerTable
+            - Deal
             - Timer
         topic:
           type: string

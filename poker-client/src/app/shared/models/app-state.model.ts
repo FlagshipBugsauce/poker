@@ -4,6 +4,7 @@ import {
   ChatMessageModel,
   ClientUserModel,
   CurrentGameModel,
+  DealModel,
   DrawGameDataContainerModel,
   GameModel,
   GamePlayerModel,
@@ -74,10 +75,15 @@ export interface PokerTableStateContainer {
   tableState: PokerTableModel;
 }
 
-export interface TimerStateContainer {
-  timerState: TimerState;
+export interface MiscEventsStateContainer {
+  miscEvents: MiscEventsState;
 }
 
-export interface TimerState {
+export interface MiscEventsState {
   timer?: TimerModel;
+  deal?: DealModel;
+}
+
+export interface PrivatePlayerDataStateContainer {
+  privatePlayerData: GamePlayerModel;
 }

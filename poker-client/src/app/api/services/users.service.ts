@@ -91,11 +91,6 @@ export class UsersService extends BaseService {
   static readonly GetUserInfoPath = '/user/getUserInfo/{userId}';
 
   /**
-   * Path part for operation authorizeWithJwt
-   */
-  static readonly AuthorizeWithJwtPath = '/user/auth-with-jwt';
-
-  /**
    * Get User Info.
    *
    * Retrieve user information for user with provided ID.
@@ -126,6 +121,11 @@ export class UsersService extends BaseService {
       })
     );
   }
+
+  /**
+   * Path part for operation authorizeWithJwt
+   */
+  static readonly AuthorizeWithJwtPath = '/user/auth-with-jwt';
 
   /**
    * Path part for operation authorize

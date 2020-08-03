@@ -3,11 +3,13 @@ package com.poker.poker.services;
 import com.poker.poker.config.AppConfig;
 import com.poker.poker.events.CurrentGameEvent;
 import com.poker.poker.events.GameMessageEvent;
+import com.poker.poker.events.PrivateMessageEvent;
 import com.poker.poker.events.PublishMessageEvent;
 import com.poker.poker.events.ToastMessageEvent;
 import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.user.UserModel;
 import com.poker.poker.models.websocket.GenericServerMessage;
+import com.poker.poker.models.websocket.PrivateTopicModel;
 import com.poker.poker.models.websocket.ToastClassModel;
 import com.poker.poker.models.websocket.ToastModel;
 import com.poker.poker.models.websocket.WebSocketInfoModel;
@@ -72,10 +74,10 @@ public class WebSocketService {
    * @param user The user requesting a private topic.
    * @return The UUID component of the topic.
    */
-  public UUID requestPrivateTopic(final UserModel user) {
+  public PrivateTopicModel requestPrivateTopic(final UserModel user) {
     final UUID privateId = UUID.randomUUID();
     privateSockets.put(user.getId(), new WebSocketInfoModel(privateId, new Date()));
-    return privateId;
+    return new PrivateTopicModel(privateId);
   }
 
   /**
@@ -102,13 +104,22 @@ public class WebSocketService {
     model.setLastActivity(new Date());
   }
 
+  @EventListener
+  public <T> void privateMessageEventHandler(final PrivateMessageEvent<T> event) {
+    assert privateSockets.get(event.getId()) != null;
+    final WebSocketInfoModel socketInfo = privateSockets.get(event.getId());
+    final String topic = "/topic/secure/" + socketInfo.getSecureTopicId();
+    socketInfo.setLastActivity(new Date());
+    template.convertAndSend(topic, event.getMessage());
+  }
+
   /**
    * Sends the provided data to the specified topic. This message is public and no attempt has been
    * made to conceal the topic from anyone who wants to listen in.
    *
    * @param topic Topic to broadcast to.
-   * @param data Data being broadcast.
-   * @param <T> Type of data.
+   * @param data  Data being broadcast.
+   * @param <T>   Type of data.
    */
   public <T> void sendPublicMessage(final String topic, final GenericServerMessage<T> data) {
     template.convertAndSend(topic, data);

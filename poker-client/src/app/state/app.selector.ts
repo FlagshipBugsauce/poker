@@ -3,16 +3,14 @@ import {
   AppStateContainer,
   ChatContainer,
   ChatStateContainer,
-  DrawnCardsContainer,
-  DrawnCardsStateContainer,
   GameDataStateContainer,
   GameListStateContainer,
   GameStateContainer,
   LobbyStateContainer,
+  MiscEventsState,
+  MiscEventsStateContainer,
   PlayerDataStateContainer,
-  PokerTableStateContainer,
-  TimerState,
-  TimerStateContainer
+  PokerTableStateContainer
 } from '../shared/models/app-state.model';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {
@@ -24,48 +22,25 @@ import {
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
 
-export const authenticatedFeature =
+export const appFeature =
   createFeatureSelector<AppStateContainer, AppState>('appState');
+
 export const selectAuthenticated = createSelector(
-  authenticatedFeature, (state: AppState) => state.authenticated);
-
-export const loggedInUserFeature =
-  createFeatureSelector<AppStateContainer, AppState>('appState');
+  appFeature, (state: AppState) => state.authenticated);
 export const selectLoggedInUser = createSelector(
-  loggedInUserFeature,
-  (state: AppState) => state.loggedInUser
-);
-
+  appFeature, (state: AppState) => state.loggedInUser);
 /** Current game selector. */
-export const currentGameFeature =
-  createFeatureSelector<AppStateContainer, AppState>('appState');
 export const selectCurrentGame = createSelector(
-  currentGameFeature,
-  (state: AppState) => state.currentGame
-);
-
+  appFeature, (state: AppState) => state.currentGame);
 export const selectLobbyInfo = (state: AppStateContainer) => state.appState.lobbyInfo;
-
 export const selectLastLobbyInfo = (state: AppStateContainer) => state.appState.lastLobbyInfo;
-
-export const readyStatusFeature =
-  createFeatureSelector<AppStateContainer, AppState>('appState');
 /** Ready status selector. */
-export const selectReadyStatus = createSelector(
-  readyStatusFeature,
-  (state: AppState) => state.ready
-);
-
-export const jwtFeature = createFeatureSelector<AppStateContainer, AppState>('appState');
+export const selectReadyStatus = createSelector(appFeature, (state: AppState) => state.ready);
 /** JWT selector. */
-export const selectJwt = createSelector(jwtFeature, (state: AppState) => state.jwt);
-
-export const signInFailFeature = createFeatureSelector<AppStateContainer, AppState>('appState');
+export const selectJwt = createSelector(appFeature, (state: AppState) => state.jwt);
 /** SignInFail selector. */
-export const selectSignInFail = createSelector(
-  signInFailFeature,
-  (state: AppState) => state.showSignInFail
-);
+export const selectSignInFail = createSelector(appFeature,
+  (state: AppState) => state.showSignInFail);
 
 export const gameListFeature =
   createFeatureSelector<GameListStateContainer, GameListContainerModel>('gameList');
@@ -78,78 +53,38 @@ export const selectGameList = createSelector(
 export const lobbyFeature =
   createFeatureSelector<LobbyStateContainer, LobbyModel>('lobbyModel');
 /** Lobby document selector. */
-export const selectLobbyModel = createSelector(
-  lobbyFeature,
-  (state: LobbyModel) => state
-);
+export const selectLobbyModel = createSelector(lobbyFeature, (state: LobbyModel) => state);
 
 export const gameFeature =
   createFeatureSelector<GameStateContainer, GameModel>('gameModel');
 /** Game document selector. */
-export const selectGameModel = createSelector(
-  gameFeature,
-  (state: GameModel) => state
-);
-export const gamePhaseFeature =
-  createFeatureSelector<GameStateContainer, GameModel>('gameModel');
+export const selectGameModel = createSelector(gameFeature, (state: GameModel) => state);
 /** Game state selector. */
-export const selectGamePhase = createSelector(
-  gamePhaseFeature,
-  (state: GameModel) => state.phase);
-
-export const gamePlayersFeature =
-  createFeatureSelector<GameStateContainer, GameModel>('gameModel');
-export const selectGamePlayers = createSelector(
-  gamePlayersFeature, (state: GameModel) => state.players);
-
-export const drawnCardsFeature =
-  createFeatureSelector<DrawnCardsStateContainer, DrawnCardsContainer>('drawnCards');
-/** Drawn cards selector. */
-export const selectDrawnCards = createSelector(
-  drawnCardsFeature,
-  (state: DrawnCardsContainer) => state.drawnCards
-);
+export const selectGamePhase = createSelector(gameFeature, (state: GameModel) => state.phase);
 
 export const gameDataFeature =
   createFeatureSelector<GameDataStateContainer, DrawGameDataContainerModel>('gameData');
 /** Game data selector. */
 export const selectGameData = createSelector(
-  gameDataFeature,
-  (state: DrawGameDataContainerModel) => state.gameData
-);
+  gameDataFeature, (state: DrawGameDataContainerModel) => state.gameData);
 
 export const playerDataFeature =
   createFeatureSelector<PlayerDataStateContainer, GamePlayerModel>('playerData');
 /** Game data selector. */
 export const selectPlayerData = createSelector(
-  playerDataFeature,
-  (state: GamePlayerModel) => state
-);
-
-export const awayStatusFeature = createFeatureSelector<PlayerDataStateContainer, GamePlayerModel>('playerData');
+  playerDataFeature, (state: GamePlayerModel) => state);
 /** Away status selector. */
 export const selectAwayStatus = createSelector(
-  awayStatusFeature,
-  (state: GamePlayerModel) => state.away
-);
+  playerDataFeature, (state: GamePlayerModel) => state.away);
 
-export const actingStatusFeature = createFeatureSelector<PlayerDataStateContainer, GamePlayerModel>('playerData');
-/** Acting status selector. */
-export const selectActingStatus = createSelector(
-  actingStatusFeature,
-  (state: GamePlayerModel) => state.acting
-);
-
-export const generalChatFeature =
+export const chatFeature =
   createFeatureSelector<ChatStateContainer, ChatContainer>('chats');
 /** General chat selector. */
 export const selectGeneralChat = createSelector(
-  generalChatFeature, (state: ChatContainer) => state.generalChat);
-
-export const gameChatFeature =
-  createFeatureSelector<ChatStateContainer, ChatContainer>('chats');
+  chatFeature, (state: ChatContainer) => state.generalChat);
+/** Game chat selector. */
 export const selectGameChat = createSelector(
-  gameChatFeature, (state: ChatContainer) => state.gameChat);
+  chatFeature, (state: ChatContainer) => state.gameChat);
 
 export const pokerTableFeature =
   createFeatureSelector<PokerTableStateContainer, PokerTableModel>('tableState');
@@ -168,5 +103,7 @@ export const selectActingPlayer = createSelector(
 export const selectHandSummary = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state.summary);
 
-export const timerFeature = createFeatureSelector<TimerStateContainer, TimerState>('timerState');
-export const selectTimer = createSelector(timerFeature, (state: TimerState) => state.timer);
+export const miscEventsFeature =
+  createFeatureSelector<MiscEventsStateContainer, MiscEventsState>('miscEvents');
+export const selectTimer = createSelector(miscEventsFeature, (state: MiscEventsState) => state.timer);
+export const selectDeal = createSelector(miscEventsFeature, (state: MiscEventsState) => state.deal);

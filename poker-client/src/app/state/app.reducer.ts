@@ -1,6 +1,7 @@
 import {createReducer, on} from '@ngrx/store';
 import {
   closeChat,
+  dealCards,
   gameChatMsgReceived,
   gameDataUpdated,
   gameListUpdated,
@@ -21,6 +22,7 @@ import {
   playerLeftLobby,
   playerReadyToggled,
   pokerTableUpdate,
+  privatePlayerDataUpdated,
   readyUp,
   signInFail,
   signInSuccess,
@@ -28,12 +30,13 @@ import {
   startTimer,
   updateCurrentGame
 } from './app.actions';
-import {AppState, ChatContainer, TimerState} from '../shared/models/app-state.model';
+import {AppState, ChatContainer, MiscEventsState} from '../shared/models/app-state.model';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
   AuthResponseModel,
   ChatMessageModel,
   CurrentGameModel,
+  DealModel,
   DrawGameDataContainerModel,
   GameModel,
   GamePlayerModel,
@@ -246,13 +249,13 @@ const chatReducerInternal = createReducer<ChatContainer>(
   on(closeChat, (state: ChatContainer) => chatInitialState)
 );
 
-export const pokerTableInitialState: PokerTableModel = {
-  players: []
-} as PokerTableModel;
-
 export function chatReducer(state, action) {
   return chatReducerInternal(state, action);
 }
+
+export const pokerTableInitialState: PokerTableModel = {
+  players: []
+} as PokerTableModel;
 
 const pokerTableReducerInternal = createReducer<PokerTableModel>(
   pokerTableInitialState,
@@ -269,12 +272,28 @@ export function pokerTableReducer(state, action) {
   return pokerTableReducerInternal(state, action);
 }
 
-export const timerInitialState: TimerState = {timer: {id: '0', duration: -1}};
+export const timerInitialState: MiscEventsState = {
+  timer: {id: '0', duration: -1},
+  deal: {id: '0', numCards: -1}
+};
 
-const timerReducerInternal = createReducer<TimerState>(
+const miscEventsReducerInternal = createReducer<MiscEventsState>(
   timerInitialState,
-  on(startTimer, (state: TimerState, timer: TimerModel) => ({timer: ({...timer})})));
+  on(startTimer, (state: MiscEventsState, timer: TimerModel) => ({...state, timer})),
+  on(dealCards, (state: MiscEventsState, deal: DealModel) => ({...state, deal}))
+);
 
-export function timerReducer(state, action) {
-  return timerReducerInternal(state, action);
+export function miscEventsReducer(state, action) {
+  return miscEventsReducerInternal(state, action);
+}
+
+export const privatePlayerDataInitialState: GamePlayerModel = {};
+
+const privatePlayerDataReducerInternal = createReducer<GamePlayerModel>(
+  privatePlayerDataInitialState,
+  on(privatePlayerDataUpdated,
+    (state: GamePlayerModel, newState: GamePlayerModel) => newState));
+
+export function privatePlayerDataReducer(state, action) {
+  return privatePlayerDataReducerInternal(state, action);
 }

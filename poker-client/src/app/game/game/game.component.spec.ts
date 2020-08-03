@@ -11,9 +11,9 @@ import {
   ChatStateContainer,
   GameDataStateContainer,
   GameStateContainer,
+  MiscEventsStateContainer,
   PlayerDataStateContainer,
-  PokerTableStateContainer,
-  TimerStateContainer
+  PokerTableStateContainer
 } from '../../shared/models/app-state.model';
 import * as selectors from '../../state/app.selector';
 import {DrawGameDataModel} from '../../api/models/draw-game-data-model';
@@ -59,7 +59,7 @@ describe('GameComponent', () => {
   let mockPlayerThatActedSelector: MemoizedSelector<PokerTableStateContainer, number>;
   let mockHandSummarySelector: MemoizedSelector<PokerTableStateContainer, HandSummaryModel>;
   let mockAwayStatusSelector: MemoizedSelector<PlayerDataStateContainer, boolean>;
-  let mockSelectStartTimer: MemoizedSelector<TimerStateContainer, TimerModel>;
+  let mockSelectStartTimer: MemoizedSelector<MiscEventsStateContainer, TimerModel>;
   let component: GameComponent;
   let fixture: ComponentFixture<GameComponent>;
 

@@ -1,4 +1,5 @@
 export enum MessageType {
+  Debug = 'Debug',
   GameList = 'GameList',
   Lobby = 'Lobby',
   Game = 'Game',
@@ -18,5 +19,6 @@ export enum MessageType {
   CardDrawnByPlayer = 'CardDrawnByPlayer',
   StartTurnTimer = 'StartTurnTimer',
   PokerTable = 'PokerTable',
-  Timer = 'Timer'
+  Timer = 'Timer',
+  Deal = 'Deal'
 }

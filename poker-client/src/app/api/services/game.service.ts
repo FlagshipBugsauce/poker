@@ -67,21 +67,21 @@ export class GameService extends BaseService {
    */
   static readonly LeaveLobbyPath = '/game/leave-lobby';
   /**
+   * Path part for operation createGame
+   */
+  static readonly CreateGamePath = '/game/create';
+  /**
    * Path part for operation joinGame
    */
   static readonly JoinGamePath = '/game/join/{gameId}';
-  /**
-   * Path part for operation startGame
-   */
-  static readonly StartGamePath = '/game/start';
   /**
    * Path part for operation setActiveStatus
    */
   static readonly SetActiveStatusPath = '/game/active';
   /**
-   * Path part for operation createGame
+   * Path part for operation startGame
    */
-  static readonly CreateGamePath = '/game/create';
+  static readonly StartGamePath = '/game/start';
 
   /**
    * Ready to Start.
@@ -198,21 +198,24 @@ export class GameService extends BaseService {
   }
 
   /**
-   * Start Game.
+   * Create a new game.
    *
-   * Starts the game, provided all preconditions are satisfied..
+   * Creates a new game and returns the UUID to the client.
    *
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `startGame()` instead.
+   * To access only the response body, use `createGame()` instead.
    *
-   * This method doesn't expect any request body.
+   * This method sends `application/json` and handles request body of type `application/json`.
    */
-  startGame$Response(params?: {}): Observable<StrictHttpResponse<ApiSuccessModel>> {
+  createGame$Response(params: {
+    body: GameParameterModel
+  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
 
-    const rb = new RequestBuilder(this.rootUrl, GameService.StartGamePath, 'post');
+    const rb = new RequestBuilder(this.rootUrl, GameService.CreateGamePath, 'post');
     if (params) {
 
 
+      rb.body(params.body, 'application/json');
     }
     return this.http.request(rb.build({
       responseType: 'json',
@@ -226,18 +229,20 @@ export class GameService extends BaseService {
   }
 
   /**
-   * Start Game.
+   * Create a new game.
    *
-   * Starts the game, provided all preconditions are satisfied..
+   * Creates a new game and returns the UUID to the client.
    *
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `startGame$Response()` instead.
+   * To access the full response (for headers, for example), `createGame$Response()` instead.
    *
-   * This method doesn't expect any request body.
+   * This method sends `application/json` and handles request body of type `application/json`.
    */
-  startGame(params?: {}): Observable<ApiSuccessModel> {
+  createGame(params: {
+    body: GameParameterModel
+  }): Observable<ApiSuccessModel> {
 
-    return this.startGame$Response(params).pipe(
+    return this.createGame$Response(params).pipe(
       map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
     );
   }
@@ -293,24 +298,21 @@ export class GameService extends BaseService {
   }
 
   /**
-   * Create a new game.
+   * Start Game.
    *
-   * Creates a new game and returns the UUID to the client.
+   * Starts the game, provided all preconditions are satisfied..
    *
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `createGame()` instead.
+   * To access only the response body, use `startGame()` instead.
    *
-   * This method sends `application/json` and handles request body of type `application/json`.
+   * This method doesn't expect any request body.
    */
-  createGame$Response(params: {
-    body: GameParameterModel
-  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
+  startGame$Response(params?: {}): Observable<StrictHttpResponse<ApiSuccessModel>> {
 
-    const rb = new RequestBuilder(this.rootUrl, GameService.CreateGamePath, 'post');
+    const rb = new RequestBuilder(this.rootUrl, GameService.StartGamePath, 'post');
     if (params) {
 
 
-      rb.body(params.body, 'application/json');
     }
     return this.http.request(rb.build({
       responseType: 'json',
@@ -324,20 +326,18 @@ export class GameService extends BaseService {
   }
 
   /**
-   * Create a new game.
+   * Start Game.
    *
-   * Creates a new game and returns the UUID to the client.
+   * Starts the game, provided all preconditions are satisfied..
    *
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `createGame$Response()` instead.
+   * To access the full response (for headers, for example), `startGame$Response()` instead.
    *
-   * This method sends `application/json` and handles request body of type `application/json`.
+   * This method doesn't expect any request body.
    */
-  createGame(params: {
-    body: GameParameterModel
-  }): Observable<ApiSuccessModel> {
+  startGame(params?: {}): Observable<ApiSuccessModel> {
 
-    return this.createGame$Response(params).pipe(
+    return this.startGame$Response(params).pipe(
       map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
     );
   }

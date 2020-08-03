@@ -17,10 +17,10 @@ import {CardComponent} from '../../../shared/card/card.component';
 export class PlayerBoxComponent implements OnInit, OnDestroy {
   /*    Player positions:
 
-            5     6     7
-        4                   8
-        3                   9
-            2     1     10      */
+            4     5     6
+        3                   7
+        2                   8
+            1     0     9      */
 
   @Input() player: number;
   @ViewChild('card1') card1: CardComponent;
@@ -51,42 +51,42 @@ export class PlayerBoxComponent implements OnInit, OnDestroy {
   public get iconBoxPosition(): { top: number; left: number } {
     const position: { top: number; left: number } = {top: 0, left: 0};
     switch (this.player) {
+      case 0:
       case 1:
-      case 2:
-      case 10:
+      case 9:
         position.top = -40;
         break;
+      case 2:
       case 3:
-      case 4:
+      case 7:
       case 8:
-      case 9:
         position.top = 60;
         break;
+      case 4:
       case 5:
       case 6:
-      case 7:
         position.top = 165;
         break;
     }
     switch (this.player) {
-      case 1:
-      case 6:
+      case 0:
+      case 5:
         position.left = 110;
         break;
-      case 2:
-      case 5:
+      case 1:
+      case 4:
         position.left = 185;
         break;
+      case 2:
       case 3:
-      case 4:
         position.left = 265;
         break;
-      case 7:
-      case 10:
+      case 6:
+      case 9:
         position.left = 35;
         break;
+      case 7:
       case 8:
-      case 9:
         position.left = -45;
         break;
     }
@@ -96,24 +96,24 @@ export class PlayerBoxComponent implements OnInit, OnDestroy {
   public get awayIconPosition(): { top: number; left: number } {
     const position: { top: number; left: number } = {top: 0, left: 0};
     switch (this.player) {
-      case 1:
-      case 6:
+      case 0:
+      case 5:
         position.left = 33;
         break;
-      case 2:
-      case 5:
+      case 1:
+      case 4:
         position.left = -33;
         break;
+      case 2:
       case 3:
-      case 4:
         position.top = 33;
         break;
-      case 7:
-      case 10:
+      case 6:
+      case 9:
         position.left = 33;
         break;
+      case 7:
       case 8:
-      case 9:
         position.top = 33;
         break;
     }
@@ -125,15 +125,13 @@ export class PlayerBoxComponent implements OnInit, OnDestroy {
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((players: GamePlayerModel[]) => {
       this.players = players;
-      this.playerModel = players ? players[this.player - 1] : null;
+      this.playerModel = players ? players[this.player] : null;
       if (this.playerModel) {
         this.initials =
           `${this.playerModel.firstName.substring(0, 1)}${this.playerModel.lastName.substring(0, 1)}`;
         this.name = `${this.playerModel.firstName} ${this.playerModel.lastName}`;
-        this.bankRoll = this.playerModel.bankRoll;
-        this.dealerInternal = this.playerModel.acting;
+        this.bankRoll = this.playerModel.controls.bankRoll;
         this.cards = this.playerModel.cards;
-        this.score = this.playerModel.score;
         this.away = this.playerModel.away;
       }
     });

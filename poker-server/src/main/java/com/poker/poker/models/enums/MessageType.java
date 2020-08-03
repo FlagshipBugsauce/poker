@@ -1,6 +1,7 @@
 package com.poker.poker.models.enums;
 
 public enum MessageType {
+  Debug,
   GameList,
   Lobby,
   Game,
@@ -20,5 +21,6 @@ public enum MessageType {
   CardDrawnByPlayer,
   StartTurnTimer,
   PokerTable,
+  Deal,
   Timer
 }

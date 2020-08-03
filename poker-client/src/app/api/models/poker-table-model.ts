@@ -25,9 +25,24 @@ export interface PokerTableModel {
   eventTracker?: number;
 
   /**
+   * The round will end once this player has acted.
+   */
+  lastToAct?: number;
+
+  /**
+   * Minimum raise amount.
+   */
+  minRaise?: number;
+
+  /**
    * Position of the player that acted.
    */
   playerThatActed?: number;
   players?: Array<GamePlayerModel>;
+
+  /**
+   * Total amount in the pot.
+   */
+  pot?: number;
   summary?: HandSummaryModel;
 }

@@ -8,6 +8,7 @@ import com.poker.poker.models.enums.UserGroup;
 import com.poker.poker.models.game.ActiveStatusModel;
 import com.poker.poker.models.game.CardModel;
 import com.poker.poker.models.game.CurrentGameModel;
+import com.poker.poker.models.game.DealModel;
 import com.poker.poker.models.game.DeckModel;
 import com.poker.poker.models.game.DrawGameDataContainerModel;
 import com.poker.poker.models.game.DrawGameDrawModel;
@@ -20,6 +21,7 @@ import com.poker.poker.models.game.LobbyModel;
 import com.poker.poker.models.game.LobbyPlayerModel;
 import com.poker.poker.models.game.PlayerModel;
 import com.poker.poker.models.game.PokerTableModel;
+import com.poker.poker.models.game.TableControlsModel;
 import com.poker.poker.models.game.TimerModel;
 import com.poker.poker.models.user.AuthRequestModel;
 import com.poker.poker.models.user.AuthResponseModel;
@@ -30,6 +32,7 @@ import com.poker.poker.models.user.UserModel;
 import com.poker.poker.models.websocket.ChatMessageModel;
 import com.poker.poker.models.websocket.ClientMessageModel;
 import com.poker.poker.models.websocket.GenericServerMessage;
+import com.poker.poker.models.websocket.PrivateTopicModel;
 import com.poker.poker.models.websocket.ToastClassModel;
 import com.poker.poker.models.websocket.ToastModel;
 import com.poker.poker.models.websocket.WebSocketInfoModel;
@@ -58,6 +61,7 @@ public class ModelModel {
   // Game Models
   private ActiveStatusModel activeStatusModel;
   private CardModel cardModel;
+  private DealModel dealModel;
   private DeckModel deckModel;
   private DrawGameDataContainerModel drawGameDataContainerModel;
   private DrawGameDrawModel drawGameDrawModel;
@@ -71,6 +75,7 @@ public class ModelModel {
   private PlayerModel playerModel;
   private PokerTableModel pokerTableModel;
   private TimerModel timerModel;
+  private TableControlsModel tableControlsModel;
 
   // User Models
   private UserModel userModel;
@@ -85,6 +90,7 @@ public class ModelModel {
   private ClientMessageModel clientMessageModel;
   private CurrentGameModel currentGameModel;
   private GenericServerMessage genericServerMessage;
+  private PrivateTopicModel privateTopicModel;
   private ToastClassModel toastClassModel;
   private ToastModel toastModel;
   private WebSocketInfoModel webSocketInfoModel;

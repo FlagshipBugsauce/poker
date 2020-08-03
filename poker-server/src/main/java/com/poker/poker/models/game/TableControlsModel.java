@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "Model containing fields needed by the UI's game controls component.")
-public class GameControlsModel {
+public class TableControlsModel {
 
   @Schema(description = "Size of the players bank roll.", implementation = BigDecimal.class)
   private BigDecimal bankRoll;
@@ -18,10 +18,10 @@ public class GameControlsModel {
   @Schema(
       description = "Amount invested into current round of betting.",
       implementation = BigDecimal.class)
-  private BigDecimal currentBet;
+  private BigDecimal currentBet = new BigDecimal(0);
 
   @Schema(
       description = "Amount required for the player to call.",
       implementation = BigDecimal.class)
-  private BigDecimal toCall;
+  private BigDecimal toCall = new BigDecimal(0);
 }

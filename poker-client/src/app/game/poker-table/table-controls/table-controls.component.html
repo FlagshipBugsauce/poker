@@ -3,13 +3,14 @@
     <button class="btn btn-danger table-button">Fold</button>
   </div>
   <div>
-    <button [disabled]="amountToCall > 0" class="btn btn-secondary table-button">Check</button>
+    <button [disabled]="!canCheck" class="btn btn-secondary table-button">Check</button>
   </div>
   <div>
     <button
       [disabled]="amountToCall <= 0"
-      class="btn btn-warning table-button text-light">Call {{amountToCall > 0 ? amountToCall
-      : ''}}</button>
+      class="btn btn-warning table-button text-light">
+      Call {{toCall > 0 ? toCall : ''}}
+    </button>
   </div>
   <div>
     <button class="btn btn-info table-button">Raise {{raise}}</button>
@@ -28,7 +29,7 @@
     <div>
       <input
         (input)="raiseChanged($event)"
-        [max]="bankRoll"
+        [max]="slider.max"
         [min]="slider.min"
         [step]="slider.step"
         [value]="raise"
