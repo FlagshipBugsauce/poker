@@ -9,10 +9,9 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class PrivateMessageEvent<T> extends ApplicationEvent {
 
-  /**
-   * User ID.
-   */
+  /** User ID. */
   private final UUID id;
+
   private final GenericServerMessage<T> message;
 
   public PrivateMessageEvent(

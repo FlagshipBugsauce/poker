@@ -9,9 +9,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class HideCardsModel {
 
-  /**
-   * ID of the hide cards event.
-   */
+  /** ID of the hide cards event. */
   @Schema(description = "ID of the deal event.", implementation = UUID.class)
   private UUID id;
 

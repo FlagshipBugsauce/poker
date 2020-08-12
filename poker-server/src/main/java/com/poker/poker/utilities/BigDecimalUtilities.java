@@ -4,8 +4,7 @@ import java.math.BigDecimal;
 
 public final class BigDecimalUtilities {
 
-  private BigDecimalUtilities() {
-  }
+  private BigDecimalUtilities() {}
 
   /**
    * Calculates the sum of the numbers provided.
@@ -21,7 +20,6 @@ public final class BigDecimalUtilities {
     return result;
   }
 
-
   /**
    * Calculates the sum of the numbers provided.
    *
@@ -35,7 +33,6 @@ public final class BigDecimalUtilities {
     }
     return result;
   }
-
 
   /**
    * Calculates the max of the numbers provided.

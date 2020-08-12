@@ -12,18 +12,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GameActionModel {
 
-  /**
-   * Player ID.
-   */
+  /** Player ID. */
   private UUID playerId;
 
-  /**
-   * Type of action.
-   */
+  /** Type of action. */
   private GameAction actionType;
 
-  /**
-   * Raise amount (if applicable).
-   */
+  /** Raise amount (if applicable). */
   private BigDecimal raise;
 }

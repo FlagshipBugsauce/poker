@@ -28,14 +28,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Static utility class for performing operations on a PokerTableModel object.
- */
+/** Static utility class for performing operations on a PokerTableModel object. */
 @Slf4j
 public final class PokerTableUtilities {
 
-  private PokerTableUtilities() {
-  }
+  private PokerTableUtilities() {}
 
   /**
    * Creates a clone of the argument poker table which has new player objects with face down cards.
@@ -44,8 +41,8 @@ public final class PokerTableUtilities {
    *
    * @param table Poker table.
    * @return A clone of the table with all cards hidden (face down, i.e. client has no way of
-   * knowing what these cards are because the values will not be sent to any clients if the table is
-   * first processed by this method).
+   *     knowing what these cards are because the values will not be sent to any clients if the
+   *     table is first processed by this method).
    */
   public static PokerTableModel hideCards(final PokerTableModel table) {
     // Clone table, creating deep copy of player list and cards.
@@ -53,11 +50,12 @@ public final class PokerTableUtilities {
     // Replace the cards with face down cards.
     newTable
         .getPlayers()
-        .forEach(p -> p.setCards(
-            p.getCards()
-                .stream()
-                .map(c -> new CardModel(CardSuit.Back, CardValue.Back))
-                .collect(Collectors.toList())));
+        .forEach(
+            p ->
+                p.setCards(
+                    p.getCards().stream()
+                        .map(c -> new CardModel(CardSuit.Back, CardValue.Back))
+                        .collect(Collectors.toList())));
     return newTable;
   }
 
@@ -66,21 +64,19 @@ public final class PokerTableUtilities {
    *
    * <ol>
    *   <b>Pre-Conditions:</b>
-   *   <li><code>table</code> is <code>non-null</code>.</li>
-   *   <li>List of players is <code>non-null</code>.</li>
-   *   <li><code>playerId</code> in the action event refers to a player in the game.</li>
-   *   <li>
-   *     The <code>actingPlayer</code> field of <code>table</code> should refer to the player with
-   *     ID = <code>playerId</code>.
-   *   </li>
-   *   <li><code>toCall >= 0</code>.</li>
-   *   <li><code>raise >= 0</code>.</li>
+   *   <li><code>table</code> is <code>non-null</code>.
+   *   <li>List of players is <code>non-null</code>.
+   *   <li><code>playerId</code> in the action event refers to a player in the game.
+   *   <li>The <code>actingPlayer</code> field of <code>table</code> should refer to the player with
+   *       ID = <code>playerId</code>.
+   *   <li><code>toCall >= 0</code>.
+   *   <li><code>raise >= 0</code>.
    * </ol>
    *
    * <ol>
    *   <b>Post-Conditions:</b>
-   *   <li>Returned value should be a valid raise, i.e.
-   *   <code>adjustedWager + toCall <= bankRoll</code>.</li>
+   *   <li>Returned value should be a valid raise, i.e. <code>adjustedWager + toCall <= bankRoll
+   *       </code>.
    * </ol>
    *
    * @param table Poker table.
@@ -97,11 +93,11 @@ public final class PokerTableUtilities {
     assert table.getPlayers() != null;
 
     final List<GamePlayerModel> players = table.getPlayers();
-    final GamePlayerModel player = players
-        .stream()
-        .filter(p -> p.getId().equals(event.getPlayerId()))
-        .findFirst()
-        .orElse(null);
+    final GamePlayerModel player =
+        players.stream()
+            .filter(p -> p.getId().equals(event.getPlayerId()))
+            .findFirst()
+            .orElse(null);
 
     // Validate Pre-Conditions #3 and #4.
     assert player != null;
@@ -114,15 +110,15 @@ public final class PokerTableUtilities {
     // Validate Pre-Conditions #5 and #6.
     assert is(toCall).gte(BigDecimal.ZERO);
     assert is(raise).gte(BigDecimal.ZERO);
-//    assert toCall.compareTo(BigDecimal.ZERO) >= 0;
-//    assert raise.compareTo(BigDecimal.ZERO) >= 0;
+    //    assert toCall.compareTo(BigDecimal.ZERO) >= 0;
+    //    assert raise.compareTo(BigDecimal.ZERO) >= 0;
 
-    final BigDecimal adjustedWager = raise.add(toCall).compareTo(bankRoll) > 0 ?
-        bankRoll.subtract(toCall) : raise;
+    final BigDecimal adjustedWager =
+        raise.add(toCall).compareTo(bankRoll) > 0 ? bankRoll.subtract(toCall) : raise;
 
     // Validate Post-Condition.
     assert is(sum(adjustedWager, toCall)).lte(bankRoll);
-//    assert adjustedWager.add(toCall).compareTo(bankRoll) <= 0;
+    //    assert adjustedWager.add(toCall).compareTo(bankRoll) <= 0;
 
     return adjustedWager;
   }
@@ -133,56 +129,42 @@ public final class PokerTableUtilities {
    *
    * <ol>
    *   <b>Pre-Conditions:</b>
-   *   <li>There are at least 2 players who have not folded or been eliminated.</li>
-   *   <li>playerId is valid (i.e. refers to a player in the player list of the poker table).</li>
-   *   <li>Raise is non-null if the action is Raise.</li>
-   *   <li>Raise is >= table.minRaise if the action is Raise.</li>
-   *   <li>
-   *     If player is performing a Call or Raise action, the player's bank roll has enough chips to
-   *     legally perform this action, i.e. bankRoll >= toCall + raise.
-   *   </li>
-   *   <li>Player can only check if calling is free, i.e. toCall field for the player is 0.</li>
-   *   <li>
-   *     Player can only check if their current bet is equal to the minimum raise. Note that the
-   *     only player who could potentially check is the player who posted the big blind.
-   *   </li>
-   *   <li>Player can only perform AllInCheck if the player is all-in.</li>
+   *   <li>There are at least 2 players who have not folded or been eliminated.
+   *   <li>playerId is valid (i.e. refers to a player in the player list of the poker table).
+   *   <li>Raise is non-null if the action is Raise.
+   *   <li>Raise is >= table.minRaise if the action is Raise.
+   *   <li>If player is performing a Call or Raise action, the player's bank roll has enough chips
+   *       to legally perform this action, i.e. bankRoll >= toCall + raise.
+   *   <li>Player can only check if calling is free, i.e. toCall field for the player is 0.
+   *   <li>Player can only check if their current bet is equal to the minimum raise. Note that the
+   *       only player who could potentially check is the player who posted the big blind.
+   *   <li>Player can only perform AllInCheck if the player is all-in.
    * </ol>
    *
    * <ol>
    *   <b>Post-Conditions:</b>
-   *   <li>actingPlayer field updated correctly.</li>
-   *   <li>playerThatActed field updated correctly.</li>
-   *   <li>There is at least one player still active in the hand.</li>
-   *   <li>Pot and bank rolls are unaffected if action was Fold, Check or AllInCheck.</li>
-   *   <li>
-   *     If action was Call, acting player's bankroll should have decreased by toCall, pot should
-   *     have increased by toCall.
-   *   </li>
-   *   <li>
-   *     If action was Raise, acting player's bankroll should have decreased by (toCall + raise),
-   *     i.e. the amount required to make the raise.
-   *   </li>
-   *   <li>If action was Raise, pot should have increased by (toCall + raise).</li>
-   *   <li>If action was Raise, minRaise field of the table should be equal to raise</li>
-   *   <li>
-   *     If action was Raise, toCall values of all other players should be set equal to
-   *     (raise - currentBet).
-   *   </li>
-   *   <li>
-   *     If action was Raise, and raise was equal to acting player's bank roll, this player's all-in
-   *     field should be set to <code>true</code>.
-   *   </li>
-   *   <li>
-   *     If action was Raise, the lastToAct field should be updated so that it is the index of the
-   *     first active player before the player that raised.
-   *   </li>
+   *   <li>actingPlayer field updated correctly.
+   *   <li>playerThatActed field updated correctly.
+   *   <li>There is at least one player still active in the hand.
+   *   <li>Pot and bank rolls are unaffected if action was Fold, Check or AllInCheck.
+   *   <li>If action was Call, acting player's bankroll should have decreased by toCall, pot should
+   *       have increased by toCall.
+   *   <li>If action was Raise, acting player's bankroll should have decreased by (toCall + raise),
+   *       i.e. the amount required to make the raise.
+   *   <li>If action was Raise, pot should have increased by (toCall + raise).
+   *   <li>If action was Raise, minRaise field of the table should be equal to raise
+   *   <li>If action was Raise, toCall values of all other players should be set equal to (raise -
+   *       currentBet).
+   *   <li>If action was Raise, and raise was equal to acting player's bank roll, this player's
+   *       all-in field should be set to <code>true</code>.
+   *   <li>If action was Raise, the lastToAct field should be updated so that it is the index of the
+   *       first active player before the player that raised.
    * </ol>
    *
-   * @param table    Poker table.
-   * @param action   Action that was performed.
+   * @param table Poker table.
+   * @param action Action that was performed.
    * @param playerId ID of the player that performed the action.
-   * @param raise    The amount raised if action was Raise, null otherwise.
+   * @param raise The amount raised if action was Raise, null otherwise.
    */
   public static void handlePlayerAction(
       final PokerTableModel table,
@@ -195,11 +177,8 @@ public final class PokerTableUtilities {
     assert players.stream().filter(p -> !p.isOut() && !p.isFolded()).count() >= 2;
 
     // Get player model
-    final GamePlayerModel player = players
-        .stream()
-        .filter(p -> p.getId().equals(playerId))
-        .findFirst()
-        .orElse(null);
+    final GamePlayerModel player =
+        players.stream().filter(p -> p.getId().equals(playerId)).findFirst().orElse(null);
     // Validate Pre-Condition #2.
     assert player != null;
 
@@ -236,7 +215,7 @@ public final class PokerTableUtilities {
         // Validate Pre-Condition #6.
         assert toCall.equals(BigDecimal.ZERO);
         // Validate Pre-Condition #7.
-//        assert minRaise.equals(currentBet); TODO: This is breaking an edge case
+        //        assert minRaise.equals(currentBet); TODO: This is breaking an edge case
         break;
       case AllInCheck:
         // Validate Pre-Condition #8.
@@ -262,12 +241,14 @@ public final class PokerTableUtilities {
         // Update lastToAct (exit condition of betting round).
         table.setLastToAct(getNextActivePlayer(table, playerIndex, false));
         // Update toCall field for other players.
-        players.forEach(p -> {
-          final BigDecimal pToCall = p.getControls().getToCall();
-          final BigDecimal pBankRoll = p.getControls().getBankRoll();
-          p.getControls().setToCall(
-              raise.add(pToCall).compareTo(pBankRoll) > 0 ? pBankRoll : raise.add(pToCall));
-        });
+        players.forEach(
+            p -> {
+              final BigDecimal pToCall = p.getControls().getToCall();
+              final BigDecimal pBankRoll = p.getControls().getBankRoll();
+              p.getControls()
+                  .setToCall(
+                      raise.add(pToCall).compareTo(pBankRoll) > 0 ? pBankRoll : raise.add(pToCall));
+            });
         break;
     }
 
@@ -284,41 +265,37 @@ public final class PokerTableUtilities {
   }
 
   /**
-   * Performs the basic poker table setup when a new round begins. This includes setting the
-   * <code>dealer</code> field, <code>actingPlayer</code> field, performing the blind bets, etc...
+   * Performs the basic poker table setup when a new round begins. This includes setting the <code>
+   * dealer</code> field, <code>actingPlayer</code> field, performing the blind bets, etc...
    *
    * <ol>
    *   <b>Pre-Conditions:</b>
-   *   <li><code>table != null</code>.</li>
-   *   <li><code>deck != null</code>.</li>
-   *   <li><code>table.getPlayers() != null</code>.</li>
-   *   <li>
-   *     There are at least 2 players who have not been eliminated (i.e. with
-   *     <code>bankRoll > 0</code>).
-   *   </li>
-   *   <li>
-   *     The number of players with non-zero bank roll is the same as the number of players whose
-   *     <code>out</code> status is false.
-   *   </li>
-   *   <li>All players who have not been eliminated have not folded.</li>
+   *   <li><code>table != null</code>.
+   *   <li><code>deck != null</code>.
+   *   <li><code>table.getPlayers() != null</code>.
+   *   <li>There are at least 2 players who have not been eliminated (i.e. with <code>bankRoll > 0
+   *       </code>).
+   *   <li>The number of players with non-zero bank roll is the same as the number of players whose
+   *       <code>out</code> status is false.
+   *   <li>All players who have not been eliminated have not folded.
    * </ol>
    *
    * <ol>
    *   <b>Post-Conditions:</b>
-   *   <li>round field incremented.</li>
-   *   <li>Small blind bet made.</li>
-   *   <li>Big blind bet made.</li>
-   *   <li><code>pot</code> should be equal to sb + bb.</li>
-   *   <li>bb player's <code>toCall = 0</code>.</li>
-   *   <li>sb player's <code>toCall = table.blind</code>.</li>
-   *   <li>All other players <code>toCall = 2 * table.blind</code>.</li>
-   *   <li><code>actingPlayer</code> is the player 3 spots after the <code>dealer</code>.</li>
-   *   <li>If <code>table.round % 10 == 0</code>, then <code>table.blind *= 2</code>.</li>
-   *   <li>One card is dealt to each player.</li>
+   *   <li>round field incremented.
+   *   <li>Small blind bet made.
+   *   <li>Big blind bet made.
+   *   <li><code>pot</code> should be equal to sb + bb.
+   *   <li>bb player's <code>toCall = 0</code>.
+   *   <li>sb player's <code>toCall = table.blind</code>.
+   *   <li>All other players <code>toCall = 2 * table.blind</code>.
+   *   <li><code>actingPlayer</code> is the player 3 spots after the <code>dealer</code>.
+   *   <li>If <code>table.round % 10 == 0</code>, then <code>table.blind *= 2</code>.
+   *   <li>One card is dealt to each player.
    * </ol>
    *
    * @param table Poker table.
-   * @param deck  Deck being used on this poker table.
+   * @param deck Deck being used on this poker table.
    */
   public static void newHandSetup(final PokerTableModel table, final DeckModel deck) {
     // Validate Pre-Conditions #1, #2 and #3.
@@ -332,17 +309,22 @@ public final class PokerTableUtilities {
     final List<GamePlayerModel> players = table.getPlayers();
 
     // Update folded, allIn, out and table controls.
-    players.forEach(p -> {
-      p.setFolded(false); // Should always be reset false.
-      p.setAllIn(false); // Should always be reset to false.
-      p.setOut(p.getControls().getBankRoll().equals(BigDecimal.ZERO));  // True when 0 chips left.
-      p.setControls(new TableControlsModel(p.getControls().getBankRoll())); // Keep bankRoll only.
-    });
+    players.forEach(
+        p -> {
+          p.setFolded(false); // Should always be reset false.
+          p.setAllIn(false); // Should always be reset to false.
+          p.setOut(
+              p.getControls().getBankRoll().equals(BigDecimal.ZERO)); // True when 0 chips left.
+          p.setControls(
+              new TableControlsModel(p.getControls().getBankRoll())); // Keep bankRoll only.
+        });
 
     // Validate Pre-Condition #4, #5 and #6.
     final long numNotOut = players.stream().filter(p -> !p.isOut()).count();
-    final long numWithNonZeroChips = players.stream()
-        .filter(p -> !p.getControls().getBankRoll().equals(BigDecimal.ZERO)).count();
+    final long numWithNonZeroChips =
+        players.stream()
+            .filter(p -> !p.getControls().getBankRoll().equals(BigDecimal.ZERO))
+            .count();
     assert numNotOut >= 2;
     assert numWithNonZeroChips >= 2;
     assert numNotOut == numWithNonZeroChips;
@@ -377,20 +359,20 @@ public final class PokerTableUtilities {
    *
    * <ol>
    *   <b>Pre-Conditions:</b>
-   *   <li><code>table != null</code></li>
-   *   <li><code>deck != null</code></li>
-   *   <li><code>table.getPlayers() != null</code></li>
-   *   <li>At least 2 players remaining in the hand.</li>
+   *   <li><code>table != null</code>
+   *   <li><code>deck != null</code>
+   *   <li><code>table.getPlayers() != null</code>
+   *   <li>At least 2 players remaining in the hand.
    * </ol>
    *
    * <ol>
    *   <b>Post-Conditions:</b>
-   *   <li>All active players were dealt a card.</li>
-   *   <li>The dealer was the last person to be dealt a card.</li>
+   *   <li>All active players were dealt a card.
+   *   <li>The dealer was the last person to be dealt a card.
    * </ol>
    *
    * @param table Poker table.
-   * @param deck  Deck.
+   * @param deck Deck.
    */
   public static void dealCards(final PokerTableModel table, final DeckModel deck) {
     // Validate Pre-Conditions.
@@ -398,7 +380,9 @@ public final class PokerTableUtilities {
     assert deck != null;
     assert table.getPlayers() != null;
     assert table.getPlayers().stream()
-        .filter(p -> !p.getControls().getBankRoll().equals(BigDecimal.ZERO)).count() >= 2;
+            .filter(p -> !p.getControls().getBankRoll().equals(BigDecimal.ZERO))
+            .count()
+        >= 2;
 
     final List<GamePlayerModel> players = table.getPlayers();
     players.forEach(p -> p.setCards(new ArrayList<>())); // Clear drawn cards.
@@ -417,20 +401,18 @@ public final class PokerTableUtilities {
    *
    * <ol>
    *   <b>Pre-Conditions:</b>
-   *   <li>actingPlayer field should be the index of the first active player after the dealer.</li>
-   *   <li>currentBet field is equal to 0 for all players.</li>
-   *   <li>blind field on poker table is non-zero and non-null.</li>
+   *   <li>actingPlayer field should be the index of the first active player after the dealer.
+   *   <li>currentBet field is equal to 0 for all players.
+   *   <li>blind field on poker table is non-zero and non-null.
    * </ol>
    *
    * <ol>
    *   <b>Post-Conditions:</b>
-   *   <li>Small and big blind bets have been posted.</li>
-   *   <li>Pot is equal to the sum of the posted bets.</li>
-   *   <li>toCall field of all players is accurate.</li>
-   *   <li>
-   *     actingPlayer field is set to the first active player after the player that posted the big
-   *     blind.
-   *   </li>
+   *   <li>Small and big blind bets have been posted.
+   *   <li>Pot is equal to the sum of the posted bets.
+   *   <li>toCall field of all players is accurate.
+   *   <li>actingPlayer field is set to the first active player after the player that posted the big
+   *       blind.
    * </ol>
    *
    * @param table Poker table.
@@ -482,13 +464,16 @@ public final class PokerTableUtilities {
     generateSidePots(table);
 
     // Update toCall field for all players.
-    players.forEach(p -> {
-      final BigDecimal pBankRoll = p.getControls().getBankRoll();
-      final BigDecimal pCurrentBet = p.getControls().getCurrentBet();
-      final BigDecimal toCall = maxBet.subtract(pCurrentBet).compareTo(pBankRoll) >= 0 ?
-          pBankRoll : maxBet.subtract(pCurrentBet);
-      p.getControls().setToCall(toCall);
-    });
+    players.forEach(
+        p -> {
+          final BigDecimal pBankRoll = p.getControls().getBankRoll();
+          final BigDecimal pCurrentBet = p.getControls().getCurrentBet();
+          final BigDecimal toCall =
+              maxBet.subtract(pCurrentBet).compareTo(pBankRoll) >= 0
+                  ? pBankRoll
+                  : maxBet.subtract(pCurrentBet);
+          p.getControls().setToCall(toCall);
+        });
 
     // Update lastToAct, actingPlaying and playerThatActed.
     table.setLastToAct(bbIndex);
@@ -512,21 +497,21 @@ public final class PokerTableUtilities {
    * @param table Poker table.
    */
   public static void generateSidePots(final PokerTableModel table) {
-    final List<BigDecimal> allInBets = table.getPlayers()
-        .stream()
-        .filter(GamePlayerModel::isAllIn)
-        .map(p -> p.getControls().getCurrentBet())
-        .sorted()
-        .collect(Collectors.toList());
+    final List<BigDecimal> allInBets =
+        table.getPlayers().stream()
+            .filter(GamePlayerModel::isAllIn)
+            .map(p -> p.getControls().getCurrentBet())
+            .sorted()
+            .collect(Collectors.toList());
 
-    final List<BigDecimal> bets = table.getPlayers()
-        .stream()
-        .map(p -> p.getControls().getCurrentBet().add(BigDecimal.ZERO))
-        .sorted()
-        .collect(Collectors.toList());
+    final List<BigDecimal> bets =
+        table.getPlayers().stream()
+            .map(p -> p.getControls().getCurrentBet().add(BigDecimal.ZERO))
+            .sorted()
+            .collect(Collectors.toList());
 
-    if (allInBets.isEmpty() ||
-        !bets.get(bets.size() - 1).equals(allInBets.get(allInBets.size() - 1))) {
+    if (allInBets.isEmpty()
+        || !bets.get(bets.size() - 1).equals(allInBets.get(allInBets.size() - 1))) {
       allInBets.add(bets.get(bets.size() - 1));
     }
 
@@ -535,7 +520,7 @@ public final class PokerTableUtilities {
       final PotModel pot = new PotModel(allInBet, BigDecimal.ZERO);
       for (final BigDecimal bet : bets) {
         pot.increaseTotal(is(allInBet).gte(bet) ? bet : allInBet);
-//        pot.increaseTotal(allInBet.compareTo(bet) >= 0 ? bet : allInBet);
+        //        pot.increaseTotal(allInBet.compareTo(bet) >= 0 ? bet : allInBet);
       }
       pots.add(pot);
     }
@@ -555,10 +540,10 @@ public final class PokerTableUtilities {
    * @return Total amount in all pots combined.
    */
   public static BigDecimal getTotalInAllSidePots(final Collection<PotModel> pots) {
-//    BigDecimal allPotsTotal = BigDecimal.ZERO;
-//    for (PotModel pot : pots) {
-//      allPotsTotal = pot.getTotal().add(allPotsTotal);
-//    }
+    //    BigDecimal allPotsTotal = BigDecimal.ZERO;
+    //    for (PotModel pot : pots) {
+    //      allPotsTotal = pot.getTotal().add(allPotsTotal);
+    //    }
     return sum(pots.stream().map(PotModel::getTotal).collect(Collectors.toList()));
   }
 
@@ -568,12 +553,12 @@ public final class PokerTableUtilities {
    *
    * <ul>
    *   <b>Pre-Conditions:</b>
-   *   <li>There are at least 2 players who are still in the current hand.</li>
+   *   <li>There are at least 2 players who are still in the current hand.
    * </ul>
    *
    * <ul>
    *   <b>Post-Conditions:</b>
-   *   <li>dealer field has changed.</li>
+   *   <li>dealer field has changed.
    * </ul>
    *
    * @param table Poker table.
@@ -597,19 +582,19 @@ public final class PokerTableUtilities {
    *
    * <ol>
    *   <b>Pre-Conditions:</b>
-   *   <li>startIndex is a valid index.</li>
-   *   <li>There are at least 2 players who are still in the current hand.</li>
+   *   <li>startIndex is a valid index.
+   *   <li>There are at least 2 players who are still in the current hand.
    * </ol>
    *
    * <ol>
    *   <b>Post-Conditions:</b>
-   *   <li>Returns the previous/next active player in the rotation.</li>
+   *   <li>Returns the previous/next active player in the rotation.
    * </ol>
    *
-   * @param table      Poker table.
+   * @param table Poker table.
    * @param startIndex Index in players list.
-   * @param forward    Should be <code>true</code> if searching forward, <code>false</code> if
-   *                   searching backward.
+   * @param forward Should be <code>true</code> if searching forward, <code>false</code> if
+   *     searching backward.
    * @return The active player next in the rotation after the player at index startIndex.
    */
   public static int getNextActivePlayer(
@@ -619,8 +604,10 @@ public final class PokerTableUtilities {
     assert startIndex >= 0 && startIndex < players.size();
     assert players.stream().filter(p -> !p.isOut() && !p.isFolded()).count() >= 2;
 
-    int j = forward ? (startIndex + 1) % players.size() :
-        (startIndex - 1 + players.size()) % players.size();
+    int j =
+        forward
+            ? (startIndex + 1) % players.size()
+            : (startIndex - 1 + players.size()) % players.size();
     // Loop-Invariant: jth player has either been eliminated, or has folded.
     // Exit-Condition: jth player is active in the current hand.
     while (players.get(j).isOut() || players.get(j).isFolded()) {
@@ -632,10 +619,10 @@ public final class PokerTableUtilities {
   /**
    * Returns the ith next active player.
    *
-   * @param table      Poker table.
+   * @param table Poker table.
    * @param startIndex Start index.
-   * @param i          i.
-   * @param forward    Forward or backward.
+   * @param i i.
+   * @param forward Forward or backward.
    * @return ith next active player.
    */
   public static int getIthNextActivePlayer(
@@ -653,27 +640,29 @@ public final class PokerTableUtilities {
    *
    * <ol>
    *   <b>Pre-Conditions:</b>
-   *   <li>Player model is valid, i.e. non-null.</li>
+   *   <li>Player model is valid, i.e. non-null.
    * </ol>
    *
    * <ol>
    *   <b>Post-Conditions:</b>
-   *   <li>Returns the correct default action.</li>
+   *   <li>Returns the correct default action.
    * </ol>
    *
    * @param player Player the system is acting on behalf of.
    * @return The default action for this player.
    */
   public static GameAction defaultAction(final GamePlayerModel player) {
-    return player.isAllIn() ? GameAction.AllInCheck :
-        player.getControls().getToCall().equals(BigDecimal.ZERO) ?
-            GameAction.Check : GameAction.Fold;
+    return player.isAllIn()
+        ? GameAction.AllInCheck
+        : player.getControls().getToCall().equals(BigDecimal.ZERO)
+            ? GameAction.Check
+            : GameAction.Fold;
   }
 
   /**
    * Determines the winners when a hand is over.
    *
-   * @param table       Poker table.
+   * @param table Poker table.
    * @param cardService Card service (contains card comparator).
    */
   public static void determineWinners(
@@ -699,10 +688,10 @@ public final class PokerTableUtilities {
     }
 
     /*
-         If we have more than one player who is still in the hand, then we need to determine which
-         side pots go to each player. We'll keep giving out chips until the amount remaining in
-         all of the side pots reaches 0.
-     */
+        If we have more than one player who is still in the hand, then we need to determine which
+        side pots go to each player. We'll keep giving out chips until the amount remaining in
+        all of the side pots reaches 0.
+    */
     while (!getTotalInAllSidePots(pots).equals(BigDecimal.ZERO)) {
       final GamePlayerModel winningPlayer = players.remove(0);
       final BigDecimal winningWager = winningPlayer.getControls().getCurrentBet();
@@ -726,19 +715,17 @@ public final class PokerTableUtilities {
    *
    * <ol>
    *   <b>Pre-Conditions:</b>
-   *   <li>There is either one player remaining in the hand, or the player</li>
+   *   <li>There is either one player remaining in the hand, or the player
    * </ol>
    *
    * <ol>
    *   <b>Post-Conditions:</b>
-   *   <li>All players with 0 chips have their out status set to true.</li>
-   *   <li>All players with chips remaining have folded and allin status set to false.</li>
-   *   <li>Pot value reduced to 0.</li>
-   *   <li>Winning players bank roll is increased by the value of the pot.</li>
-   *   <li>
-   *     Hand summary is generated and returned containing the index of the winning player and the
-   *     winning card.
-   *   </li>
+   *   <li>All players with 0 chips have their out status set to true.
+   *   <li>All players with chips remaining have folded and allin status set to false.
+   *   <li>Pot value reduced to 0.
+   *   <li>Winning players bank roll is increased by the value of the pot.
+   *   <li>Hand summary is generated and returned containing the index of the winning player and the
+   *       winning card.
    * </ol>
    *
    * @param table Poker table.
@@ -749,22 +736,31 @@ public final class PokerTableUtilities {
     // Betting round has concluded.
     table.setBetting(false);
     determineWinners(table, cardService);
-    table.setSummary(new HandSummaryModel(
-        table.getWinners().get(0).getCards().get(0),
-        table.getPlayers()
-            .indexOf(table.getPlayers()
-                .stream()
-                .filter(p -> p.getId().equals(table.getWinners().get(0).getId()))
-                .findFirst()
-                .orElse(null))));
+    table.setSummary(
+        new HandSummaryModel(
+            table.getWinners().get(0).getCards().get(0),
+            table
+                .getPlayers()
+                .indexOf(
+                    table.getPlayers().stream()
+                        .filter(p -> p.getId().equals(table.getWinners().get(0).getId()))
+                        .findFirst()
+                        .orElse(null))));
 
-    table.getWinners().forEach(w -> {
-      final GamePlayerModel player = Objects.requireNonNull(table.getPlayers()
-          .stream()
-          .filter(p -> p.getId().equals(w.getId()))
-          .findFirst().orElse(null));
-      player.getControls().setBankRoll(player.getControls().getBankRoll().add(w.getWinnings()));
-    });
+    table
+        .getWinners()
+        .forEach(
+            w -> {
+              final GamePlayerModel player =
+                  Objects.requireNonNull(
+                      table.getPlayers().stream()
+                          .filter(p -> p.getId().equals(w.getId()))
+                          .findFirst()
+                          .orElse(null));
+              player
+                  .getControls()
+                  .setBankRoll(player.getControls().getBankRoll().add(w.getWinnings()));
+            });
     // Not clearing cards until next hand begins.
     table.setDisplayHandSummary(true);
   }
@@ -786,11 +782,10 @@ public final class PokerTableUtilities {
         message = String.format("%s %s called.", player.getFirstName(), player.getLastName());
         break;
       case Raise:
-        message = String.format(
-            "%s %s raised by %s.",
-            player.getFirstName(),
-            player.getLastName(),
-            event.getRaise());
+        message =
+            String.format(
+                "%s %s raised by %s.",
+                player.getFirstName(), player.getLastName(), event.getRaise());
         break;
       case AllInCheck:
         message = String.format("%s %s is ALL-IN!", player.getFirstName(), player.getLastName());

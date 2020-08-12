@@ -102,11 +102,10 @@ public class DeckModel {
    * @return A list of the top <code>n</code> cards in the deck (cards are deep copies).
    */
   public List<CardModel> peek(int n) {
-    final List<CardModel> topCards = cards
-        .subList(cards.size() - n, cards.size())
-        .stream()
-        .map(CardModel::new)
-        .collect(Collectors.toList());
+    final List<CardModel> topCards =
+        cards.subList(cards.size() - n, cards.size()).stream()
+            .map(CardModel::new)
+            .collect(Collectors.toList());
     Collections.reverse(topCards);
     return topCards;
   }

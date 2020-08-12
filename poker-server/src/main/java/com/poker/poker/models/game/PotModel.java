@@ -22,19 +22,19 @@ public class PotModel {
     total = total.add(value);
   }
 
-//  @Schema(description = "The number of wagers in this side-pot")
-//  private int number = 0;
-//
-//  @ArraySchema(schema = @Schema(
-//      description = "Collection of wagers.",
-//      implementation = BigDecimal.class))
-//  private List<BigDecimal> wagers = new ArrayList<>();
-//
-//  public void incrementNumber() {
-//    number++;
-//  }
-//
-//  public void decrementNumber() {
-//    number--;
-//  }
+  //  @Schema(description = "The number of wagers in this side-pot")
+  //  private int number = 0;
+  //
+  //  @ArraySchema(schema = @Schema(
+  //      description = "Collection of wagers.",
+  //      implementation = BigDecimal.class))
+  //  private List<BigDecimal> wagers = new ArrayList<>();
+  //
+  //  public void incrementNumber() {
+  //    number++;
+  //  }
+  //
+  //  public void decrementNumber() {
+  //    number--;
+  //  }
 }

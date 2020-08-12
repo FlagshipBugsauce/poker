@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Controller
 @AllArgsConstructor
-@RestController   // TODO: Need to investigate whether having this messes up anything socket-related
+@RestController // TODO: Need to investigate whether having this messes up anything socket-related
 @Tag(name = "websocket", description = "WebSocket controller.")
 public class WebSocketController {
 
@@ -93,15 +93,17 @@ public class WebSocketController {
 
   @Operation(
       summary = "Request a private topic.",
-      description = "Creates a private topic so that the backend can communicate securely to one client.",
+      description =
+          "Creates a private topic so that the backend can communicate securely to one client.",
       tags = "websocket")
-  @ApiResponses(@ApiResponse(
-      responseCode = "200",
-      description = "Private topic successfully created.",
-      content =
-      @Content(
-          schema = @Schema(implementation = PrivateTopicModel.class),
-          mediaType = MediaType.APPLICATION_JSON_VALUE)))
+  @ApiResponses(
+      @ApiResponse(
+          responseCode = "200",
+          description = "Private topic successfully created.",
+          content =
+              @Content(
+                  schema = @Schema(implementation = PrivateTopicModel.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE)))
   @GetMapping("/private-topic")
   public ResponseEntity<PrivateTopicModel> getPrivateTopic(
       @Parameter(hidden = true) @RequestHeader("Authorization") final String jwt) {

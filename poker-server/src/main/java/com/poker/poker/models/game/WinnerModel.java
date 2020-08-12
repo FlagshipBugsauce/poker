@@ -15,23 +15,17 @@ import lombok.NoArgsConstructor;
 @Schema(description = "A winner of a hand, could be one of several.")
 public class WinnerModel {
 
-  /**
-   * The ID of the winning player.
-   */
+  /** The ID of the winning player. */
   @Schema(description = "The ID of the winning player.")
   private UUID id;
 
-  /**
-   * The amount the player won.
-   */
+  /** The amount the player won. */
   @Schema(description = "The amount the player won.")
   private BigDecimal winnings;
 
-  /**
-   * The winning cards.
-   */
-  @ArraySchema(schema = @Schema(
-      description = "The winning cards.", implementation = CardModel.class))
+  /** The winning cards. */
+  @ArraySchema(
+      schema = @Schema(description = "The winning cards.", implementation = CardModel.class))
   private List<CardModel> cards;
 
   public void increaseWinnings(final BigDecimal amount) {

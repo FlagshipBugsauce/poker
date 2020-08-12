@@ -13,15 +13,13 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-/**
- * Service that can perform useful operations for a card game.
- */
+/** Service that can perform useful operations for a card game. */
 @Slf4j
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class CardService implements Comparator<CardModel> {
 
-  public final static CardModel FACE_DOWN_CARD = new CardModel(CardSuit.Back, CardValue.Back);
+  public static final CardModel FACE_DOWN_CARD = new CardModel(CardSuit.Back, CardValue.Back);
 
   private final Map<CardValue, Integer> numericalCardValues;
   private final Map<Integer, CardValue> enumCardValues;

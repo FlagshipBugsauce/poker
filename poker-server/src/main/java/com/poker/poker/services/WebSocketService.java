@@ -121,8 +121,8 @@ public class WebSocketService {
    * made to conceal the topic from anyone who wants to listen in.
    *
    * @param topic Topic to broadcast to.
-   * @param data  Data being broadcast.
-   * @param <T>   Type of data.
+   * @param data Data being broadcast.
+   * @param <T> Type of data.
    */
   public <T> void sendPublicMessage(final String topic, final GenericServerMessage<T> data) {
     template.convertAndSend(topic, data);

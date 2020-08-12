@@ -52,9 +52,7 @@ public class GameDataService {
   private final Map<UUID, DeckModel> decks;
   private final Map<UUID, PokerTableModel> tables;
   private final Map<UUID, DrawGameDataContainerModel> summaries;
-  /**
-   * Mapping from user ID to game ID. Can be used to retrieve the game a user is in.
-   */
+  /** Mapping from user ID to game ID. Can be used to retrieve the game a user is in. */
   private final Map<UUID, UUID> userIdToGameIdMap;
 
   private final Map<UUID, UUID> gameIdToHandIdMap;
@@ -85,9 +83,7 @@ public class GameDataService {
     useCachedGameList = false;
   }
 
-  /**
-   * Every 3 seconds, broadcasts the list of joinable games to the game list topic.
-   */
+  /** Every 3 seconds, broadcasts the list of joinable games to the game list topic. */
   @Scheduled(cron = "0/3 * * * * ?")
   public void broadcastGameList() {
     webSocketService.sendPublicMessage(
@@ -106,10 +102,7 @@ public class GameDataService {
     assert tables.get(id) != null;
     publisher.publishEvent(
         new GameMessageEvent<>(
-            this,
-            MessageType.PokerTable,
-            id,
-            PokerTableUtilities.hideCards(tables.get(id))));
+            this, MessageType.PokerTable, id, PokerTableUtilities.hideCards(tables.get(id))));
   }
 
   public void broadcastGame(final UUID id) {
@@ -146,7 +139,7 @@ public class GameDataService {
    * Sets up all the required mappings when a game is created and returns the ID of the new game.
    *
    * @param params Parameters of the new game.
-   * @param user   User who created the game.
+   * @param user User who created the game.
    * @return ID of the new game.
    */
   public UUID newGame(final GameParameterModel params, final UserModel user) {
@@ -272,10 +265,13 @@ public class GameDataService {
 
     final LobbyModel lobby = lobbys.remove(id);
     tables.get(id).setPlayers(game.getPlayers());
-    tables.get(id).setBlind(lobby
-        .getParameters()
-        .getBuyIn()
-        .divide(new BigDecimal(appConfig.getNumBigBlinds() * 2), BigDecimal.ROUND_CEILING));
+    tables
+        .get(id)
+        .setBlind(
+            lobby
+                .getParameters()
+                .getBuyIn()
+                .divide(new BigDecimal(appConfig.getNumBigBlinds() * 2), BigDecimal.ROUND_CEILING));
 
     cachedGameListIsOutdated();
     broadcastObfuscatedPokerTable(id);

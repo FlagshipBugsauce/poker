@@ -12,9 +12,7 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Specifies the ID of a topic used to communicate securely with one user.")
 public class PrivateTopicModel {
 
-  /**
-   * Secure topic ID.
-   */
+  /** Secure topic ID. */
   @Schema(description = "Secure topic ID.", implementation = UUID.class)
   private UUID id;
 }

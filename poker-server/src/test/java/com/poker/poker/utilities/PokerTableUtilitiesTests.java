@@ -45,8 +45,7 @@ public class PokerTableUtilitiesTests {
 
   public List<GamePlayerModel> getSamplePlayers(
       final int numPlayers, final int bankRollMin, final int bankRollMax) {
-    return IntStream
-        .range(0, numPlayers)
+    return IntStream.range(0, numPlayers)
         .mapToObj(i -> getRandomPlayer(bankRollMin, bankRollMax))
         .collect(Collectors.toList());
   }
@@ -67,10 +66,10 @@ public class PokerTableUtilitiesTests {
    * Creates a sequence of the following fake bets:
    *
    * <ol>
-   *   <li>10</li>
-   *   <li>20</li>
-   *   <li>40</li>
-   *   <li>80</li>
+   *   <li>10
+   *   <li>20
+   *   <li>40
+   *   <li>80
    * </ol>
    *
    * @param table Poker table.
@@ -87,14 +86,14 @@ public class PokerTableUtilitiesTests {
    * Creates a sequence of the following fake bets:
    *
    * <ol>
-   *   <li>10</li>
-   *   <li>20</li>
-   *   <li>40</li>
-   *   <li>60, all-in</li>
-   *   <li>100</li>
-   *   <li>300</li>
-   *   <li>140, all-in</li>
-   *   <li>600</li>
+   *   <li>10
+   *   <li>20
+   *   <li>40
+   *   <li>60, all-in
+   *   <li>100
+   *   <li>300
+   *   <li>140, all-in
+   *   <li>600
    * </ol>
    *
    * @param table Poker table.
@@ -119,15 +118,15 @@ public class PokerTableUtilitiesTests {
    * Creates a sequence of the following fake bets:
    *
    * <ol>
-   *   <li>10</li>
-   *   <li>20</li>
-   *   <li>40</li>
-   *   <li>60, all-in</li>
-   *   <li>100</li>
-   *   <li>300</li>
-   *   <li>140, all-in</li>
-   *   <li>600</li>
-   *   <li>1200, all-in</li>
+   *   <li>10
+   *   <li>20
+   *   <li>40
+   *   <li>60, all-in
+   *   <li>100
+   *   <li>300
+   *   <li>140, all-in
+   *   <li>600
+   *   <li>1200, all-in
    * </ol>
    *
    * @param table Poker table.
@@ -155,16 +154,16 @@ public class PokerTableUtilitiesTests {
    * Creates a sequence of the following fake bets:
    *
    * <ol>
-   *   <li>1200</li>
-   *   <li>2400</li>
-   *   <li>40</li>
-   *   <li>60, all-in</li>
-   *   <li>100</li>
-   *   <li>300</li>
-   *   <li>140, all-in</li>
-   *   <li>600</li>
-   *   <li>1200, all-in</li>
-   *   <li>1200</li>
+   *   <li>1200
+   *   <li>2400
+   *   <li>40
+   *   <li>60, all-in
+   *   <li>100
+   *   <li>300
+   *   <li>140, all-in
+   *   <li>600
+   *   <li>1200, all-in
+   *   <li>1200
    * </ol>
    *
    * @param table Poker table.
@@ -193,30 +192,31 @@ public class PokerTableUtilitiesTests {
    * Creates a sequence of the following fake bets:
    *
    * <ol>
-   *   <li>1000</li>
-   *   <li>500, all-in</li>
-   *   <li>400, all-in</li>
-   *   <li>200, all-in</li>
-   *   <li>100, all-in</li>
-   *   <li>1000</li>
-   *   <li>1000</li>
-   *   <li>300, all-in</li>
-   *   <li>1000</li>
-   *   <li>1000</li>
+   *   <li>1000
+   *   <li>500, all-in
+   *   <li>400, all-in
+   *   <li>200, all-in
+   *   <li>100, all-in
+   *   <li>1000
+   *   <li>1000
+   *   <li>300, all-in
+   *   <li>1000
+   *   <li>1000
    * </ol>
-   * <p>
-   * We want to make the bets so each of these players are all-in.
+   *
+   * <p>We want to make the bets so each of these players are all-in.
+   *
    * <ol>
-   *   <li>Player 4 - AS</li>
-   *   <li>Player 3 - JS</li>
-   *   <li>Player 7 - 10D</li>
-   *   <li>Player 2 - 9S</li>
-   *   <li>Player 1 - 7S</li>
-   *   <li>Player 5 - 6H</li>
-   *   <li>Player 6 - 5H</li>
-   *   <li>Player 8 - 3D</li>
-   *   <li>Player 0 - 2S</li>
-   *   <li>Player 9 - 2C</li>
+   *   <li>Player 4 - AS
+   *   <li>Player 3 - JS
+   *   <li>Player 7 - 10D
+   *   <li>Player 2 - 9S
+   *   <li>Player 1 - 7S
+   *   <li>Player 5 - 6H
+   *   <li>Player 6 - 5H
+   *   <li>Player 8 - 3D
+   *   <li>Player 0 - 2S
+   *   <li>Player 9 - 2C
    * </ol>
    *
    * @param table Poker table.
@@ -253,12 +253,13 @@ public class PokerTableUtilitiesTests {
    */
   public void createAllButOneFoldedScenario(final PokerTableModel table) {
     final List<GamePlayerModel> players = table.getPlayers();
-    players.forEach(p -> {
-      p.getControls().setCurrentBet(new BigDecimal(1000));
-      if (players.indexOf(p) != 0) {
-        p.setFolded(true);
-      }
-    });
+    players.forEach(
+        p -> {
+          p.getControls().setCurrentBet(new BigDecimal(1000));
+          if (players.indexOf(p) != 0) {
+            p.setFolded(true);
+          }
+        });
     createFakeHand(table);
     PokerTableUtilities.generateSidePots(table);
   }
@@ -267,16 +268,16 @@ public class PokerTableUtilitiesTests {
    * Creates a fake hand.
    *
    * <ol>
-   *   <li>Player 4 - AS</li>
-   *   <li>Player 3 - JS</li>
-   *   <li>Player 7 - 10D</li>
-   *   <li>Player 2 - 9S</li>
-   *   <li>Player 1 - 7S</li>
-   *   <li>Player 5 - 6H</li>
-   *   <li>Player 6 - 5H</li>
-   *   <li>Player 8 - 3D</li>
-   *   <li>Player 0 - 2S</li>
-   *   <li>Player 9 - 2C</li>
+   *   <li>Player 4 - AS
+   *   <li>Player 3 - JS
+   *   <li>Player 7 - 10D
+   *   <li>Player 2 - 9S
+   *   <li>Player 1 - 7S
+   *   <li>Player 5 - 6H
+   *   <li>Player 6 - 5H
+   *   <li>Player 8 - 3D
+   *   <li>Player 0 - 2S
+   *   <li>Player 9 - 2C
    * </ol>
    *
    * @param table Poker table.
@@ -300,13 +301,10 @@ public class PokerTableUtilitiesTests {
         new CardModel(CardSuit.Hearts, CardValue.Five),
         new CardModel(CardSuit.Diamonds, CardValue.Ten),
         new CardModel(CardSuit.Diamonds, CardValue.Three),
-        new CardModel(CardSuit.Clubs, CardValue.Two)
-    );
+        new CardModel(CardSuit.Clubs, CardValue.Two));
   }
 
-  /**
-   * Basic test where there are no side-pots.
-   */
+  /** Basic test where there are no side-pots. */
   @Test
   public void testPotGeneration_1() {
     final PokerTableModel table = getSamplePokerTable(10);
@@ -411,8 +409,8 @@ public class PokerTableUtilitiesTests {
   /**
    * Tests a relatively complex situation with 6 side-pots, to ensure that each winner receives the
    * appropriate amount of chips and the winners are selected correctly.
-   * <p>
-   * Unfortunately this test will be obsolete once we moved to 2-card hands.
+   *
+   * <p>Unfortunately this test will be obsolete once we moved to 2-card hands.
    */
   @Test
   public void testDetermineWinners_1() {
@@ -460,9 +458,7 @@ public class PokerTableUtilitiesTests {
     Assertions.assertEquals(1, table.getPots().size());
   }
 
-  /**
-   * Basic test of card dealing where all players are active in the hand.
-   */
+  /** Basic test of card dealing where all players are active in the hand. */
   @Test
   public void testDealCards_1() {
     // Setup.
@@ -484,9 +480,7 @@ public class PokerTableUtilitiesTests {
     Assertions.assertEquals(10, deck.numCardsUsed());
   }
 
-  /**
-   * Test of card dealing where some players are not active in the hand.
-   */
+  /** Test of card dealing where some players are not active in the hand. */
   @Test
   public void testDealCards_2() {
     // Setup.
@@ -549,12 +543,9 @@ public class PokerTableUtilitiesTests {
 
     Assertions.assertEquals(48, deck.numCardsRemaining());
     Assertions.assertEquals(4, deck.numCardsUsed());
-
   }
 
-  /**
-   * Basic test of general case where sb and bb both have enough chips to post their blinds.
-   */
+  /** Basic test of general case where sb and bb both have enough chips to post their blinds. */
   @Test
   public void testPerformBlindBets_1() {
     // Setup.
@@ -578,8 +569,10 @@ public class PokerTableUtilitiesTests {
     Assertions.assertEquals(
         bbBankRollInitial.subtract(bb), players.get(5).getControls().getBankRoll());
     Assertions.assertEquals(6, table.getActingPlayer());
-    players.forEach(p -> Assertions
-        .assertEquals(bb, p.getControls().getToCall().add(p.getControls().getCurrentBet())));
+    players.forEach(
+        p ->
+            Assertions.assertEquals(
+                bb, p.getControls().getToCall().add(p.getControls().getCurrentBet())));
     Assertions.assertEquals(BigDecimal.ZERO, players.get(5).getControls().getToCall());
     Assertions.assertEquals(sb, players.get(4).getControls().getToCall());
     Assertions.assertEquals(1, table.getPots().size());
@@ -620,8 +613,10 @@ public class PokerTableUtilitiesTests {
     Assertions.assertEquals(
         bbBankRollInitial.subtract(bb), players.get(1).getControls().getBankRoll());
     Assertions.assertEquals(2, table.getActingPlayer());
-    players.forEach(p -> Assertions
-        .assertEquals(bb, p.getControls().getToCall().add(p.getControls().getCurrentBet())));
+    players.forEach(
+        p ->
+            Assertions.assertEquals(
+                bb, p.getControls().getToCall().add(p.getControls().getCurrentBet())));
     Assertions.assertEquals(BigDecimal.ZERO, players.get(1).getControls().getToCall());
     Assertions.assertEquals(sb, players.get(6).getControls().getToCall());
     Assertions.assertEquals(1, table.getPots().size());
@@ -659,8 +654,8 @@ public class PokerTableUtilitiesTests {
     Assertions.assertEquals(6, table.getActingPlayer());
     Assertions.assertTrue(players.get(5).isAllIn());
     Assertions.assertEquals(BigDecimal.ZERO, players.get(5).getControls().getToCall());
-    Assertions
-        .assertEquals(bbBankRollInitial.subtract(sb), players.get(4).getControls().getToCall());
+    Assertions.assertEquals(
+        bbBankRollInitial.subtract(sb), players.get(4).getControls().getToCall());
     Assertions.assertEquals(1, table.getPots().size());
     Assertions.assertEquals(sb.add(bbBankRollInitial), table.getPots().get(0).getTotal());
     Assertions.assertEquals(bb, table.getMinRaise());
@@ -710,16 +705,16 @@ public class PokerTableUtilitiesTests {
    *
    * <ol>
    *   <b>Post-Conditions:</b>
-   *   <li>round field incremented.</li>
-   *   <li>Small blind bet made.</li>
-   *   <li>Big blind bet made.</li>
-   *   <li><code>pot</code> should be equal to sb + bb.</li>
-   *   <li>bb player's <code>toCall = 0</code>.</li>
-   *   <li>sb player's <code>toCall = table.blind</code>.</li>
-   *   <li>All other players <code>toCall = 2 * table.blind</code>.</li>
-   *   <li><code>actingPlayer</code> is the player 3 spots after the <code>dealer</code>.</li>
-   *   <li>If <code>table.round % 10 == 0</code>, then <code>table.blind *= 2</code>.</li>
-   *   <li>One card is dealt to each player.</li>
+   *   <li>round field incremented.
+   *   <li>Small blind bet made.
+   *   <li>Big blind bet made.
+   *   <li><code>pot</code> should be equal to sb + bb.
+   *   <li>bb player's <code>toCall = 0</code>.
+   *   <li>sb player's <code>toCall = table.blind</code>.
+   *   <li>All other players <code>toCall = 2 * table.blind</code>.
+   *   <li><code>actingPlayer</code> is the player 3 spots after the <code>dealer</code>.
+   *   <li>If <code>table.round % 10 == 0</code>, then <code>table.blind *= 2</code>.
+   *   <li>One card is dealt to each player.
    * </ol>
    */
   @Test
@@ -742,15 +737,14 @@ public class PokerTableUtilitiesTests {
     Assertions.assertEquals(pot, PokerTableUtilities.getTotalInAllSidePots(table.getPots()));
     Assertions.assertEquals(sb, players.get(2).getControls().getCurrentBet());
     Assertions.assertEquals(sb.add(sb), players.get(3).getControls().getCurrentBet());
-    players.stream().filter(p -> players.indexOf(p) != 2 && players.indexOf(p) != 3).forEach(p ->
-        Assertions.assertEquals(sb.add(sb), p.getControls().getToCall()));
+    players.stream()
+        .filter(p -> players.indexOf(p) != 2 && players.indexOf(p) != 3)
+        .forEach(p -> Assertions.assertEquals(sb.add(sb), p.getControls().getToCall()));
     Assertions.assertEquals(4, table.getActingPlayer());
     // TODO: Check that cards were dealt
   }
 
-  /**
-   * Ensuring the blinds are increased
-   */
+  /** Ensuring the blinds are increased */
   @Test
   public void testNewHandSetup_2() {
     final PokerTableModel table = getSamplePokerTable(10);
@@ -766,13 +760,10 @@ public class PokerTableUtilitiesTests {
     // Verify.
     Assertions.assertEquals(sb.add(sb), table.getBlind());
     Assertions.assertEquals(
-        sb.multiply(new BigDecimal(6)),
-        PokerTableUtilities.getTotalInAllSidePots(table.getPots()));
+        sb.multiply(new BigDecimal(6)), PokerTableUtilities.getTotalInAllSidePots(table.getPots()));
   }
 
-  /**
-   * Simulates some actions and ensures they were handled correctly.
-   */
+  /** Simulates some actions and ensures they were handled correctly. */
   @Test
   public void testHandleHandAction_1() {
     final PokerTableModel table = getSamplePokerTable(10);
@@ -838,8 +829,8 @@ public class PokerTableUtilitiesTests {
     Assertions.assertEquals(dealtCards.get(9), players.get(5).getCards().get(0));
     players.forEach(p -> Assertions.assertEquals(1, p.getCards().size()));
     // Check acting players
-    actingPlayers.forEach(i ->
-        Assertions.assertEquals(expectedActingPlayers.indexOf(i), actingPlayers.indexOf(i)));
+    actingPlayers.forEach(
+        i -> Assertions.assertEquals(expectedActingPlayers.indexOf(i), actingPlayers.indexOf(i)));
     // Check lastToAct
     Assertions.assertEquals(3, table.getLastToAct());
   }

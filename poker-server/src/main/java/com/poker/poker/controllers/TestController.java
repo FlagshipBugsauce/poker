@@ -49,7 +49,7 @@ public class TestController {
       @Parameter(hidden = true) @RequestHeader("Authorization") final String jwt,
       @RequestBody final String message) {
     final UserModel user = jwtService.getUserDocument(jwt);
-    publisher.publishEvent(new PrivateMessageEvent<>(
-        this, MessageType.Debug, user.getId(), message));
+    publisher.publishEvent(
+        new PrivateMessageEvent<>(this, MessageType.Debug, user.getId(), message));
   }
 }

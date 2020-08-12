@@ -10,19 +10,13 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class GameActionEvent extends ApplicationEvent {
 
-  /**
-   * Player ID.
-   */
+  /** Player ID. */
   private final UUID playerId;
 
-  /**
-   * Type of action.
-   */
+  /** Type of action. */
   private final GameAction type;
 
-  /**
-   * Raise amount (if applicable).
-   */
+  /** Raise amount (if applicable). */
   private final BigDecimal raise;
 
   public GameActionEvent(final Object source, final GameActionModel model) {
@@ -33,10 +27,7 @@ public class GameActionEvent extends ApplicationEvent {
   }
 
   public GameActionEvent(
-      final Object source,
-      final UUID playerId,
-      final GameAction type,
-      final BigDecimal raise) {
+      final Object source, final UUID playerId, final GameAction type, final BigDecimal raise) {
     super(source);
     this.playerId = playerId;
     this.type = type;

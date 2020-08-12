@@ -7,9 +7,7 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class WaitForPlayerEvent extends ApplicationEvent {
 
-  /**
-   * Player's ID.
-   */
+  /** Player's ID. */
   private final UUID id;
 
   public WaitForPlayerEvent(final Object source, final UUID id) {

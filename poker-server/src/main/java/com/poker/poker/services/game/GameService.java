@@ -71,7 +71,7 @@ public class GameService {
   /**
    * Publishes a message to system chat for specified game ID.
    *
-   * @param gameId  The lobby the message should be published to.
+   * @param gameId The lobby the message should be published to.
    * @param message The message to publish.
    */
   public void publishSystemChatMessageEvent(final UUID gameId, final String message) {
@@ -268,8 +268,8 @@ public class GameService {
 
     // If the players away status is true, and it's their turn, draw their card for them.
     if (player.getId().equals(acting.getId()) && player.isAway()) {
-      publisher.publishEvent(new GameActionEvent(
-          this, player.getId(), defaultAction(player), null));
+      publisher.publishEvent(
+          new GameActionEvent(this, player.getId(), defaultAction(player), null));
     }
 
     publisher.publishEvent(
@@ -308,31 +308,33 @@ public class GameService {
     data.broadcastObfuscatedPokerTable(game.getId());
 
     // Wait for player action.
-    publisher.publishEvent(new WaitForPlayerEvent(
-        this,
-        table.getPlayers().get(table.getActingPlayer()).getId()));
+    publisher.publishEvent(
+        new WaitForPlayerEvent(this, table.getPlayers().get(table.getActingPlayer()).getId()));
   }
 
   @Async
   @EventListener
   public void broadcastPlayerCards(final PublishCardsEvent event) {
     final GameModel game = data.getGame(event.getId());
-    game.getPlayers().forEach(p -> publisher.publishEvent(
-        new PrivateMessageEvent<>(this, MessageType.PlayerData, p.getId(), p)));
+    game.getPlayers()
+        .forEach(
+            p ->
+                publisher.publishEvent(
+                    new PrivateMessageEvent<>(this, MessageType.PlayerData, p.getId(), p)));
   }
 
   @Async
   @EventListener
   public void dealCards(final DealCardsEvent event) {
-    publisher.publishEvent(new GameMessageEvent<>(
-        this, MessageType.Deal, event.getId(), new DealModel()));
+    publisher.publishEvent(
+        new GameMessageEvent<>(this, MessageType.Deal, event.getId(), new DealModel()));
   }
 
   @Async
   @EventListener
   public void hideCards(final HideCardsEvent event) {
-    publisher.publishEvent(new GameMessageEvent<>(
-        this, MessageType.HideCards, event.getId(), new HideCardsModel()));
+    publisher.publishEvent(
+        new GameMessageEvent<>(this, MessageType.HideCards, event.getId(), new HideCardsModel()));
   }
 
   @Async
@@ -344,8 +346,7 @@ public class GameService {
     // Update table + player models.
     handlePlayerAction(table, event.getType(), event.getPlayerId(), adjustWager(table, event));
 
-    publishSystemChatMessageEvent(
-        game.getId(), getSystemChatActionMessage(table, event));
+    publishSystemChatMessageEvent(game.getId(), getSystemChatActionMessage(table, event));
     data.broadcastObfuscatedPokerTable(game.getId());
 
     // Check if hand should continue, if yes, publish wait even and return;
@@ -373,11 +374,15 @@ public class GameService {
 
     // Now we need to determine whether the game is over (i.e. all players are bust, except one).
     log.debug("Determining if game should continue.");
-    final int numRemaining = (int) table.getPlayers()
-        .stream()
-        .filter(p -> !p.getControls().getBankRoll()
-            .equals(BigDecimal.ZERO))  // TODO: Should check isOut
-        .count();
+    final int numRemaining =
+        (int)
+            table.getPlayers().stream()
+                .filter(
+                    p ->
+                        !p.getControls()
+                            .getBankRoll()
+                            .equals(BigDecimal.ZERO)) // TODO: Should check isOut
+                .count();
 
     if (numRemaining > 1) {
       // Start a new hand
@@ -421,21 +426,17 @@ public class GameService {
     final int tracker = table.getEventTracker();
     data.broadcastObfuscatedPokerTable(game.getId());
 
-    assert table
-        .getPlayers()
-        .get(table.getActingPlayer())
-        .getId()
-        .equals(player.getId());
+    assert table.getPlayers().get(table.getActingPlayer()).getId().equals(player.getId());
 
     if (player.isAway()) {
       // Perform default action for afk players, could be AllInCheck, Check or Fold.
-      publisher.publishEvent(new GameActionEvent(
-          this, player.getId(), defaultAction(player), null));
+      publisher.publishEvent(
+          new GameActionEvent(this, player.getId(), defaultAction(player), null));
       return;
     } else if (player.isAllIn()) {
       // Player is All-In, they can't do anything nor can they be removed from the round.
-      publisher.publishEvent(new GameActionEvent(
-          this, player.getId(), GameAction.AllInCheck, null));
+      publisher.publishEvent(
+          new GameActionEvent(this, player.getId(), GameAction.AllInCheck, null));
       return;
     }
 
