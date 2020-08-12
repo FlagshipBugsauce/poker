@@ -1,19 +1,30 @@
-<div *ngIf="acting" class="control-container">
+<div *ngIf="displayControls" class="control-container">
   <div>
-    <button class="btn btn-danger table-button">Fold</button>
-  </div>
-  <div>
-    <button [disabled]="!canCheck" class="btn btn-secondary table-button">Check</button>
+    <button
+      (click)="performAction(actions.Fold)"
+      class="btn btn-danger table-button">Fold
+    </button>
   </div>
   <div>
     <button
-      [disabled]="amountToCall <= 0"
+      (click)="performAction(actions.Check)"
+      [disabled]="!canCheck"
+      class="btn btn-secondary table-button">Check
+    </button>
+  </div>
+  <div>
+    <button
+      (click)="performAction(actions.Call)"
+      [disabled]="toCall === 0"
       class="btn btn-warning table-button text-light">
       Call {{toCall > 0 ? toCall : ''}}
     </button>
   </div>
   <div>
-    <button class="btn btn-info table-button">Raise {{raise}}</button>
+    <button
+      (click)="performAction(actions.Raise)"
+      [disabled]="!canRaise"
+      class="btn btn-info table-button">Raise {{raise}}</button>
   </div>
   <div class="raise-slider-container">
     <div class="raise-input-container">
@@ -23,6 +34,7 @@
         [max]="bankRoll"
         [min]="minRaise"
         [value]="raise"
+        [disabled]="true"
         class="form-control raise-input"
         type="number">
     </div>

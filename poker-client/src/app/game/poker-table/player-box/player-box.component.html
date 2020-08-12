@@ -3,7 +3,7 @@
     {{initials}}
   </div>
   <div class="card-box">
-    <div *ngIf="cards[0]" class="card-container left">
+    <div *ngIf="cards[0] && !hideCards" class="card-container left">
       <pkr-card #card1 [card]="cards[0]" size="md"></pkr-card>
     </div>
     <!--    <div class="card-container right">-->
@@ -15,19 +15,24 @@
       {{name}}
     </div>
     <div class="chips">
-      {{bankRoll | currency}} {{score}}
+      {{bankRoll | currency}}
     </div>
   </div>
   <div *ngIf="true" [ngStyle]="{
-      'left': iconBoxPosition.left + 'px',
-      'top': iconBoxPosition.top + 'px'
+      'left': positions.iconBox.left + 'px',
+      'top': positions.iconBox.top + 'px'
     }" class="icon-containers">
     <img *ngIf="dealer" [src]="dealerButtonPath" alt="" ngbTooltip="Dealer">
     <img *ngIf="away" [ngStyle]="{
       'position': 'absolute',
-      'top': awayIconPosition.top + 'px',
-      'left': awayIconPosition.left + 'px'
+      'top': positions.awayIcon.top + 'px',
+      'left': positions.awayIcon.left + 'px'
     }" [src]="awayIconPath" alt="" ngbTooltip="Away">
   </div>
-
+  <div [ngStyle]="{
+      'left': positions.chipsBox.left + 'px',
+      'top': positions.chipsBox.top + 'px'
+  }" class="chips-box">
+    {{ currentBet === 0 ? '' : (currentBet | currency) }}
+  </div>
 </div>

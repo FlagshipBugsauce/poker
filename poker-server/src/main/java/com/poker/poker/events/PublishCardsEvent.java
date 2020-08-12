@@ -5,14 +5,14 @@ import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
 @Getter
-public class WaitForPlayerEvent extends ApplicationEvent {
+public class PublishCardsEvent extends ApplicationEvent {
 
   /**
-   * Player's ID.
+   * Game ID.
    */
   private final UUID id;
 
-  public WaitForPlayerEvent(final Object source, final UUID id) {
+  public PublishCardsEvent(final Object source, final UUID id) {
     super(source);
     this.id = id;
   }

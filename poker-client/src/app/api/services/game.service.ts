@@ -63,10 +63,6 @@ export class GameService extends BaseService {
   }
 
   /**
-   * Path part for operation leaveLobby
-   */
-  static readonly LeaveLobbyPath = '/game/leave-lobby';
-  /**
    * Path part for operation createGame
    */
   static readonly CreateGamePath = '/game/create';
@@ -75,75 +71,17 @@ export class GameService extends BaseService {
    */
   static readonly JoinGamePath = '/game/join/{gameId}';
   /**
-   * Path part for operation setActiveStatus
-   */
-  static readonly SetActiveStatusPath = '/game/active';
-  /**
    * Path part for operation startGame
    */
   static readonly StartGamePath = '/game/start';
-
   /**
-   * Ready to Start.
-   *
-   * Request sent when a player is ready for the game to start.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `ready$Response()` instead.
-   *
-   * This method doesn't expect any request body.
+   * Path part for operation leaveLobby
    */
-  ready(params?: {}): Observable<ApiSuccessModel> {
-
-    return this.ready$Response(params).pipe(
-      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
-    );
-  }
-
+  static readonly LeaveLobbyPath = '/game/leave-lobby';
   /**
-   * Leave Game Lobby.
-   *
-   * Request sent when a player leaves a game lobby.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `leaveLobby()` instead.
-   *
-   * This method doesn't expect any request body.
+   * Path part for operation setActiveStatus
    */
-  leaveLobby$Response(params?: {}): Observable<StrictHttpResponse<ApiSuccessModel>> {
-
-    const rb = new RequestBuilder(this.rootUrl, GameService.LeaveLobbyPath, 'post');
-    if (params) {
-
-
-    }
-    return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<ApiSuccessModel>;
-      })
-    );
-  }
-
-  /**
-   * Leave Game Lobby.
-   *
-   * Request sent when a player leaves a game lobby.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `leaveLobby$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  leaveLobby(params?: {}): Observable<ApiSuccessModel> {
-
-    return this.leaveLobby$Response(params).pipe(
-      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
-    );
-  }
+  static readonly SetActiveStatusPath = '/game/active';
 
   /**
    * Joins a game.
@@ -193,6 +131,23 @@ export class GameService extends BaseService {
   }): Observable<ApiSuccessModel> {
 
     return this.joinGame$Response(params).pipe(
+      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
+    );
+  }
+
+  /**
+   * Ready to Start.
+   *
+   * Request sent when a player is ready for the game to start.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `ready$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  ready(params?: {}): Observable<ApiSuccessModel> {
+
+    return this.ready$Response(params).pipe(
       map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
     );
   }
@@ -248,6 +203,96 @@ export class GameService extends BaseService {
   }
 
   /**
+   * Start Game.
+   *
+   * Starts the game, provided all preconditions are satisfied..
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `startGame()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  startGame$Response(params?: {}): Observable<StrictHttpResponse<ApiSuccessModel>> {
+
+    const rb = new RequestBuilder(this.rootUrl, GameService.StartGamePath, 'post');
+    if (params) {
+
+
+    }
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<ApiSuccessModel>;
+      })
+    );
+  }
+
+  /**
+   * Start Game.
+   *
+   * Starts the game, provided all preconditions are satisfied..
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `startGame$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  startGame(params?: {}): Observable<ApiSuccessModel> {
+
+    return this.startGame$Response(params).pipe(
+      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
+    );
+  }
+
+  /**
+   * Leave Game Lobby.
+   *
+   * Request sent when a player leaves a game lobby.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `leaveLobby()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  leaveLobby$Response(params?: {}): Observable<StrictHttpResponse<ApiSuccessModel>> {
+
+    const rb = new RequestBuilder(this.rootUrl, GameService.LeaveLobbyPath, 'post');
+    if (params) {
+
+
+    }
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<ApiSuccessModel>;
+      })
+    );
+  }
+
+  /**
+   * Leave Game Lobby.
+   *
+   * Request sent when a player leaves a game lobby.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `leaveLobby$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  leaveLobby(params?: {}): Observable<ApiSuccessModel> {
+
+    return this.leaveLobby$Response(params).pipe(
+      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
+    );
+  }
+
+  /**
    * Set Active Status.
    *
    * Sets the status that indicates whether a player is active or not.
@@ -293,51 +338,6 @@ export class GameService extends BaseService {
   }): Observable<ApiSuccessModel> {
 
     return this.setActiveStatus$Response(params).pipe(
-      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
-    );
-  }
-
-  /**
-   * Start Game.
-   *
-   * Starts the game, provided all preconditions are satisfied..
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `startGame()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  startGame$Response(params?: {}): Observable<StrictHttpResponse<ApiSuccessModel>> {
-
-    const rb = new RequestBuilder(this.rootUrl, GameService.StartGamePath, 'post');
-    if (params) {
-
-
-    }
-    return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<ApiSuccessModel>;
-      })
-    );
-  }
-
-  /**
-   * Start Game.
-   *
-   * Starts the game, provided all preconditions are satisfied..
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `startGame$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  startGame(params?: {}): Observable<ApiSuccessModel> {
-
-    return this.startGame$Response(params).pipe(
       map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
     );
   }

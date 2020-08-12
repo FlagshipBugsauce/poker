@@ -8,6 +8,11 @@ import {TableControlsModel} from './table-controls-model';
 export interface GamePlayerModel {
 
   /**
+   * Player bet entire bankroll.
+   */
+  allIn?: boolean;
+
+  /**
    * Specifies whether a player is active.
    */
   away?: boolean;
@@ -24,7 +29,7 @@ export interface GamePlayerModel {
   firstName?: string;
 
   /**
-   * Player is no longer in the hand.
+   * Player is no longer in the hand when this is true.
    */
   folded?: boolean;
 

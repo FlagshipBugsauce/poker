@@ -1,4 +1,4 @@
-<div *ngIf="summary" class="hand-summary-container">
+<div *ngIf="displayHandSummary$ | async" class="hand-summary-container">
   <div
     [ngStyle]="{
       'left': -(width / 2) + 'px',

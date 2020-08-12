@@ -20,5 +20,7 @@ export enum MessageType {
   StartTurnTimer = 'StartTurnTimer',
   PokerTable = 'PokerTable',
   Timer = 'Timer',
-  Deal = 'Deal'
+  Deal = 'Deal',
+  HideCards = 'HideCards',
+  Cards = 'Cards'
 }

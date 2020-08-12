@@ -10,6 +10,7 @@ import {
   joinLobby,
   leaveGame,
   leaveLobby,
+  performGameAction,
   readyUp,
   rejoinGame,
   requestGameModelUpdate,
@@ -21,7 +22,7 @@ import {
 import {Router} from '@angular/router';
 import {APP_ROUTES} from '../app-routes';
 import {HandService} from '../api/services/hand.service';
-import {ActiveStatusModel, GameParameterModel} from '../api/models';
+import {ActiveStatusModel, GameActionModel, GameParameterModel} from '../api/models';
 import {WebSocketService} from '../shared/web-socket/web-socket.service';
 import {MessageType} from '../shared/models/message-types.enum';
 import {RejoinModel} from '../shared/models/rejoin.model';
@@ -29,7 +30,6 @@ import {CreateGameService} from '../shared/web-socket/create-game.service';
 import {AppStateContainer} from '../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {selectJwt} from './app.selector';
-import {TypedAction} from '@ngrx/store/src/models';
 import {GamePhase} from '../shared/models/game-phase.enum';
 
 @Injectable()
@@ -161,12 +161,21 @@ export class GameEffects {
    */
   rejoinGame$ = createEffect(() => this.actions$.pipe(
     ofType(rejoinGame),
-    tap((action: RejoinModel & TypedAction<'[Lobby Component] RejoinGame'>) => {
+    tap((action: RejoinModel) => {
       this.webSocketService.send('/topic/game/rejoin', {jwt: this.jwt});
       this.subscribeToGameTopics(action.gameId);
       this.requestGameTopicUpdatesInPlayPhase();
       this.router.navigate([`${APP_ROUTES.GAME_PREFIX.path}/${action.gameId}`]).then();
     })
+  ), {dispatch: false});
+
+  /**
+   * Performs a game action (Fold, Check, Call or Raise).
+   */
+  performGameAction$ = createEffect(() => this.actions$.pipe(
+    ofType(performGameAction),
+    tap((action: GameActionModel) =>
+      this.webSocketService.send('/topic/game/act', {jwt: this.jwt, data: action}))
   ), {dispatch: false});
 
   constructor(

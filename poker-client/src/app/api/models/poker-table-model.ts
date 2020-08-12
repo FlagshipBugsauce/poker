@@ -1,6 +1,8 @@
 /* tslint:disable */
 import {GamePlayerModel} from './game-player-model';
 import {HandSummaryModel} from './hand-summary-model';
+import {PotModel} from './pot-model';
+import {WinnerModel} from './winner-model';
 
 export interface PokerTableModel {
 
@@ -8,6 +10,16 @@ export interface PokerTableModel {
    * Position of the player who is acting.
    */
   actingPlayer?: number;
+
+  /**
+   * Flag that is true when a betting round is taking place.
+   */
+  betting?: boolean;
+
+  /**
+   * Blinds.
+   */
+  blind?: number;
 
   /**
    * Position of the dealer.
@@ -44,5 +56,12 @@ export interface PokerTableModel {
    * Total amount in the pot.
    */
   pot?: number;
+  pots?: Array<PotModel>;
+
+  /**
+   * Current round.
+   */
+  round?: number;
   summary?: HandSummaryModel;
+  winners?: Array<WinnerModel>;
 }

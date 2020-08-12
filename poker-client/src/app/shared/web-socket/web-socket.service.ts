@@ -27,6 +27,7 @@ import {
   gamePhaseChanged,
   gamePlayerUpdated,
   handCompleted,
+  hideCards,
   lobbyModelUpdated,
   playerAwayToggled,
   playerDataUpdated,
@@ -34,6 +35,7 @@ import {
   playerLeftLobby,
   playerReadyToggled,
   pokerTableUpdate,
+  privatePlayerDataUpdated,
   startTimer,
   updateCurrentGame
 } from '../../state/app.actions';
@@ -140,7 +142,8 @@ export class WebSocketService implements OnDestroy {
     .subscribe(data => {
       switch (data.type) {
         case MessageType.PlayerData:
-          this.privatePlayerDataStore.dispatch(playerDataUpdated(data.data));
+          console.log(data.data.cards);
+          this.privatePlayerDataStore.dispatch(privatePlayerDataUpdated(data.data));
           break;
         case MessageType.Debug:
           console.log(data);
@@ -203,6 +206,10 @@ export class WebSocketService implements OnDestroy {
           break;
         case MessageType.Deal:
           this.miscEventsStore.dispatch(dealCards(data.data));
+          break;
+        case MessageType.HideCards:
+          this.miscEventsStore.dispatch(hideCards(data.data));
+          break;
       }
     });
   }

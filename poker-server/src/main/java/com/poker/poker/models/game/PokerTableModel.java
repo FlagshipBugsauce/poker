@@ -3,7 +3,9 @@ package com.poker.poker.models.game;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -49,6 +51,12 @@ public class PokerTableModel {
   private HandSummaryModel summary = null;
 
   /**
+   * Winners of the hand.
+   */
+  @ArraySchema(schema = @Schema(implementation = WinnerModel.class))
+  private List<WinnerModel> winners = new ArrayList<>();
+
+  /**
    * This is incremented whenever some action is performed.
    */
   @Schema(description = "This is incremented whenever some action is performed.", example = "69")
@@ -58,7 +66,7 @@ public class PokerTableModel {
    * Minimum raise amount.
    */
   @Schema(description = "Minimum raise amount.", example = "69", implementation = BigDecimal.class)
-  private BigDecimal minRaise;
+  private BigDecimal minRaise = BigDecimal.ZERO;
 
   /**
    * Total amount in the pot.
@@ -67,13 +75,62 @@ public class PokerTableModel {
       description = "Total amount in the pot.",
       example = "420.69",
       implementation = BigDecimal.class)
-  private BigDecimal pot;
+  private BigDecimal pot = BigDecimal.ZERO;
+
+  /**
+   * Side-pots.
+   */
+  @ArraySchema(schema = @Schema(implementation = PotModel.class))
+  private List<PotModel> pots = new ArrayList<>();
+
+  /**
+   * Blinds.
+   */
+  @Schema(description = "Blinds.", example = "69", implementation = BigDecimal.class)
+  private BigDecimal blind = BigDecimal.ZERO;
+
+  /**
+   * Blinds.
+   */
+  @Schema(description = "Current round.", example = "69")
+  private int round = 0;
 
   /**
    * The round will end once this player has acted.
    */
   @Schema(description = "The round will end once this player has acted.", example = "2")
-  private int lastToAct;
+  private int lastToAct = 0;
+
+  /**
+   * Flag that is true when a betting round is taking place.
+   */
+  @Schema(description = "Flag that is true when a betting round is taking place.", example = "true")
+  private boolean betting = false;
+
+  public PokerTableModel(final PokerTableModel table) {
+    players = table.getPlayers()
+        .stream()
+        .map(GamePlayerModel::new)
+        .collect(Collectors.toList());
+    actingPlayer = table.getActingPlayer();
+    playerThatActed = table.getPlayerThatActed();
+    dealer = table.getDealer();
+    displayHandSummary = table.isDisplayHandSummary();
+    summary = table.getSummary();
+    eventTracker = table.getEventTracker();
+    minRaise = table.getMinRaise();
+    pot = table.getPot();
+    lastToAct = table.getLastToAct();
+    betting = table.isBetting();
+    round = table.getRound();
+    blind = table.getBlind();
+    pots = table.getPots();
+    winners = table.getWinners();
+  }
+
+  public void roundStarted() {
+    round++;
+  }
 
   public void playerActed() {
     incActingPlayer();

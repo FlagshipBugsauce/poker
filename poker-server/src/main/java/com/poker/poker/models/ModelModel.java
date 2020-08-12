@@ -2,6 +2,7 @@ package com.poker.poker.models;
 
 import com.poker.poker.models.enums.CardSuit;
 import com.poker.poker.models.enums.CardValue;
+import com.poker.poker.models.enums.GameAction;
 import com.poker.poker.models.enums.GamePhase;
 import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.enums.UserGroup;
@@ -12,17 +13,21 @@ import com.poker.poker.models.game.DealModel;
 import com.poker.poker.models.game.DeckModel;
 import com.poker.poker.models.game.DrawGameDataContainerModel;
 import com.poker.poker.models.game.DrawGameDrawModel;
+import com.poker.poker.models.game.GameActionModel;
 import com.poker.poker.models.game.GameListModel;
 import com.poker.poker.models.game.GameModel;
 import com.poker.poker.models.game.GameParameterModel;
 import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.HandSummaryModel;
+import com.poker.poker.models.game.HideCardsModel;
 import com.poker.poker.models.game.LobbyModel;
 import com.poker.poker.models.game.LobbyPlayerModel;
 import com.poker.poker.models.game.PlayerModel;
 import com.poker.poker.models.game.PokerTableModel;
+import com.poker.poker.models.game.PotModel;
 import com.poker.poker.models.game.TableControlsModel;
 import com.poker.poker.models.game.TimerModel;
+import com.poker.poker.models.game.WinnerModel;
 import com.poker.poker.models.user.AuthRequestModel;
 import com.poker.poker.models.user.AuthResponseModel;
 import com.poker.poker.models.user.ClientUserModel;
@@ -54,6 +59,7 @@ public class ModelModel {
   // Enums
   private CardSuit cardSuit;
   private CardValue cardValue;
+  private GameAction gameAction;
   private GamePhase gamePhase;
   private MessageType messageType;
   private UserGroup userGroup;
@@ -65,17 +71,21 @@ public class ModelModel {
   private DeckModel deckModel;
   private DrawGameDataContainerModel drawGameDataContainerModel;
   private DrawGameDrawModel drawGameDrawModel;
+  private GameActionModel gameActionModel;
   private GameListModel gameListModel;
   private GameModel gameModel;
   private GameParameterModel gameParameterModel;
   private GamePlayerModel gamePlayerModel;
   private HandSummaryModel handSummaryModel;
+  private HideCardsModel hideCardsModel;
   private LobbyModel lobbyModel;
   private LobbyPlayerModel lobbyPlayerModel;
   private PlayerModel playerModel;
   private PokerTableModel pokerTableModel;
+  private PotModel potModel;
   private TimerModel timerModel;
   private TableControlsModel tableControlsModel;
+  private WinnerModel winnerModel;
 
   // User Models
   private UserModel userModel;

@@ -3,11 +3,14 @@ package com.poker.poker.controllers;
 import com.poker.poker.config.AppConfig;
 import com.poker.poker.events.ChatMessageEvent;
 import com.poker.poker.events.CreateGameEvent;
+import com.poker.poker.events.GameActionEvent;
 import com.poker.poker.events.JoinGameEvent;
 import com.poker.poker.events.LeaveGameEvent;
 import com.poker.poker.events.PublishCurrentGameEvent;
 import com.poker.poker.events.RejoinGameEvent;
+import com.poker.poker.models.game.GameActionModel;
 import com.poker.poker.models.game.GameParameterModel;
+import com.poker.poker.models.game.PokerTableModel;
 import com.poker.poker.models.user.UserModel;
 import com.poker.poker.models.websocket.ClientMessageModel;
 import com.poker.poker.models.websocket.GenericServerMessage;
@@ -17,6 +20,7 @@ import com.poker.poker.services.JwtService;
 import com.poker.poker.services.UserService;
 import com.poker.poker.services.WebSocketService;
 import com.poker.poker.services.game.GameDataService;
+import com.poker.poker.utilities.PokerTableUtilities;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -73,7 +77,9 @@ public class WebSocketController {
           data = this.data.getPlayer(updateModel.getId());
           break;
         case PokerTable:
-          data = this.data.getPokerTable(updateModel.getId());
+          PokerTableModel table = this.data.getPokerTable(updateModel.getId());
+          table = table.isBetting() ? PokerTableUtilities.hideCards(table) : table;
+          data = table;
           break;
         default:
           data = null;
@@ -89,16 +95,13 @@ public class WebSocketController {
       summary = "Request a private topic.",
       description = "Creates a private topic so that the backend can communicate securely to one client.",
       tags = "websocket")
-  @ApiResponses(
-      value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Private topic successfully created.",
-              content =
-              @Content(
-                  schema = @Schema(implementation = PrivateTopicModel.class),
-                  mediaType = MediaType.APPLICATION_JSON_VALUE))
-      })
+  @ApiResponses(@ApiResponse(
+      responseCode = "200",
+      description = "Private topic successfully created.",
+      content =
+      @Content(
+          schema = @Schema(implementation = PrivateTopicModel.class),
+          mediaType = MediaType.APPLICATION_JSON_VALUE)))
   @GetMapping("/private-topic")
   public ResponseEntity<PrivateTopicModel> getPrivateTopic(
       @Parameter(hidden = true) @RequestHeader("Authorization") final String jwt) {
@@ -152,5 +155,12 @@ public class WebSocketController {
     final UserModel user = jwtService.getUserDocument(messageModel.getJwt());
     log.debug("User {} attempting to join a game.", user.getId());
     publisher.publishEvent(new JoinGameEvent(this, messageModel.getGameId(), user));
+  }
+
+  @MessageMapping("/game/act")
+  public void performGameAction(final ClientMessageModel<GameActionModel> messageModel) {
+    userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
+    log.debug("Player performed {} action.", messageModel.getData().getActionType());
+    publisher.publishEvent(new GameActionEvent(this, messageModel.getData()));
   }
 }

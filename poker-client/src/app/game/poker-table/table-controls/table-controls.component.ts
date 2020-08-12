@@ -8,6 +8,8 @@ import {Subject} from "rxjs";
 import {GamePlayerModel} from "../../../api/models/game-player-model";
 import {ClientUserModel} from "../../../api/models/client-user-model";
 import {PokerTableModel} from "../../../api/models/poker-table-model";
+import {GameAction} from "../../../shared/models/game-action.enum";
+import {performGameAction} from "../../../state/app.actions";
 
 @Component({
   selector: 'pkr-table-controls',
@@ -23,9 +25,7 @@ export class TableControlsComponent implements OnInit, OnDestroy {
   }
   @ViewChild('raiseInput') public raiseInput: ElementRef;
 
-  public acting: boolean = true;
-  public otherBet: number = 120;
-  public currentBet: number = 40;
+  public actions = GameAction;
   public players: GamePlayerModel[] = [];
   public player: GamePlayerModel;
   public user: ClientUserModel;
@@ -42,35 +42,44 @@ export class TableControlsComponent implements OnInit, OnDestroy {
   }
 
   public get safe(): boolean {
-    return this.table && this.player && this.player.controls;
+    return this.table && this.player && this.player.controls != null;
   }
 
-  public get amountToCall(): number {
-    return this.otherBet - this.currentBet;
+  public get displayControls(): boolean {
+    return this.safe ? this.acting && this.table.betting : false;
+  }
+
+  public get acting(): boolean {
+    return this.safe ? this.players[this.table.actingPlayer].id === this.player.id : false;
   }
 
   public get toCall(): number {
-    return this.safe ? this.player.controls.toCall : 0;
+    return this.safe ?
+      this.player.controls.toCall > this.bankRoll ? this.bankRoll : this.player.controls.toCall : 0;
   }
 
   public get canCheck(): boolean {
     return this.toCall === 0;
   }
 
+  public get minRaise(): number {
+    return this.safe ? Math.min(this.table.minRaise, this.bankRoll - this.toCall) : 0;
+  }
+
+  public get canRaise(): boolean {
+    return this.safe ? this.player.controls.toCall < this.bankRoll : false;
+  }
+
   public get slider(): SliderModel {
     return this.safe ? {
-      min: this.table.minRaise,
-      max: this.player.controls.bankRoll,
+      min: this.minRaise,
+      max: this.bankRoll - this.toCall,
       step: 1
     } : this.defaultSlider;
   }
 
   public get bankRoll(): number {
-    return this.safe ? this.player.controls.bankRoll : 420;
-  }
-
-  public get minRaise(): number {
-    return this.safe ? this.table.minRaise : 420;
+    return this.safe ? this.player.controls.bankRoll : 0;
   }
 
   ngOnInit(): void {
@@ -81,16 +90,21 @@ export class TableControlsComponent implements OnInit, OnDestroy {
     this.pokerTableStore.select(selectPlayers)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((players: GamePlayerModel[]) => {
+      // TODO: Should replace this with request for one players data.
       this.players = players;
       if (players && players.length > 0) {
-        console.log(this.user);
         this.player = players.find(p => p.id === this.user.id);
       }
     });
 
     this.pokerTableStore.select(selectPokerTable)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((table: PokerTableModel) => this.table = table);
+    .subscribe((table: PokerTableModel) => {
+      this.table = table;
+      if (this.safe && this.table.players[this.table.actingPlayer].id === this.user.id) {
+        this.raise = this.minRaise;
+      }
+    });
   }
 
   public ngOnDestroy() {
@@ -99,12 +113,25 @@ export class TableControlsComponent implements OnInit, OnDestroy {
   }
 
   public raiseChanged($event): void {
-    const val = $event.target.value;
-    this.raise = val <= this.bankRoll ? val : this.bankRoll;
-    this.raise = this.raise >= this.minRaise ? this.raise : this.minRaise;
-    this.raiseInput.nativeElement.value = this.raise;
+    // const val = $event.target.value;
+    // this.raise = val <= this.bankRoll ? val : this.bankRoll;
+    // this.raise = this.raise >= Math.min(this.minRaise, this.bankRoll) ? this.raise :
+    //   Math.min(this.minRaise, this.bankRoll);
+    // this.raiseInput.nativeElement.value = this.raise;
+    this.raise = $event.target.value;
   }
 
+  public performAction(type: GameAction) {
+    this.pokerTableStore.dispatch(performGameAction({
+      actionType: type,
+      playerId: this.player.id,
+      raise: type === GameAction.Raise ? this.raise : null
+    }));
+  }
+
+  private async delay(time: number): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, time));
+  }
 }
 
 export interface SliderModel {

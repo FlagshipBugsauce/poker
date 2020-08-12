@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.Getter;
 
 @Getter
@@ -86,8 +87,45 @@ public class DeckModel {
     cards = new ArrayList<>(52);
     for (final CardSuit cardSuit : CardSuit.values()) {
       for (final CardValue cardValue : CardValue.values()) {
+        if (cardSuit == CardSuit.Back || cardValue == CardValue.Back) {
+          continue;
+        }
         cards.add(new CardModel(cardSuit, cardValue));
       }
     }
+  }
+
+  /**
+   * Take a look at the top <code>n</code> cards of the deck. Used for testing and debugging.
+   *
+   * @param n The number of cards to peek at.
+   * @return A list of the top <code>n</code> cards in the deck (cards are deep copies).
+   */
+  public List<CardModel> peek(int n) {
+    final List<CardModel> topCards = cards
+        .subList(cards.size() - n, cards.size())
+        .stream()
+        .map(CardModel::new)
+        .collect(Collectors.toList());
+    Collections.reverse(topCards);
+    return topCards;
+  }
+
+  /**
+   * Returns the number of cards remaining in the deck. Used mostly for debugging and testing.
+   *
+   * @return The number of cards remaining in the deck.
+   */
+  public int numCardsRemaining() {
+    return cards.size();
+  }
+
+  /**
+   * Returns the number of cards used in the deck. Used mostly for debugging and testing.
+   *
+   * @return The number of cards used in the deck.
+   */
+  public int numCardsUsed() {
+    return usedCards.size();
   }
 }

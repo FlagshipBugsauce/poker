@@ -22,5 +22,7 @@ public enum MessageType {
   StartTurnTimer,
   PokerTable,
   Deal,
-  Timer
+  Timer,
+  HideCards,
+  Cards
 }

@@ -4,6 +4,6 @@
         'height': 'auto'
       }"
   [alt]="cardText"
-  [src]="faceDown ? cardService.getFlippedPath() : cardService.getCardImagePath(card)"
+  [src]="cardService.getCardImagePath(card)"
   [ngbTooltip]="cardText"
   class="back">

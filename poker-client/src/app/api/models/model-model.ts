@@ -13,18 +13,21 @@ import {DealModel} from './deal-model';
 import {DeckModel} from './deck-model';
 import {DrawGameDataContainerModel} from './draw-game-data-container-model';
 import {DrawGameDrawModel} from './draw-game-draw-model';
+import {GameActionModel} from './game-action-model';
 import {GameListModel} from './game-list-model';
 import {GameModel} from './game-model';
 import {GameParameterModel} from './game-parameter-model';
 import {GamePlayerModel} from './game-player-model';
 import {GenericServerMessage} from './generic-server-message';
 import {HandSummaryModel} from './hand-summary-model';
+import {HideCardsModel} from './hide-cards-model';
 import {JwtAuthRequestModel} from './jwt-auth-request-model';
 import {LobbyModel} from './lobby-model';
 import {LobbyPlayerModel} from './lobby-player-model';
 import {NewAccountModel} from './new-account-model';
 import {PlayerModel} from './player-model';
 import {PokerTableModel} from './poker-table-model';
+import {PotModel} from './pot-model';
 import {PrivateTopicModel} from './private-topic-model';
 import {TableControlsModel} from './table-controls-model';
 import {TimerModel} from './timer-model';
@@ -33,6 +36,7 @@ import {ToastModel} from './toast-model';
 import {UserModel} from './user-model';
 import {WebSocketInfoModel} from './web-socket-info-model';
 import {WebSocketUpdateModel} from './web-socket-update-model';
+import {WinnerModel} from './winner-model';
 
 export interface ModelModel {
   activeStatusModel?: ActiveStatusModel;
@@ -41,8 +45,8 @@ export interface ModelModel {
   authRequestModel?: AuthRequestModel;
   authResponseModel?: AuthResponseModel;
   cardModel?: CardModel;
-  cardSuit?: 'Spades' | 'Hearts' | 'Clubs' | 'Diamonds';
-  cardValue?: 'Ace' | 'King' | 'Queen' | 'Jack' | 'Ten' | 'Nine' | 'Eight' | 'Seven' | 'Six' | 'Five' | 'Four' | 'Three' | 'Two';
+  cardSuit?: 'Spades' | 'Hearts' | 'Clubs' | 'Diamonds' | 'Back';
+  cardValue?: 'Ace' | 'King' | 'Queen' | 'Jack' | 'Ten' | 'Nine' | 'Eight' | 'Seven' | 'Six' | 'Five' | 'Four' | 'Three' | 'Two' | 'Back';
   chatMessageModel?: ChatMessageModel;
   clientMessageModel?: ClientMessageModel;
   clientUserModel?: ClientUserModel;
@@ -51,6 +55,8 @@ export interface ModelModel {
   deckModel?: DeckModel;
   drawGameDataContainerModel?: DrawGameDataContainerModel;
   drawGameDrawModel?: DrawGameDrawModel;
+  gameAction?: 'Fold' | 'Check' | 'AllInCheck' | 'Call' | 'Raise';
+  gameActionModel?: GameActionModel;
   gameListModel?: GameListModel;
   gameModel?: GameModel;
   gameParameterModel?: GameParameterModel;
@@ -58,13 +64,15 @@ export interface ModelModel {
   gamePlayerModel?: GamePlayerModel;
   genericServerMessage?: GenericServerMessage;
   handSummaryModel?: HandSummaryModel;
+  hideCardsModel?: HideCardsModel;
   jwtAuthRequestModel?: JwtAuthRequestModel;
   lobbyModel?: LobbyModel;
   lobbyPlayerModel?: LobbyPlayerModel;
-  messageType?: 'GameList' | 'Lobby' | 'Game' | 'Hand' | 'GameData' | 'PlayerData' | 'Toast' | 'ReadyToggled' | 'PlayerJoinedLobby' | 'PlayerLeftLobby' | 'GamePhaseChanged' | 'HandStarted' | 'PlayerAwayToggled' | 'HandActionPerformed' | 'ActingPlayerChanged' | 'GamePlayer' | 'CardDrawnByPlayer' | 'StartTurnTimer' | 'PokerTable' | 'Deal' | 'Timer';
+  messageType?: 'Debug' | 'GameList' | 'Lobby' | 'Game' | 'Hand' | 'GameData' | 'PlayerData' | 'Toast' | 'ReadyToggled' | 'PlayerJoinedLobby' | 'PlayerLeftLobby' | 'GamePhaseChanged' | 'HandStarted' | 'PlayerAwayToggled' | 'HandActionPerformed' | 'ActingPlayerChanged' | 'GamePlayer' | 'CardDrawnByPlayer' | 'StartTurnTimer' | 'PokerTable' | 'Deal' | 'Timer' | 'HideCards' | 'Cards';
   newAccountModel?: NewAccountModel;
   playerModel?: PlayerModel;
   pokerTableModel?: PokerTableModel;
+  potModel?: PotModel;
   privateTopicModel?: PrivateTopicModel;
   tableControlsModel?: TableControlsModel;
   timerModel?: TimerModel;
@@ -74,4 +82,5 @@ export interface ModelModel {
   userModel?: UserModel;
   webSocketInfoModel?: WebSocketInfoModel;
   webSocketUpdateModel?: WebSocketUpdateModel;
+  winnerModel?: WinnerModel;
 }

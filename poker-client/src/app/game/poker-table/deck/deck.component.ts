@@ -11,6 +11,7 @@ import {takeUntil} from 'rxjs/operators';
 import {GamePhase} from '../../../shared/models/game-phase.enum';
 import {DealModel} from '../../../api/models/deal-model';
 import {GamePlayerModel} from '../../../api/models/game-player-model';
+import {showCard} from '../../../state/app.actions';
 
 @Component({
   selector: 'pkr-deck',
@@ -34,6 +35,7 @@ export class DeckComponent implements OnInit, OnDestroy {
     opacity: 0,
     width: this.width
   };
+  public players: GamePlayerModel[] = [];
   private cardDestinations: { down: number; right: number }[] = [
     {down: 2.5, right: 4},
     {down: 2.5, right: 0.5},
@@ -47,8 +49,6 @@ export class DeckComponent implements OnInit, OnDestroy {
     {down: 2.5, right: 6}
   ];
 
-  public players: GamePlayerModel[] = [];
-
   constructor(
     private pokerTableStore: Store<PokerTableStateContainer>,
     private gameStore: Store<GameStateContainer>,
@@ -60,14 +60,6 @@ export class DeckComponent implements OnInit, OnDestroy {
     this.gameStore.select(selectGamePhase)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((phase: GamePhase) => this.phase = phase);
-
-    // this.pokerTableStore.select(selectPlayerThatActed)
-    // .pipe(takeUntil(this.ngDestroyed$))
-    // .subscribe((pos: number) => {
-    //   if (pos !== -1 && this.phase === GamePhase.Play) {
-    //     this.sendCardToPosition(pos).then();
-    //   }
-    // });
 
     this.miscEventStore.select(selectDeal)
     .pipe(takeUntil(this.ngDestroyed$))
@@ -109,6 +101,7 @@ export class DeckComponent implements OnInit, OnDestroy {
       this.movingCardStyle.opacity = 0;
       this.movingCardStyle.width = this.width;
       this.showMovingCard = false;
+      this.miscEventStore.dispatch(showCard({card: pos}));
     }
   }
 

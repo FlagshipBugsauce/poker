@@ -18,17 +18,17 @@ import {PrivateTopicModel} from '../models/private-topic-model';
   providedIn: 'root',
 })
 export class WebsocketService extends BaseService {
-  /**
-   * Path part for operation getPrivateTopic
-   */
-  static readonly GetPrivateTopicPath = '/private-topic';
-
   constructor(
     config: ApiConfiguration,
     http: HttpClient
   ) {
     super(config, http);
   }
+
+  /**
+   * Path part for operation getPrivateTopic
+   */
+  static readonly GetPrivateTopicPath = '/private-topic';
 
   /**
    * Request a private topic.

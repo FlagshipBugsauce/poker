@@ -26,6 +26,7 @@ export class CardService {
   public valueMapping = {};
 
   constructor() {
+    // Face up cards:
     this.suitMapping[CardSuit.Spades] = 'S';
     this.suitMapping[CardSuit.Hearts] = 'H';
     this.suitMapping[CardSuit.Clubs] = 'C';
@@ -43,6 +44,10 @@ export class CardService {
     this.valueMapping[CardValue.Four] = '4';
     this.valueMapping[CardValue.Three] = '3';
     this.valueMapping[CardValue.Two] = '2';
+
+    // Face down card:
+    this.suitMapping[CardSuit.Back] = 'B';
+    this.valueMapping[CardValue.Back] = '2';
   }
 
   /**
@@ -54,7 +59,7 @@ export class CardService {
   }
 
   public cardName(card: CardModel): string {
-    return `${card.value} of ${card.suit}`;
+    return card.suit === CardSuit.Back ? 'Card' : `${card.value} of ${card.suit}`;
   }
 
   /**
@@ -63,10 +68,6 @@ export class CardService {
    */
   public getCardImagePath(card: CardModel): string {
     return `assets/icons/cards/${this.getCardShortName(card)}.svg`;
-  }
-
-  public getFlippedPath(): string {
-    return 'assets/icons/cards/2B.svg';
   }
 
   public cardSizeToPxSize(size: CardSize): number {

@@ -194,7 +194,7 @@ export class UsersService extends BaseService {
    * This method sends `application/json` and handles request body of type `application/json`.
    */
   authorize(params: {
-    body: AuthRequestModel
+      body: AuthRequestModel
   }): Observable<AuthResponseModel> {
 
     return this.authorize$Response(params).pipe(

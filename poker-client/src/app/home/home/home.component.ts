@@ -23,7 +23,7 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // TODO: This is for design purposes only.
+    // // TODO: This is for design purposes only.
     this.delay(500).then(() => this.pokerTableStore.dispatch(pokerTableUpdate(table)));
     this.delay(500).then(() => this.miscEventsStore.dispatch(dealCards({id: '0', numCards: 69})));
   }

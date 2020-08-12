@@ -2,7 +2,8 @@ export enum CardSuit {
   Spades = 'Spades',
   Hearts = 'Hearts',
   Clubs = 'Clubs',
-  Diamonds = 'Diamonds'
+  Diamonds = 'Diamonds',
+  Back = 'Back'
 }
 
 export enum CardValue {
@@ -18,5 +19,6 @@ export enum CardValue {
   Five = 'Five',
   Four = 'Four',
   Three = 'Three',
-  Two = 'Two'
+  Two = 'Two',
+  Back = 'Back'
 }

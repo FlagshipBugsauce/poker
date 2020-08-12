@@ -44,7 +44,7 @@ export const table: PokerTableModel = {
       lastName: 'Johnson',
       away: true,
       out: false,
-      cards: [{suit: 'Hearts', value: 'Jack'}],
+      cards: [{suit: 'Back', value: 'Back'}],
       controls: {
         bankRoll: 420,
         currentBet: 80,
@@ -56,9 +56,9 @@ export const table: PokerTableModel = {
       lastName: 'McGee',
       away: false,
       out: false,
-      cards: [],
+      cards: [{suit: 'Back', value: 'Back'}],
       controls: {
-        bankRoll: 42069,
+        bankRoll: 100,
         currentBet: 20,
         toCall: 400
       }
@@ -68,7 +68,7 @@ export const table: PokerTableModel = {
       lastName: 'Winslow',
       away: false,
       out: false,
-      cards: [],
+      cards: [{suit: 'Back', value: 'Back'}],
       controls: {
         bankRoll: 420,
         currentBet: 80,
@@ -79,8 +79,8 @@ export const table: PokerTableModel = {
       firstName: 'Testy',
       lastName: 'McGoo',
       away: false,
-      out: true,
-      cards: [],
+      out: false,
+      cards: [{suit: 'Back', value: 'Back'}],
       controls: {
         bankRoll: 420,
         currentBet: 80,
@@ -124,7 +124,7 @@ export const table: PokerTableModel = {
       }
     }
   ],
-  actingPlayer: 1,
+  actingPlayer: 4,
   dealer: 0,
   displayHandSummary: false,
   summary: null,

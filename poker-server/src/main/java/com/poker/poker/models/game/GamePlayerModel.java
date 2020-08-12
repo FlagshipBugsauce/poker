@@ -19,36 +19,61 @@ import lombok.Setter;
 @Schema(description = "Model representing a player in a game.")
 public class GamePlayerModel extends PlayerModel {
 
+  /**
+   * Specifies whether a player is active.
+   */
   @Schema(description = "Specifies whether a player is active.", example = "true")
-  protected boolean away;
+  protected boolean away = false;
 
+  /**
+   * Specifies whether a player is out of the game.
+   */
   @Schema(description = "Specifies whether a player is out of the game.", example = "false")
-  protected boolean out;
+  protected boolean out = false;
 
+  /**
+   * Cards.
+   */
   @Schema(description = "Cards")
-  protected List<CardModel> cards;
+  protected List<CardModel> cards = new ArrayList<>();
 
+  /**
+   * Player controls.
+   */
   @Schema(implementation = TableControlsModel.class)
-  protected TableControlsModel controls;
+  protected TableControlsModel controls = new TableControlsModel();
 
-  @Schema(description = "Player is no longer in the hand.", example = "false")
-  protected boolean folded;
+  /**
+   * Player is no longer in the hand when this is true.
+   */
+  @Schema(description = "Player is no longer in the hand when this is true.", example = "false")
+  protected boolean folded = false;
+
+  /**
+   * Player bet entire bankroll.
+   */
+  @Schema(description = "Player bet entire bankroll.", example = "false")
+  protected boolean allIn = false;
 
   public GamePlayerModel(final PlayerModel playerModel) {
     super(playerModel);
     away = false;
     out = false;
+    folded = false;
     controls = new TableControlsModel();
     cards = new ArrayList<>();
+    allIn = false;
   }
 
   public GamePlayerModel(final GamePlayerModel player) {
     super(player);
-    away = player.away;
-    out = false;
-    controls = player.controls;
+    away = player.isAway();
+    out = player.isOut();
+    folded = player.isFolded();
+    allIn = player.isAllIn();
+    controls = player.getControls();
     cards =
-        player.cards.stream()
+        player.getCards().stream()
             .map(c -> new CardModel(c.getSuit(), c.getValue()))
             .collect(Collectors.toList());
   }

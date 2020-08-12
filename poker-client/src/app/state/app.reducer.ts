@@ -11,6 +11,7 @@ import {
   gameToastReceived,
   generalChatMsgReceived,
   handCompleted,
+  hideCards,
   hideFailedSignInWarning,
   joinLobby,
   leaveLobby,
@@ -24,6 +25,7 @@ import {
   pokerTableUpdate,
   privatePlayerDataUpdated,
   readyUp,
+  showCard,
   signInFail,
   signInSuccess,
   signOut,
@@ -40,6 +42,7 @@ import {
   DrawGameDataContainerModel,
   GameModel,
   GamePlayerModel,
+  HideCardsModel,
   LobbyModel,
   LobbyPlayerModel,
   PokerTableModel,
@@ -274,13 +277,19 @@ export function pokerTableReducer(state, action) {
 
 export const timerInitialState: MiscEventsState = {
   timer: {id: '0', duration: -1},
-  deal: {id: '0', numCards: -1}
+  deal: {id: '0', numCards: -1},
+  hide: {id: '0'},
+  hiddenCards: Array(10).fill(true)
 };
 
 const miscEventsReducerInternal = createReducer<MiscEventsState>(
   timerInitialState,
   on(startTimer, (state: MiscEventsState, timer: TimerModel) => ({...state, timer})),
-  on(dealCards, (state: MiscEventsState, deal: DealModel) => ({...state, deal}))
+  on(dealCards, (state: MiscEventsState, deal: DealModel) => ({...state, deal})),
+  on(hideCards, (state: MiscEventsState, hide: HideCardsModel) =>
+    ({...state, hide, hiddenCards: Array(10).fill(true)})),
+  on(showCard, (state: MiscEventsState, card: { card: number }) =>
+    ({...state, hiddenCards: state.hiddenCards.map((c, i) => i === card.card ? false : c)}))
 );
 
 export function miscEventsReducer(state, action) {

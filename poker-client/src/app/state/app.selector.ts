@@ -10,7 +10,8 @@ import {
   MiscEventsState,
   MiscEventsStateContainer,
   PlayerDataStateContainer,
-  PokerTableStateContainer
+  PokerTableStateContainer,
+  PrivatePlayerDataStateContainer
 } from '../shared/models/app-state.model';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {
@@ -102,8 +103,20 @@ export const selectActingPlayer = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state.actingPlayer);
 export const selectHandSummary = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state.summary);
+export const selectHandWinners = createSelector(
+  pokerTableFeature, (state: PokerTableModel) => state.winners);
 
 export const miscEventsFeature =
   createFeatureSelector<MiscEventsStateContainer, MiscEventsState>('miscEvents');
-export const selectTimer = createSelector(miscEventsFeature, (state: MiscEventsState) => state.timer);
+export const selectTimer = createSelector(miscEventsFeature,
+  (state: MiscEventsState) => state.timer);
 export const selectDeal = createSelector(miscEventsFeature, (state: MiscEventsState) => state.deal);
+export const selectHideCards = createSelector(miscEventsFeature,
+  (state: MiscEventsState) => state.hide);
+export const selectHiddenCards = createSelector(miscEventsFeature,
+  (state: MiscEventsState) => state.hiddenCards);
+
+export const privatePlayerDataFeature =
+  createFeatureSelector<PrivatePlayerDataStateContainer, GamePlayerModel>('privatePlayerData');
+export const selectPrivateCards = createSelector(
+  privatePlayerDataFeature, (state: GamePlayerModel) => state.cards);

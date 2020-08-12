@@ -8,6 +8,7 @@ import {
   DrawGameDataContainerModel,
   GameModel,
   GamePlayerModel,
+  HideCardsModel,
   LobbyModel,
   PokerTableModel,
   TimerModel,
@@ -82,6 +83,8 @@ export interface MiscEventsStateContainer {
 export interface MiscEventsState {
   timer?: TimerModel;
   deal?: DealModel;
+  hide?: HideCardsModel;
+  hiddenCards: boolean[];
 }
 
 export interface PrivatePlayerDataStateContainer {

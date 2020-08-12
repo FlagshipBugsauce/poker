@@ -10,9 +10,11 @@ import {
   CurrentGameModel,
   DealModel,
   DrawGameDataContainerModel,
+  GameActionModel,
   GameModel,
   GameParameterModel,
   GamePlayerModel,
+  HideCardsModel,
   LobbyModel,
   LobbyPlayerModel,
   PokerTableModel,
@@ -54,6 +56,7 @@ export const gameDataUpdated = createAction('gameDataUpdated', props<DrawGameDat
 export const playerDataUpdated = createAction('playerDataUpdated', props<GamePlayerModel>());
 export const gameToastReceived = createAction('gameToastReceived', props<ToastModel>());
 export const unsubscribeFromGameTopics = createAction('unsubscribeFromGameTopics');
+export const performGameAction = createAction('performGameAction', props<GameActionModel>());
 
 // Poker Table:
 export const gamePlayerUpdated = createAction('gamePlayerUpdated', props<GamePlayerModel>());
@@ -82,6 +85,8 @@ export const gameChatMsgReceived = createAction('gameChatMsgReceived', props<Cha
 // Misc Events Actions:
 export const startTimer = createAction('startTimer', props<TimerModel>());
 export const dealCards = createAction('dealCards', props<DealModel>());
+export const hideCards = createAction('hideCards', props<HideCardsModel>());
+export const showCard = createAction('showCard', props<{ card: number }>());
 
 // Private Player Data:
 export const privatePlayerDataUpdated = createAction(

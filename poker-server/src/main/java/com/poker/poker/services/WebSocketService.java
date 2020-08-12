@@ -31,7 +31,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @AllArgsConstructor
-@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class WebSocketService {
 
   private final AppConfig appConfig;
@@ -106,8 +106,11 @@ public class WebSocketService {
 
   @EventListener
   public <T> void privateMessageEventHandler(final PrivateMessageEvent<T> event) {
-    assert privateSockets.get(event.getId()) != null;
     final WebSocketInfoModel socketInfo = privateSockets.get(event.getId());
+    if (socketInfo == null) {
+      log.debug("Player with ID {} has no private socket.", event.getId());
+      return;
+    }
     final String topic = "/topic/secure/" + socketInfo.getSecureTopicId();
     socketInfo.setLastActivity(new Date());
     template.convertAndSend(topic, event.getMessage());
