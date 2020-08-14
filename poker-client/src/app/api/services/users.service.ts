@@ -91,11 +91,6 @@ export class UsersService extends BaseService {
   static readonly GetUserInfoPath = '/user/getUserInfo/{userId}';
 
   /**
-   * Path part for operation authorizeWithJwt
-   */
-  static readonly AuthorizeWithJwtPath = '/user/auth-with-jwt';
-
-  /**
    * Get User Info.
    *
    * Retrieve user information for user with provided ID.
@@ -126,6 +121,11 @@ export class UsersService extends BaseService {
       })
     );
   }
+
+  /**
+   * Path part for operation authorizeWithJwt
+   */
+  static readonly AuthorizeWithJwtPath = '/user/auth-with-jwt';
 
   /**
    * Path part for operation authorize
@@ -194,7 +194,7 @@ export class UsersService extends BaseService {
    * This method sends `application/json` and handles request body of type `application/json`.
    */
   authorize(params: {
-    body: AuthRequestModel
+      body: AuthRequestModel
   }): Observable<AuthResponseModel> {
 
     return this.authorize$Response(params).pipe(

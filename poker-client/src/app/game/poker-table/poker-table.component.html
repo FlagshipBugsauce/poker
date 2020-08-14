@@ -38,9 +38,15 @@
     }"
     [width]="deckPosition.width"></pkr-hand-summary>
   <div class="button-box">
+    <button (click)="setStatusToAway()" [disabled]="away" class="btn btn-light">Away</button>
     <span class="turn-timer">{{timerValue[timerIndex]}}</span>
-    <button (click)="setStatusToAway()" [disabled]="away" class="btn btn-success">Away</button>
-    <button (click)="draw()" [disabled]="!acting" class="btn btn-success">Draw</button>
+    <!--    <button (click)="draw()" [disabled]="!acting" class="btn btn-success">Draw</button>-->
   </div>
+  <pkr-table-controls [ngStyle]="{
+    'position': 'absolute',
+    'width': '840px',
+    'left': width / 2 - 280 + 'px',
+    'bottom': 10 + 'px'
+  }"></pkr-table-controls>
 </div>
 <pkr-popup-afk #afkPopup></pkr-popup-afk>

@@ -13,18 +13,21 @@ import {
   GameListStateContainer,
   GameStateContainer,
   LobbyStateContainer,
+  MiscEventsStateContainer,
   PlayerDataStateContainer,
   PokerTableStateContainer,
-  TimerStateContainer
+  PrivatePlayerDataStateContainer
 } from '../models/app-state.model';
 import {MessageType} from '../models/message-types.enum';
 import {
+  dealCards,
   gameDataUpdated,
   gameListUpdated,
   gameModelUpdated,
   gamePhaseChanged,
   gamePlayerUpdated,
   handCompleted,
+  hideCards,
   lobbyModelUpdated,
   playerAwayToggled,
   playerDataUpdated,
@@ -32,6 +35,7 @@ import {
   playerLeftLobby,
   playerReadyToggled,
   pokerTableUpdate,
+  privatePlayerDataUpdated,
   startTimer,
   updateCurrentGame
 } from '../../state/app.actions';
@@ -68,30 +72,7 @@ export class WebSocketService implements OnDestroy {
   /** Model for the logged in user. */
   private user: ClientUserModel;
 
-  constructor(
-    private toastService: ToastService,
-    private appStore: Store<AppStateContainer>,
-    private gameDataStore: Store<GameDataStateContainer>,
-    private gameStore: Store<GameStateContainer>,
-    private lobbyStore: Store<LobbyStateContainer>,
-    private gameListStore: Store<GameListStateContainer>,
-    private playerDataStore: Store<PlayerDataStateContainer>,
-    private drawnCardsStore: Store<DrawnCardsStateContainer>,
-    private pokerTableStore: Store<PokerTableStateContainer>,
-    private timerStore: Store<TimerStateContainer>
-  ) {
-    this.client = over(new SockJS(environment.api));
-    this.client.debug = () => {
-    }; // TODO: Gets rid of debugging messages in console
-    this.state = new BehaviorSubject<SocketClientState>(SocketClientState.ATTEMPTING);
-    this.client.connect({}, () => {
-      this.state.next(SocketClientState.CONNECTED);
-    });
-
-    this.appStore.select(selectLoggedInUser)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((user: ClientUserModel) => this.user = user);
-  }
+  public secureId: string = '';
 
   public ngOnDestroy(): void {
     this.connect().pipe(first()).subscribe(client => client.disconnect(null));
@@ -123,6 +104,54 @@ export class WebSocketService implements OnDestroy {
     this.connect()
     .pipe(first())
     .subscribe(client => client.send(topic, {}, JSON.stringify(payload)));
+  }
+
+  public privateTopicUnsubscribe$: Subject<any>;
+
+  constructor(
+    private toastService: ToastService,
+    private appStore: Store<AppStateContainer>,
+    private gameDataStore: Store<GameDataStateContainer>,
+    private gameStore: Store<GameStateContainer>,
+    private lobbyStore: Store<LobbyStateContainer>,
+    private gameListStore: Store<GameListStateContainer>,
+    private playerDataStore: Store<PlayerDataStateContainer>,
+    private drawnCardsStore: Store<DrawnCardsStateContainer>,
+    private pokerTableStore: Store<PokerTableStateContainer>,
+    private miscEventsStore: Store<MiscEventsStateContainer>,
+    private privatePlayerDataStore: Store<PrivatePlayerDataStateContainer>
+  ) {
+    this.client = over(new SockJS(environment.api));
+    this.client.debug = () => {
+    }; // TODO: Gets rid of debugging messages in console
+    this.state = new BehaviorSubject<SocketClientState>(SocketClientState.ATTEMPTING);
+    this.client.connect({}, () => {
+      this.state.next(SocketClientState.CONNECTED);
+    });
+
+    this.appStore.select(selectLoggedInUser)
+    .pipe(takeUntil(this.ngDestroyed$))
+    .subscribe((user: ClientUserModel) => this.user = user);
+  }
+
+  public subscribeToPrivateTopic(secureId: string): void {
+    this.secureId = secureId;
+    this.privateTopicUnsubscribe$ = new Subject<any>();
+    this.onMessage(`/topic/secure/${secureId}`)
+    .pipe(takeUntil(this.privateTopicUnsubscribe$))
+    .subscribe(data => {
+      switch (data.type) {
+        case MessageType.PlayerData:
+          console.log(data.data.cards);
+          this.privatePlayerDataStore.dispatch(privatePlayerDataUpdated(data.data));
+          break;
+        case MessageType.Debug:
+          console.log(data);
+          break;
+        default:
+          break;
+      }
+    });
   }
 
   /**
@@ -173,7 +202,13 @@ export class WebSocketService implements OnDestroy {
           this.pokerTableStore.dispatch(pokerTableUpdate(data.data));
           break;
         case MessageType.Timer:
-          this.timerStore.dispatch(startTimer(data.data));
+          this.miscEventsStore.dispatch(startTimer(data.data));
+          break;
+        case MessageType.Deal:
+          this.miscEventsStore.dispatch(dealCards(data.data));
+          break;
+        case MessageType.HideCards:
+          this.miscEventsStore.dispatch(hideCards(data.data));
           break;
       }
     });

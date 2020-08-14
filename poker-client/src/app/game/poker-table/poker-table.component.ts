@@ -1,18 +1,13 @@
-import {Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {
   AppStateContainer,
   GameStateContainer,
+  MiscEventsStateContainer,
   PlayerDataStateContainer,
-  PokerTableStateContainer,
-  TimerStateContainer
+  PokerTableStateContainer
 } from '../../shared/models/app-state.model';
-import {
-  drawCard,
-  requestGameModelUpdate,
-  requestPokerTableUpdate,
-  setAwayStatus
-} from '../../state/app.actions';
+import {drawCard, setAwayStatus} from '../../state/app.actions';
 import {Subject} from 'rxjs';
 import {
   selectActingPlayer,
@@ -33,6 +28,8 @@ import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
   styleUrls: ['./poker-table.component.scss']
 })
 export class PokerTableComponent implements OnInit, OnDestroy {
+  // If this is true, we'll seed the table with sample data.
+  @Input() design: boolean = false;
 
   numPlayers: number = 0;
   @ViewChild('afkPopup') afkPopup: PopupAfkComponent;
@@ -64,7 +61,7 @@ export class PokerTableComponent implements OnInit, OnDestroy {
     private playerDataStore: Store<PlayerDataStateContainer>,
     private gameStore: Store<GameStateContainer>,
     private pokerTableStore: Store<PokerTableStateContainer>,
-    private timerStore: Store<TimerStateContainer>) {
+    private timerStore: Store<MiscEventsStateContainer>) {
   }
 
   public get height(): number {
@@ -92,11 +89,16 @@ export class PokerTableComponent implements OnInit, OnDestroy {
   }
 
   public get safeToCheck(): boolean {
-    return this.user && this.user.id && this.players && this.players.length > 0 && this.players[0].id != null;
+    return this.user &&
+      this.user.id &&
+      this.players &&
+      this.players.length > 0 &&
+      this.players[0].id != null;
   }
 
   public get acting(): boolean {
-    return this.safeToCheck ? this.players[this.actingIndex].id === this.user.id && !this.displaySummary : false;
+    return this.safeToCheck ?
+      this.players[this.actingIndex].id === this.user.id && !this.displaySummary : false;
   }
 
   public get playersIndex(): number {
@@ -120,9 +122,8 @@ export class PokerTableComponent implements OnInit, OnDestroy {
         this.width = window.innerWidth - 50;
         this.playerBoxes = Array(this.numPlayers)
         .fill({number: 1, top: 0, left: 0})
-        .map((v, i) => ({number: i + 1, top: 0, left: 0}));
+        .map((v, i) => ({number: i, top: 0, left: 0}));
         this.updatePositions();
-        this.pokerTableStore.dispatch(requestPokerTableUpdate());
       });
     }
   }
@@ -132,7 +133,6 @@ export class PokerTableComponent implements OnInit, OnDestroy {
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((user: ClientUserModel) => this.user = user);
 
-    this.delay(100).then(() => this.gameStore.dispatch(requestGameModelUpdate()));
     this.gameStore.select(selectGameModel)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((game: GameModel) => this.game = game);
@@ -170,8 +170,6 @@ export class PokerTableComponent implements OnInit, OnDestroy {
       this.timerValue.push(timer.duration | 0);
       this.startTimer().then();
     });
-
-    this.pokerTableStore.dispatch(requestPokerTableUpdate());
   }
 
   @HostListener('window:resize', ['$event'])
@@ -179,7 +177,8 @@ export class PokerTableComponent implements OnInit, OnDestroy {
     const lastWidth = this.width;
     const scrollbar: boolean = document.body.scrollHeight > document.body.clientHeight;
     const margin: number = scrollbar ? 48 : 30;
-    this.width = window.innerWidth > this.minWidth ? window.innerWidth - margin : this.minWidth - margin;
+    this.width = window.innerWidth > this.minWidth ?
+      window.innerWidth - margin : this.minWidth - margin;
     if (this.width !== lastWidth) {
       this.updatePositions();
     }
@@ -224,9 +223,9 @@ export class PokerTableComponent implements OnInit, OnDestroy {
     this.logoPosition.logoWidth = this.tableWidth / 6;
     this.logoPosition.top = this.tableHeight / 2.25 - this.logoPosition.logoWidth / 2;
     this.logoPosition.left = this.tableWidth / 2 - this.logoPosition.logoWidth / 2;
-    this.deckPosition.width = this.tableWidth / 10;
+    this.deckPosition.width = 80;  // TODO: Revisit this.
     this.deckPosition.top = this.tableHeight / 2.55 - this.deckPosition.width / 2;
-    this.deckPosition.left = this.tableWidth * 0.2;
+    this.deckPosition.left = this.tableWidth * 0.26;
   }
 
   /**

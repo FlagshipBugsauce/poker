@@ -1,8 +1,10 @@
+/* tslint:disable */
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {UsersService} from '../api/services/users.service';
 import {
   requestCurrentGameUpdate,
+  requestPrivateTopic,
   signIn,
   signInFail,
   signInSuccess,
@@ -19,6 +21,8 @@ import {APP_ROUTES} from '../app-routes';
 import {WebSocketService} from '../shared/web-socket/web-socket.service';
 import {CookieService} from 'ngx-cookie-service';
 import {ClientMessageModel} from '../api/models/client-message-model';
+import {WebsocketService} from "../api/services";
+import {PrivateTopicModel} from "../api/models/private-topic-model";
 
 @Injectable()
 export class AppEffects {
@@ -35,7 +39,11 @@ export class AppEffects {
         switchMap((response: AuthResponseModel) => {
           this.webSocketService.subscribeToCurrentGameTopic(response.userDetails.id);
           this.router.navigate([`/${APP_ROUTES.HOME.path}`]).then();
-          return [signInSuccess(response), requestCurrentGameUpdate({userId: response.userDetails.id})];
+          return [
+            signInSuccess(response),
+            requestCurrentGameUpdate({userId: response.userDetails.id}),
+            requestPrivateTopic()
+          ];
         }), catchError(() => of({type: signInFail().type}))
       )
     )
@@ -77,16 +85,28 @@ export class AppEffects {
           this.router.navigate([`/${APP_ROUTES.HOME}`]).then();
           this.cookieService.deleteAll();
           this.cookieService.set('jwt', response.jwt, new Date(Date.now() + this.twoWeeks));
-          return [signInSuccess(response), requestCurrentGameUpdate({userId: response.userDetails.id})];
+          return [
+            signInSuccess(response),
+            requestCurrentGameUpdate({userId: response.userDetails.id}),
+            requestPrivateTopic()
+          ];
         }), catchError(() => of({type: signInFail().type}))
       )
     ))
   );
 
+  requestPrivateTopic$ = createEffect(() => this.actions$.pipe(
+    ofType(requestPrivateTopic),
+    exhaustMap(() => this.websocketService.getPrivateTopic()
+    .pipe(tap((response: PrivateTopicModel) =>
+      this.webSocketService.subscribeToPrivateTopic(response.id))))
+  ), {dispatch: false})
+
   constructor(
     private actions$: Actions,
     private webSocketService: WebSocketService,
     private usersService: UsersService,
+    private websocketService: WebsocketService,
     private toastService: ToastService,
     private router: Router,
     private cookieService: CookieService

@@ -2,7 +2,6 @@ package com.poker.poker.models.game;
 
 import com.poker.poker.models.user.UserModel;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,36 +19,49 @@ import lombok.Setter;
 @Schema(description = "Model representing a player in a game.")
 public class GamePlayerModel extends PlayerModel {
 
-  @Schema(description = "The players current score.", example = "69")
-  protected int score = 0;
-
+  /** Specifies whether a player is active. */
   @Schema(description = "Specifies whether a player is active.", example = "true")
-  protected boolean away;
+  protected boolean away = false;
 
-  @Schema(description = "Specifies whether a player needs to act.", example = "true")
-  protected boolean acting;
+  /** Specifies whether a player is out of the game. */
+  @Schema(description = "Specifies whether a player is out of the game.", example = "false")
+  protected boolean out = false;
 
-  @Schema(description = "Size of the players bank roll.", implementation = BigDecimal.class)
-  protected BigDecimal bankRoll;
-
+  /** Cards. */
   @Schema(description = "Cards")
-  protected List<CardModel> cards;
+  protected List<CardModel> cards = new ArrayList<>();
+
+  /** Player controls. */
+  @Schema(implementation = TableControlsModel.class)
+  protected TableControlsModel controls = new TableControlsModel();
+
+  /** Player is no longer in the hand when this is true. */
+  @Schema(description = "Player is no longer in the hand when this is true.", example = "false")
+  protected boolean folded = false;
+
+  /** Player bet entire bankroll. */
+  @Schema(description = "Player bet entire bankroll.", example = "false")
+  protected boolean allIn = false;
 
   public GamePlayerModel(final PlayerModel playerModel) {
     super(playerModel);
-    this.away = false;
-    this.acting = false;
-    this.cards = new ArrayList<>();
+    away = false;
+    out = false;
+    folded = false;
+    controls = new TableControlsModel();
+    cards = new ArrayList<>();
+    allIn = false;
   }
 
   public GamePlayerModel(final GamePlayerModel player) {
     super(player);
-    this.score = player.score;
-    this.away = player.away;
-    this.acting = player.acting;
-    this.bankRoll = player.bankRoll;
-    this.cards =
-        player.cards.stream()
+    away = player.isAway();
+    out = player.isOut();
+    folded = player.isFolded();
+    allIn = player.isAllIn();
+    controls = player.getControls();
+    cards =
+        player.getCards().stream()
             .map(c -> new CardModel(c.getSuit(), c.getValue()))
             .collect(Collectors.toList());
   }

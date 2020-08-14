@@ -13,9 +13,10 @@ import {
   gameListReducer,
   gameModelReducer,
   lobbyModelReducer,
+  miscEventsReducer,
   playerDataReducer,
   pokerTableReducer,
-  timerReducer,
+  privatePlayerDataReducer,
   toastDataReducer
 } from './state/app.reducer';
 import {EffectsModule} from '@ngrx/effects';
@@ -42,7 +43,8 @@ import {ChatEffects} from './state/chat.effects';
         lastToast: toastDataReducer,
         chats: chatReducer,
         tableState: pokerTableReducer,
-        timerState: timerReducer
+        miscEvents: miscEventsReducer,
+        privatePlayerData: privatePlayerDataReducer
       }),
     EffectsModule.forRoot([AppEffects, GameEffects, ChatEffects])
   ],

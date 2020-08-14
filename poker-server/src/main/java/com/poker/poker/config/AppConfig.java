@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @Configuration
 @PropertySource("classpath:poker.properties")
 public class AppConfig {
+
   @Value("${validation.admin-groups}")
   private final List<UserGroup> adminGroups;
 
@@ -21,6 +22,9 @@ public class AppConfig {
 
   @Value("${validation.general-groups}")
   private final List<UserGroup> generalGroups;
+
+  @Value("${num-cards-in-deck}")
+  private int numCardsInDeck;
 
   @Value("${min-number-of-players}")
   private int minNumberOfPlayers;
@@ -37,8 +41,14 @@ public class AppConfig {
   @Value("${hand-summary-duration-in-millis}")
   private int handSummaryDurationInMs;
 
+  @Value("${deal-duration-in-millis}")
+  private int dealDurationInMs;
+
   @Value("${web-socket.private-socket-timeout-hours}")
   private int privateSocketTimeoutHours;
+
+  @Value("${num-big-blinds}")
+  private int numBigBlinds;
 
   @Value("${web-socket.topics.toast}")
   private String toastTopic;

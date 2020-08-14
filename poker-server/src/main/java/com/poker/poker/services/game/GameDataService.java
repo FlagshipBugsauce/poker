@@ -17,6 +17,8 @@ import com.poker.poker.models.game.PokerTableModel;
 import com.poker.poker.models.user.UserModel;
 import com.poker.poker.models.websocket.GenericServerMessage;
 import com.poker.poker.services.WebSocketService;
+import com.poker.poker.utilities.PokerTableUtilities;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,7 +41,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Getter
 @Service
-@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class GameDataService {
 
   private final AppConfig appConfig;
@@ -94,6 +96,13 @@ public class GameDataService {
     assert tables.get(id) != null;
     publisher.publishEvent(
         new GameMessageEvent<>(this, MessageType.PokerTable, id, tables.get(id)));
+  }
+
+  public void broadcastObfuscatedPokerTable(final UUID id) {
+    assert tables.get(id) != null;
+    publisher.publishEvent(
+        new GameMessageEvent<>(
+            this, MessageType.PokerTable, id, PokerTableUtilities.hideCards(tables.get(id))));
   }
 
   public void broadcastGame(final UUID id) {
@@ -196,7 +205,7 @@ public class GameDataService {
     broadcastGame(id);
     publisher.publishEvent(
         new GameMessageEvent<>(this, MessageType.GamePhaseChanged, id, GamePhase.Over));
-    broadcastPokerTable(id);
+    broadcastObfuscatedPokerTable(id);
     broadcastGameSummary(id);
     games.get(id).getPlayers().forEach(p -> userIdToGameIdMap.remove(p.getId()));
     games.remove(id);
@@ -244,6 +253,9 @@ public class GameDataService {
             .collect(Collectors.toList()));
     Collections.shuffle(game.getPlayers());
 
+    game.getPlayers()
+        .forEach(p -> p.getControls().setBankRoll(lobbys.get(id).getParameters().getBuyIn()));
+
     summaries
         .get(id)
         .setGameData(
@@ -251,15 +263,22 @@ public class GameDataService {
                 .map(p -> new DrawGameDataModel(p, false, new ArrayList<>()))
                 .collect(Collectors.toList()));
 
-    lobbys.remove(id);
-    game.setPhase(GamePhase.Play);
+    final LobbyModel lobby = lobbys.remove(id);
     tables.get(id).setPlayers(game.getPlayers());
+    tables
+        .get(id)
+        .setBlind(
+            lobby
+                .getParameters()
+                .getBuyIn()
+                .divide(new BigDecimal(appConfig.getNumBigBlinds() * 2), BigDecimal.ROUND_CEILING));
+
     cachedGameListIsOutdated();
-    broadcastPokerTable(id);
+    broadcastObfuscatedPokerTable(id);
     broadcastGame(id);
+    game.setPhase(GamePhase.Play);
     publisher.publishEvent(
         new GameMessageEvent<>(this, MessageType.GamePhaseChanged, id, GamePhase.Play));
-    // TODO: May need to set player.get(0).acting = true - not sure yet.
   }
 
   public PokerTableModel getPokerTable(final UUID id) {

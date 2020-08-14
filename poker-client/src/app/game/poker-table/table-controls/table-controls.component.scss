@@ -1,0 +1,40 @@
+:host {
+  .control-container {
+    display: grid;
+    grid-template-columns: 140px 140px 140px 140px 300px;
+
+    .table-button {
+      width: 130px;
+      height: 70px;
+      margin-left: 5px;
+      margin-right: 5px;
+      font-weight: bolder;
+    }
+
+    .raise-slider-container {
+      width: 300px;
+      padding: 0 10px 0 10px;
+      text-align: center;
+
+      .raise-input-container {
+        margin: auto;
+
+        .raise-input {
+          margin: auto auto 5px;
+          text-align: center;
+          width: 120px;
+          font-weight: bolder;
+
+          &::-webkit-inner-spin-button, &::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+          }
+        }
+      }
+
+      .raise-slider {
+        width: 100%;
+      }
+    }
+  }
+}

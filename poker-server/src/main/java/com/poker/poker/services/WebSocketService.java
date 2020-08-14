@@ -3,11 +3,13 @@ package com.poker.poker.services;
 import com.poker.poker.config.AppConfig;
 import com.poker.poker.events.CurrentGameEvent;
 import com.poker.poker.events.GameMessageEvent;
+import com.poker.poker.events.PrivateMessageEvent;
 import com.poker.poker.events.PublishMessageEvent;
 import com.poker.poker.events.ToastMessageEvent;
 import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.user.UserModel;
 import com.poker.poker.models.websocket.GenericServerMessage;
+import com.poker.poker.models.websocket.PrivateTopicModel;
 import com.poker.poker.models.websocket.ToastClassModel;
 import com.poker.poker.models.websocket.ToastModel;
 import com.poker.poker.models.websocket.WebSocketInfoModel;
@@ -29,7 +31,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @AllArgsConstructor
-@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class WebSocketService {
 
   private final AppConfig appConfig;
@@ -72,10 +74,10 @@ public class WebSocketService {
    * @param user The user requesting a private topic.
    * @return The UUID component of the topic.
    */
-  public UUID requestPrivateTopic(final UserModel user) {
+  public PrivateTopicModel requestPrivateTopic(final UserModel user) {
     final UUID privateId = UUID.randomUUID();
     privateSockets.put(user.getId(), new WebSocketInfoModel(privateId, new Date()));
-    return privateId;
+    return new PrivateTopicModel(privateId);
   }
 
   /**
@@ -100,6 +102,18 @@ public class WebSocketService {
     final WebSocketInfoModel model = privateSockets.get(recipient);
     template.convertAndSend("/topic/secure/" + model.getSecureTopicId(), data);
     model.setLastActivity(new Date());
+  }
+
+  @EventListener
+  public <T> void privateMessageEventHandler(final PrivateMessageEvent<T> event) {
+    final WebSocketInfoModel socketInfo = privateSockets.get(event.getId());
+    if (socketInfo == null) {
+      log.debug("Player with ID {} has no private socket.", event.getId());
+      return;
+    }
+    final String topic = "/topic/secure/" + socketInfo.getSecureTopicId();
+    socketInfo.setLastActivity(new Date());
+    template.convertAndSend(topic, event.getMessage());
   }
 
   /**

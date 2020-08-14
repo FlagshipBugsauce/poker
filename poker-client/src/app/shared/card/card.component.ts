@@ -21,8 +21,6 @@ export class CardComponent implements OnInit {
    */
   @Input() size: CardSize;
   @Input() pxSize: number = -1;
-  @Input() faceDown: boolean = false;
-  public rotateY: number = 0;
 
   constructor(public cardService: CardService) {
   }
@@ -31,7 +29,7 @@ export class CardComponent implements OnInit {
    * Getter that will return a textual representation of a card, i.e. "Ace of Spades".
    */
   public get cardText(): string {
-    return this.card != null ? `${this.card.value} of ${this.card.suit}` : 'n/a';
+    return this.card ? this.cardService.cardName(this.card) : 'n/a';
   }
 
   ngOnInit(): void {

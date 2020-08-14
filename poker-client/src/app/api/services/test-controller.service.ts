@@ -27,6 +27,15 @@ export class TestControllerService extends BaseService {
   static readonly ModelsPath = '/test/models';
 
   /**
+   * Path part for operation dealCards
+   */
+  static readonly DealCardsPath = '/test/deal';
+  /**
+   * Path part for operation sendPrivateMessage
+   */
+  static readonly SendPrivateMessagePath = '/test/send-private-message';
+
+  /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
    * To access only the response body, use `models()` instead.
    *
@@ -60,6 +69,94 @@ export class TestControllerService extends BaseService {
 
     return this.models$Response(params).pipe(
       map((r: StrictHttpResponse<ModelModel>) => r.body as ModelModel)
+    );
+  }
+
+  /**
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `dealCards$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  dealCards(params: {
+    gameId: string;
+
+  }): Observable<void> {
+
+    return this.dealCards$Response(params).pipe(
+      map((r: StrictHttpResponse<void>) => r.body as void)
+    );
+  }
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `dealCards()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  dealCards$Response(params: {
+    gameId: string;
+
+  }): Observable<StrictHttpResponse<void>> {
+
+    const rb = new RequestBuilder(this.rootUrl, TestControllerService.DealCardsPath, 'get');
+    if (params) {
+
+      rb.query('gameId', params.gameId);
+
+    }
+    return this.http.request(rb.build({
+      responseType: 'text',
+      accept: '*/*'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return (r as HttpResponse<any>).clone({body: undefined}) as StrictHttpResponse<void>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `sendPrivateMessage()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  sendPrivateMessage$Response(params: {
+    message: string;
+
+  }): Observable<StrictHttpResponse<void>> {
+
+    const rb = new RequestBuilder(this.rootUrl, TestControllerService.SendPrivateMessagePath, 'get');
+    if (params) {
+
+      rb.query('message', params.message);
+
+    }
+    return this.http.request(rb.build({
+      responseType: 'text',
+      accept: '*/*'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return (r as HttpResponse<any>).clone({body: undefined}) as StrictHttpResponse<void>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `sendPrivateMessage$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  sendPrivateMessage(params: {
+    message: string;
+
+  }): Observable<void> {
+
+    return this.sendPrivateMessage$Response(params).pipe(
+      map((r: StrictHttpResponse<void>) => r.body as void)
     );
   }
 

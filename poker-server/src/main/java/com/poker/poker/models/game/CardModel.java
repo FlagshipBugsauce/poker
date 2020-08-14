@@ -21,4 +21,9 @@ public class CardModel {
 
   @Schema(description = "The value of the card.", example = "Ace", implementation = CardValue.class)
   private CardValue value;
+
+  public CardModel(final CardModel card) {
+    suit = card.getSuit();
+    value = card.getValue();
+  }
 }

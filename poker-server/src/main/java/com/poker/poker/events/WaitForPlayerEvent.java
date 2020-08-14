@@ -1,16 +1,17 @@
 package com.poker.poker.events;
 
-import com.poker.poker.models.game.GamePlayerModel;
+import java.util.UUID;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
 @Getter
 public class WaitForPlayerEvent extends ApplicationEvent {
 
-  private final GamePlayerModel player;
+  /** Player's ID. */
+  private final UUID id;
 
-  public WaitForPlayerEvent(Object source, GamePlayerModel player) {
+  public WaitForPlayerEvent(final Object source, final UUID id) {
     super(source);
-    this.player = player;
+    this.id = id;
   }
 }

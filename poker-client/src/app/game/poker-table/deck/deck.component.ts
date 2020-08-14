@@ -1,10 +1,17 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {GameStateContainer, PokerTableStateContainer} from '../../../shared/models/app-state.model';
+import {
+  GameStateContainer,
+  MiscEventsStateContainer,
+  PokerTableStateContainer
+} from '../../../shared/models/app-state.model';
 import {Subject} from 'rxjs';
-import {selectGamePhase, selectPlayerThatActed} from '../../../state/app.selector';
+import {selectDeal, selectGamePhase, selectPlayers} from '../../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
 import {GamePhase} from '../../../shared/models/game-phase.enum';
+import {DealModel} from '../../../api/models/deal-model';
+import {GamePlayerModel} from '../../../api/models/game-player-model';
+import {showCard} from '../../../state/app.actions';
 
 @Component({
   selector: 'pkr-deck',
@@ -28,6 +35,7 @@ export class DeckComponent implements OnInit, OnDestroy {
     opacity: 0,
     width: this.width
   };
+  public players: GamePlayerModel[] = [];
   private cardDestinations: { down: number; right: number }[] = [
     {down: 2.5, right: 4},
     {down: 2.5, right: 0.5},
@@ -43,7 +51,8 @@ export class DeckComponent implements OnInit, OnDestroy {
 
   constructor(
     private pokerTableStore: Store<PokerTableStateContainer>,
-    private gameStore: Store<GameStateContainer>
+    private gameStore: Store<GameStateContainer>,
+    private miscEventStore: Store<MiscEventsStateContainer>
   ) {
   }
 
@@ -52,13 +61,13 @@ export class DeckComponent implements OnInit, OnDestroy {
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((phase: GamePhase) => this.phase = phase);
 
-    this.pokerTableStore.select(selectPlayerThatActed)
+    this.miscEventStore.select(selectDeal)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((pos: number) => {
-      if (pos !== -1 && this.phase === GamePhase.Play) {
-        this.sendCardToPosition(pos + 1).then();
-      }
-    });
+    .subscribe((deal: DealModel) => this.dealCards());
+
+    this.pokerTableStore.select(selectPlayers)
+    .pipe(takeUntil(this.ngDestroyed$))
+    .subscribe((players: GamePlayerModel[]) => this.players = players);
   }
 
   public ngOnDestroy() {
@@ -66,15 +75,24 @@ export class DeckComponent implements OnInit, OnDestroy {
     this.ngDestroyed$.complete();
   }
 
+  public async dealCards(): Promise<void> {
+    await this.delay(100);
+    for (let i = 0; i < this.players.length; i++) {
+      if (!this.players[i].out) {
+        await this.sendCardToPosition(i);
+      }
+    }
+  }
+
   public async sendCardToPosition(pos: number): Promise<void> {
-    if (pos > 0) {
+    if (pos >= 0) {
       this.showMovingCard = true;
       let timer = 0;
       this.movingCardStyle.opacity = 1;
       while (timer++ < 30) {
         await this.delay(5);
-        this.movingCardStyle.top += this.cardDestinations[pos - 1].down * 3;
-        this.movingCardStyle.left += this.cardDestinations[pos - 1].right * 3;
+        this.movingCardStyle.top += this.cardDestinations[pos].down * 3;
+        this.movingCardStyle.left += this.cardDestinations[pos].right * 3;
         this.movingCardStyle.opacity -= 0.01;
         this.movingCardStyle.width -= 1;
       }
@@ -83,6 +101,7 @@ export class DeckComponent implements OnInit, OnDestroy {
       this.movingCardStyle.opacity = 0;
       this.movingCardStyle.width = this.width;
       this.showMovingCard = false;
+      this.miscEventStore.dispatch(showCard({card: pos}));
     }
   }
 

@@ -11,9 +11,9 @@ import {
   ChatStateContainer,
   GameDataStateContainer,
   GameStateContainer,
+  MiscEventsStateContainer,
   PlayerDataStateContainer,
-  PokerTableStateContainer,
-  TimerStateContainer
+  PokerTableStateContainer
 } from '../../shared/models/app-state.model';
 import * as selectors from '../../state/app.selector';
 import {DrawGameDataModel} from '../../api/models/draw-game-data-model';
@@ -30,10 +30,12 @@ import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 import {
   ChatMessageModel,
   ClientUserModel,
+  DealModel,
   GameModel,
   GamePlayerModel,
   HandSummaryModel,
-  TimerModel
+  TimerModel,
+  WinnerModel
 } from '../../api/models';
 import {MockChatService, MockWebSocketService} from '../../testing/mock-services';
 import {ChatService} from '../../shared/web-socket/chat.service';
@@ -42,6 +44,7 @@ import {PlayerBoxComponent} from '../poker-table/player-box/player-box.component
 import {HandSummaryComponent} from '../poker-table/hand-summary/hand-summary.component';
 import {DeckComponent} from '../poker-table/deck/deck.component';
 import {GamePhase} from '../../shared/models/game-phase.enum';
+import {TableControlsComponent} from '../poker-table/table-controls/table-controls.component';
 
 describe('GameComponent', () => {
   let mockStore: MockStore;
@@ -59,7 +62,9 @@ describe('GameComponent', () => {
   let mockPlayerThatActedSelector: MemoizedSelector<PokerTableStateContainer, number>;
   let mockHandSummarySelector: MemoizedSelector<PokerTableStateContainer, HandSummaryModel>;
   let mockAwayStatusSelector: MemoizedSelector<PlayerDataStateContainer, boolean>;
-  let mockSelectStartTimer: MemoizedSelector<TimerStateContainer, TimerModel>;
+  let mockStartTimerSelector: MemoizedSelector<MiscEventsStateContainer, TimerModel>;
+  let mockDealSelector: MemoizedSelector<MiscEventsStateContainer, DealModel>;
+  let mockWinnersSelector: MemoizedSelector<PokerTableStateContainer, WinnerModel[]>;
   let component: GameComponent;
   let fixture: ComponentFixture<GameComponent>;
 
@@ -73,7 +78,8 @@ describe('GameComponent', () => {
         PokerTableComponent,
         PlayerBoxComponent,
         HandSummaryComponent,
-        DeckComponent
+        DeckComponent,
+        TableControlsComponent
       ],
       imports: [SharedModule, RouterTestingModule],
       providers: [
@@ -103,7 +109,9 @@ describe('GameComponent', () => {
     mockPlayerThatActedSelector = mockStore.overrideSelector(selectors.selectPlayerThatActed, 0);
     mockHandSummarySelector = mockStore.overrideSelector(selectors.selectHandSummary, mockHandSummaryModel);
     mockAwayStatusSelector = mockStore.overrideSelector(selectors.selectAwayStatus, false);
-    mockSelectStartTimer = mockStore.overrideSelector(selectors.selectTimer, {});
+    mockStartTimerSelector = mockStore.overrideSelector(selectors.selectTimer, {});
+    mockDealSelector = mockStore.overrideSelector(selectors.selectDeal, {});
+    mockWinnersSelector = mockStore.overrideSelector(selectors.selectHandWinners, []);
     fixture = TestBed.createComponent(GameComponent);
     fixture.detectChanges();
   }));
