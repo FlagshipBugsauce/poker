@@ -1,6 +1,7 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {TableControlsComponent} from './table-controls.component';
+import {provideMockStore} from '@ngrx/store/testing';
 
 describe('TableControlsComponent', () => {
   let component: TableControlsComponent;
@@ -8,7 +9,10 @@ describe('TableControlsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [TableControlsComponent]
+      declarations: [TableControlsComponent],
+      providers: [
+        provideMockStore()
+      ]
     })
     .compileComponents();
   }));
