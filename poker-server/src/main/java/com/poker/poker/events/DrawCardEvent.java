@@ -7,6 +7,9 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class DrawCardEvent extends ApplicationEvent {
 
+  /**
+   * ID of the player who drew the card.
+   */
   private final UUID id;
 
   public DrawCardEvent(final Object source, final UUID id) {

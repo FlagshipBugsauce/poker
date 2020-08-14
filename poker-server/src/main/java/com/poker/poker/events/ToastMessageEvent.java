@@ -9,7 +9,14 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class ToastMessageEvent extends ApplicationEvent {
 
+  /**
+   * Game ID.
+   */
   private final UUID id;
+
+  /**
+   * Toast.
+   */
   private final ToastModel toast;
 
   public ToastMessageEvent(
