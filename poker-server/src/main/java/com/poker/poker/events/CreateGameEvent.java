@@ -8,14 +8,10 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class CreateGameEvent extends ApplicationEvent {
 
-  /**
-   * Game parameters.
-   */
+  /** Game parameters. */
   private final GameParameterModel gameParameterModel;
 
-  /**
-   * Host of the game.
-   */
+  /** Host of the game. */
   private final UserModel host;
 
   public CreateGameEvent(

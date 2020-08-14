@@ -7,9 +7,7 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class ReadyEvent extends ApplicationEvent {
 
-  /**
-   * Player ID.
-   */
+  /** Player ID. */
   private final UUID id;
 
   public ReadyEvent(final Object source, final UUID id) {

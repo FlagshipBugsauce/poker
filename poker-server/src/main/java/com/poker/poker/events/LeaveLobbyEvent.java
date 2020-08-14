@@ -7,9 +7,7 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class LeaveLobbyEvent extends ApplicationEvent {
 
-  /**
-   * User leaving the lobby.
-   */
+  /** User leaving the lobby. */
   private final UserModel user;
 
   public LeaveLobbyEvent(final Object source, final UserModel user) {

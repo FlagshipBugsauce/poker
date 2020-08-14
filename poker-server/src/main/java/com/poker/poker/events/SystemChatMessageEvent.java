@@ -7,14 +7,10 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class SystemChatMessageEvent extends ApplicationEvent {
 
-  /**
-   * Game ID.
-   */
+  /** Game ID. */
   private final UUID gameId;
 
-  /**
-   * Chat message.
-   */
+  /** Chat message. */
   private final String message;
 
   public SystemChatMessageEvent(final Object source, final UUID gameId, final String message) {

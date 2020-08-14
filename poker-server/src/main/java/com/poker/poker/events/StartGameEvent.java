@@ -7,9 +7,7 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class StartGameEvent extends ApplicationEvent {
 
-  /**
-   * Game ID.
-   */
+  /** Game ID. */
   private final UUID id;
 
   public StartGameEvent(final Object source, final UUID id) {

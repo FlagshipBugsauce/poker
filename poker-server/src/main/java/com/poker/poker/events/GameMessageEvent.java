@@ -9,14 +9,10 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class GameMessageEvent<T> extends ApplicationEvent {
 
-  /**
-   * Game ID.
-   */
+  /** Game ID. */
   private final UUID id;
 
-  /**
-   * Wrapper for the data being sent.
-   */
+  /** Wrapper for the data being sent. */
   private final GenericServerMessage<T> message;
 
   public GameMessageEvent(

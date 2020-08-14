@@ -6,14 +6,10 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class PublishMessageEvent<T> extends ApplicationEvent {
 
-  /**
-   * Topic the data is being published to.
-   */
+  /** Topic the data is being published to. */
   private final String topic;
 
-  /**
-   * Data being published.
-   */
+  /** Data being published. */
   private final T data;
 
   public PublishMessageEvent(final Object source, final String topic, final T data) {

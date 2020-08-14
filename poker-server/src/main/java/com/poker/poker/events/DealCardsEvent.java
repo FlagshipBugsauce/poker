@@ -7,9 +7,7 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class DealCardsEvent extends ApplicationEvent {
 
-  /**
-   * ID of the game.
-   */
+  /** ID of the game. */
   private final UUID id;
 
   public DealCardsEvent(final Object source, final UUID id) {
