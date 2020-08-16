@@ -115,15 +115,12 @@ public final class PokerTableUtilities {
     // Validate Pre-Conditions #5 and #6.
     assert is(toCall).gte(ZERO);
     assert is(raise).gte(ZERO);
-    //    assert toCall.compareTo(BigDecimal.ZERO) >= 0;
-    //    assert raise.compareTo(BigDecimal.ZERO) >= 0;
 
     final BigDecimal adjustedWager =
         raise.add(toCall).compareTo(bankRoll) > 0 ? bankRoll.subtract(toCall) : raise;
 
     // Validate Post-Condition.
     assert is(sum(adjustedWager, toCall)).lte(bankRoll);
-    //    assert adjustedWager.add(toCall).compareTo(bankRoll) <= 0;
 
     return adjustedWager;
   }
@@ -261,9 +258,7 @@ public final class PokerTableUtilities {
     if (controls.getBankRoll().equals(ZERO)) {
       player.setAllIn(true);
     }
-
     generateSidePots(table);
-
     table.setPlayerThatActed(playerIndex);
     table.setActingPlayer(nextPlayerToAct);
     table.actionPerformed();

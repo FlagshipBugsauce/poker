@@ -34,9 +34,6 @@ build/
 ### Logging ###
 /logs/*
 /poker-server/logs/*
-/poker-server/logs/
-./poker-server/logs
-./poker-server/logs/**
 
 # poker-client ignore
 
