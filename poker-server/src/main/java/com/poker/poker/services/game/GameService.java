@@ -78,7 +78,7 @@ public class GameService {
   /**
    * Publishes a message to system chat for specified game ID.
    *
-   * @param gameId  The lobby the message should be published to.
+   * @param gameId The lobby the message should be published to.
    * @param message The message to publish.
    */
   public void publishSystemChatMessageEvent(final UUID gameId, final String message) {
@@ -320,8 +320,7 @@ public class GameService {
     final GameModel game = data.getGame(event.getId());
     game.getPlayers()
         .forEach(
-            p ->
-                publisher.publishEvent(new PrivateMessageEvent<>(this, PlayerData, p.getId(), p)));
+            p -> publisher.publishEvent(new PrivateMessageEvent<>(this, PlayerData, p.getId(), p)));
   }
 
   @Async
@@ -374,10 +373,11 @@ public class GameService {
 
     // Now we need to determine whether the game is over (i.e. all players are bust, except one).
     log.debug("Determining if game should continue.");
-    final int numRemaining = (int) table.getPlayers()
-        .stream()
-        .filter(p -> !p.getControls().getBankRoll().equals(ZERO)) // TODO: Check isOut?
-        .count();
+    final int numRemaining =
+        (int)
+            table.getPlayers().stream()
+                .filter(p -> !p.getControls().getBankRoll().equals(ZERO)) // TODO: Check isOut?
+                .count();
 
     if (numRemaining > 1) {
       // Start a new hand

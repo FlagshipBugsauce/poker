@@ -313,9 +313,7 @@ public class PokerTableUtilitiesTests {
         new CardModel(CardSuit.Clubs, CardValue.Two));
   }
 
-  /**
-   * Basic test where there are no side-pots.
-   */
+  /** Basic test where there are no side-pots. */
   @Test
   public void testPotGeneration_1() {
     final PokerTableModel table = getSamplePokerTable(10);
@@ -465,9 +463,7 @@ public class PokerTableUtilitiesTests {
     assertEquals(1, table.getPots().size());
   }
 
-  /**
-   * Basic test of card dealing where all players are active in the hand.
-   */
+  /** Basic test of card dealing where all players are active in the hand. */
   @Test
   public void testDealCards_1() {
     // Setup.
@@ -489,9 +485,7 @@ public class PokerTableUtilitiesTests {
     assertEquals(10, deck.numCardsUsed());
   }
 
-  /**
-   * Test of card dealing where some players are not active in the hand.
-   */
+  /** Test of card dealing where some players are not active in the hand. */
   @Test
   public void testDealCards_2() {
     // Setup.
@@ -556,9 +550,7 @@ public class PokerTableUtilitiesTests {
     assertEquals(4, deck.numCardsUsed());
   }
 
-  /**
-   * Basic test of general case where sb and bb both have enough chips to post their blinds.
-   */
+  /** Basic test of general case where sb and bb both have enough chips to post their blinds. */
   @Test
   public void testPerformBlindBets_1() {
     // Setup.
@@ -580,8 +572,8 @@ public class PokerTableUtilitiesTests {
     assertEquals(sbBankRollInitial.subtract(sb), players.get(4).getControls().getBankRoll());
     assertEquals(bbBankRollInitial.subtract(bb), players.get(5).getControls().getBankRoll());
     assertEquals(6, table.getActingPlayer());
-    players.forEach(p ->
-        assertEquals(bb, p.getControls().getToCall().add(p.getControls().getCurrentBet())));
+    players.forEach(
+        p -> assertEquals(bb, p.getControls().getToCall().add(p.getControls().getCurrentBet())));
     assertEquals(ZERO, players.get(5).getControls().getToCall());
     assertEquals(sb, players.get(4).getControls().getToCall());
     assertEquals(1, table.getPots().size());
@@ -620,8 +612,8 @@ public class PokerTableUtilitiesTests {
     assertEquals(sbBankRollInitial.subtract(sb), players.get(6).getControls().getBankRoll());
     assertEquals(bbBankRollInitial.subtract(bb), players.get(1).getControls().getBankRoll());
     assertEquals(2, table.getActingPlayer());
-    players.forEach(p ->
-        assertEquals(bb, p.getControls().getToCall().add(p.getControls().getCurrentBet())));
+    players.forEach(
+        p -> assertEquals(bb, p.getControls().getToCall().add(p.getControls().getCurrentBet())));
     assertEquals(ZERO, players.get(1).getControls().getToCall());
     assertEquals(sb, players.get(6).getControls().getToCall());
     assertEquals(1, table.getPots().size());
@@ -744,9 +736,7 @@ public class PokerTableUtilitiesTests {
     // TODO: Check that cards were dealt
   }
 
-  /**
-   * Ensuring the blinds are increased
-   */
+  /** Ensuring the blinds are increased */
   @Test
   public void testNewHandSetup_2() {
     final PokerTableModel table = getSamplePokerTable(10);
@@ -763,9 +753,7 @@ public class PokerTableUtilitiesTests {
     assertEquals(sb.multiply(new BigDecimal(6)), getTotalInAllSidePots(table.getPots()));
   }
 
-  /**
-   * Simulates some actions and ensures they were handled correctly.
-   */
+  /** Simulates some actions and ensures they were handled correctly. */
   @Test
   public void testHandleHandAction_1() {
     final PokerTableModel table = getSamplePokerTable(10);

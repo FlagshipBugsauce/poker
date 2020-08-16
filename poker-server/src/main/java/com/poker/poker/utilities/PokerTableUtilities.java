@@ -33,14 +33,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Static utility class for performing operations on a PokerTableModel object.
- */
+/** Static utility class for performing operations on a PokerTableModel object. */
 @Slf4j
 public final class PokerTableUtilities {
 
-  private PokerTableUtilities() {
-  }
+  private PokerTableUtilities() {}
 
   /**
    * Creates a clone of the argument poker table which has new player objects with face down cards.
@@ -49,8 +46,8 @@ public final class PokerTableUtilities {
    *
    * @param table Poker table.
    * @return A clone of the table with all cards hidden (face down, i.e. client has no way of
-   * knowing what these cards are because the values will not be sent to any clients if the table is
-   * first processed by this method).
+   *     knowing what these cards are because the values will not be sent to any clients if the
+   *     table is first processed by this method).
    */
   public static PokerTableModel hideCards(final PokerTableModel table) {
     // Clone table, creating deep copy of player list and cards.
@@ -169,10 +166,10 @@ public final class PokerTableUtilities {
    *       first active player before the player that raised.
    * </ol>
    *
-   * @param table    Poker table.
-   * @param action   Action that was performed.
+   * @param table Poker table.
+   * @param action Action that was performed.
    * @param playerId ID of the player that performed the action.
-   * @param raise    The amount raised if action was Raise, null otherwise.
+   * @param raise The amount raised if action was Raise, null otherwise.
    */
   public static void handlePlayerAction(
       final PokerTableModel table,
@@ -303,7 +300,7 @@ public final class PokerTableUtilities {
    * </ol>
    *
    * @param table Poker table.
-   * @param deck  Deck being used on this poker table.
+   * @param deck Deck being used on this poker table.
    */
   public static void newHandSetup(final PokerTableModel table, final DeckModel deck) {
     // Validate Pre-Conditions #1, #2 and #3.
@@ -321,8 +318,7 @@ public final class PokerTableUtilities {
         p -> {
           p.setFolded(false); // Should always be reset false.
           p.setAllIn(false); // Should always be reset to false.
-          p.setOut(
-              p.getControls().getBankRoll().equals(ZERO)); // True when 0 chips left.
+          p.setOut(p.getControls().getBankRoll().equals(ZERO)); // True when 0 chips left.
           p.setControls(
               new TableControlsModel(p.getControls().getBankRoll())); // Keep bankRoll only.
         });
@@ -330,9 +326,7 @@ public final class PokerTableUtilities {
     // Validate Pre-Condition #4, #5 and #6.
     final long numNotOut = players.stream().filter(p -> !p.isOut()).count();
     final long numWithNonZeroChips =
-        players.stream()
-            .filter(p -> !p.getControls().getBankRoll().equals(ZERO))
-            .count();
+        players.stream().filter(p -> !p.getControls().getBankRoll().equals(ZERO)).count();
     assert numNotOut >= 2;
     assert numWithNonZeroChips >= 2;
     assert numNotOut == numWithNonZeroChips;
@@ -380,7 +374,7 @@ public final class PokerTableUtilities {
    * </ol>
    *
    * @param table Poker table.
-   * @param deck  Deck.
+   * @param deck Deck.
    */
   public static void dealCards(final PokerTableModel table, final DeckModel deck) {
     // Validate Pre-Conditions.
@@ -388,8 +382,8 @@ public final class PokerTableUtilities {
     assert deck != null;
     assert table.getPlayers() != null;
     assert table.getPlayers().stream()
-        .filter(p -> !p.getControls().getBankRoll().equals(ZERO))
-        .count()
+            .filter(p -> !p.getControls().getBankRoll().equals(ZERO))
+            .count()
         >= 2;
 
     final List<GamePlayerModel> players = table.getPlayers();
@@ -586,10 +580,10 @@ public final class PokerTableUtilities {
    *   <li>Returns the previous/next active player in the rotation.
    * </ol>
    *
-   * @param table      Poker table.
+   * @param table Poker table.
    * @param startIndex Index in players list.
-   * @param forward    Should be <code>true</code> if searching forward, <code>false</code> if
-   *                   searching backward.
+   * @param forward Should be <code>true</code> if searching forward, <code>false</code> if
+   *     searching backward.
    * @return The active player next in the rotation after the player at index startIndex.
    */
   public static int getNextActivePlayer(
@@ -614,10 +608,10 @@ public final class PokerTableUtilities {
   /**
    * Returns the ith next active player.
    *
-   * @param table      Poker table.
+   * @param table Poker table.
    * @param startIndex Start index.
-   * @param i          i.
-   * @param forward    Forward or backward.
+   * @param i i.
+   * @param forward Forward or backward.
    * @return ith next active player.
    */
   public static int getIthNextActivePlayer(
@@ -647,8 +641,9 @@ public final class PokerTableUtilities {
    * @return The default action for this player.
    */
   public static GameAction defaultAction(final GamePlayerModel player) {
-    return player.isAllIn() ? AllInCheck :
-        player.getControls().getToCall().equals(ZERO) ? Check : Fold;
+    return player.isAllIn()
+        ? AllInCheck
+        : player.getControls().getToCall().equals(ZERO) ? Check : Fold;
   }
 
   /**
