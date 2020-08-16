@@ -1,11 +1,23 @@
 package com.poker.poker.services.game;
 
+import static com.poker.poker.models.enums.GameAction.AllInCheck;
+import static com.poker.poker.models.enums.GamePhase.Over;
+import static com.poker.poker.models.enums.MessageType.Deal;
+import static com.poker.poker.models.enums.MessageType.HideCards;
+import static com.poker.poker.models.enums.MessageType.PlayerAwayToggled;
+import static com.poker.poker.models.enums.MessageType.PlayerData;
+import static com.poker.poker.models.enums.MessageType.PlayerJoinedLobby;
+import static com.poker.poker.models.enums.MessageType.PlayerLeftLobby;
+import static com.poker.poker.models.enums.MessageType.ReadyToggled;
+import static com.poker.poker.models.enums.MessageType.Timer;
 import static com.poker.poker.utilities.PokerTableUtilities.adjustWager;
 import static com.poker.poker.utilities.PokerTableUtilities.defaultAction;
 import static com.poker.poker.utilities.PokerTableUtilities.getSystemChatActionMessage;
 import static com.poker.poker.utilities.PokerTableUtilities.handleEndOfHand;
 import static com.poker.poker.utilities.PokerTableUtilities.handlePlayerAction;
 import static com.poker.poker.utilities.PokerTableUtilities.newHandSetup;
+import static java.math.BigDecimal.ZERO;
+import static java.math.RoundingMode.HALF_UP;
 
 import com.poker.poker.config.AppConfig;
 import com.poker.poker.events.AwayStatusEvent;
@@ -31,9 +43,6 @@ import com.poker.poker.events.SystemChatMessageEvent;
 import com.poker.poker.events.ToastMessageEvent;
 import com.poker.poker.events.WaitForPlayerEvent;
 import com.poker.poker.models.ApiSuccessModel;
-import com.poker.poker.models.enums.GameAction;
-import com.poker.poker.models.enums.GamePhase;
-import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.game.CurrentGameModel;
 import com.poker.poker.models.game.DealModel;
 import com.poker.poker.models.game.GameModel;
@@ -46,7 +55,6 @@ import com.poker.poker.models.game.PokerTableModel;
 import com.poker.poker.models.game.TimerModel;
 import com.poker.poker.models.user.UserModel;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,13 +73,12 @@ public class GameService {
 
   private final AppConfig appConfig;
   private final GameDataService data;
-  private final CardService cardService;
   private final ApplicationEventPublisher publisher;
 
   /**
    * Publishes a message to system chat for specified game ID.
    *
-   * @param gameId The lobby the message should be published to.
+   * @param gameId  The lobby the message should be published to.
    * @param message The message to publish.
    */
   public void publishSystemChatMessageEvent(final UUID gameId, final String message) {
@@ -133,8 +140,7 @@ public class GameService {
     final String toastMessage =
         String.format("%s %s has joined the game.", player.getFirstName(), player.getLastName());
     publisher.publishEvent(new ToastMessageEvent(this, lobby.getId(), toastMessage, "lg"));
-    publisher.publishEvent(
-        new GameMessageEvent<>(this, MessageType.PlayerJoinedLobby, lobby.getId(), player));
+    publisher.publishEvent(new GameMessageEvent<>(this, PlayerJoinedLobby, lobby.getId(), player));
     data.cachedGameListIsOutdated();
   }
 
@@ -167,8 +173,7 @@ public class GameService {
     final String toastMessage =
         String.format("%s %s has left the lobby.", player.getFirstName(), player.getLastName());
     publisher.publishEvent(new ToastMessageEvent(this, lobby.getId(), toastMessage, "lg"));
-    publisher.publishEvent(
-        new GameMessageEvent<>(this, MessageType.PlayerLeftLobby, lobby.getId(), player));
+    publisher.publishEvent(new GameMessageEvent<>(this, PlayerLeftLobby, lobby.getId(), player));
 
     data.cachedGameListIsOutdated();
   }
@@ -193,8 +198,7 @@ public class GameService {
           String.format(
               "%s %s %s ready.",
               player.getFirstName(), player.getLastName(), player.isReady() ? "is" : "is not"));
-      publisher.publishEvent(
-          new GameMessageEvent<>(this, MessageType.ReadyToggled, lobby.getId(), player));
+      publisher.publishEvent(new GameMessageEvent<>(this, ReadyToggled, lobby.getId(), player));
     }
   }
 
@@ -272,10 +276,8 @@ public class GameService {
           new GameActionEvent(this, player.getId(), defaultAction(player), null));
     }
 
-    publisher.publishEvent(
-        new GameMessageEvent<>(this, MessageType.PlayerData, player.getId(), player));
-    publisher.publishEvent(
-        new GameMessageEvent<>(this, MessageType.PlayerAwayToggled, game.getId(), player));
+    publisher.publishEvent(new GameMessageEvent<>(this, PlayerData, player.getId(), player));
+    publisher.publishEvent(new GameMessageEvent<>(this, PlayerAwayToggled, game.getId(), player));
     data.broadcastObfuscatedPokerTable(game.getId());
     // TODO: Refine what we're sending out here
   }
@@ -319,22 +321,20 @@ public class GameService {
     game.getPlayers()
         .forEach(
             p ->
-                publisher.publishEvent(
-                    new PrivateMessageEvent<>(this, MessageType.PlayerData, p.getId(), p)));
+                publisher.publishEvent(new PrivateMessageEvent<>(this, PlayerData, p.getId(), p)));
   }
 
   @Async
   @EventListener
   public void dealCards(final DealCardsEvent event) {
-    publisher.publishEvent(
-        new GameMessageEvent<>(this, MessageType.Deal, event.getId(), new DealModel()));
+    publisher.publishEvent(new GameMessageEvent<>(this, Deal, event.getId(), new DealModel()));
   }
 
   @Async
   @EventListener
   public void hideCards(final HideCardsEvent event) {
     publisher.publishEvent(
-        new GameMessageEvent<>(this, MessageType.HideCards, event.getId(), new HideCardsModel()));
+        new GameMessageEvent<>(this, HideCards, event.getId(), new HideCardsModel()));
   }
 
   @Async
@@ -361,7 +361,7 @@ public class GameService {
     }
 
     // If we get here, then the hand (and possibly the game) is over.
-    handleEndOfHand(table, cardService);
+    handleEndOfHand(table);
     // Let's display the summary and cards (if appropriate).
     if (numPlayersRemaining > 1) {
       data.broadcastPokerTable(game.getId());
@@ -374,15 +374,10 @@ public class GameService {
 
     // Now we need to determine whether the game is over (i.e. all players are bust, except one).
     log.debug("Determining if game should continue.");
-    final int numRemaining =
-        (int)
-            table.getPlayers().stream()
-                .filter(
-                    p ->
-                        !p.getControls()
-                            .getBankRoll()
-                            .equals(BigDecimal.ZERO)) // TODO: Should check isOut
-                .count();
+    final int numRemaining = (int) table.getPlayers()
+        .stream()
+        .filter(p -> !p.getControls().getBankRoll().equals(ZERO)) // TODO: Check isOut?
+        .count();
 
     if (numRemaining > 1) {
       // Start a new hand
@@ -405,10 +400,10 @@ public class GameService {
   private void publishTimerMessage(final UUID id, final int durationInMs) {
     final GameModel game = data.getGame(id);
     final BigDecimal duration =
-        new BigDecimal(durationInMs).divide(new BigDecimal(1000), 10, RoundingMode.HALF_UP);
+        new BigDecimal(durationInMs).divide(new BigDecimal(1000), 10, HALF_UP);
     publisher.publishEvent(
         new GameMessageEvent<>(
-            this, MessageType.Timer, game.getId(), new TimerModel(UUID.randomUUID(), duration)));
+            this, Timer, game.getId(), new TimerModel(UUID.randomUUID(), duration)));
   }
 
   /**
@@ -435,8 +430,7 @@ public class GameService {
       return;
     } else if (player.isAllIn()) {
       // Player is All-In, they can't do anything nor can they be removed from the round.
-      publisher.publishEvent(
-          new GameActionEvent(this, player.getId(), GameAction.AllInCheck, null));
+      publisher.publishEvent(new GameActionEvent(this, player.getId(), AllInCheck, null));
       return;
     }
 
@@ -462,7 +456,7 @@ public class GameService {
   @EventListener
   public void gameOver(final GameOverEvent event) {
     final GameModel game = data.getGame(event.getId());
-    game.setPhase(GamePhase.Over);
+    game.setPhase(Over);
 
     // TODO: Save game in DB
     data.endGame(game.getId());

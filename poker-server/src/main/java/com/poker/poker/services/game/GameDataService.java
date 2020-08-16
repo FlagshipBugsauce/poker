@@ -1,9 +1,17 @@
 package com.poker.poker.services.game;
 
+import static com.poker.poker.models.enums.GamePhase.Play;
+import static com.poker.poker.models.enums.MessageType.Game;
+import static com.poker.poker.models.enums.MessageType.GameData;
+import static com.poker.poker.models.enums.MessageType.GameList;
+import static com.poker.poker.models.enums.MessageType.GamePhaseChanged;
+import static com.poker.poker.models.enums.MessageType.PokerTable;
+import static com.poker.poker.utilities.PokerTableUtilities.hideCards;
+import static java.math.BigDecimal.ROUND_CEILING;
+
 import com.poker.poker.config.AppConfig;
 import com.poker.poker.events.GameMessageEvent;
 import com.poker.poker.models.enums.GamePhase;
-import com.poker.poker.models.enums.MessageType;
 import com.poker.poker.models.game.DeckModel;
 import com.poker.poker.models.game.DrawGameDataContainerModel;
 import com.poker.poker.models.game.DrawGameDataModel;
@@ -17,7 +25,6 @@ import com.poker.poker.models.game.PokerTableModel;
 import com.poker.poker.models.user.UserModel;
 import com.poker.poker.models.websocket.GenericServerMessage;
 import com.poker.poker.services.WebSocketService;
-import com.poker.poker.utilities.PokerTableUtilities;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,32 +95,27 @@ public class GameDataService {
   public void broadcastGameList() {
     webSocketService.sendPublicMessage(
         appConfig.getGameListTopic(),
-        new GenericServerMessage<>(
-            MessageType.GameList, useCachedGameList ? gameList : getLobbyList()));
+        new GenericServerMessage<>(GameList, useCachedGameList ? gameList : getLobbyList()));
   }
 
   public void broadcastPokerTable(final UUID id) {
     assert tables.get(id) != null;
-    publisher.publishEvent(
-        new GameMessageEvent<>(this, MessageType.PokerTable, id, tables.get(id)));
+    publisher.publishEvent(new GameMessageEvent<>(this, PokerTable, id, tables.get(id)));
   }
 
   public void broadcastObfuscatedPokerTable(final UUID id) {
     assert tables.get(id) != null;
-    publisher.publishEvent(
-        new GameMessageEvent<>(
-            this, MessageType.PokerTable, id, PokerTableUtilities.hideCards(tables.get(id))));
+    publisher.publishEvent(new GameMessageEvent<>(this, PokerTable, id, hideCards(tables.get(id))));
   }
 
   public void broadcastGame(final UUID id) {
     assert games.get(id) != null;
-    publisher.publishEvent(new GameMessageEvent<>(this, MessageType.Game, id, games.get(id)));
+    publisher.publishEvent(new GameMessageEvent<>(this, Game, id, games.get(id)));
   }
 
   public void broadcastGameSummary(final UUID id) {
     assert summaries.get(id) != null;
-    publisher.publishEvent(
-        new GameMessageEvent<>(this, MessageType.GameData, id, summaries.get(id)));
+    publisher.publishEvent(new GameMessageEvent<>(this, GameData, id, summaries.get(id)));
   }
 
   /**
@@ -203,8 +205,7 @@ public class GameDataService {
     assert tables.get(id) != null;
     assert summaries.get(id) != null;
     broadcastGame(id);
-    publisher.publishEvent(
-        new GameMessageEvent<>(this, MessageType.GamePhaseChanged, id, GamePhase.Over));
+    publisher.publishEvent(new GameMessageEvent<>(this, GamePhaseChanged, id, GamePhase.Over));
     broadcastObfuscatedPokerTable(id);
     broadcastGameSummary(id);
     games.get(id).getPlayers().forEach(p -> userIdToGameIdMap.remove(p.getId()));
@@ -271,14 +272,13 @@ public class GameDataService {
             lobby
                 .getParameters()
                 .getBuyIn()
-                .divide(new BigDecimal(appConfig.getNumBigBlinds() * 2), BigDecimal.ROUND_CEILING));
+                .divide(new BigDecimal(appConfig.getNumBigBlinds() * 2), ROUND_CEILING));
 
     cachedGameListIsOutdated();
     broadcastObfuscatedPokerTable(id);
     broadcastGame(id);
-    game.setPhase(GamePhase.Play);
-    publisher.publishEvent(
-        new GameMessageEvent<>(this, MessageType.GamePhaseChanged, id, GamePhase.Play));
+    game.setPhase(Play);
+    publisher.publishEvent(new GameMessageEvent<>(this, GamePhaseChanged, id, Play));
   }
 
   public PokerTableModel getPokerTable(final UUID id) {
