@@ -348,6 +348,7 @@ public class GameService {
     publishSystemChatMessageEvent(game.getId(), getSystemChatActionMessage(table, event));
     data.broadcastObfuscatedPokerTable(game.getId());
 
+    // TODO: Take a closer look at this logic to ensure the game flow is correct.
     // Check if hand should continue, if yes, publish wait even and return;
     final long numPlayersRemaining =
         table.getPlayers().stream().filter(p -> !p.isOut() && !p.isFolded()).count();

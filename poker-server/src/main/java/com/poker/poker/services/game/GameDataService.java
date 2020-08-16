@@ -61,8 +61,6 @@ public class GameDataService {
   private final Map<UUID, DrawGameDataContainerModel> summaries;
   /** Mapping from user ID to game ID. Can be used to retrieve the game a user is in. */
   private final Map<UUID, UUID> userIdToGameIdMap;
-
-  private final Map<UUID, UUID> gameIdToHandIdMap;
   private List<GameListModel> gameList;
   private boolean useCachedGameList = false;
 
@@ -79,18 +77,19 @@ public class GameDataService {
     tables = Collections.synchronizedMap(new HashMap<>());
     summaries = Collections.synchronizedMap(new HashMap<>());
     userIdToGameIdMap = Collections.synchronizedMap(new HashMap<>());
-    gameIdToHandIdMap = Collections.synchronizedMap(new HashMap<>());
   }
 
   /**
-   * If there is any change to any of the lobbys, this method should be called so that a updated
+   * If there is any change to any of the lobbys, this method should be called so that an updated
    * game list is generated.
    */
   public void cachedGameListIsOutdated() {
     useCachedGameList = false;
   }
 
-  /** Every 3 seconds, broadcasts the list of joinable games to the game list topic. */
+  /**
+   * Every 3 seconds, broadcasts the list of joinable games to the game list topic.
+   */
   @Scheduled(cron = "0/3 * * * * ?")
   public void broadcastGameList() {
     webSocketService.sendPublicMessage(
@@ -98,16 +97,47 @@ public class GameDataService {
         new GenericServerMessage<>(GameList, useCachedGameList ? gameList : getLobbyList()));
   }
 
+  /**
+   * Broadcasts the poker table associated with the specified game ID to the game topic associated
+   * with this ID.
+   *
+   * <ol>
+   *   <b>Pre-Conditions:</b>
+   *   <li><code>tables.get(id) != null</code></li>
+   * </ol>
+   *
+   * @param id ID of the game associated with the poker table being broadcast.
+   */
   public void broadcastPokerTable(final UUID id) {
     assert tables.get(id) != null;
     publisher.publishEvent(new GameMessageEvent<>(this, PokerTable, id, tables.get(id)));
   }
 
+  /**
+   * Broadcasts the poker table associated with the specified game ID to the game topic associated
+   * with this ID. Before broadcasting, player cards are hidden, so the data being sent out lets
+   * clients that are listening know that players have cards, but does not give them any information
+   * about what those cards actually are.
+   *
+   * <ol>
+   *   <b>Pre-Conditions:</b>
+   *   <li><code>tables.get(id) != null</code></li>
+   * </ol>
+   *
+   * @param id ID of the game associated with the poker table being broadcast.
+   */
   public void broadcastObfuscatedPokerTable(final UUID id) {
     assert tables.get(id) != null;
     publisher.publishEvent(new GameMessageEvent<>(this, PokerTable, id, hideCards(tables.get(id))));
   }
 
+  /**
+   * Broadcasts certain game data, such as the game phase.
+   * <p>
+   * TODO: May deprecate this and replace with PokerTableModel.
+   *
+   * @param id Game ID of the game to broadcast.
+   */
   public void broadcastGame(final UUID id) {
     assert games.get(id) != null;
     publisher.publishEvent(new GameMessageEvent<>(this, Game, id, games.get(id)));
@@ -158,9 +188,6 @@ public class GameDataService {
             gameId,
             GamePhase.Lobby,
             new ArrayList<>(),
-            new ArrayList<>(),
-            0,
-            appConfig.getNumRoundsInRollGame(),
             appConfig.getTimeToActInMs() / 1000);
 
     final LobbyPlayerModel host = new LobbyPlayerModel(user, false, true);

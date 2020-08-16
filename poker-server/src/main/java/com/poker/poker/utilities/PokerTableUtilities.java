@@ -308,6 +308,7 @@ public final class PokerTableUtilities {
     // Store pointer to player list.
     final List<GamePlayerModel> players = table.getPlayers();
 
+    // TODO: Investigate if this should be done in handleEndOfHand.
     // Update folded, allIn, out and table controls.
     players.forEach(
         p -> {

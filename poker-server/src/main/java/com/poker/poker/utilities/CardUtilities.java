@@ -26,7 +26,9 @@ import static com.poker.poker.models.enums.HandType.Set;
 import static com.poker.poker.models.enums.HandType.Straight;
 import static com.poker.poker.models.enums.HandType.StraightFlush;
 import static com.poker.poker.models.enums.HandType.TwoPair;
+import static java.util.stream.Collectors.toList;
 
+import com.google.common.collect.ImmutableMap;
 import com.poker.poker.models.enums.CardSuit;
 import com.poker.poker.models.enums.CardValue;
 import com.poker.poker.models.enums.HandType;
@@ -41,7 +43,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.Data;
 
 /**
@@ -51,11 +52,13 @@ import lombok.Data;
 public final class CardUtilities {
 
   /**
-   * Sorting order constant which can be passed to the comparator methods to specify the sort order.
+   * Sorting order constant which can be passed to the comparator methods to specify the sort
+   * order.
    */
   public static final int ASCENDING = 1;
   /**
-   * Sorting order constant which can be passed to the comparator methods to specify the sort order.
+   * Sorting order constant which can be passed to the comparator methods to specify the sort
+   * order.
    */
   public static final int DESCENDING = -1;
 
@@ -70,60 +73,61 @@ public final class CardUtilities {
    */
   public static final int RANK_BASE = 15;
 
-  /** Face down card. */
+  /**
+   * Face down card.
+   */
   public static final CardModel FACE_DOWN_CARD = new CardModel(CardSuit.Back, CardValue.Back);
 
   /**
    * Mapping of card values to a number that is less than 15. These values are used for sorting and
    * determining hand ranks.
    */
-  public static final Map<CardValue, Integer> cardValues =
-      new HashMap<CardValue, Integer>() {
-        {
-          put(CardValue.Back, 1);
-          put(Two, 2);
-          put(Three, 3);
-          put(Four, 4);
-          put(Five, 5);
-          put(Six, 6);
-          put(Seven, 7);
-          put(Eight, 8);
-          put(Nine, 9);
-          put(Ten, 10);
-          put(Jack, 11);
-          put(Queen, 12);
-          put(King, 13);
-          put(Ace, 14);
-        }
-      };
+  public static final Map<CardValue, Integer> cardValues = ImmutableMap
+      .<CardValue, Integer>builder()
+      .put(CardValue.Back, 1)
+      .put(Two, 2)
+      .put(Three, 3)
+      .put(Four, 4)
+      .put(Five, 5)
+      .put(Six, 6)
+      .put(Seven, 7)
+      .put(Eight, 8)
+      .put(Nine, 9)
+      .put(Ten, 10)
+      .put(Jack, 11)
+      .put(Queen, 12)
+      .put(King, 13)
+      .put(Ace, 14)
+      .build();
 
-  /** Mapping of card suits to numbers, to help with sorting. */
-  public static final Map<CardSuit, Integer> cardSuitValues =
-      new HashMap<CardSuit, Integer>() {
-        {
-          put(CardSuit.Back, 0);
-          put(Spades, 1);
-          put(Hearts, 2);
-          put(Clubs, 3);
-          put(Diamonds, 4);
-        }
-      };
+  /**
+   * Mapping of card suits to numbers, to help with sorting.
+   */
+  public static final Map<CardSuit, Integer> cardSuitValues = ImmutableMap
+      .<CardSuit, Integer>builder()
+      .put(CardSuit.Back, 0)
+      .put(Spades, 1)
+      .put(Hearts, 2)
+      .put(Clubs, 3)
+      .put(Diamonds, 4)
+      .build();
 
-  /** Mapping of hand types to numbers, used to generate hand ranks. */
-  public static final Map<HandType, Integer> handTypeValues =
-      new HashMap<HandType, Integer>() {
-        {
-          put(StraightFlush, 8);
-          put(FourOfAKind, 7);
-          put(FullHouse, 6);
-          put(Flush, 5);
-          put(Straight, 4);
-          put(Set, 3);
-          put(TwoPair, 2);
-          put(Pair, 1);
-          put(HighCard, 0);
-        }
-      };
+
+  /**
+   * Mapping of hand types to numbers, used to generate hand ranks.
+   */
+  public static final Map<HandType, Integer> handTypeValues = ImmutableMap
+      .<HandType, Integer>builder()
+      .put(StraightFlush, 8)
+      .put(FourOfAKind, 7)
+      .put(FullHouse, 6)
+      .put(Flush, 5)
+      .put(Straight, 4)
+      .put(Set, 3)
+      .put(TwoPair, 2)
+      .put(Pair, 1)
+      .put(HighCard, 0)
+      .build();
 
   /**
    * Ordered list of hand evaluators, which helps to easily rank hands by iterating over this list.
@@ -142,11 +146,15 @@ public final class CardUtilities {
           new Evaluator(Pair, CardUtilities::checkForPair),
           new Evaluator(HighCard, CardUtilities::checkForHighCard));
 
-  /** Private constructor to prevent creating instances of static class. */
-  private CardUtilities() {}
+  /**
+   * Private constructor to prevent creating instances of static class.
+   */
+  private CardUtilities() {
+  }
 
   /**
-   * All methods in this class that take in a collection of cards must satisfy these pre-conditions.
+   * All methods in this class that take in a collection of cards must satisfy these
+   * pre-conditions.
    *
    * <ol>
    *   <b>Pre-Conditions:</b>
@@ -286,7 +294,7 @@ public final class CardUtilities {
           cards.stream()
               .filter(c -> c.getSuit() == suit)
               .sorted(valueSorter())
-              .collect(Collectors.toList()));
+              .collect(toList()));
     }
     return result;
   }
@@ -304,11 +312,7 @@ public final class CardUtilities {
     final Map<CardValue, List<CardModel>> result = new HashMap<>();
     for (final CardValue v : CardValue.values()) {
       result.put(
-          v,
-          cards.stream()
-              .filter(c -> c.getValue() == v)
-              .sorted(suitSorter())
-              .collect(Collectors.toList()));
+          v, cards.stream().filter(c -> c.getValue() == v).sorted(suitSorter()).collect(toList()));
     }
     return result;
   }
@@ -343,9 +347,9 @@ public final class CardUtilities {
     }
 
     final List<CardModel> lowAceCards =
-        cards.stream().map(CardModel::new).sorted(lowAceValueSorter()).collect(Collectors.toList());
+        cards.stream().map(CardModel::new).sorted(lowAceValueSorter()).collect(toList());
     final List<CardModel> highAceCards =
-        cards.stream().map(CardModel::new).sorted(valueSorter()).collect(Collectors.toList());
+        cards.stream().map(CardModel::new).sorted(valueSorter()).collect(toList());
 
     int lowIndex1 = -1, lowIndex2 = -1;
 
@@ -389,7 +393,7 @@ public final class CardUtilities {
    *
    * @param cards List of 7 cards.
    * @return The cards that make up the straight flush, or <code>null</code> if there is no straight
-   *     flush.
+   * flush.
    */
   public static List<CardModel> checkForStraightFlush(final Collection<CardModel> cards) {
     assert sharedPreCondition(cards);
@@ -426,7 +430,7 @@ public final class CardUtilities {
    *
    * @param cards Cards.
    * @return The best 5-card hand that includes 4-of-a-kind if there are four of the same card in
-   *     <code>cards</code>, otherwise returns <code>null</code>.
+   * <code>cards</code>, otherwise returns <code>null</code>.
    */
   public static List<CardModel> checkForFourOfAKind(final List<CardModel> cards) {
     assert sharedPreCondition(cards);
@@ -474,7 +478,7 @@ public final class CardUtilities {
    *
    * @param cards Cards.
    * @return The best full house found in the provided cards, or <code>null</code> if no full house
-   *     is found.
+   * is found.
    */
   public static List<CardModel> checkForFullHouse(final Collection<CardModel> cards) {
     assert sharedPreCondition(cards);
@@ -581,7 +585,7 @@ public final class CardUtilities {
    * checkForSet methods. If no set is found, <code>null</code> is returned.
    *
    * @param values Mapping of lists of cards, keyed by the value associated with the cards in each
-   *     list.
+   *               list.
    * @return The highest set found in the map.
    */
   public static List<CardModel> findSet(final Map<CardValue, List<CardModel>> values) {
@@ -635,7 +639,7 @@ public final class CardUtilities {
    * checkForTwoPair methods. If no pair is found, <code>null</code> is returned.
    *
    * @param values Mapping of lists of cards, keyed by the value associated with the cards in each
-   *     list.
+   *               list.
    * @return The highest pair found in the map.
    */
   public static List<CardModel> findFirstPair(final Map<CardValue, List<CardModel>> values) {
@@ -656,8 +660,8 @@ public final class CardUtilities {
    * </code> is returned.
    *
    * @param values Mapping of lists of cards, keyed by the value associated with the cards in each
-   *     list.
-   * @param first The first pair that was found (needed to avoid returning the same pair).
+   *               list.
+   * @param first  The first pair that was found (needed to avoid returning the same pair).
    * @return The best pair that isn't the pair in the <code>first</code> argument.
    */
   public static List<CardModel> findSecondPair(
@@ -697,7 +701,7 @@ public final class CardUtilities {
    *
    * @param cards Cards.
    * @return The best two pairs with the best kicker in the cards provided if two pairs are found,
-   *     otherwise <code>null</code>.
+   * otherwise <code>null</code>.
    */
   public static List<CardModel> checkForTwoPair(final List<CardModel> cards) {
     assert sharedPreCondition(cards);
@@ -790,7 +794,7 @@ public final class CardUtilities {
    *   <li>
    * </ol>
    *
-   * @param cards Cards.
+   * @param cards  Cards.
    * @param result Part of a 5 card hand that needs to be padded with kickers.
    * @return A 5 card hand with the best possible kickers.
    */
@@ -815,7 +819,8 @@ public final class CardUtilities {
 
   /**
    * Takes a list of 7 cards, finds the best 5 card hand that can be made and gives it a numerical
-   * ranking. The object returned contains the best 5 card hand and the numerical rank of that hand.
+   * ranking. The object returned contains the best 5 card hand and the numerical rank of that
+   * hand.
    *
    * <ol>
    *   <b>Pre-Conditions:</b>
@@ -827,7 +832,7 @@ public final class CardUtilities {
    *
    * @param cards Cards.
    * @return The best 5 card hand that can be made with the list of 7 cards provided, along with the
-   *     numerical ranking of the best hand.
+   * numerical ranking of the best hand.
    */
   public static HandRankModel rankHand(final List<CardModel> cards) {
     assert sharedPreCondition(cards);
@@ -880,7 +885,9 @@ public final class CardUtilities {
     return new HandRankModel(rank, bestHand);
   }
 
-  /** Wrapper for hand evaluators. */
+  /**
+   * Wrapper for hand evaluators.
+   */
   @Data
   private static final class Evaluator {
 
