@@ -28,8 +28,8 @@ public class LobbyPlayerModel extends PlayerModel {
    * currently the host of game.
    *
    * @param userModel The general model of the player (does not contain game related information).
-   * @param ready     Flag which specifies if the player's ready status should be true or false.
-   * @param host      Flag which specifies if the player is the host of the game.
+   * @param ready Flag which specifies if the player's ready status should be true or false.
+   * @param host Flag which specifies if the player is the host of the game.
    */
   public LobbyPlayerModel(final UserModel userModel, boolean ready, boolean host) {
     super(userModel);

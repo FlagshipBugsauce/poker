@@ -61,6 +61,7 @@ public class GameDataService {
   private final Map<UUID, DrawGameDataContainerModel> summaries;
   /** Mapping from user ID to game ID. Can be used to retrieve the game a user is in. */
   private final Map<UUID, UUID> userIdToGameIdMap;
+
   private List<GameListModel> gameList;
   private boolean useCachedGameList = false;
 
@@ -87,9 +88,7 @@ public class GameDataService {
     useCachedGameList = false;
   }
 
-  /**
-   * Every 3 seconds, broadcasts the list of joinable games to the game list topic.
-   */
+  /** Every 3 seconds, broadcasts the list of joinable games to the game list topic. */
   @Scheduled(cron = "0/3 * * * * ?")
   public void broadcastGameList() {
     webSocketService.sendPublicMessage(
@@ -103,7 +102,7 @@ public class GameDataService {
    *
    * <ol>
    *   <b>Pre-Conditions:</b>
-   *   <li><code>tables.get(id) != null</code></li>
+   *   <li><code>tables.get(id) != null</code>
    * </ol>
    *
    * @param id ID of the game associated with the poker table being broadcast.
@@ -121,7 +120,7 @@ public class GameDataService {
    *
    * <ol>
    *   <b>Pre-Conditions:</b>
-   *   <li><code>tables.get(id) != null</code></li>
+   *   <li><code>tables.get(id) != null</code>
    * </ol>
    *
    * @param id ID of the game associated with the poker table being broadcast.
@@ -133,8 +132,8 @@ public class GameDataService {
 
   /**
    * Broadcasts certain game data, such as the game phase.
-   * <p>
-   * TODO: May deprecate this and replace with PokerTableModel.
+   *
+   * <p>TODO: May deprecate this and replace with PokerTableModel.
    *
    * @param id Game ID of the game to broadcast.
    */
@@ -185,10 +184,7 @@ public class GameDataService {
 
     final GameModel game =
         new GameModel(
-            gameId,
-            GamePhase.Lobby,
-            new ArrayList<>(),
-            appConfig.getTimeToActInMs() / 1000);
+            gameId, GamePhase.Lobby, new ArrayList<>(), appConfig.getTimeToActInMs() / 1000);
 
     final LobbyPlayerModel host = new LobbyPlayerModel(user, false, true);
     final List<LobbyPlayerModel> players = Collections.synchronizedList(new ArrayList<>());
