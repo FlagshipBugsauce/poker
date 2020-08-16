@@ -27,9 +27,11 @@ public class LobbyPlayerModel extends PlayerModel {
    * Constructor that takes in a UserModel as well as the ready status and whether this player is
    * currently the host of game.
    *
-   * @param userModel UserModel representing a player.
+   * @param userModel The general model of the player (does not contain game related information).
+   * @param ready Flag which specifies if the player's ready status should be true or false.
+   * @param host Flag which specifies if the player is the host of the game.
    */
-  public LobbyPlayerModel(UserModel userModel, boolean ready, boolean host) {
+  public LobbyPlayerModel(final UserModel userModel, boolean ready, boolean host) {
     super(userModel);
     this.ready = ready;
     this.host = host;

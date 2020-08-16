@@ -1,5 +1,17 @@
 package com.poker.poker.utilities;
 
+import static com.poker.poker.utilities.CardUtilities.DESCENDING;
+import static com.poker.poker.utilities.CardUtilities.valueSorter;
+import static com.poker.poker.utilities.PokerTableUtilities.dealCards;
+import static com.poker.poker.utilities.PokerTableUtilities.determineWinners;
+import static com.poker.poker.utilities.PokerTableUtilities.generateSidePots;
+import static com.poker.poker.utilities.PokerTableUtilities.getTotalInAllSidePots;
+import static com.poker.poker.utilities.PokerTableUtilities.handlePlayerAction;
+import static com.poker.poker.utilities.PokerTableUtilities.newHandSetup;
+import static com.poker.poker.utilities.PokerTableUtilities.performBlindBets;
+import static java.math.BigDecimal.ZERO;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.poker.poker.models.enums.CardSuit;
 import com.poker.poker.models.enums.CardValue;
 import com.poker.poker.models.enums.GameAction;
@@ -10,7 +22,6 @@ import com.poker.poker.models.game.PokerTableModel;
 import com.poker.poker.models.game.PotModel;
 import com.poker.poker.models.game.TableControlsModel;
 import com.poker.poker.models.game.WinnerModel;
-import com.poker.poker.services.game.CardService;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,8 +42,6 @@ public class PokerTableUtilitiesTests {
   public static final int SAMPLE_MIN_BANKROLL = 1000;
   public static final int SAMPLE_MAX_BANKROLL = 2000;
   public static final BigDecimal SAMPLE_BLIND = new BigDecimal(10);
-
-  public CardService cardService = new CardService();
 
   public PokerTableModel getSamplePokerTable(final int numPlayers) {
     final PokerTableModel table = new PokerTableModel();
@@ -104,12 +113,12 @@ public class PokerTableUtilitiesTests {
     players.get(1).getControls().setCurrentBet(new BigDecimal(20));
     players.get(2).getControls().setCurrentBet(new BigDecimal(40));
     players.get(3).getControls().setCurrentBet(new BigDecimal(60));
-    players.get(3).getControls().setBankRoll(BigDecimal.ZERO);
+    players.get(3).getControls().setBankRoll(ZERO);
     players.get(3).setAllIn(true);
     players.get(4).getControls().setCurrentBet(new BigDecimal(100));
     players.get(5).getControls().setCurrentBet(new BigDecimal(300));
     players.get(6).getControls().setCurrentBet(new BigDecimal(140));
-    players.get(6).getControls().setBankRoll(BigDecimal.ZERO);
+    players.get(6).getControls().setBankRoll(ZERO);
     players.get(6).setAllIn(true);
     players.get(7).getControls().setCurrentBet(new BigDecimal(600));
   }
@@ -137,16 +146,16 @@ public class PokerTableUtilitiesTests {
     players.get(1).getControls().setCurrentBet(new BigDecimal(20));
     players.get(2).getControls().setCurrentBet(new BigDecimal(40));
     players.get(3).getControls().setCurrentBet(new BigDecimal(60));
-    players.get(3).getControls().setBankRoll(BigDecimal.ZERO);
+    players.get(3).getControls().setBankRoll(ZERO);
     players.get(3).setAllIn(true);
     players.get(4).getControls().setCurrentBet(new BigDecimal(100));
     players.get(5).getControls().setCurrentBet(new BigDecimal(300));
     players.get(6).getControls().setCurrentBet(new BigDecimal(140));
-    players.get(6).getControls().setBankRoll(BigDecimal.ZERO);
+    players.get(6).getControls().setBankRoll(ZERO);
     players.get(6).setAllIn(true);
     players.get(7).getControls().setCurrentBet(new BigDecimal(600));
     players.get(8).getControls().setCurrentBet(new BigDecimal(1200));
-    players.get(8).getControls().setBankRoll(BigDecimal.ZERO);
+    players.get(8).getControls().setBankRoll(ZERO);
     players.get(8).setAllIn(true);
   }
 
@@ -174,16 +183,16 @@ public class PokerTableUtilitiesTests {
     players.get(1).getControls().setCurrentBet(new BigDecimal(2400));
     players.get(2).getControls().setCurrentBet(new BigDecimal(40));
     players.get(3).getControls().setCurrentBet(new BigDecimal(60));
-    players.get(3).getControls().setBankRoll(BigDecimal.ZERO);
+    players.get(3).getControls().setBankRoll(ZERO);
     players.get(3).setAllIn(true);
     players.get(4).getControls().setCurrentBet(new BigDecimal(100));
     players.get(5).getControls().setCurrentBet(new BigDecimal(300));
     players.get(6).getControls().setCurrentBet(new BigDecimal(140));
-    players.get(6).getControls().setBankRoll(BigDecimal.ZERO);
+    players.get(6).getControls().setBankRoll(ZERO);
     players.get(6).setAllIn(true);
     players.get(7).getControls().setCurrentBet(new BigDecimal(600));
     players.get(8).getControls().setCurrentBet(new BigDecimal(1200));
-    players.get(8).getControls().setBankRoll(BigDecimal.ZERO);
+    players.get(8).getControls().setBankRoll(ZERO);
     players.get(8).setAllIn(true);
     players.get(9).getControls().setCurrentBet(new BigDecimal(1200));
   }
@@ -225,21 +234,21 @@ public class PokerTableUtilitiesTests {
     final List<GamePlayerModel> players = table.getPlayers();
     players.get(0).getControls().setCurrentBet(new BigDecimal(1000));
     players.get(1).getControls().setCurrentBet(new BigDecimal(500));
-    players.get(1).getControls().setBankRoll(BigDecimal.ZERO);
+    players.get(1).getControls().setBankRoll(ZERO);
     players.get(1).setAllIn(true);
     players.get(2).getControls().setCurrentBet(new BigDecimal(400));
-    players.get(2).getControls().setBankRoll(BigDecimal.ZERO);
+    players.get(2).getControls().setBankRoll(ZERO);
     players.get(2).setAllIn(true);
     players.get(3).getControls().setCurrentBet(new BigDecimal(200));
-    players.get(3).getControls().setBankRoll(BigDecimal.ZERO);
+    players.get(3).getControls().setBankRoll(ZERO);
     players.get(3).setAllIn(true);
     players.get(4).getControls().setCurrentBet(new BigDecimal(100));
-    players.get(4).getControls().setBankRoll(BigDecimal.ZERO);
+    players.get(4).getControls().setBankRoll(ZERO);
     players.get(4).setAllIn(true);
     players.get(5).getControls().setCurrentBet(new BigDecimal(1000));
     players.get(6).getControls().setCurrentBet(new BigDecimal(1000));
     players.get(7).getControls().setCurrentBet(new BigDecimal(300));
-    players.get(7).getControls().setBankRoll(BigDecimal.ZERO);
+    players.get(7).getControls().setBankRoll(ZERO);
     players.get(7).setAllIn(true);
     players.get(8).getControls().setCurrentBet(new BigDecimal(1000));
     players.get(9).getControls().setCurrentBet(new BigDecimal(1000));
@@ -261,7 +270,7 @@ public class PokerTableUtilitiesTests {
           }
         });
     createFakeHand(table);
-    PokerTableUtilities.generateSidePots(table);
+    generateSidePots(table);
   }
 
   /**
@@ -311,11 +320,11 @@ public class PokerTableUtilitiesTests {
     createFakeBets1(table);
 
     // Test.
-    PokerTableUtilities.generateSidePots(table);
+    generateSidePots(table);
 
     // Verify.
-    Assertions.assertEquals(1, table.getPots().size());
-    Assertions.assertEquals(new BigDecimal(150), table.getPots().get(0).getTotal());
+    assertEquals(1, table.getPots().size());
+    assertEquals(new BigDecimal(150), table.getPots().get(0).getTotal());
   }
 
   @Test
@@ -324,18 +333,17 @@ public class PokerTableUtilitiesTests {
     createFakeBets2(table);
 
     // Test.
-    PokerTableUtilities.generateSidePots(table);
+    generateSidePots(table);
 
     // Verify.
-    Assertions.assertEquals(3, table.getPots().size());
-    Assertions.assertEquals(new BigDecimal(370), table.getPots().get(0).getTotal());
-    Assertions.assertEquals(new BigDecimal(280), table.getPots().get(1).getTotal());
-    Assertions.assertEquals(new BigDecimal(620), table.getPots().get(2).getTotal());
-    Assertions.assertEquals(new BigDecimal(60), table.getPots().get(0).getWager());
-    Assertions.assertEquals(new BigDecimal(140), table.getPots().get(1).getWager());
-    Assertions.assertEquals(new BigDecimal(600), table.getPots().get(2).getWager());
-    Assertions.assertEquals(
-        new BigDecimal(1270), PokerTableUtilities.getTotalInAllSidePots(table.getPots()));
+    assertEquals(3, table.getPots().size());
+    assertEquals(new BigDecimal(370), table.getPots().get(0).getTotal());
+    assertEquals(new BigDecimal(280), table.getPots().get(1).getTotal());
+    assertEquals(new BigDecimal(620), table.getPots().get(2).getTotal());
+    assertEquals(new BigDecimal(60), table.getPots().get(0).getWager());
+    assertEquals(new BigDecimal(140), table.getPots().get(1).getWager());
+    assertEquals(new BigDecimal(600), table.getPots().get(2).getWager());
+    assertEquals(new BigDecimal(1270), getTotalInAllSidePots(table.getPots()));
   }
 
   @Test
@@ -344,18 +352,17 @@ public class PokerTableUtilitiesTests {
     createFakeBets3(table);
 
     // Test.
-    PokerTableUtilities.generateSidePots(table);
+    generateSidePots(table);
 
     // Verify.
-    Assertions.assertEquals(3, table.getPots().size());
-    Assertions.assertEquals(new BigDecimal(430), table.getPots().get(0).getTotal());
-    Assertions.assertEquals(new BigDecimal(360), table.getPots().get(1).getTotal());
-    Assertions.assertEquals(new BigDecimal(1680), table.getPots().get(2).getTotal());
-    Assertions.assertEquals(new BigDecimal(60), table.getPots().get(0).getWager());
-    Assertions.assertEquals(new BigDecimal(140), table.getPots().get(1).getWager());
-    Assertions.assertEquals(new BigDecimal(1200), table.getPots().get(2).getWager());
-    Assertions.assertEquals(
-        new BigDecimal(2470), PokerTableUtilities.getTotalInAllSidePots(table.getPots()));
+    assertEquals(3, table.getPots().size());
+    assertEquals(new BigDecimal(430), table.getPots().get(0).getTotal());
+    assertEquals(new BigDecimal(360), table.getPots().get(1).getTotal());
+    assertEquals(new BigDecimal(1680), table.getPots().get(2).getTotal());
+    assertEquals(new BigDecimal(60), table.getPots().get(0).getWager());
+    assertEquals(new BigDecimal(140), table.getPots().get(1).getWager());
+    assertEquals(new BigDecimal(1200), table.getPots().get(2).getWager());
+    assertEquals(new BigDecimal(2470), getTotalInAllSidePots(table.getPots()));
   }
 
   @Test
@@ -364,20 +371,19 @@ public class PokerTableUtilitiesTests {
     createFakeBets4(table);
 
     // Test.
-    PokerTableUtilities.generateSidePots(table);
+    generateSidePots(table);
 
     // Verify.
-    Assertions.assertEquals(4, table.getPots().size());
-    Assertions.assertEquals(new BigDecimal(580), table.getPots().get(0).getTotal());
-    Assertions.assertEquals(new BigDecimal(600), table.getPots().get(1).getTotal());
-    Assertions.assertEquals(new BigDecimal(4860), table.getPots().get(2).getTotal());
-    Assertions.assertEquals(new BigDecimal(1200), table.getPots().get(3).getTotal());
-    Assertions.assertEquals(new BigDecimal(60), table.getPots().get(0).getWager());
-    Assertions.assertEquals(new BigDecimal(140), table.getPots().get(1).getWager());
-    Assertions.assertEquals(new BigDecimal(1200), table.getPots().get(2).getWager());
-    Assertions.assertEquals(new BigDecimal(2400), table.getPots().get(3).getWager());
-    Assertions.assertEquals(
-        new BigDecimal(7240), PokerTableUtilities.getTotalInAllSidePots(table.getPots()));
+    assertEquals(4, table.getPots().size());
+    assertEquals(new BigDecimal(580), table.getPots().get(0).getTotal());
+    assertEquals(new BigDecimal(600), table.getPots().get(1).getTotal());
+    assertEquals(new BigDecimal(4860), table.getPots().get(2).getTotal());
+    assertEquals(new BigDecimal(1200), table.getPots().get(3).getTotal());
+    assertEquals(new BigDecimal(60), table.getPots().get(0).getWager());
+    assertEquals(new BigDecimal(140), table.getPots().get(1).getWager());
+    assertEquals(new BigDecimal(1200), table.getPots().get(2).getWager());
+    assertEquals(new BigDecimal(2400), table.getPots().get(3).getWager());
+    assertEquals(new BigDecimal(7240), getTotalInAllSidePots(table.getPots()));
   }
 
   @Test
@@ -386,24 +392,23 @@ public class PokerTableUtilitiesTests {
     createFakeBets5(table);
 
     // Test.
-    PokerTableUtilities.generateSidePots(table);
+    generateSidePots(table);
 
     // Verify.
-    Assertions.assertEquals(6, table.getPots().size());
-    Assertions.assertEquals(new BigDecimal(1000), table.getPots().get(0).getTotal());
-    Assertions.assertEquals(new BigDecimal(900), table.getPots().get(1).getTotal());
-    Assertions.assertEquals(new BigDecimal(800), table.getPots().get(2).getTotal());
-    Assertions.assertEquals(new BigDecimal(700), table.getPots().get(3).getTotal());
-    Assertions.assertEquals(new BigDecimal(600), table.getPots().get(4).getTotal());
-    Assertions.assertEquals(new BigDecimal(2500), table.getPots().get(5).getTotal());
-    Assertions.assertEquals(new BigDecimal(100), table.getPots().get(0).getWager());
-    Assertions.assertEquals(new BigDecimal(200), table.getPots().get(1).getWager());
-    Assertions.assertEquals(new BigDecimal(300), table.getPots().get(2).getWager());
-    Assertions.assertEquals(new BigDecimal(400), table.getPots().get(3).getWager());
-    Assertions.assertEquals(new BigDecimal(500), table.getPots().get(4).getWager());
-    Assertions.assertEquals(new BigDecimal(1000), table.getPots().get(5).getWager());
-    Assertions.assertEquals(
-        new BigDecimal(6500), PokerTableUtilities.getTotalInAllSidePots(table.getPots()));
+    assertEquals(6, table.getPots().size());
+    assertEquals(new BigDecimal(1000), table.getPots().get(0).getTotal());
+    assertEquals(new BigDecimal(900), table.getPots().get(1).getTotal());
+    assertEquals(new BigDecimal(800), table.getPots().get(2).getTotal());
+    assertEquals(new BigDecimal(700), table.getPots().get(3).getTotal());
+    assertEquals(new BigDecimal(600), table.getPots().get(4).getTotal());
+    assertEquals(new BigDecimal(2500), table.getPots().get(5).getTotal());
+    assertEquals(new BigDecimal(100), table.getPots().get(0).getWager());
+    assertEquals(new BigDecimal(200), table.getPots().get(1).getWager());
+    assertEquals(new BigDecimal(300), table.getPots().get(2).getWager());
+    assertEquals(new BigDecimal(400), table.getPots().get(3).getWager());
+    assertEquals(new BigDecimal(500), table.getPots().get(4).getWager());
+    assertEquals(new BigDecimal(1000), table.getPots().get(5).getWager());
+    assertEquals(new BigDecimal(6500), getTotalInAllSidePots(table.getPots()));
   }
 
   /**
@@ -417,25 +422,25 @@ public class PokerTableUtilitiesTests {
     // Setup.
     final PokerTableModel table = getSamplePokerTable(10);
     final List<CardModel> cards = getSampleCards();
-    cards.sort((a, b) -> cardService.compare(b, a));
+    cards.sort(valueSorter(DESCENDING));
     createFakeBets5(table);
     createFakeHand(table);
 
     // Test
-    PokerTableUtilities.generateSidePots(table);
-    PokerTableUtilities.determineWinners(table, cardService);
+    generateSidePots(table);
+    determineWinners(table);
 
     // Verify
     final List<WinnerModel> winners = table.getWinners();
     for (int i = 0; i < winners.size(); i++) {
-      Assertions.assertEquals(cards.get(i), winners.get(i).getCards().get(0));
+      assertEquals(cards.get(i), winners.get(i).getCards().get(0));
     }
-    Assertions.assertEquals(new BigDecimal(1000), winners.get(0).getWinnings());
-    Assertions.assertEquals(new BigDecimal(900), winners.get(1).getWinnings());
-    Assertions.assertEquals(new BigDecimal(800), winners.get(2).getWinnings());
-    Assertions.assertEquals(new BigDecimal(700), winners.get(3).getWinnings());
-    Assertions.assertEquals(new BigDecimal(600), winners.get(4).getWinnings());
-    Assertions.assertEquals(new BigDecimal(2500), winners.get(5).getWinnings());
+    assertEquals(new BigDecimal(1000), winners.get(0).getWinnings());
+    assertEquals(new BigDecimal(900), winners.get(1).getWinnings());
+    assertEquals(new BigDecimal(800), winners.get(2).getWinnings());
+    assertEquals(new BigDecimal(700), winners.get(3).getWinnings());
+    assertEquals(new BigDecimal(600), winners.get(4).getWinnings());
+    assertEquals(new BigDecimal(2500), winners.get(5).getWinnings());
   }
 
   /**
@@ -450,12 +455,12 @@ public class PokerTableUtilitiesTests {
     createAllButOneFoldedScenario(table);
 
     // Test.
-    PokerTableUtilities.determineWinners(table, cardService);
+    determineWinners(table);
 
     // Verify.
-    Assertions.assertEquals(players.get(0).getId(), table.getWinners().get(0).getId());
-    Assertions.assertEquals(new BigDecimal(10000), table.getWinners().get(0).getWinnings());
-    Assertions.assertEquals(1, table.getPots().size());
+    assertEquals(players.get(0).getId(), table.getWinners().get(0).getId());
+    assertEquals(new BigDecimal(10000), table.getWinners().get(0).getWinnings());
+    assertEquals(1, table.getPots().size());
   }
 
   /** Basic test of card dealing where all players are active in the hand. */
@@ -468,16 +473,16 @@ public class PokerTableUtilitiesTests {
     table.setDealer(9);
 
     // Test.
-    PokerTableUtilities.dealCards(table, deck);
+    dealCards(table, deck);
     final List<CardModel> dealtCards = deck.getUsedCards();
 
     // Verify.
     for (int i = 0; i < players.size(); i++) {
-      Assertions.assertEquals(dealtCards.get(i), players.get(i).getCards().get(0));
-      Assertions.assertEquals(1, players.get(i).getCards().size());
+      assertEquals(dealtCards.get(i), players.get(i).getCards().get(0));
+      assertEquals(1, players.get(i).getCards().size());
     }
-    Assertions.assertEquals(42, deck.numCardsRemaining());
-    Assertions.assertEquals(10, deck.numCardsUsed());
+    assertEquals(42, deck.numCardsRemaining());
+    assertEquals(10, deck.numCardsUsed());
   }
 
   /** Test of card dealing where some players are not active in the hand. */
@@ -494,7 +499,7 @@ public class PokerTableUtilitiesTests {
     table.setDealer(9);
 
     // Test.
-    PokerTableUtilities.dealCards(table, deck);
+    dealCards(table, deck);
 
     final List<CardModel> dealtCards = deck.getUsedCards();
     int j = 0;
@@ -503,13 +508,13 @@ public class PokerTableUtilitiesTests {
     // Verify.
     while (j < 7) {
       if (!players.get(i).isOut()) {
-        Assertions.assertEquals(dealtCards.get(j), players.get(i).getCards().get(0));
+        assertEquals(dealtCards.get(j), players.get(i).getCards().get(0));
         j++;
       }
       i++;
     }
-    Assertions.assertEquals(45, deck.numCardsRemaining());
-    Assertions.assertEquals(7, deck.numCardsUsed());
+    assertEquals(45, deck.numCardsRemaining());
+    assertEquals(7, deck.numCardsUsed());
   }
 
   /**
@@ -532,17 +537,17 @@ public class PokerTableUtilitiesTests {
     table.setDealer(4);
 
     // Test.
-    PokerTableUtilities.dealCards(table, deck);
+    dealCards(table, deck);
 
     final List<CardModel> dealtCards = deck.getUsedCards();
     // Verify
-    Assertions.assertEquals(dealtCards.get(0), players.get(5).getCards().get(0));
-    Assertions.assertEquals(dealtCards.get(1), players.get(0).getCards().get(0));
-    Assertions.assertEquals(dealtCards.get(2), players.get(3).getCards().get(0));
-    Assertions.assertEquals(dealtCards.get(3), players.get(4).getCards().get(0));
+    assertEquals(dealtCards.get(0), players.get(5).getCards().get(0));
+    assertEquals(dealtCards.get(1), players.get(0).getCards().get(0));
+    assertEquals(dealtCards.get(2), players.get(3).getCards().get(0));
+    assertEquals(dealtCards.get(3), players.get(4).getCards().get(0));
 
-    Assertions.assertEquals(48, deck.numCardsRemaining());
-    Assertions.assertEquals(4, deck.numCardsUsed());
+    assertEquals(48, deck.numCardsRemaining());
+    assertEquals(4, deck.numCardsUsed());
   }
 
   /** Basic test of general case where sb and bb both have enough chips to post their blinds. */
@@ -559,25 +564,21 @@ public class PokerTableUtilitiesTests {
     final BigDecimal bb = table.getBlind().add(table.getBlind());
 
     // Test.
-    PokerTableUtilities.performBlindBets(table);
+    performBlindBets(table);
 
     // Verify.
-    Assertions.assertEquals(sb, players.get(4).getControls().getCurrentBet());
-    Assertions.assertEquals(bb, players.get(5).getControls().getCurrentBet());
-    Assertions.assertEquals(
-        sbBankRollInitial.subtract(sb), players.get(4).getControls().getBankRoll());
-    Assertions.assertEquals(
-        bbBankRollInitial.subtract(bb), players.get(5).getControls().getBankRoll());
-    Assertions.assertEquals(6, table.getActingPlayer());
+    assertEquals(sb, players.get(4).getControls().getCurrentBet());
+    assertEquals(bb, players.get(5).getControls().getCurrentBet());
+    assertEquals(sbBankRollInitial.subtract(sb), players.get(4).getControls().getBankRoll());
+    assertEquals(bbBankRollInitial.subtract(bb), players.get(5).getControls().getBankRoll());
+    assertEquals(6, table.getActingPlayer());
     players.forEach(
-        p ->
-            Assertions.assertEquals(
-                bb, p.getControls().getToCall().add(p.getControls().getCurrentBet())));
-    Assertions.assertEquals(BigDecimal.ZERO, players.get(5).getControls().getToCall());
-    Assertions.assertEquals(sb, players.get(4).getControls().getToCall());
-    Assertions.assertEquals(1, table.getPots().size());
-    Assertions.assertEquals(sb.add(bb), table.getPots().get(0).getTotal());
-    Assertions.assertEquals(bb, table.getMinRaise());
+        p -> assertEquals(bb, p.getControls().getToCall().add(p.getControls().getCurrentBet())));
+    assertEquals(ZERO, players.get(5).getControls().getToCall());
+    assertEquals(sb, players.get(4).getControls().getToCall());
+    assertEquals(1, table.getPots().size());
+    assertEquals(sb.add(bb), table.getPots().get(0).getTotal());
+    assertEquals(bb, table.getMinRaise());
   }
 
   /**
@@ -603,25 +604,21 @@ public class PokerTableUtilitiesTests {
     final BigDecimal bb = table.getBlind().add(table.getBlind());
 
     // Test.
-    PokerTableUtilities.performBlindBets(table);
+    performBlindBets(table);
 
     // Verify.
-    Assertions.assertEquals(sb, players.get(6).getControls().getCurrentBet());
-    Assertions.assertEquals(bb, players.get(1).getControls().getCurrentBet());
-    Assertions.assertEquals(
-        sbBankRollInitial.subtract(sb), players.get(6).getControls().getBankRoll());
-    Assertions.assertEquals(
-        bbBankRollInitial.subtract(bb), players.get(1).getControls().getBankRoll());
-    Assertions.assertEquals(2, table.getActingPlayer());
+    assertEquals(sb, players.get(6).getControls().getCurrentBet());
+    assertEquals(bb, players.get(1).getControls().getCurrentBet());
+    assertEquals(sbBankRollInitial.subtract(sb), players.get(6).getControls().getBankRoll());
+    assertEquals(bbBankRollInitial.subtract(bb), players.get(1).getControls().getBankRoll());
+    assertEquals(2, table.getActingPlayer());
     players.forEach(
-        p ->
-            Assertions.assertEquals(
-                bb, p.getControls().getToCall().add(p.getControls().getCurrentBet())));
-    Assertions.assertEquals(BigDecimal.ZERO, players.get(1).getControls().getToCall());
-    Assertions.assertEquals(sb, players.get(6).getControls().getToCall());
-    Assertions.assertEquals(1, table.getPots().size());
-    Assertions.assertEquals(sb.add(bb), table.getPots().get(0).getTotal());
-    Assertions.assertEquals(bb, table.getMinRaise());
+        p -> assertEquals(bb, p.getControls().getToCall().add(p.getControls().getCurrentBet())));
+    assertEquals(ZERO, players.get(1).getControls().getToCall());
+    assertEquals(sb, players.get(6).getControls().getToCall());
+    assertEquals(1, table.getPots().size());
+    assertEquals(sb.add(bb), table.getPots().get(0).getTotal());
+    assertEquals(bb, table.getMinRaise());
   }
 
   /**
@@ -643,22 +640,20 @@ public class PokerTableUtilitiesTests {
     final BigDecimal bb = table.getBlind().add(table.getBlind());
 
     // Test.
-    PokerTableUtilities.performBlindBets(table);
+    performBlindBets(table);
 
     // Verify.
-    Assertions.assertEquals(sb, players.get(4).getControls().getCurrentBet());
-    Assertions.assertEquals(bbBankRollInitial, players.get(5).getControls().getCurrentBet());
-    Assertions.assertEquals(
-        sbBankRollInitial.subtract(sb), players.get(4).getControls().getBankRoll());
-    Assertions.assertEquals(BigDecimal.ZERO, players.get(5).getControls().getBankRoll());
-    Assertions.assertEquals(6, table.getActingPlayer());
+    assertEquals(sb, players.get(4).getControls().getCurrentBet());
+    assertEquals(bbBankRollInitial, players.get(5).getControls().getCurrentBet());
+    assertEquals(sbBankRollInitial.subtract(sb), players.get(4).getControls().getBankRoll());
+    assertEquals(ZERO, players.get(5).getControls().getBankRoll());
+    assertEquals(6, table.getActingPlayer());
     Assertions.assertTrue(players.get(5).isAllIn());
-    Assertions.assertEquals(BigDecimal.ZERO, players.get(5).getControls().getToCall());
-    Assertions.assertEquals(
-        bbBankRollInitial.subtract(sb), players.get(4).getControls().getToCall());
-    Assertions.assertEquals(1, table.getPots().size());
-    Assertions.assertEquals(sb.add(bbBankRollInitial), table.getPots().get(0).getTotal());
-    Assertions.assertEquals(bb, table.getMinRaise());
+    assertEquals(ZERO, players.get(5).getControls().getToCall());
+    assertEquals(bbBankRollInitial.subtract(sb), players.get(4).getControls().getToCall());
+    assertEquals(1, table.getPots().size());
+    assertEquals(sb.add(bbBankRollInitial), table.getPots().get(0).getTotal());
+    assertEquals(bb, table.getMinRaise());
   }
 
   /**
@@ -680,24 +675,21 @@ public class PokerTableUtilitiesTests {
     final BigDecimal bb = table.getBlind().add(table.getBlind());
 
     // Test.
-    PokerTableUtilities.performBlindBets(table);
+    performBlindBets(table);
 
     // Verify.
-    Assertions.assertEquals(sb, players.get(4).getControls().getCurrentBet());
-    Assertions.assertEquals(bbBankRollInitial, players.get(5).getControls().getCurrentBet());
-    Assertions.assertEquals(
-        sbBankRollInitial.subtract(sb), players.get(4).getControls().getBankRoll());
-    Assertions.assertEquals(BigDecimal.ZERO, players.get(5).getControls().getBankRoll());
-    Assertions.assertEquals(6, table.getActingPlayer());
+    assertEquals(sb, players.get(4).getControls().getCurrentBet());
+    assertEquals(bbBankRollInitial, players.get(5).getControls().getCurrentBet());
+    assertEquals(sbBankRollInitial.subtract(sb), players.get(4).getControls().getBankRoll());
+    assertEquals(ZERO, players.get(5).getControls().getBankRoll());
+    assertEquals(6, table.getActingPlayer());
     Assertions.assertTrue(players.get(5).isAllIn());
-    Assertions.assertEquals(BigDecimal.ZERO, players.get(5).getControls().getToCall());
-    Assertions.assertEquals(BigDecimal.ZERO, players.get(4).getControls().getToCall());
-    Assertions.assertEquals(2, table.getPots().size());
-    Assertions.assertEquals(
-        bbBankRollInitial.add(bbBankRollInitial), table.getPots().get(0).getTotal());
-    Assertions.assertEquals(
-        bbBankRollInitial.add(sb), PokerTableUtilities.getTotalInAllSidePots(table.getPots()));
-    Assertions.assertEquals(bb, table.getMinRaise());
+    assertEquals(ZERO, players.get(5).getControls().getToCall());
+    assertEquals(ZERO, players.get(4).getControls().getToCall());
+    assertEquals(2, table.getPots().size());
+    assertEquals(bbBankRollInitial.add(bbBankRollInitial), table.getPots().get(0).getTotal());
+    assertEquals(bbBankRollInitial.add(sb), getTotalInAllSidePots(table.getPots()));
+    assertEquals(bb, table.getMinRaise());
   }
 
   /**
@@ -730,17 +722,17 @@ public class PokerTableUtilitiesTests {
     final BigDecimal pot = sb.add(sb).add(sb);
 
     // Test.
-    PokerTableUtilities.newHandSetup(table, deck);
+    newHandSetup(table, deck);
 
     // Verify.
-    Assertions.assertEquals(1, table.getRound());
-    Assertions.assertEquals(pot, PokerTableUtilities.getTotalInAllSidePots(table.getPots()));
-    Assertions.assertEquals(sb, players.get(2).getControls().getCurrentBet());
-    Assertions.assertEquals(sb.add(sb), players.get(3).getControls().getCurrentBet());
+    assertEquals(1, table.getRound());
+    assertEquals(pot, getTotalInAllSidePots(table.getPots()));
+    assertEquals(sb, players.get(2).getControls().getCurrentBet());
+    assertEquals(sb.add(sb), players.get(3).getControls().getCurrentBet());
     players.stream()
         .filter(p -> players.indexOf(p) != 2 && players.indexOf(p) != 3)
-        .forEach(p -> Assertions.assertEquals(sb.add(sb), p.getControls().getToCall()));
-    Assertions.assertEquals(4, table.getActingPlayer());
+        .forEach(p -> assertEquals(sb.add(sb), p.getControls().getToCall()));
+    assertEquals(4, table.getActingPlayer());
     // TODO: Check that cards were dealt
   }
 
@@ -749,18 +741,16 @@ public class PokerTableUtilitiesTests {
   public void testNewHandSetup_2() {
     final PokerTableModel table = getSamplePokerTable(10);
     final DeckModel deck = new DeckModel();
-    final List<CardModel> dealtCards = deck.peek(10);
 
     table.setRound(-1);
     final BigDecimal sb = table.getBlind();
 
     // Test.
-    PokerTableUtilities.newHandSetup(table, deck);
+    newHandSetup(table, deck);
 
     // Verify.
-    Assertions.assertEquals(sb.add(sb), table.getBlind());
-    Assertions.assertEquals(
-        sb.multiply(new BigDecimal(6)), PokerTableUtilities.getTotalInAllSidePots(table.getPots()));
+    assertEquals(sb.add(sb), table.getBlind());
+    assertEquals(sb.multiply(new BigDecimal(6)), getTotalInAllSidePots(table.getPots()));
   }
 
   /** Simulates some actions and ensures they were handled correctly. */
@@ -775,7 +765,7 @@ public class PokerTableUtilitiesTests {
     players.get(2).getControls().setBankRoll(new BigDecimal(100));
     players.get(3).getControls().setBankRoll(new BigDecimal(250));
     players.get(5).getControls().setBankRoll(new BigDecimal(300));
-    PokerTableUtilities.newHandSetup(table, deck);
+    newHandSetup(table, deck);
     final List<CardModel> dealtCards = deck.getUsedCards();
 
     final List<Integer> expectedActingPlayers = Arrays.asList(8, 9, 0, 1, 2, 3, 4, 5, 6, 7);
@@ -783,55 +773,51 @@ public class PokerTableUtilitiesTests {
     actingPlayers.add(table.getActingPlayer());
 
     // Perform several actions
-    PokerTableUtilities.handlePlayerAction(table, GameAction.Call, players.get(8).getId(), null);
+    handlePlayerAction(table, GameAction.Call, players.get(8).getId(), null);
     actingPlayers.add(table.getActingPlayer());
-    PokerTableUtilities.handlePlayerAction(table, GameAction.Call, players.get(9).getId(), null);
+    handlePlayerAction(table, GameAction.Call, players.get(9).getId(), null);
     actingPlayers.add(table.getActingPlayer());
-    PokerTableUtilities.handlePlayerAction(table, GameAction.Call, players.get(0).getId(), null);
+    handlePlayerAction(table, GameAction.Call, players.get(0).getId(), null);
     actingPlayers.add(table.getActingPlayer());
-    PokerTableUtilities.handlePlayerAction(
-        table, GameAction.Raise, players.get(1).getId(), new BigDecimal(30));
+    handlePlayerAction(table, GameAction.Raise, players.get(1).getId(), new BigDecimal(30));
     actingPlayers.add(table.getActingPlayer());
     // toCall should be 50
-    PokerTableUtilities.handlePlayerAction(
-        table, GameAction.Raise, players.get(2).getId(), new BigDecimal(50));
+    handlePlayerAction(table, GameAction.Raise, players.get(2).getId(), new BigDecimal(50));
     actingPlayers.add(table.getActingPlayer());
     // toCall should be 100
-    PokerTableUtilities.handlePlayerAction(
-        table, GameAction.Raise, players.get(3).getId(), new BigDecimal(150));
+    handlePlayerAction(table, GameAction.Raise, players.get(3).getId(), new BigDecimal(150));
     actingPlayers.add(table.getActingPlayer());
-    PokerTableUtilities.handlePlayerAction(table, GameAction.Fold, players.get(4).getId(), null);
+    handlePlayerAction(table, GameAction.Fold, players.get(4).getId(), null);
     actingPlayers.add(table.getActingPlayer());
-    PokerTableUtilities.handlePlayerAction(
-        table, GameAction.Raise, players.get(5).getId(), new BigDecimal(50));
+    handlePlayerAction(table, GameAction.Raise, players.get(5).getId(), new BigDecimal(50));
     actingPlayers.add(table.getActingPlayer());
-    PokerTableUtilities.handlePlayerAction(table, GameAction.Fold, players.get(6).getId(), null);
+    handlePlayerAction(table, GameAction.Fold, players.get(6).getId(), null);
     actingPlayers.add(table.getActingPlayer());
-    PokerTableUtilities.handlePlayerAction(table, GameAction.Call, players.get(7).getId(), null);
+    handlePlayerAction(table, GameAction.Call, players.get(7).getId(), null);
 
     // Verify.
     final List<PotModel> pots = table.getPots();
-    Assertions.assertEquals(new BigDecimal(1070), table.getPot());
-    Assertions.assertEquals(table.getPot(), PokerTableUtilities.getTotalInAllSidePots(pots));
-    Assertions.assertEquals(3, pots.size());
-    Assertions.assertEquals(3, players.stream().filter(GamePlayerModel::isAllIn).count());
-    Assertions.assertEquals(2, players.stream().filter(GamePlayerModel::isFolded).count());
+    assertEquals(new BigDecimal(1070), table.getPot());
+    assertEquals(table.getPot(), getTotalInAllSidePots(pots));
+    assertEquals(3, pots.size());
+    assertEquals(3, players.stream().filter(GamePlayerModel::isAllIn).count());
+    assertEquals(2, players.stream().filter(GamePlayerModel::isFolded).count());
     // Check players cards.
-    Assertions.assertEquals(dealtCards.get(0), players.get(6).getCards().get(0));
-    Assertions.assertEquals(dealtCards.get(1), players.get(7).getCards().get(0));
-    Assertions.assertEquals(dealtCards.get(2), players.get(8).getCards().get(0));
-    Assertions.assertEquals(dealtCards.get(3), players.get(9).getCards().get(0));
-    Assertions.assertEquals(dealtCards.get(4), players.get(0).getCards().get(0));
-    Assertions.assertEquals(dealtCards.get(5), players.get(1).getCards().get(0));
-    Assertions.assertEquals(dealtCards.get(6), players.get(2).getCards().get(0));
-    Assertions.assertEquals(dealtCards.get(7), players.get(3).getCards().get(0));
-    Assertions.assertEquals(dealtCards.get(8), players.get(4).getCards().get(0));
-    Assertions.assertEquals(dealtCards.get(9), players.get(5).getCards().get(0));
-    players.forEach(p -> Assertions.assertEquals(1, p.getCards().size()));
+    assertEquals(dealtCards.get(0), players.get(6).getCards().get(0));
+    assertEquals(dealtCards.get(1), players.get(7).getCards().get(0));
+    assertEquals(dealtCards.get(2), players.get(8).getCards().get(0));
+    assertEquals(dealtCards.get(3), players.get(9).getCards().get(0));
+    assertEquals(dealtCards.get(4), players.get(0).getCards().get(0));
+    assertEquals(dealtCards.get(5), players.get(1).getCards().get(0));
+    assertEquals(dealtCards.get(6), players.get(2).getCards().get(0));
+    assertEquals(dealtCards.get(7), players.get(3).getCards().get(0));
+    assertEquals(dealtCards.get(8), players.get(4).getCards().get(0));
+    assertEquals(dealtCards.get(9), players.get(5).getCards().get(0));
+    players.forEach(p -> assertEquals(1, p.getCards().size()));
     // Check acting players
     actingPlayers.forEach(
-        i -> Assertions.assertEquals(expectedActingPlayers.indexOf(i), actingPlayers.indexOf(i)));
+        i -> assertEquals(expectedActingPlayers.indexOf(i), actingPlayers.indexOf(i)));
     // Check lastToAct
-    Assertions.assertEquals(3, table.getLastToAct());
+    assertEquals(3, table.getLastToAct());
   }
 }
