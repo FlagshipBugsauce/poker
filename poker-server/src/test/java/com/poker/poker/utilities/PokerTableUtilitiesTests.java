@@ -1,39 +1,64 @@
 package com.poker.poker.utilities;
 
-import static com.poker.poker.utilities.CardUtilities.DESCENDING;
-import static com.poker.poker.utilities.CardUtilities.valueSorter;
+import static com.poker.poker.models.enums.CardSuit.Clubs;
+import static com.poker.poker.models.enums.CardSuit.Diamonds;
+import static com.poker.poker.models.enums.CardSuit.Hearts;
+import static com.poker.poker.models.enums.CardSuit.Spades;
+import static com.poker.poker.models.enums.CardValue.Ace;
+import static com.poker.poker.models.enums.CardValue.Eight;
+import static com.poker.poker.models.enums.CardValue.Five;
+import static com.poker.poker.models.enums.CardValue.Four;
+import static com.poker.poker.models.enums.CardValue.Jack;
+import static com.poker.poker.models.enums.CardValue.King;
+import static com.poker.poker.models.enums.CardValue.Nine;
+import static com.poker.poker.models.enums.CardValue.Queen;
+import static com.poker.poker.models.enums.CardValue.Seven;
+import static com.poker.poker.models.enums.CardValue.Six;
+import static com.poker.poker.models.enums.CardValue.Ten;
+import static com.poker.poker.models.enums.CardValue.Three;
+import static com.poker.poker.models.enums.CardValue.Two;
+import static com.poker.poker.models.enums.GameAction.AllInCheck;
+import static com.poker.poker.models.enums.GameAction.Call;
+import static com.poker.poker.models.enums.GameAction.Fold;
+import static com.poker.poker.models.enums.GameAction.Raise;
+import static com.poker.poker.utilities.BigDecimalUtilities.sum;
+import static com.poker.poker.utilities.CardUtilities.FACE_DOWN_CARD;
+import static com.poker.poker.utilities.CardUtilities.card;
 import static com.poker.poker.utilities.PokerTableUtilities.dealCards;
 import static com.poker.poker.utilities.PokerTableUtilities.determineWinners;
 import static com.poker.poker.utilities.PokerTableUtilities.generateSidePots;
-import static com.poker.poker.utilities.PokerTableUtilities.getTotalInAllSidePots;
+import static com.poker.poker.utilities.PokerTableUtilities.getPotTotal;
 import static com.poker.poker.utilities.PokerTableUtilities.handlePlayerAction;
-import static com.poker.poker.utilities.PokerTableUtilities.newHandSetup;
 import static com.poker.poker.utilities.PokerTableUtilities.performBlindBets;
+import static com.poker.poker.utilities.PokerTableUtilities.setupNewHand;
 import static java.math.BigDecimal.ZERO;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.poker.poker.models.enums.CardSuit;
 import com.poker.poker.models.enums.CardValue;
-import com.poker.poker.models.enums.GameAction;
 import com.poker.poker.models.game.CardModel;
 import com.poker.poker.models.game.DeckModel;
 import com.poker.poker.models.game.GamePlayerModel;
 import com.poker.poker.models.game.PokerTableModel;
-import com.poker.poker.models.game.PotModel;
 import com.poker.poker.models.game.TableControlsModel;
 import com.poker.poker.models.game.WinnerModel;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 @Slf4j
 @SuppressWarnings("MagicNumber")
@@ -52,11 +77,222 @@ public class PokerTableUtilitiesTests {
     return table;
   }
 
-  public List<GamePlayerModel> getSamplePlayers(
-      final int numPlayers, final int bankRollMin, final int bankRollMax) {
-    return IntStream.range(0, numPlayers)
-        .mapToObj(i -> getRandomPlayer(bankRollMin, bankRollMax))
-        .collect(Collectors.toList());
+  /**
+   * Simulates a hand by setting up a table, then performing a sequence of actions. TODO: Document
+   * the sequence of moves.
+   *
+   * @param table Poker table.
+   * @param deck  Deck (can use a mocked deck to ensure players are given specific cards).
+   */
+  public static void performAndVerifyHandActionSequence_1(
+      final PokerTableModel table, final DeckModel deck) {
+    final List<GamePlayerModel> players = table.getPlayers();
+    final GamePlayerModel p0 = players.get(0);
+    final GamePlayerModel p1 = players.get(1);
+    final GamePlayerModel p2 = players.get(2);
+    final GamePlayerModel p3 = players.get(3);
+    final GamePlayerModel p4 = players.get(4);
+    final GamePlayerModel p5 = players.get(5);
+    final GamePlayerModel p6 = players.get(6);
+    final GamePlayerModel p7 = players.get(7);
+    final GamePlayerModel p8 = players.get(8);
+    final GamePlayerModel p9 = players.get(9);
+    table.setRound(3);
+    table.setDealer(8);
+    final List<BigDecimal> chips = Stream
+        .of(1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 400, 400)
+        .map(BigDecimal::new)
+        .collect(toList());
+    for (int i = 0; i < players.size(); i++) {
+      players.get(i).setChips(chips.get(i));
+    }
+
+    setupNewHand(table, deck);
+    verifyHandAction(table, p1, p2, 980, 20, 20, 20, 30, false, false, 1, 2);
+
+    final Collection<Integer> actingPlayers = new ArrayList<>();
+    final Collection<Integer> playersThatActed = new ArrayList<>();
+
+    // Player 2 raises 80 to 100.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, Raise, p2.getId(), bd(80));
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p2, p3, 900, 100, 100, 100, 130, false, false, 1, 3);
+
+    // Player 3 calls.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, Call, p3.getId(), null);
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p3, p4, 900, 100, 100, 100, 230, false, false, 1, 4);
+
+    // Player 4 folds.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, Fold, p4.getId(), null);
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p4, p5, 1000, 0, 100, 100, 230, false, true, 1, 5);
+
+    // Player 5 calls.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, Call, p5.getId(), null);
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p5, p6, 900, 100, 100, 100, 330, false, false, 1, 6);
+
+    // Player 6 raises 100 to 200.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, Raise, p6.getId(), bd(100));
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p6, p7, 800, 200, 200, 200, 530, false, false, 5, 7);
+
+    // Player 7 raises 200 to 400.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, Raise, p7.getId(), bd(200));
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p7, p8, 600, 400, 400, 400, 930, false, false, 6, 8);
+
+    // Player 8 calls and goes all-in.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, Call, p8.getId(), null);
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p8, p9, 0, 400, 400, 400, 1330, true, false, 6, 9);
+
+    // Player 9 calls and goes all-in.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, Call, p9.getId(), null);
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p9, p0, 0, 400, 400, 390, 1730, true, false, 6, 0);
+
+    // Player 0 calls 400.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, Call, p0.getId(), null);
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p0, p1, 600, 400, 400, 380, 2120, false, false, 6, 1);
+
+    // Player 1 folds.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, Fold, p1.getId(), null);
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p1, p2, 980, 20, 400, 300, 2120, false, true, 6, 2);
+
+    // Player 2 folds.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, Fold, p2.getId(), null);
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p2, p3, 900, 100, 400, 300, 2120, false, true, 6, 3);
+
+    // Player 3 calls 400.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, Call, p3.getId(), null);
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p3, p4, 600, 400, 400, 400, 2420, false, false, 6, 5);
+
+    // Player 4 folded already, so we should bypass this player.
+    verifyHandAction(table, p4, p5, 1000, 0, 400, 300, 2420, false, true, 6, 5);
+
+    // Player 5 calls 400.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, Call, p5.getId(), null);
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p5, p6, 600, 400, 400, 200, 2720, false, false, 6, 6);
+
+    // Player 6 raises by 600 to 1000, going all-in.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, Raise, p6.getId(), bd(600));
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p6, p7, 0, 1000, 1000, 600, 3520, true, false, 5, 7);
+
+    // Player 7 folds.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, Fold, p7.getId(), null);
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p7, p8, 600, 400, 1000, 0, 3520, false, true, 5, 8);
+
+    // Player 8 performs an AllInCheck.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, AllInCheck, p8.getId(), null);
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p8, p9, 0, 400, 1000, 0, 3520, true, false, 5, 9);
+
+    // Player 9 performs an AllInCheck.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, AllInCheck, p9.getId(), null);
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p9, p0, 0, 400, 1000, 600, 3520, true, false, 5, 0);
+
+    // Player 0 folds.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, Fold, p0.getId(), null);
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p0, p1, 600, 400, 1000, 980, 3520, false, true, 5, 3);
+
+    // Player 1 folded already, so we should bypass this player.
+    verifyHandAction(table, p1, p2, 980, 20, 1000, 900, 3520, false, true, 5, 3);
+
+    // Player 2 folded already, so we should bypass this player.
+    verifyHandAction(table, p2, p3, 900, 100, 1000, 600, 3520, false, true, 5, 3);
+
+    // Player 3 calls 1000.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, Call, p3.getId(), null);
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p3, p4, 0, 1000, 1000, 1000, 4120, true, false, 5, 5);
+
+    // Player 4 folded already, so we should bypass this player.
+    verifyHandAction(table, p4, p5, 1000, 0, 1000, 600, 4120, false, true, 5, 5);
+
+    // Player 5 calls 1000.
+    actingPlayers.add(table.getActingPlayer());
+    handlePlayerAction(table, Call, p5.getId(), null);
+    playersThatActed.add(table.getPlayerThatActed());
+
+    // Verify post-conditions.
+    verifyHandAction(table, p5, p6, 0, 1000, 1000, 0, 4720, true, false, 5, 6);
+
+    // Betting round should be over, let's verify the check that would normally determine this.
+    final boolean exitCondition = table.getPlayerThatActed() == table.getLastToAct();
+    assertTrue(exitCondition);
+
+    final Collection<Integer> expectedActingPlayers =
+        asList(2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 5, 6, 7, 8, 9, 0, 3, 5);
+    assertEquals(expectedActingPlayers, actingPlayers);
+    assertEquals(expectedActingPlayers, playersThatActed);
   }
 
   public GamePlayerModel getRandomPlayer(final int bankRollMin, final int bankRollMax) {
@@ -299,21 +535,222 @@ public class PokerTableUtilitiesTests {
     }
   }
 
+  public static BigDecimal bd(final int val) {
+    return new BigDecimal(val);
+  }
+
+  public static void verifyHandAction(
+      final PokerTableModel table,
+      final GamePlayerModel player,
+      final GamePlayerModel nextPlayer,
+      final int expectedChips,
+      final int expectedBet,
+      final int expectedMinRaise,
+      final int expectedToCall,
+      final int expectedPotTotal,
+      final boolean expectedAllinStatus,
+      final boolean expectedFoldedStatus,
+      final int expectedLastToAct,
+      final int expectedActingPlayer
+  ) {
+    assertEquals(bd(expectedChips), player.getChips());
+    assertEquals(bd(expectedBet), player.getBet());
+    assertEquals(bd(expectedMinRaise), table.getMinRaise());
+    assertEquals(bd(expectedToCall), nextPlayer.getToCall());
+    assertEquals(bd(expectedPotTotal), getPotTotal(table.getPots()));
+    assertEquals(expectedAllinStatus, player.isAllIn());
+    assertEquals(expectedFoldedStatus, player.isFolded());
+    assertEquals(expectedLastToAct, table.getLastToAct());
+    assertEquals(expectedActingPlayer, table.getActingPlayer());
+  }
+
+  public List<GamePlayerModel> getSamplePlayers(
+      final int numPlayers, final int bankRollMin, final int bankRollMax) {
+    return IntStream.range(0, numPlayers)
+        .mapToObj(i -> getRandomPlayer(bankRollMin, bankRollMax))
+        .collect(toList());
+  }
+
   public List<CardModel> getSampleCards() {
-    return Arrays.asList(
-        new CardModel(CardSuit.Spades, CardValue.Two),
-        new CardModel(CardSuit.Spades, CardValue.Seven),
-        new CardModel(CardSuit.Spades, CardValue.Nine),
-        new CardModel(CardSuit.Spades, CardValue.Jack),
-        new CardModel(CardSuit.Spades, CardValue.Ace),
-        new CardModel(CardSuit.Hearts, CardValue.Six),
+    return asList(
+        new CardModel(Spades, CardValue.Two),
+        new CardModel(Spades, CardValue.Seven),
+        new CardModel(Spades, CardValue.Nine),
+        new CardModel(Spades, CardValue.Jack),
+        new CardModel(Spades, CardValue.Ace),
+        new CardModel(CardSuit.Hearts, Six),
         new CardModel(CardSuit.Hearts, CardValue.Five),
         new CardModel(CardSuit.Diamonds, CardValue.Ten),
         new CardModel(CardSuit.Diamonds, CardValue.Three),
         new CardModel(CardSuit.Clubs, CardValue.Two));
   }
 
-  /** Basic test where there are no side-pots. */
+  /**
+   * Creates a sample deck which is spy'd so that the <code>restoreAndShuffle()</code> method does
+   * nothing, so that when the cards are dealt (using the <code>dealCards</code> method, we'll
+   * have:
+   * </p>
+   * <p>
+   * <b>Shared Cards:</b>
+   *   <ol>
+   *     <li>KS</li>
+   *     <li>QS</li>
+   *     <li>10S</li>
+   *     <li>KC</li>
+   *     <li>2D</li>
+   *   </ol>
+   *
+   *   <ol>
+   *     <b>Player Hands:</b>
+   *     <li>AS, JS => Straight flush</li>
+   *     <li>KD, KH => 4-of-a-kind</li>
+   *     <li>QH, QD => Queens and Kings Full House</li>
+   *     <li>2S, 9S => K/Q/10/9/2 Flush</li>
+   *     <li>3S, 8S => K/Q/10/8/3 Flush</li>
+   *     <li>AD, JC => 10->A Straight</li>
+   *     <li>AH, JH => 10->A Straight</li>
+   *     <li>JD, 9H => 9->K Straight</li>
+   *     <li>2H, 4H => KK + Q, 10, 4 Kickers</li>
+   *     <li>2C, 3C => KK + Q, 10, 3 Kickers</li>
+   *   </ol>
+   * </p>
+   *
+   * @return Sample deck with specified hands.
+   */
+  public DeckModel getSampleDeck_1() {
+    final List<CardModel> cards = new ArrayList<>(asList(
+        card(Spades, Six),
+        card(Spades, Seven),
+        card(Hearts, Three),
+        card(Hearts, Two),
+        card(Hearts, Five),
+        card(Hearts, Six),
+        card(Hearts, Seven),
+        card(Hearts, Eight),
+        card(Hearts, Ten),
+        card(Clubs, Ace),
+        card(Clubs, Two),
+        card(Hearts, Four),
+        card(Clubs, Six),
+        card(Clubs, Seven),
+        card(Clubs, Eight),
+        card(Clubs, Nine),
+        card(Clubs, Ten),
+        card(Clubs, Queen),
+        card(Diamonds, Four),
+        card(Diamonds, Five),
+        card(Diamonds, Six),
+        card(Diamonds, Seven),
+        card(Diamonds, Eight),
+        card(Diamonds, Nine),
+        card(Diamonds, Ten),
+        card(Diamonds, Two),  // River
+        card(Spades, Five),  // Burn
+        card(Clubs, King),  // Turn
+        card(Spades, Four),  // Burn
+        card(Spades, Ten),  // Flop
+        card(Spades, Queen),  // Flop
+        card(Spades, King),  // Flop
+        card(Clubs, Four),  // Dealer 2nd Card
+        card(Clubs, Five), // Player 8 2nd Card
+        card(Hearts, Nine), // Player 7 2nd Card
+        card(Hearts, Jack), // Player 6 2nd Card
+        card(Clubs, Jack), // Player 5 2nd Card
+        card(Spades, Eight), // Player 4 2nd Card
+        card(Spades, Nine), // Player 3 2nd Card
+        card(Diamonds, Queen), // Player 2 2nd Card
+        card(Hearts, King), // Player 1 2nd Card
+        card(Spades, Jack), // Player 0 2nd Card = 41
+        card(Clubs, Three),  // Dealer 1st Card
+        card(Diamonds, Three), // Player 8 1st Card
+        card(Diamonds, Jack), // Player 7 1st Card
+        card(Hearts, Ace), // Player 6 1st Card
+        card(Diamonds, Ace), // Player 5 1st Card
+        card(Spades, Three), // Player 4 1st Card
+        card(Spades, Two), // Player 3 1st Card
+        card(Hearts, Queen), // Player 2 1st Card
+        card(Diamonds, King), // Player 1 1st Card
+        card(Spades, Ace) // Player 0 1st Card = 51
+    ));
+
+    final DeckModel mockDeck = Mockito.spy(DeckModel.class);
+    Mockito.doNothing().when(mockDeck).restoreAndShuffle();
+    mockDeck.setCards(cards);
+    return mockDeck;
+  }
+
+  /**
+   * Creates a sample deck which is spy'd so that the <code>restoreAndShuffle()</code> method does
+   * nothing, so that when the cards are dealt (using the <code>dealCards</code> method, we'll have
+   * a royal flush on the board, meaning that all players will have the same value hand.
+   *
+   * @return Sample deck with specified hands.
+   */
+  public DeckModel getSampleDeck_2() {
+    final List<CardModel> cards = new ArrayList<>(asList(
+        card(Diamonds, Two),
+        card(Clubs, King),
+        card(Hearts, Three),
+        card(Hearts, Five),
+        card(Hearts, Six),
+        card(Hearts, Seven),
+        card(Hearts, Eight),
+        card(Hearts, Ten),
+        card(Clubs, Ace),
+        card(Clubs, Four),
+        card(Clubs, Five),
+        card(Clubs, Six),
+        card(Clubs, Seven),
+        card(Clubs, Eight),
+        card(Clubs, Nine),
+        card(Clubs, Ten),
+        card(Clubs, Queen),
+        card(Diamonds, Three),
+        card(Diamonds, Four),
+        card(Diamonds, Five),
+        card(Diamonds, Six),
+        card(Diamonds, Seven),
+        card(Diamonds, Eight),
+        card(Diamonds, Nine),
+        card(Diamonds, Ten),
+        card(Spades, Ace),  // River
+        card(Spades, Five),  // Burn
+        card(Spades, Jack),  // Turn
+        card(Spades, Four),  // Burn
+        card(Spades, Ten),  // Flop
+        card(Spades, Queen),  // Flop
+        card(Spades, King),  // Flop
+        card(Clubs, Three),  // Dealer 2nd Card
+        card(Hearts, Four), // Player 8 2nd Card
+        card(Hearts, Nine), // Player 7 2nd Card
+        card(Hearts, Jack), // Player 6 2nd Card
+        card(Clubs, Jack), // Player 5 2nd Card
+        card(Spades, Eight), // Player 4 2nd Card
+        card(Spades, Nine), // Player 3 2nd Card
+        card(Diamonds, Queen), // Player 2 2nd Card
+        card(Hearts, King), // Player 1 2nd Card
+        card(Spades, Seven), // Player 0 2nd Card
+        card(Clubs, Two),  // Dealer 1st Card
+        card(Hearts, Two), // Player 8 1st Card
+        card(Diamonds, Jack), // Player 7 1st Card
+        card(Hearts, Ace), // Player 6 1st Card
+        card(Diamonds, Ace), // Player 5 1st Card
+        card(Spades, Three), // Player 4 1st Card
+        card(Spades, Two), // Player 3 1st Card
+        card(Hearts, Queen), // Player 2 1st Card
+        card(Diamonds, King), // Player 1 1st Card
+        card(Spades, Two) // Player 0 1st Card
+    ));
+
+    final DeckModel mockDeck = Mockito.spy(DeckModel.class);
+    Mockito.doNothing().when(mockDeck).restoreAndShuffle();
+    mockDeck.setCards(cards);
+    return mockDeck;
+  }
+
+  /**
+   * Basic test where there are no side-pots.
+   */
   @Test
   public void testPotGeneration_1() {
     final PokerTableModel table = getSamplePokerTable(10);
@@ -343,7 +780,7 @@ public class PokerTableUtilitiesTests {
     assertEquals(new BigDecimal(60), table.getPots().get(0).getWager());
     assertEquals(new BigDecimal(140), table.getPots().get(1).getWager());
     assertEquals(new BigDecimal(600), table.getPots().get(2).getWager());
-    assertEquals(new BigDecimal(1270), getTotalInAllSidePots(table.getPots()));
+    assertEquals(new BigDecimal(1270), getPotTotal(table.getPots()));
   }
 
   @Test
@@ -362,7 +799,7 @@ public class PokerTableUtilitiesTests {
     assertEquals(new BigDecimal(60), table.getPots().get(0).getWager());
     assertEquals(new BigDecimal(140), table.getPots().get(1).getWager());
     assertEquals(new BigDecimal(1200), table.getPots().get(2).getWager());
-    assertEquals(new BigDecimal(2470), getTotalInAllSidePots(table.getPots()));
+    assertEquals(new BigDecimal(2470), getPotTotal(table.getPots()));
   }
 
   @Test
@@ -383,7 +820,7 @@ public class PokerTableUtilitiesTests {
     assertEquals(new BigDecimal(140), table.getPots().get(1).getWager());
     assertEquals(new BigDecimal(1200), table.getPots().get(2).getWager());
     assertEquals(new BigDecimal(2400), table.getPots().get(3).getWager());
-    assertEquals(new BigDecimal(7240), getTotalInAllSidePots(table.getPots()));
+    assertEquals(new BigDecimal(7240), getPotTotal(table.getPots()));
   }
 
   @Test
@@ -408,62 +845,352 @@ public class PokerTableUtilitiesTests {
     assertEquals(new BigDecimal(400), table.getPots().get(3).getWager());
     assertEquals(new BigDecimal(500), table.getPots().get(4).getWager());
     assertEquals(new BigDecimal(1000), table.getPots().get(5).getWager());
-    assertEquals(new BigDecimal(6500), getTotalInAllSidePots(table.getPots()));
+    assertEquals(new BigDecimal(6500), getPotTotal(table.getPots()));
   }
 
-  /**
-   * Tests a relatively complex situation with 6 side-pots, to ensure that each winner receives the
-   * appropriate amount of chips and the winners are selected correctly.
-   *
-   * <p>Unfortunately this test will be obsolete once we moved to 2-card hands.
-   */
   @Test
   public void testDetermineWinners_1() {
     // Setup.
     final PokerTableModel table = getSamplePokerTable(10);
-    final List<CardModel> cards = getSampleCards();
-    cards.sort(valueSorter(DESCENDING));
-    createFakeBets5(table);
-    createFakeHand(table);
+    final List<GamePlayerModel> players = table.getPlayers();
+    final DeckModel deck = getSampleDeck_1();
+    table.setDealer(9);
+    dealCards(table, deck, 2);
 
-    // Test
-    generateSidePots(table);
+    // Set bets and bankrolls
+
+    // Player 0 is All-In, bet 100, has best hand
+    players.get(0).setChips(ZERO);
+    players.get(0).setBet(new BigDecimal(100));
+    players.get(0).setAllIn(true);
+
+    // Player 1 is All-In, bet 200, has 2nd best hand
+    players.get(1).setChips(ZERO);
+    players.get(1).setBet(new BigDecimal(200));
+    players.get(1).setAllIn(true);
+
+    // Player 2 folded, but bet 100 before folding.
+    players.get(2).setChips(new BigDecimal(500));
+    players.get(2).setFolded(true);
+    players.get(2).setBet(new BigDecimal(100));
+
+    // Player 3 has bet 300
+    players.get(3).setChips(new BigDecimal(500));
+    players.get(3).setBet(new BigDecimal(300));
+
+    // Player 4 has bet 300
+    players.get(4).setChips(new BigDecimal(500));
+    players.get(4).setBet(new BigDecimal(300));
+
+    // Both 5 and 6 have 10->A Straights.
+    // Player 5 has bet 300
+    players.get(5).setChips(new BigDecimal(500));
+    players.get(5).setBet(new BigDecimal(300));
+
+    // Player 6 has bet 300
+    players.get(6).setChips(new BigDecimal(500));
+    players.get(6).setBet(new BigDecimal(300));
+
+    // Player 7 has bet 300, has 9->K Straight, so will lose to p5 and p6
+    players.get(7).setChips(new BigDecimal(500));
+    players.get(7).setBet(new BigDecimal(300));
+
+    // Player 8 folded, but bet 200 before folding.
+    players.get(8).setChips(new BigDecimal(500));
+    players.get(8).setFolded(true);
+    players.get(8).setBet(new BigDecimal(200));
+
+    // Player 9 folded, but bet 200 before folding.
+    players.get(9).setChips(new BigDecimal(500));
+    players.get(9).setFolded(true);
+    players.get(9).setBet(new BigDecimal(200));
+
+    // Test.
     determineWinners(table);
 
-    // Verify
+    // Verify.
+    // Expecting player 0 with straight flush to win 1000
+    // Expecting player 1 with 4-of-a-kind to win 800
+    // Expecting player 3 with K/Q/10/9/2 Flush to win 500
+    // Winners should be sorted according to amount won.
     final List<WinnerModel> winners = table.getWinners();
-    for (int i = 0; i < winners.size(); i++) {
-      assertEquals(cards.get(i), winners.get(i).getCards().get(0));
-    }
     assertEquals(new BigDecimal(1000), winners.get(0).getWinnings());
-    assertEquals(new BigDecimal(900), winners.get(1).getWinnings());
-    assertEquals(new BigDecimal(800), winners.get(2).getWinnings());
-    assertEquals(new BigDecimal(700), winners.get(3).getWinnings());
-    assertEquals(new BigDecimal(600), winners.get(4).getWinnings());
-    assertEquals(new BigDecimal(2500), winners.get(5).getWinnings());
+    assertEquals(new BigDecimal(800), winners.get(1).getWinnings());
+    assertEquals(new BigDecimal(500), winners.get(2).getWinnings());
+    assertEquals(players.get(0).getId(), winners.get(0).getId());
+    assertEquals(players.get(1).getId(), winners.get(1).getId());
+    assertEquals(players.get(3).getId(), winners.get(2).getId());
   }
 
   /**
-   * Tests a simpler situation where all players but one have folded, to ensure that the winner
-   * selected is the player remaining in the hand and also that this player's card is not revealed.
+   * Case where all players tie (there is a royal flush on the board).
    */
   @Test
   public void testDetermineWinners_2() {
     // Setup.
     final PokerTableModel table = getSamplePokerTable(10);
     final List<GamePlayerModel> players = table.getPlayers();
-    createAllButOneFoldedScenario(table);
+    final DeckModel deck = getSampleDeck_2();
+    table.setDealer(9);
+    dealCards(table, deck, 2);
+
+    // Set bets and bankrolls
+
+    // Player 0 bet 500.
+    players.forEach(p -> {
+      p.setChips(new BigDecimal(500));
+      p.setBet(new BigDecimal(500));
+    });
 
     // Test.
     determineWinners(table);
 
     // Verify.
-    assertEquals(players.get(0).getId(), table.getWinners().get(0).getId());
-    assertEquals(new BigDecimal(10000), table.getWinners().get(0).getWinnings());
-    assertEquals(1, table.getPots().size());
+    // Expecting players 5 and 6 to tie with a 10->Ace straight, winning 1000 chips each.
+    // Expecting player 7 to win the remaining chips with a 9->K straight.
+    final List<WinnerModel> winners = table.getWinners();
+    winners.forEach(w -> assertEquals(new BigDecimal(500), w.getWinnings()));
+    assertEquals(10, winners.size());
   }
 
-  /** Basic test of card dealing where all players are active in the hand. */
+  @Test
+  public void testDetermineWinners_3() {
+    // Setup.
+    final PokerTableModel table = getSamplePokerTable(10);
+    final List<GamePlayerModel> players = table.getPlayers();
+    final DeckModel deck = getSampleDeck_2();
+    table.setDealer(9);
+    dealCards(table, deck, 2);
+
+    // Set bets and bankrolls
+
+    // Player 0 bet 100 and is all-in.
+    players.get(0).setChips(ZERO);
+    players.get(0).setBet(new BigDecimal(100));
+    players.get(0).setAllIn(true);
+
+    // Player 1 bet 100 and is all-in.
+    players.get(1).setChips(ZERO);
+    players.get(1).setBet(new BigDecimal(100));
+    players.get(1).setAllIn(true);
+
+    // Player 2 bet 200 and is all-in.
+    players.get(2).setChips(ZERO);
+    players.get(2).setBet(new BigDecimal(200));
+    players.get(2).setAllIn(true);
+
+    // Player 3 bet 200 and is all-in.
+    players.get(3).setChips(ZERO);
+    players.get(3).setBet(new BigDecimal(200));
+    players.get(3).setAllIn(true);
+
+    // Player 4 bet 300 and is all-in.
+    players.get(4).setChips(ZERO);
+    players.get(4).setBet(new BigDecimal(300));
+    players.get(4).setAllIn(true);
+
+    // Player 5 bet 400 and is all-in.
+    players.get(5).setChips(ZERO);
+    players.get(5).setBet(new BigDecimal(400));
+    players.get(5).setAllIn(true);
+
+    // Player 6 bet 500 and is all-in.
+    players.get(6).setChips(ZERO);
+    players.get(6).setBet(new BigDecimal(500));
+    players.get(6).setAllIn(true);
+
+    // Player 7 bet 600 and is all-in.
+    players.get(7).setChips(ZERO);
+    players.get(7).setBet(new BigDecimal(600));
+    players.get(7).setAllIn(true);
+
+    // Player 8 bet 500.
+    players.get(8).setChips(new BigDecimal(500));
+    players.get(8).setBet(new BigDecimal(1000));
+
+    // Player 9 bet 500.
+    players.get(9).setChips(new BigDecimal(500));
+    players.get(9).setBet(new BigDecimal(1000));
+
+    // Test.
+    determineWinners(table);
+
+    // Verify.
+    // Expecting players 5 and 6 to tie with a 10->Ace straight, winning 1000 chips each.
+    // Expecting player 7 to win the remaining chips with a 9->K straight.
+    final List<WinnerModel> winners = table.getWinners();
+    assertEquals(new BigDecimal(1000), winners.get(0).getWinnings());
+    assertEquals(new BigDecimal(1000), winners.get(1).getWinnings());
+    assertEquals(new BigDecimal(600), winners.get(2).getWinnings());
+    assertEquals(new BigDecimal(500), winners.get(3).getWinnings());
+    assertEquals(new BigDecimal(400), winners.get(4).getWinnings());
+    assertEquals(new BigDecimal(300), winners.get(5).getWinnings());
+    assertEquals(new BigDecimal(200), winners.get(6).getWinnings());
+    assertEquals(new BigDecimal(200), winners.get(7).getWinnings());
+    assertEquals(new BigDecimal(100), winners.get(8).getWinnings());
+    assertEquals(new BigDecimal(100), winners.get(9).getWinnings());
+  }
+
+  /**
+   * Case where we have a mix of all-ins, tied hands and some players have folded.
+   */
+  @Test
+  public void testDetermineWinners_4() {
+    // Setup.
+    final PokerTableModel table = getSamplePokerTable(10);
+    final List<GamePlayerModel> players = table.getPlayers();
+    final DeckModel deck = getSampleDeck_2();
+    table.setDealer(9);
+    dealCards(table, deck, 2);
+
+    // Set bets and bankrolls
+    final List<BigDecimal> bets = Stream.of(1, 1, 2, 2, 5, 5, 5, 5, 10, 10)
+        .map(i -> new BigDecimal(i * 100))
+        .collect(toList());
+    final List<BigDecimal> chips = Stream.of(0, 0, 0, 0, 500, 500, 500, 500, 500, 500)
+        .map(BigDecimal::new)
+        .collect(toList());
+    final List<Boolean> allIn = Stream
+        .of(true, true, true, true, false, false, false, false, false, false).collect(toList());
+    final List<Boolean> folded = Stream
+        .of(false, false, false, false, true, true, true, true, false, false).collect(toList());
+    for (int i = 0; i < players.size(); i++) {
+      players.get(i).setBet(bets.get(i));
+      players.get(i).setChips(chips.get(i));
+      players.get(i).setAllIn(allIn.get(i));
+      players.get(i).setFolded(folded.get(i));
+    }
+
+    // Test.
+    determineWinners(table);
+
+    // Verify.
+    // Expecting players 5 and 6 to tie with a 10->Ace straight, winning 1000 chips each.
+    // Expecting player 7 to win the remaining chips with a 9->K straight.
+    final List<WinnerModel> winners = table.getWinners();
+    assertEquals(6, winners.size());
+    assertEquals(new BigDecimal(1766), winners.get(0).getWinnings());
+    assertEquals(new BigDecimal(1766), winners.get(1).getWinnings());
+    assertEquals(new BigDecimal(366), winners.get(2).getWinnings());
+    assertEquals(new BigDecimal(366), winners.get(3).getWinnings());
+    assertEquals(new BigDecimal(166), winners.get(4).getWinnings());
+    assertEquals(new BigDecimal(166), winners.get(5).getWinnings());
+    testDetermineWinners_5();
+  }
+
+  /**
+   * Test where 9 players are all-in and the last player calls. We have a somewhat interesting case
+   * here where hand ranks are <code>0 > 1 > 2 > 3 > 4 > 5 = 6 > 7 > 8 > 9</code>, but wagers are.
+   * <code>0 > 1 > 2 > 3 > 4 > 5 > 6 > 7 > 8 > 9</code>. This results in player 5 receiving much
+   * less than player 6, even though their hands have the same rank.
+   *
+   * <p>
+   * When players 5 and 6 tie, a relatively unintuitive situation in created where player 5 wins
+   * only 250 chips and player 6 wins 650 chips, despite the fact that they have the same hand and
+   * player 6 only wagered 100 chips more than player 5. If player 6 had a worse hand, then player 5
+   * would win 500 and player 6 would win 400 and if player 6 had the better hand, player 6 would
+   * win 900. In each case, these two players are entitled to a total of 900 chips between them. The
+   * reason why player 6 receives so much more in the event of a tie is because the additional 100
+   * chips wagered entitles player 6 to that 100 chips plus 100 extra chips from the other three
+   * players with worse hands.
+   */
+  @Test
+  public void testDetermineWinners_5() {
+    // Setup.
+    final PokerTableModel table = getSamplePokerTable(10);
+    final List<GamePlayerModel> players = table.getPlayers();
+    final DeckModel deck = getSampleDeck_1();
+    table.setDealer(9);
+    dealCards(table, deck, 2);
+
+    // Set bets and bankrolls.
+    final List<BigDecimal> bets = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 9)
+        .map(i -> new BigDecimal(i * 100))
+        .collect(toList());
+    final List<BigDecimal> chips =
+        Stream.of(0, 0, 0, 0, 0, 0, 0, 0, 0, 500).map(BigDecimal::new).collect(toList());
+    final List<Boolean> allIn =
+        Stream.of(true, true, true, true, true, true, true, true, true, false).collect(toList());
+    for (int i = 0; i < players.size(); i++) {
+      players.get(i).setBet(bets.get(i));
+      players.get(i).setChips(chips.get(i));
+      players.get(i).setAllIn(allIn.get(i));
+    }
+
+    // Test.
+    determineWinners(table);
+
+    // Verify.
+    assertEquals(9, table.getWinners().size());
+    assertEquals(
+        Stream.of(1000, 900, 800, 700, 650, 600, 300, 250, 200)
+            .map(BigDecimal::new).collect(toList()),
+        table.getWinners().stream().map(WinnerModel::getWinnings).collect(toList()));
+  }
+
+  /**
+   * Case where all but one player have folded.
+   */
+  @Test
+  public void testDetermineWinners_6() {
+    // Setup.
+    final PokerTableModel table = getSamplePokerTable(10);
+    final List<GamePlayerModel> players = table.getPlayers();
+    table.setDealer(9);
+    dealCards(table, new DeckModel(), 2);
+
+    // Set bets and bankrolls.
+    players.forEach(p -> p.setChips(new BigDecimal(500)));
+    players.forEach(p -> p.setFolded(true));
+    players.forEach(p -> p.setBet(new BigDecimal(500)));
+    players.get(0).setFolded(false);
+
+    // Testing.
+    determineWinners(table);
+
+    // Verify.
+    players.forEach(p -> assertEquals(
+        players.indexOf(p) == 0 ? new BigDecimal(5500) : new BigDecimal(500),
+        p.getChips()));
+    assertEquals(1, table.getWinners().size());
+    assertEquals(players.get(0).getId(), table.getWinners().get(0).getId());
+    assertEquals(new BigDecimal(5000), table.getWinners().get(0).getWinnings());
+    assertEquals(
+        asList(FACE_DOWN_CARD, FACE_DOWN_CARD, FACE_DOWN_CARD, FACE_DOWN_CARD, FACE_DOWN_CARD),
+        table.getWinners().get(0).getCards());
+  }
+
+  /**
+   * Common case where we have many wagers but only one winner.
+   */
+  @Test
+  public void testDetermineWinners_7() {
+    // Setup.
+    final PokerTableModel table = getSamplePokerTable(10);
+    final List<GamePlayerModel> players = table.getPlayers();
+    table.setDealer(9);
+    dealCards(table, getSampleDeck_1(), 2);
+
+    // Set bets and bankrolls.
+    players.forEach(p -> p.setChips(new BigDecimal(500)));
+    players.forEach(p -> p.setBet(new BigDecimal(500)));
+    players.get(0).setFolded(false);
+
+    // Testing.
+    determineWinners(table);
+
+    // Verify.
+    players.forEach(p -> assertEquals(
+        players.indexOf(p) == 0 ? new BigDecimal(5500) : new BigDecimal(500),
+        p.getChips()));
+    assertEquals(1, table.getWinners().size());
+    assertEquals(players.get(0).getId(), table.getWinners().get(0).getId());
+    assertEquals(new BigDecimal(5000), table.getWinners().get(0).getWinnings());
+  }
+
+  /**
+   * Basic test of card dealing where all players are active in the hand.
+   */
   @Test
   public void testDealCards_1() {
     // Setup.
@@ -473,112 +1200,21 @@ public class PokerTableUtilitiesTests {
     table.setDealer(9);
 
     // Test.
-    dealCards(table, deck);
-    final List<CardModel> dealtCards = deck.getUsedCards();
+    dealCards(table, deck, 2);
+    final List<CardModel> usedCards = deck.getUsedCards();
 
     // Verify.
     for (int i = 0; i < players.size(); i++) {
-      assertEquals(dealtCards.get(i), players.get(i).getCards().get(0));
-      assertEquals(1, players.get(i).getCards().size());
+      assertEquals(usedCards.get(i), players.get(i).getCards().get(0));
+      assertEquals(usedCards.get(i + 10), players.get(i).getCards().get(1));
+      assertEquals(2, players.get(i).getCards().size());
     }
-    assertEquals(42, deck.numCardsRemaining());
-    assertEquals(10, deck.numCardsUsed());
-  }
 
-  /** Test of card dealing where some players are not active in the hand. */
-  @Test
-  public void testDealCards_2() {
-    // Setup.
-    final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
-    final DeckModel deck = new DeckModel();
-    // Set 3 players to out.
-    players.get(2).setOut(true);
-    players.get(1).setOut(true);
-    players.get(6).setOut(true);
-    table.setDealer(9);
-
-    // Test.
-    dealCards(table, deck);
-
-    final List<CardModel> dealtCards = deck.getUsedCards();
-    int j = 0;
-    int i = 0;
-
-    // Verify.
-    while (j < 7) {
-      if (!players.get(i).isOut()) {
-        assertEquals(dealtCards.get(j), players.get(i).getCards().get(0));
-        j++;
-      }
-      i++;
-    }
-    assertEquals(45, deck.numCardsRemaining());
-    assertEquals(7, deck.numCardsUsed());
-  }
-
-  /**
-   * Test of card dealing where some players are not active in the hand and the dealer is set to
-   * some player in the middle of the player list.
-   */
-  @Test
-  public void testDealCards_3() {
-    // Setup.
-    final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
-    final DeckModel deck = new DeckModel();
-    // Set 3 players to out.
-    players.get(2).setOut(true);
-    players.get(1).setOut(true);
-    players.get(6).setOut(true);
-    players.get(7).setOut(true);
-    players.get(8).setOut(true);
-    players.get(9).setOut(true);
-    table.setDealer(4);
-
-    // Test.
-    dealCards(table, deck);
-
-    final List<CardModel> dealtCards = deck.getUsedCards();
-    // Verify
-    assertEquals(dealtCards.get(0), players.get(5).getCards().get(0));
-    assertEquals(dealtCards.get(1), players.get(0).getCards().get(0));
-    assertEquals(dealtCards.get(2), players.get(3).getCards().get(0));
-    assertEquals(dealtCards.get(3), players.get(4).getCards().get(0));
-
-    assertEquals(48, deck.numCardsRemaining());
-    assertEquals(4, deck.numCardsUsed());
-  }
-
-  /** Basic test of general case where sb and bb both have enough chips to post their blinds. */
-  @Test
-  public void testPerformBlindBets_1() {
-    // Setup.
-    final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
-    table.setDealer(3); // sb = 4, bb = 5
-    table.setActingPlayer(4); // Satisfy Pre-Condition.
-    final BigDecimal sbBankRollInitial = players.get(4).getControls().getBankRoll();
-    final BigDecimal bbBankRollInitial = players.get(5).getControls().getBankRoll();
-    final BigDecimal sb = table.getBlind();
-    final BigDecimal bb = table.getBlind().add(table.getBlind());
-
-    // Test.
-    performBlindBets(table);
-
-    // Verify.
-    assertEquals(sb, players.get(4).getControls().getCurrentBet());
-    assertEquals(bb, players.get(5).getControls().getCurrentBet());
-    assertEquals(sbBankRollInitial.subtract(sb), players.get(4).getControls().getBankRoll());
-    assertEquals(bbBankRollInitial.subtract(bb), players.get(5).getControls().getBankRoll());
-    assertEquals(6, table.getActingPlayer());
-    players.forEach(
-        p -> assertEquals(bb, p.getControls().getToCall().add(p.getControls().getCurrentBet())));
-    assertEquals(ZERO, players.get(5).getControls().getToCall());
-    assertEquals(sb, players.get(4).getControls().getToCall());
-    assertEquals(1, table.getPots().size());
-    assertEquals(sb.add(bb), table.getPots().get(0).getTotal());
-    assertEquals(bb, table.getMinRaise());
+    assertEquals(usedCards.get(20), table.getSharedCards().get(0));
+    assertEquals(usedCards.get(21), table.getSharedCards().get(1));
+    assertEquals(usedCards.get(22), table.getSharedCards().get(2));
+    assertEquals(usedCards.get(24), table.getSharedCards().get(3));
+    assertEquals(usedCards.get(26), table.getSharedCards().get(4));
   }
 
   /**
@@ -657,6 +1293,113 @@ public class PokerTableUtilitiesTests {
   }
 
   /**
+   * Test of card dealing where some players are not active in the hand.
+   */
+  @Test
+  public void testDealCards_2() {
+    // Setup.
+    final PokerTableModel table = getSamplePokerTable(10);
+    final List<GamePlayerModel> players = table.getPlayers();
+    final DeckModel deck = new DeckModel();
+    table.setDealer(9);
+    // Eliminate 3 players
+    players.get(2).setOut(true);
+    players.get(1).setOut(true);
+    players.get(6).setOut(true);
+
+    // Test.
+    dealCards(table, deck, 2);
+    final List<CardModel> usedCards = deck.getUsedCards();
+
+    // Verify.
+    int j = 0;
+    int i = 0;
+    while (j < 7) {
+      if (!players.get(i).isOut()) {
+        assertEquals(usedCards.get(j), players.get(i).getCards().get(0));
+        assertEquals(usedCards.get(j + 7), players.get(i).getCards().get(1));
+        j++;
+      }
+      i++;
+    }
+    assertEquals(usedCards.get(14), table.getSharedCards().get(0));
+    assertEquals(usedCards.get(15), table.getSharedCards().get(1));
+    assertEquals(usedCards.get(16), table.getSharedCards().get(2));
+    assertEquals(usedCards.get(18), table.getSharedCards().get(3));
+    assertEquals(usedCards.get(20), table.getSharedCards().get(4));
+  }
+
+  @Test
+  public void testDealCards_3() {
+    // Setup.
+    final PokerTableModel table = getSamplePokerTable(10);
+    final List<GamePlayerModel> players = table.getPlayers();
+    final DeckModel deck = new DeckModel();
+    table.setDealer(9);
+    // Eliminate 3 players
+    players.get(2).setOut(true);
+    players.get(1).setOut(true);
+    players.get(6).setOut(true);
+    players.get(7).setOut(true);
+    players.get(8).setOut(true);
+    players.get(0).setOut(true);
+
+    // Test.
+    dealCards(table, deck, 2);
+    final List<CardModel> usedCards = deck.getUsedCards();
+
+    // Verify.
+    int j = 0;
+    int i = 0;
+    while (j < 4) {
+      if (!players.get(i).isOut()) {
+        assertEquals(usedCards.get(j), players.get(i).getCards().get(0));
+        assertEquals(usedCards.get(j + 4), players.get(i).getCards().get(1));
+        j++;
+      }
+      i++;
+    }
+    assertEquals(usedCards.get(8), table.getSharedCards().get(0));
+    assertEquals(usedCards.get(9), table.getSharedCards().get(1));
+    assertEquals(usedCards.get(10), table.getSharedCards().get(2));
+    assertEquals(usedCards.get(12), table.getSharedCards().get(3));
+    assertEquals(usedCards.get(14), table.getSharedCards().get(4));
+  }
+
+  /**
+   * Basic test of general case where sb and bb both have enough chips to post their blinds.
+   */
+  @Test
+  public void testPerformBlindBets_1() {
+    // Setup.
+    final PokerTableModel table = getSamplePokerTable(10);
+    final List<GamePlayerModel> players = table.getPlayers();
+    table.setDealer(3); // sb = 4, bb = 5
+    table.setActingPlayer(4); // Satisfy Pre-Condition.
+    final BigDecimal sbBankRollInitial = players.get(4).getControls().getBankRoll();
+    final BigDecimal bbBankRollInitial = players.get(5).getControls().getBankRoll();
+    final BigDecimal sb = table.getBlind();
+    final BigDecimal bb = table.getBlind().add(table.getBlind());
+
+    // Test.
+    performBlindBets(table);
+
+    // Verify.
+    assertEquals(sb, players.get(4).getControls().getCurrentBet());
+    assertEquals(bb, players.get(5).getControls().getCurrentBet());
+    assertEquals(sbBankRollInitial.subtract(sb), players.get(4).getControls().getBankRoll());
+    assertEquals(bbBankRollInitial.subtract(bb), players.get(5).getControls().getBankRoll());
+    assertEquals(6, table.getActingPlayer());
+    players.forEach(
+        p -> assertEquals(bb, p.getControls().getToCall().add(p.getControls().getCurrentBet())));
+    assertEquals(ZERO, players.get(5).getControls().getToCall());
+    assertEquals(sb, players.get(4).getControls().getToCall());
+    assertEquals(1, table.getPots().size());
+    assertEquals(sb.add(bb), table.getPots().get(0).getTotal());
+    assertEquals(bb, table.getMinRaise());
+  }
+
+  /**
    * Test of edge case where the BB player doesn't have enough chips to post the full blinds, but
    * has less than the SB.
    */
@@ -688,7 +1431,7 @@ public class PokerTableUtilitiesTests {
     assertEquals(ZERO, players.get(4).getControls().getToCall());
     assertEquals(2, table.getPots().size());
     assertEquals(bbBankRollInitial.add(bbBankRollInitial), table.getPots().get(0).getTotal());
-    assertEquals(bbBankRollInitial.add(sb), getTotalInAllSidePots(table.getPots()));
+    assertEquals(bbBankRollInitial.add(sb), getPotTotal(table.getPots()));
     assertEquals(bb, table.getMinRaise());
   }
 
@@ -722,11 +1465,11 @@ public class PokerTableUtilitiesTests {
     final BigDecimal pot = sb.add(sb).add(sb);
 
     // Test.
-    newHandSetup(table, deck);
+    setupNewHand(table, deck);
 
     // Verify.
     assertEquals(1, table.getRound());
-    assertEquals(pot, getTotalInAllSidePots(table.getPots()));
+    assertEquals(pot, getPotTotal(table.getPots()));
     assertEquals(sb, players.get(2).getControls().getCurrentBet());
     assertEquals(sb.add(sb), players.get(3).getControls().getCurrentBet());
     players.stream()
@@ -736,7 +1479,9 @@ public class PokerTableUtilitiesTests {
     // TODO: Check that cards were dealt
   }
 
-  /** Ensuring the blinds are increased */
+  /**
+   * Ensuring the blinds are increased
+   */
   @Test
   public void testNewHandSetup_2() {
     final PokerTableModel table = getSamplePokerTable(10);
@@ -746,78 +1491,152 @@ public class PokerTableUtilitiesTests {
     final BigDecimal sb = table.getBlind();
 
     // Test.
-    newHandSetup(table, deck);
+    setupNewHand(table, deck);
 
     // Verify.
     assertEquals(sb.add(sb), table.getBlind());
-    assertEquals(sb.multiply(new BigDecimal(6)), getTotalInAllSidePots(table.getPots()));
+    assertEquals(sb.multiply(new BigDecimal(6)), getPotTotal(table.getPots()));
   }
 
-  /** Simulates some actions and ensures they were handled correctly. */
+  /**
+   * Simulates some actions and ensures they were handled correctly. TODO: Document the sequence of
+   * moves
+   */
   @Test
   public void testHandleHandAction_1() {
     final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
-    final DeckModel deck = new DeckModel();
+    final DeckModel deck = getSampleDeck_1();
 
-    table.setRound(0);
-    table.setDealer(4);
-    players.get(2).getControls().setBankRoll(new BigDecimal(100));
-    players.get(3).getControls().setBankRoll(new BigDecimal(250));
-    players.get(5).getControls().setBankRoll(new BigDecimal(300));
-    newHandSetup(table, deck);
-    final List<CardModel> dealtCards = deck.getUsedCards();
+    performAndVerifyHandActionSequence_1(table, deck);
+  }
 
-    final List<Integer> expectedActingPlayers = Arrays.asList(8, 9, 0, 1, 2, 3, 4, 5, 6, 7);
-    final List<Integer> actingPlayers = new ArrayList<>();
-    actingPlayers.add(table.getActingPlayer());
+  @Test
+  public void testFullHand_1() {
+    final PokerTableModel table = getSamplePokerTable(10);
+    final DeckModel deck = getSampleDeck_1();
 
-    // Perform several actions
-    handlePlayerAction(table, GameAction.Call, players.get(8).getId(), null);
-    actingPlayers.add(table.getActingPlayer());
-    handlePlayerAction(table, GameAction.Call, players.get(9).getId(), null);
-    actingPlayers.add(table.getActingPlayer());
-    handlePlayerAction(table, GameAction.Call, players.get(0).getId(), null);
-    actingPlayers.add(table.getActingPlayer());
-    handlePlayerAction(table, GameAction.Raise, players.get(1).getId(), new BigDecimal(30));
-    actingPlayers.add(table.getActingPlayer());
-    // toCall should be 50
-    handlePlayerAction(table, GameAction.Raise, players.get(2).getId(), new BigDecimal(50));
-    actingPlayers.add(table.getActingPlayer());
-    // toCall should be 100
-    handlePlayerAction(table, GameAction.Raise, players.get(3).getId(), new BigDecimal(150));
-    actingPlayers.add(table.getActingPlayer());
-    handlePlayerAction(table, GameAction.Fold, players.get(4).getId(), null);
-    actingPlayers.add(table.getActingPlayer());
-    handlePlayerAction(table, GameAction.Raise, players.get(5).getId(), new BigDecimal(50));
-    actingPlayers.add(table.getActingPlayer());
-    handlePlayerAction(table, GameAction.Fold, players.get(6).getId(), null);
-    actingPlayers.add(table.getActingPlayer());
-    handlePlayerAction(table, GameAction.Call, players.get(7).getId(), null);
+    // Test.
+    performAndVerifyHandActionSequence_1(table, deck);
+    determineWinners(table);
 
     // Verify.
-    final List<PotModel> pots = table.getPots();
-    assertEquals(new BigDecimal(1070), table.getPot());
-    assertEquals(table.getPot(), getTotalInAllSidePots(pots));
-    assertEquals(3, pots.size());
-    assertEquals(3, players.stream().filter(GamePlayerModel::isAllIn).count());
-    assertEquals(2, players.stream().filter(GamePlayerModel::isFolded).count());
-    // Check players cards.
-    assertEquals(dealtCards.get(0), players.get(6).getCards().get(0));
-    assertEquals(dealtCards.get(1), players.get(7).getCards().get(0));
-    assertEquals(dealtCards.get(2), players.get(8).getCards().get(0));
-    assertEquals(dealtCards.get(3), players.get(9).getCards().get(0));
-    assertEquals(dealtCards.get(4), players.get(0).getCards().get(0));
-    assertEquals(dealtCards.get(5), players.get(1).getCards().get(0));
-    assertEquals(dealtCards.get(6), players.get(2).getCards().get(0));
-    assertEquals(dealtCards.get(7), players.get(3).getCards().get(0));
-    assertEquals(dealtCards.get(8), players.get(4).getCards().get(0));
-    assertEquals(dealtCards.get(9), players.get(5).getCards().get(0));
-    players.forEach(p -> assertEquals(1, p.getCards().size()));
-    // Check acting players
-    actingPlayers.forEach(
-        i -> assertEquals(expectedActingPlayers.indexOf(i), actingPlayers.indexOf(i)));
-    // Check lastToAct
-    assertEquals(3, table.getLastToAct());
+    final List<WinnerModel> winners = table.getWinners();
+    assertEquals(1, winners.size());
+    assertEquals(bd(4720), winners.get(0).getWinnings());
+    assertEquals(table.getPlayers().get(3).getId(), winners.get(0).getId());
+  }
+
+  /**
+   * Give players 5 and 6 a royal flush to ensure they win the hand. The pot should be split 2 ways,
+   * since the players have hands with equal rank.
+   */
+  @Test
+  public void testFullHand_2() {
+    final PokerTableModel table = getSamplePokerTable(10);
+    final DeckModel deck = getSampleDeck_1();
+    final GamePlayerModel p5 = table.getPlayers().get(5);
+    final GamePlayerModel p6 = table.getPlayers().get(6);
+
+//    card(Clubs, Four),  // Dealer 2nd Card
+//    card(Clubs, Five), // Player 8 2nd Card
+//    card(Hearts, Nine), // Player 7 2nd Card
+//    card(Hearts, Jack), // Player 6 2nd Card
+//    card(Clubs, Jack), // Player 5 2nd Card
+//    card(Spades, Eight), // Player 4 2nd Card
+//    card(Spades, Nine), // Player 3 2nd Card
+//    card(Diamonds, Queen), // Player 2 2nd Card
+//    card(Hearts, King), // Player 1 2nd Card
+//    card(Spades, Jack), // Player 0 2nd Card = 41
+//    card(Clubs, Three),  // Dealer 1st Card = 42
+//    card(Diamonds, Three), // Player 8 1st Card = 43
+//    card(Diamonds, Jack), // Player 7 1st Card = 44
+//    card(Hearts, Ace), // Player 6 1st Card = 45
+//    card(Diamonds, Ace), // Player 5 1st Card = 46
+//    card(Spades, Three), // Player 4 1st Card = 47
+//    card(Spades, Two), // Player 3 1st Card = 48
+//    card(Hearts, Queen), // Player 2 1st Card = 49
+//    card(Diamonds, King), // Player 1 1st Card = 50
+//    card(Spades, Ace) // Player 0 1st Card = 51
+
+    deck.getCards().set(46, card(Spades, Ace));
+    deck.getCards().set(36, card(Spades, Jack));
+    deck.getCards().set(45, card(Spades, Ace));
+    deck.getCards().set(35, card(Spades, Jack));
+
+    // Test.
+    performAndVerifyHandActionSequence_1(table, deck);
+    determineWinners(table);
+
+    // Verify.
+    final List<WinnerModel> winners = table.getWinners();
+    assertEquals(2, winners.size());
+    assertEquals(bd(4720 / 2), winners.get(0).getWinnings());
+    assertEquals(bd(4720 / 2), winners.get(1).getWinnings());
+    assertEquals(1, winners.stream().filter(w -> w.getId().equals(p5.getId())).count());
+    assertEquals(1, winners.stream().filter(w -> w.getId().equals(p6.getId())).count());
+  }
+
+  /**
+   * Give all players a royal flush (on the board), so any player that doesn't fold will win a share
+   * of the pot. Since 2 players only have 400 chips, while the other 3 players that win have bet
+   * 1000, there will be 2 players that win less than the other 3.
+   */
+  @Test
+  public void testFullHand_3() {
+    final PokerTableModel table = getSamplePokerTable(10);
+    final DeckModel deck = getSampleDeck_2();
+    final GamePlayerModel p3 = table.getPlayers().get(3);
+    final GamePlayerModel p5 = table.getPlayers().get(5);
+    final GamePlayerModel p6 = table.getPlayers().get(6);
+    final GamePlayerModel p8 = table.getPlayers().get(8);
+    final GamePlayerModel p9 = table.getPlayers().get(9);
+
+    // Test.
+    performAndVerifyHandActionSequence_1(table, deck);
+    determineWinners(table);
+
+    // Verify.
+    final List<WinnerModel> winners = table.getWinners();
+    assertEquals(5, winners.size());
+    assertEquals(bd(4720), sum(winners.stream().map(WinnerModel::getWinnings).collect(toList())));
+    assertEquals(3, winners.stream().filter(w -> w.getWinnings().equals(bd(1184))).count());
+    assertEquals(2, winners.stream().filter(w -> w.getWinnings().equals(bd(584))).count());
+
+    assertEquals(1, winners.stream().filter(w -> w.getId().equals(p3.getId())).count());
+    assertEquals(1, winners.stream().filter(w -> w.getId().equals(p5.getId())).count());
+    assertEquals(1, winners.stream().filter(w -> w.getId().equals(p6.getId())).count());
+    assertEquals(1, winners.stream().filter(w -> w.getId().equals(p8.getId())).count());
+    assertEquals(1, winners.stream().filter(w -> w.getId().equals(p9.getId())).count());
+
+    assertEquals(bd(1184), Objects.requireNonNull(winners
+        .stream()
+        .filter(w -> w.getId().equals(p3.getId()))
+        .findFirst()
+        .orElse(null))
+        .getWinnings());
+    assertEquals(bd(1184), Objects.requireNonNull(winners
+        .stream()
+        .filter(w -> w.getId().equals(p5.getId()))
+        .findFirst()
+        .orElse(null))
+        .getWinnings());
+    assertEquals(bd(1184), Objects.requireNonNull(winners
+        .stream()
+        .filter(w -> w.getId().equals(p6.getId()))
+        .findFirst()
+        .orElse(null))
+        .getWinnings());
+    assertEquals(bd(584), Objects.requireNonNull(winners
+        .stream()
+        .filter(w -> w.getId().equals(p8.getId()))
+        .findFirst()
+        .orElse(null))
+        .getWinnings());
+    assertEquals(bd(584), Objects.requireNonNull(winners
+        .stream()
+        .filter(w -> w.getId().equals(p9.getId()))
+        .findFirst()
+        .orElse(null))
+        .getWinnings());
   }
 }

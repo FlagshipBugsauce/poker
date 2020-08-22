@@ -1,5 +1,7 @@
 package com.poker.poker.utilities;
 
+import static java.math.BigDecimal.ZERO;
+
 import java.math.BigDecimal;
 
 public final class BigDecimalUtilities {
@@ -13,7 +15,7 @@ public final class BigDecimalUtilities {
    * @return The sum of all numbers provided.
    */
   public static BigDecimal sum(final BigDecimal... nums) {
-    BigDecimal result = BigDecimal.ZERO;
+    BigDecimal result = ZERO;
     for (final BigDecimal num : nums) {
       result = result.add(num);
     }
@@ -27,7 +29,7 @@ public final class BigDecimalUtilities {
    * @return The sum of all numbers provided.
    */
   public static BigDecimal sum(final Iterable<BigDecimal> nums) {
-    BigDecimal result = BigDecimal.ZERO;
+    BigDecimal result = ZERO;
     for (final BigDecimal num : nums) {
       result = result.add(num);
     }
@@ -41,7 +43,7 @@ public final class BigDecimalUtilities {
    * @return The max of all numbers provided.
    */
   public static BigDecimal max(final BigDecimal... nums) {
-    BigDecimal result = BigDecimal.ZERO;
+    BigDecimal result = ZERO;
     for (BigDecimal num : nums) {
       result = num.compareTo(result) > 0 ? num : result;
     }

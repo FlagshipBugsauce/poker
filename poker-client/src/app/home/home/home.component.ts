@@ -2,10 +2,9 @@ import {Component, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {
   MiscEventsStateContainer,
-  PokerTableStateContainer
+  PokerTableStateContainer,
+  PrivatePlayerDataStateContainer
 } from '../../shared/models/app-state.model';
-import {table} from '../../game/poker-table/sample-table';
-import {dealCards, pokerTableUpdate} from '../../state/app.actions';
 
 @Component({
   selector: 'pkr-home',
@@ -19,13 +18,16 @@ export class HomeComponent implements OnInit {
 
   constructor(
     private pokerTableStore: Store<PokerTableStateContainer>,
-    private miscEventsStore: Store<MiscEventsStateContainer>) {
+    private miscEventsStore: Store<MiscEventsStateContainer>,
+    private privatePlayerDataStore: Store<PrivatePlayerDataStateContainer>) {
   }
 
   ngOnInit(): void {
-    // // TODO: This is for design purposes only.
-    this.delay(500).then(() => this.pokerTableStore.dispatch(pokerTableUpdate(table)));
-    this.delay(500).then(() => this.miscEventsStore.dispatch(dealCards({id: '0', numCards: 69})));
+    // // // TODO: This is for design purposes only.
+    // this.delay(500).then(() => this.pokerTableStore.dispatch(pokerTableUpdate(table2)));
+    // this.delay(500).then(() => this.miscEventsStore.dispatch(dealCards({id: '0', numCards: 69})));
+    // this.delay(500).then(() =>
+    //   this.privatePlayerDataStore.dispatch(privatePlayerDataUpdated(samplePlayer)));
   }
 
   private async delay(time: number): Promise<void> {

@@ -84,7 +84,7 @@ export interface MiscEventsState {
   timer?: TimerModel;
   deal?: DealModel;
   hide?: HideCardsModel;
-  hiddenCards: boolean[];
+  hiddenCards: boolean[][];
 }
 
 export interface PrivatePlayerDataStateContainer {

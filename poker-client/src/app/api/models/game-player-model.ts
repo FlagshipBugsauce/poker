@@ -16,11 +16,13 @@ export interface GamePlayerModel {
    * Specifies whether a player is active.
    */
   away?: boolean;
+  bet?: number;
 
   /**
    * Cards
    */
   cards?: Array<CardModel>;
+  chips?: number;
   controls?: TableControlsModel;
 
   /**
@@ -47,4 +49,5 @@ export interface GamePlayerModel {
    * Specifies whether a player is out of the game.
    */
   out?: boolean;
+  toCall?: number;
 }

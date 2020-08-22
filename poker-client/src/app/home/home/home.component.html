@@ -5,60 +5,7 @@
   </h3>
   <div class="card-body bg-light text-dark">
     <p>
-      This is an experimental, online, multiplayer, poker application. This application was made
-      using Spring Boot, Angular, MongoDB and will be deployed to AWS (S3 for client, elastic
-      beanstalk for backend). The plan is to build this project in stages.
-    </p>
-    <p>
-      This process will begin by creating the basic infrastructure needed to facilitate a poker
-      game, i.e., a user account system, a basic UI, DB storage, etc...
-    </p>
-    <p>
-      Next, is designing and implementing the infrastructure needed to create and start games. This
-      requires a game creation page, a list of joinable games and some kind of game lobby, where
-      players wait for a game to begin.
-    </p>
-    <p>
-      Next is adding some kind of simple game that begins once the host of a game lobby opts to
-      start the game. The idea here is to gradually increase the complexity of the simple game.
-      As the complexity increases, more issues will arise, and they can be fixed when things are
-      still as simple as possible. Even though each iteration is basically being scrapped, the
-      issues being resolved are difficult to predict, and so, it should end up saving time in the
-      long-run, since these issues can be fixed before things are too complex.
-    </p>
-    <p>
-      The "simple game" will begin as a game where players click a button and are given a random
-      number from 1 to 100. The player who rolls the highest number wins. The next iteration of this
-      game involves adding multiple rounds. In this iteration, the player who wins the most rounds,
-      wins the game. After adding rounds, the game will transition from rolling a random number to
-      drawing a card. Following this, the focus will be on creating a more effective UI, to weed
-      out some of the issues related to communication between the client and the server. Next, the
-      concept of an away status will be added. As in, if a player does not perform an action within
-      some reasonable time frame, the server will perform a default action on their behalf, and
-      transition their status to "Away". When a player is "Away", the server will not wait for the
-      player to act and will instead perform a default action on their behalf immediately, whenever
-      it is this player's turn. Next, the ability to leave and rejoin an ongoing game will be added.
-      After this, a simple game chat will be added, so that players can communicate and also so that
-      system events can be communicated in a convenient manner, i.e. game events like which player
-      wins a hand, etc...
-    </p>
-    <p>
-      Once we get to this stage, it is time to transition the "simple game" to something that more
-      closely resembles a game of poker. Next on the agenda is building a UI for the game itself
-      that closely resembles a typical online poker game UI, as in, it looks like a poker table from
-      above. Next, is to introduce betting to the game. The idea here is that instead of drawing a
-      card and seeing who wins, each player will be dealt a card that only they can see. A round of
-      poker-style betting will follow. The game will continue until each player runs out of chips.
-      <b>This is the current stage of development.</b>
-    </p>
-    <p>
-      What will follow, is transitioning from dealing one card, to two, and adding the typical
-      NL Hold'em game flow, i.e., cards are dealt, pre-flop betting, flop, post-flop betting, turn,
-      post-turn betting, river, final round of betting, etc... That is to say, this is almost done.
-      Once the basic game flow is working correctly, the final task will involve polishing the UI
-      and ensuring the business logic is robust enough to handle all edge cases. I may also expand
-      the scope of this project from simple one-table tournaments, to cash games, multi-table
-      tournaments, etc... For now however, the focus is on the simplest type of poker game possible.
+      No games to join? Try hosting a game, maybe someone will join, or you can try chatting below.
     </p>
   </div>
 </div>

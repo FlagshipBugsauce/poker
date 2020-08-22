@@ -7,12 +7,6 @@ import {GamePlayerModel} from './game-player-model';
 export interface GameModel {
 
   /**
-   * Current hand being played.
-   */
-  currentHand?: number;
-  hands?: Array<string>;
-
-  /**
    * Game ID (same as game lobby ID).
    */
   id?: string;
@@ -27,9 +21,4 @@ export interface GameModel {
    * Amount of time each player has to act.
    */
   timeToAct?: number;
-
-  /**
-   * Total number of hands in the game.
-   */
-  totalHands?: number;
 }

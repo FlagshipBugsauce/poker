@@ -8,6 +8,7 @@ import {HandSummaryComponent} from './hand-summary/hand-summary.component';
 import {SharedModule} from '../../shared/shared.module';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 import {TableControlsComponent} from './table-controls/table-controls.component';
+import {CommunityCardsComponent} from './community-cards/community-cards.component';
 
 describe('PokerTableComponent', () => {
   let component: PokerTableComponent;
@@ -21,7 +22,8 @@ describe('PokerTableComponent', () => {
         PlayerBoxComponent,
         HandSummaryComponent,
         PopupAfkComponent,
-        TableControlsComponent
+        TableControlsComponent,
+        CommunityCardsComponent
       ],
       providers: [
         provideMockStore()

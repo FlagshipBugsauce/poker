@@ -7,6 +7,7 @@ import static com.poker.poker.models.enums.MessageType.GameList;
 import static com.poker.poker.models.enums.MessageType.GamePhaseChanged;
 import static com.poker.poker.models.enums.MessageType.PokerTable;
 import static com.poker.poker.utilities.PokerTableUtilities.hideCards;
+import static com.poker.poker.utilities.PokerTableUtilities.hideFoldedCards;
 import static java.math.BigDecimal.ROUND_CEILING;
 
 import com.poker.poker.config.AppConfig;
@@ -128,6 +129,12 @@ public class GameDataService {
   public void broadcastObfuscatedPokerTable(final UUID id) {
     assert tables.get(id) != null;
     publisher.publishEvent(new GameMessageEvent<>(this, PokerTable, id, hideCards(tables.get(id))));
+  }
+
+  public void broadcastPokerTableWithFoldedCardsHidden(final UUID id) {
+    assert (tables.get(id)) != null;
+    publisher.publishEvent(
+        new GameMessageEvent<>(this, PokerTable, id, hideFoldedCards(tables.get(id))));
   }
 
   /**

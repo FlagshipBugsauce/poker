@@ -11,10 +11,12 @@ import {LeaveGameGuardService} from './game/game/leave-game-guard.service';
 import {LeaveJoinPageGuardService} from './game/join/leave-join-page-guard.service';
 import {APP_ROUTES} from './app-routes';
 import {OpenRouteGuardService} from './shared/open-route-guard.service';
+import {AboutComponent} from './shared/about/about.component';
 
 const routes: Routes = [
   {path: 'logout', component: LoginComponent, canActivate: [AuthGuardService]},
   {path: APP_ROUTES.LOGIN.path, component: LoginComponent, canActivate: [OpenRouteGuardService]},
+  {path: APP_ROUTES.ABOUT.path, component: AboutComponent, canActivate: [OpenRouteGuardService]},
   {
     path: APP_ROUTES.REGISTER.path,
     component: RegisterComponent,

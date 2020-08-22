@@ -20,6 +20,7 @@ import {TopBarItemComponent} from './top-bar/top-bar-item/top-bar-item.component
 import {TopBarInfoComponent} from './top-bar/top-bar-info/top-bar-info.component';
 import {ChatBoxComponent} from './chat-box/chat-box.component';
 import {ChatMessageComponent} from './chat-box/chat-message/chat-message.component';
+import {AboutComponent} from './about/about.component';
 
 export const API_INTERCEPTOR_PROVIDER: Provider = {
   provide: HTTP_INTERCEPTORS,
@@ -41,7 +42,8 @@ export const API_INTERCEPTOR_PROVIDER: Provider = {
     TopBarItemComponent,
     TopBarInfoComponent,
     ChatBoxComponent,
-    ChatMessageComponent
+    ChatMessageComponent,
+    AboutComponent
   ],
   imports: [
     CommonModule,

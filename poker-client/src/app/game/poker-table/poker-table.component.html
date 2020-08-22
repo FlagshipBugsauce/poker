@@ -21,6 +21,14 @@
       'top': deckPosition.top + 'px',
       'left': deckPosition.left + 'px'
     }" [width]="deckPosition.width"></pkr-deck>
+    <pkr-community-cards
+      [ngStyle]="{
+        'position': 'absolute',
+        'top': communityCardsPosition.top + 'px',
+        'left': communityCardsPosition.left + 'px'
+      }"
+      [width]="communityCardsPosition.width"
+    ></pkr-community-cards>
     <pkr-player-box
       *ngFor="let playerBox of playerBoxes"
       [ngStyle]="{

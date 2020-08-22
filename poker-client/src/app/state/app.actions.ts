@@ -86,7 +86,7 @@ export const gameChatMsgReceived = createAction('gameChatMsgReceived', props<Cha
 export const startTimer = createAction('startTimer', props<TimerModel>());
 export const dealCards = createAction('dealCards', props<DealModel>());
 export const hideCards = createAction('hideCards', props<HideCardsModel>());
-export const showCard = createAction('showCard', props<{ card: number }>());
+export const showCard = createAction('showCard', props<{ player: number, card: number }>());
 
 // Private Player Data:
 export const privatePlayerDataUpdated = createAction(

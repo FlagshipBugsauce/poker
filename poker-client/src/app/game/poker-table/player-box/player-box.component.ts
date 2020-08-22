@@ -1,5 +1,5 @@
 /* tslint:disable:no-bitwise */
-import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {CardModel, GamePlayerModel, PokerTableModel, UserModel} from '../../../api/models';
 import {CardSuit, CardValue} from '../../../shared/models/card.enum';
 import {Store} from '@ngrx/store';
@@ -19,7 +19,6 @@ import {
 } from '../../../state/app.selector';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
-import {CardComponent} from '../../../shared/card/card.component';
 import {PlayerBoxPositionModel} from '../../../shared/models/css-position.model';
 import {PositionHelperUtil} from './position-helper.util';
 
@@ -39,11 +38,17 @@ export class PlayerBoxComponent implements OnInit, OnDestroy {
             1     0     9      */
 
   @Input() player: number;
-  @ViewChild('card1') card1: CardComponent;
-  public publicCards: CardModel[] = [{value: CardValue.Ace, suit: CardSuit.Spades}];
-  public privateCards: CardModel[] = [{value: CardValue.Ace, suit: CardSuit.Spades}];
+  public publicCards: CardModel[] = [
+    {value: CardValue.Ace, suit: CardSuit.Spades},
+    {value: CardValue.Ace, suit: CardSuit.Spades}
+  ];
+  public privateCards: CardModel[] = [
+    {value: CardValue.Ace, suit: CardSuit.Spades},
+    {value: CardValue.Ace, suit: CardSuit.Spades}
+  ];
 
   public hideCards: boolean = false;
+  public hiddenCards: boolean[] = [false, false];
   public loggedInUser: UserModel;
   public table: PokerTableModel;
   public playerModel: GamePlayerModel = {} as GamePlayerModel;
@@ -122,9 +127,12 @@ export class PlayerBoxComponent implements OnInit, OnDestroy {
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((cards: CardModel[]) => this.privateCards = cards);
 
+    // this.miscEventStore.select(selectHiddenCards)
+    // .pipe(takeUntil(this.ngDestroyed$))
+    // .subscribe((hiddenCards: boolean[]) => this.hideCards = hiddenCards[this.player]);
     this.miscEventStore.select(selectHiddenCards)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((hiddenCards: boolean[]) => this.hideCards = hiddenCards[this.player]);
+    .subscribe((hiddenCards: boolean[][]) => this.hiddenCards = hiddenCards[this.player]);
   }
 
   ngOnDestroy(): void {

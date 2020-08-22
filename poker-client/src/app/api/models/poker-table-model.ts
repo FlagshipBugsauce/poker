@@ -1,4 +1,5 @@
 /* tslint:disable */
+import {CardModel} from './card-model';
 import {GamePlayerModel} from './game-player-model';
 import {HandSummaryModel} from './hand-summary-model';
 import {PotModel} from './pot-model';
@@ -50,18 +51,27 @@ export interface PokerTableModel {
    * Position of the player that acted.
    */
   playerThatActed?: number;
+
+  /**
+   * List of players in the game.
+   */
   players?: Array<GamePlayerModel>;
 
   /**
    * Total amount in the pot.
    */
   pot?: number;
+
+  /**
+   * Collection of side-pots.
+   */
   pots?: Array<PotModel>;
 
   /**
    * Current round.
    */
   round?: number;
+  sharedCards?: Array<CardModel>;
   summary?: HandSummaryModel;
   winners?: Array<WinnerModel>;
 }

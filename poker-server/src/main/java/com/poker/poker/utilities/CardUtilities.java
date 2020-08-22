@@ -137,8 +137,15 @@ public final class CardUtilities {
           new Evaluator(Pair, CardUtilities::checkForPair),
           new Evaluator(HighCard, CardUtilities::checkForHighCard));
 
-  /** Private constructor to prevent creating instances of static class. */
-  private CardUtilities() {}
+  /**
+   * Private constructor to prevent creating instances of static class.
+   */
+  private CardUtilities() {
+  }
+
+  public static CardModel card(final CardSuit suit, final CardValue value) {
+    return new CardModel(suit, value);
+  }
 
   /**
    * All methods in this class that take in a collection of cards must satisfy these pre-conditions.
@@ -192,6 +199,17 @@ public final class CardUtilities {
    */
   public static int suitVal(final CardModel card) {
     return cardSuitValues.get(card.getSuit());
+  }
+
+  /**
+   * Creates a Comparator to sort hand rank objects in the specified order.
+   *
+   * @param order Order the card should be sorted in. Should use <code>ASCENDING</code> and <code>
+   *              DESCENDING</code> constants as the argument.
+   * @return Comparator that sorts hand rank objects in the specified order.
+   */
+  public static Comparator<HandRankModel> rankSorter(final int order) {
+    return (a, b) -> order * Integer.compare(a.getRank(), b.getRank());
   }
 
   /**

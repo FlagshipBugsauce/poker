@@ -127,4 +127,8 @@ public class DeckModel {
   public int numCardsUsed() {
     return usedCards.size();
   }
+
+  public void setCards(final List<CardModel> cards) {
+    this.cards = cards;
+  }
 }

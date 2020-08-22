@@ -142,7 +142,6 @@ export class WebSocketService implements OnDestroy {
     .subscribe(data => {
       switch (data.type) {
         case MessageType.PlayerData:
-          console.log(data.data.cards);
           this.privatePlayerDataStore.dispatch(privatePlayerDataUpdated(data.data));
           break;
         case MessageType.Debug:

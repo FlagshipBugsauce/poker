@@ -39,7 +39,6 @@ export class EndComponent implements OnInit, OnDestroy {
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((gameModel: GameModel) => {
       this.gameModel = gameModel;
-      this.numbers = Array(gameModel.totalHands).fill('').map((v, i) => i + 1);
     });
   }
 }

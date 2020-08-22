@@ -5,12 +5,15 @@
       'top': -(width * 7 / 10) + 'px'
     }"
     class="hand-summary-card">
-    <pkr-card
-      [card]="summary.card"
-      [pxSize]="width"></pkr-card>
+    <!--    <pkr-card-->
+    <!--      [card]="summary.card"-->
+    <!--      [pxSize]="width"></pkr-card>-->
   </div>
   <div
     class="hand-summary-caption">
-    {{name}} won the round!
+    <p *ngFor="let winner of winners">
+      {{getWinnerMessage(winner)}}
+    </p>
+    <!--    {{name}} won the round!-->
   </div>
 </div>
