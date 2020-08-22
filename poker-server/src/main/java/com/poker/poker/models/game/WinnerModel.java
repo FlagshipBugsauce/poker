@@ -27,6 +27,7 @@ public class WinnerModel {
   @ArraySchema(
       schema = @Schema(description = "The winning cards.", implementation = CardModel.class))
   private List<CardModel> cards;
+
   public void increaseWinnings(final BigDecimal amount) {
     winnings = winnings.add(amount);
   }

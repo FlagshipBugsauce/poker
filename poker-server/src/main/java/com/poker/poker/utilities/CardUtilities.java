@@ -137,11 +137,8 @@ public final class CardUtilities {
           new Evaluator(Pair, CardUtilities::checkForPair),
           new Evaluator(HighCard, CardUtilities::checkForHighCard));
 
-  /**
-   * Private constructor to prevent creating instances of static class.
-   */
-  private CardUtilities() {
-  }
+  /** Private constructor to prevent creating instances of static class. */
+  private CardUtilities() {}
 
   public static CardModel card(final CardSuit suit, final CardValue value) {
     return new CardModel(suit, value);

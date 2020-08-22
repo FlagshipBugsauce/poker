@@ -82,7 +82,7 @@ public class PokerTableUtilitiesTests {
    * the sequence of moves.
    *
    * @param table Poker table.
-   * @param deck  Deck (can use a mocked deck to ensure players are given specific cards).
+   * @param deck Deck (can use a mocked deck to ensure players are given specific cards).
    */
   public static void performAndVerifyHandActionSequence_1(
       final PokerTableModel table, final DeckModel deck) {
@@ -99,10 +99,10 @@ public class PokerTableUtilitiesTests {
     final GamePlayerModel p9 = players.get(9);
     table.setRound(3);
     table.setDealer(8);
-    final List<BigDecimal> chips = Stream
-        .of(1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 400, 400)
-        .map(BigDecimal::new)
-        .collect(toList());
+    final List<BigDecimal> chips =
+        Stream.of(1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 400, 400)
+            .map(BigDecimal::new)
+            .collect(toList());
     for (int i = 0; i < players.size(); i++) {
       players.get(i).setChips(chips.get(i));
     }
@@ -551,8 +551,7 @@ public class PokerTableUtilitiesTests {
       final boolean expectedAllinStatus,
       final boolean expectedFoldedStatus,
       final int expectedLastToAct,
-      final int expectedActingPlayer
-  ) {
+      final int expectedActingPlayer) {
     assertEquals(bd(expectedChips), player.getChips());
     assertEquals(bd(expectedBet), player.getBet());
     assertEquals(bd(expectedMinRaise), table.getMinRaise());
@@ -587,91 +586,91 @@ public class PokerTableUtilitiesTests {
 
   /**
    * Creates a sample deck which is spy'd so that the <code>restoreAndShuffle()</code> method does
-   * nothing, so that when the cards are dealt (using the <code>dealCards</code> method, we'll
-   * have:
-   * </p>
-   * <p>
-   * <b>Shared Cards:</b>
-   *   <ol>
-   *     <li>KS</li>
-   *     <li>QS</li>
-   *     <li>10S</li>
-   *     <li>KC</li>
-   *     <li>2D</li>
-   *   </ol>
+   * nothing, so that when the cards are dealt (using the <code>dealCards</code> method, we'll have:
    *
-   *   <ol>
-   *     <b>Player Hands:</b>
-   *     <li>AS, JS => Straight flush</li>
-   *     <li>KD, KH => 4-of-a-kind</li>
-   *     <li>QH, QD => Queens and Kings Full House</li>
-   *     <li>2S, 9S => K/Q/10/9/2 Flush</li>
-   *     <li>3S, 8S => K/Q/10/8/3 Flush</li>
-   *     <li>AD, JC => 10->A Straight</li>
-   *     <li>AH, JH => 10->A Straight</li>
-   *     <li>JD, 9H => 9->K Straight</li>
-   *     <li>2H, 4H => KK + Q, 10, 4 Kickers</li>
-   *     <li>2C, 3C => KK + Q, 10, 3 Kickers</li>
-   *   </ol>
-   * </p>
+   * <p><b>Shared Cards:</b>
+   *
+   * <ol>
+   *   <li>KS
+   *   <li>QS
+   *   <li>10S
+   *   <li>KC
+   *   <li>2D
+   * </ol>
+   *
+   * <ol>
+   *   <b>Player Hands:</b>
+   *   <li>AS, JS => Straight flush
+   *   <li>KD, KH => 4-of-a-kind
+   *   <li>QH, QD => Queens and Kings Full House
+   *   <li>2S, 9S => K/Q/10/9/2 Flush
+   *   <li>3S, 8S => K/Q/10/8/3 Flush
+   *   <li>AD, JC => 10->A Straight
+   *   <li>AH, JH => 10->A Straight
+   *   <li>JD, 9H => 9->K Straight
+   *   <li>2H, 4H => KK + Q, 10, 4 Kickers
+   *   <li>2C, 3C => KK + Q, 10, 3 Kickers
+   * </ol>
    *
    * @return Sample deck with specified hands.
    */
   public DeckModel getSampleDeck_1() {
-    final List<CardModel> cards = new ArrayList<>(asList(
-        card(Spades, Six),
-        card(Spades, Seven),
-        card(Hearts, Three),
-        card(Hearts, Two),
-        card(Hearts, Five),
-        card(Hearts, Six),
-        card(Hearts, Seven),
-        card(Hearts, Eight),
-        card(Hearts, Ten),
-        card(Clubs, Ace),
-        card(Clubs, Two),
-        card(Hearts, Four),
-        card(Clubs, Six),
-        card(Clubs, Seven),
-        card(Clubs, Eight),
-        card(Clubs, Nine),
-        card(Clubs, Ten),
-        card(Clubs, Queen),
-        card(Diamonds, Four),
-        card(Diamonds, Five),
-        card(Diamonds, Six),
-        card(Diamonds, Seven),
-        card(Diamonds, Eight),
-        card(Diamonds, Nine),
-        card(Diamonds, Ten),
-        card(Diamonds, Two),  // River
-        card(Spades, Five),  // Burn
-        card(Clubs, King),  // Turn
-        card(Spades, Four),  // Burn
-        card(Spades, Ten),  // Flop
-        card(Spades, Queen),  // Flop
-        card(Spades, King),  // Flop
-        card(Clubs, Four),  // Dealer 2nd Card
-        card(Clubs, Five), // Player 8 2nd Card
-        card(Hearts, Nine), // Player 7 2nd Card
-        card(Hearts, Jack), // Player 6 2nd Card
-        card(Clubs, Jack), // Player 5 2nd Card
-        card(Spades, Eight), // Player 4 2nd Card
-        card(Spades, Nine), // Player 3 2nd Card
-        card(Diamonds, Queen), // Player 2 2nd Card
-        card(Hearts, King), // Player 1 2nd Card
-        card(Spades, Jack), // Player 0 2nd Card = 41
-        card(Clubs, Three),  // Dealer 1st Card
-        card(Diamonds, Three), // Player 8 1st Card
-        card(Diamonds, Jack), // Player 7 1st Card
-        card(Hearts, Ace), // Player 6 1st Card
-        card(Diamonds, Ace), // Player 5 1st Card
-        card(Spades, Three), // Player 4 1st Card
-        card(Spades, Two), // Player 3 1st Card
-        card(Hearts, Queen), // Player 2 1st Card
-        card(Diamonds, King), // Player 1 1st Card
-        card(Spades, Ace) // Player 0 1st Card = 51
-    ));
+    final List<CardModel> cards =
+        new ArrayList<>(
+            asList(
+                card(Spades, Six),
+                card(Spades, Seven),
+                card(Hearts, Three),
+                card(Hearts, Two),
+                card(Hearts, Five),
+                card(Hearts, Six),
+                card(Hearts, Seven),
+                card(Hearts, Eight),
+                card(Hearts, Ten),
+                card(Clubs, Ace),
+                card(Clubs, Two),
+                card(Hearts, Four),
+                card(Clubs, Six),
+                card(Clubs, Seven),
+                card(Clubs, Eight),
+                card(Clubs, Nine),
+                card(Clubs, Ten),
+                card(Clubs, Queen),
+                card(Diamonds, Four),
+                card(Diamonds, Five),
+                card(Diamonds, Six),
+                card(Diamonds, Seven),
+                card(Diamonds, Eight),
+                card(Diamonds, Nine),
+                card(Diamonds, Ten),
+                card(Diamonds, Two), // River
+                card(Spades, Five), // Burn
+                card(Clubs, King), // Turn
+                card(Spades, Four), // Burn
+                card(Spades, Ten), // Flop
+                card(Spades, Queen), // Flop
+                card(Spades, King), // Flop
+                card(Clubs, Four), // Dealer 2nd Card
+                card(Clubs, Five), // Player 8 2nd Card
+                card(Hearts, Nine), // Player 7 2nd Card
+                card(Hearts, Jack), // Player 6 2nd Card
+                card(Clubs, Jack), // Player 5 2nd Card
+                card(Spades, Eight), // Player 4 2nd Card
+                card(Spades, Nine), // Player 3 2nd Card
+                card(Diamonds, Queen), // Player 2 2nd Card
+                card(Hearts, King), // Player 1 2nd Card
+                card(Spades, Jack), // Player 0 2nd Card = 41
+                card(Clubs, Three), // Dealer 1st Card
+                card(Diamonds, Three), // Player 8 1st Card
+                card(Diamonds, Jack), // Player 7 1st Card
+                card(Hearts, Ace), // Player 6 1st Card
+                card(Diamonds, Ace), // Player 5 1st Card
+                card(Spades, Three), // Player 4 1st Card
+                card(Spades, Two), // Player 3 1st Card
+                card(Hearts, Queen), // Player 2 1st Card
+                card(Diamonds, King), // Player 1 1st Card
+                card(Spades, Ace) // Player 0 1st Card = 51
+                ));
 
     final DeckModel mockDeck = Mockito.spy(DeckModel.class);
     Mockito.doNothing().when(mockDeck).restoreAndShuffle();
@@ -687,60 +686,62 @@ public class PokerTableUtilitiesTests {
    * @return Sample deck with specified hands.
    */
   public DeckModel getSampleDeck_2() {
-    final List<CardModel> cards = new ArrayList<>(asList(
-        card(Diamonds, Two),
-        card(Clubs, King),
-        card(Hearts, Three),
-        card(Hearts, Five),
-        card(Hearts, Six),
-        card(Hearts, Seven),
-        card(Hearts, Eight),
-        card(Hearts, Ten),
-        card(Clubs, Ace),
-        card(Clubs, Four),
-        card(Clubs, Five),
-        card(Clubs, Six),
-        card(Clubs, Seven),
-        card(Clubs, Eight),
-        card(Clubs, Nine),
-        card(Clubs, Ten),
-        card(Clubs, Queen),
-        card(Diamonds, Three),
-        card(Diamonds, Four),
-        card(Diamonds, Five),
-        card(Diamonds, Six),
-        card(Diamonds, Seven),
-        card(Diamonds, Eight),
-        card(Diamonds, Nine),
-        card(Diamonds, Ten),
-        card(Spades, Ace),  // River
-        card(Spades, Five),  // Burn
-        card(Spades, Jack),  // Turn
-        card(Spades, Four),  // Burn
-        card(Spades, Ten),  // Flop
-        card(Spades, Queen),  // Flop
-        card(Spades, King),  // Flop
-        card(Clubs, Three),  // Dealer 2nd Card
-        card(Hearts, Four), // Player 8 2nd Card
-        card(Hearts, Nine), // Player 7 2nd Card
-        card(Hearts, Jack), // Player 6 2nd Card
-        card(Clubs, Jack), // Player 5 2nd Card
-        card(Spades, Eight), // Player 4 2nd Card
-        card(Spades, Nine), // Player 3 2nd Card
-        card(Diamonds, Queen), // Player 2 2nd Card
-        card(Hearts, King), // Player 1 2nd Card
-        card(Spades, Seven), // Player 0 2nd Card
-        card(Clubs, Two),  // Dealer 1st Card
-        card(Hearts, Two), // Player 8 1st Card
-        card(Diamonds, Jack), // Player 7 1st Card
-        card(Hearts, Ace), // Player 6 1st Card
-        card(Diamonds, Ace), // Player 5 1st Card
-        card(Spades, Three), // Player 4 1st Card
-        card(Spades, Two), // Player 3 1st Card
-        card(Hearts, Queen), // Player 2 1st Card
-        card(Diamonds, King), // Player 1 1st Card
-        card(Spades, Two) // Player 0 1st Card
-    ));
+    final List<CardModel> cards =
+        new ArrayList<>(
+            asList(
+                card(Diamonds, Two),
+                card(Clubs, King),
+                card(Hearts, Three),
+                card(Hearts, Five),
+                card(Hearts, Six),
+                card(Hearts, Seven),
+                card(Hearts, Eight),
+                card(Hearts, Ten),
+                card(Clubs, Ace),
+                card(Clubs, Four),
+                card(Clubs, Five),
+                card(Clubs, Six),
+                card(Clubs, Seven),
+                card(Clubs, Eight),
+                card(Clubs, Nine),
+                card(Clubs, Ten),
+                card(Clubs, Queen),
+                card(Diamonds, Three),
+                card(Diamonds, Four),
+                card(Diamonds, Five),
+                card(Diamonds, Six),
+                card(Diamonds, Seven),
+                card(Diamonds, Eight),
+                card(Diamonds, Nine),
+                card(Diamonds, Ten),
+                card(Spades, Ace), // River
+                card(Spades, Five), // Burn
+                card(Spades, Jack), // Turn
+                card(Spades, Four), // Burn
+                card(Spades, Ten), // Flop
+                card(Spades, Queen), // Flop
+                card(Spades, King), // Flop
+                card(Clubs, Three), // Dealer 2nd Card
+                card(Hearts, Four), // Player 8 2nd Card
+                card(Hearts, Nine), // Player 7 2nd Card
+                card(Hearts, Jack), // Player 6 2nd Card
+                card(Clubs, Jack), // Player 5 2nd Card
+                card(Spades, Eight), // Player 4 2nd Card
+                card(Spades, Nine), // Player 3 2nd Card
+                card(Diamonds, Queen), // Player 2 2nd Card
+                card(Hearts, King), // Player 1 2nd Card
+                card(Spades, Seven), // Player 0 2nd Card
+                card(Clubs, Two), // Dealer 1st Card
+                card(Hearts, Two), // Player 8 1st Card
+                card(Diamonds, Jack), // Player 7 1st Card
+                card(Hearts, Ace), // Player 6 1st Card
+                card(Diamonds, Ace), // Player 5 1st Card
+                card(Spades, Three), // Player 4 1st Card
+                card(Spades, Two), // Player 3 1st Card
+                card(Hearts, Queen), // Player 2 1st Card
+                card(Diamonds, King), // Player 1 1st Card
+                card(Spades, Two) // Player 0 1st Card
+                ));
 
     final DeckModel mockDeck = Mockito.spy(DeckModel.class);
     Mockito.doNothing().when(mockDeck).restoreAndShuffle();
@@ -748,9 +749,7 @@ public class PokerTableUtilitiesTests {
     return mockDeck;
   }
 
-  /**
-   * Basic test where there are no side-pots.
-   */
+  /** Basic test where there are no side-pots. */
   @Test
   public void testPotGeneration_1() {
     final PokerTableModel table = getSamplePokerTable(10);
@@ -922,9 +921,7 @@ public class PokerTableUtilitiesTests {
     assertEquals(players.get(3).getId(), winners.get(2).getId());
   }
 
-  /**
-   * Case where all players tie (there is a royal flush on the board).
-   */
+  /** Case where all players tie (there is a royal flush on the board). */
   @Test
   public void testDetermineWinners_2() {
     // Setup.
@@ -937,10 +934,11 @@ public class PokerTableUtilitiesTests {
     // Set bets and bankrolls
 
     // Player 0 bet 500.
-    players.forEach(p -> {
-      p.setChips(new BigDecimal(500));
-      p.setBet(new BigDecimal(500));
-    });
+    players.forEach(
+        p -> {
+          p.setChips(new BigDecimal(500));
+          p.setBet(new BigDecimal(500));
+        });
 
     // Test.
     determineWinners(table);
@@ -1031,9 +1029,7 @@ public class PokerTableUtilitiesTests {
     assertEquals(new BigDecimal(100), winners.get(9).getWinnings());
   }
 
-  /**
-   * Case where we have a mix of all-ins, tied hands and some players have folded.
-   */
+  /** Case where we have a mix of all-ins, tied hands and some players have folded. */
   @Test
   public void testDetermineWinners_4() {
     // Setup.
@@ -1044,16 +1040,18 @@ public class PokerTableUtilitiesTests {
     dealCards(table, deck, 2);
 
     // Set bets and bankrolls
-    final List<BigDecimal> bets = Stream.of(1, 1, 2, 2, 5, 5, 5, 5, 10, 10)
-        .map(i -> new BigDecimal(i * 100))
-        .collect(toList());
-    final List<BigDecimal> chips = Stream.of(0, 0, 0, 0, 500, 500, 500, 500, 500, 500)
-        .map(BigDecimal::new)
-        .collect(toList());
-    final List<Boolean> allIn = Stream
-        .of(true, true, true, true, false, false, false, false, false, false).collect(toList());
-    final List<Boolean> folded = Stream
-        .of(false, false, false, false, true, true, true, true, false, false).collect(toList());
+    final List<BigDecimal> bets =
+        Stream.of(1, 1, 2, 2, 5, 5, 5, 5, 10, 10)
+            .map(i -> new BigDecimal(i * 100))
+            .collect(toList());
+    final List<BigDecimal> chips =
+        Stream.of(0, 0, 0, 0, 500, 500, 500, 500, 500, 500).map(BigDecimal::new).collect(toList());
+    final List<Boolean> allIn =
+        Stream.of(true, true, true, true, false, false, false, false, false, false)
+            .collect(toList());
+    final List<Boolean> folded =
+        Stream.of(false, false, false, false, true, true, true, true, false, false)
+            .collect(toList());
     for (int i = 0; i < players.size(); i++) {
       players.get(i).setBet(bets.get(i));
       players.get(i).setChips(chips.get(i));
@@ -1084,8 +1082,7 @@ public class PokerTableUtilitiesTests {
    * <code>0 > 1 > 2 > 3 > 4 > 5 > 6 > 7 > 8 > 9</code>. This results in player 5 receiving much
    * less than player 6, even though their hands have the same rank.
    *
-   * <p>
-   * When players 5 and 6 tie, a relatively unintuitive situation in created where player 5 wins
+   * <p>When players 5 and 6 tie, a relatively unintuitive situation in created where player 5 wins
    * only 250 chips and player 6 wins 650 chips, despite the fact that they have the same hand and
    * player 6 only wagered 100 chips more than player 5. If player 6 had a worse hand, then player 5
    * would win 500 and player 6 would win 400 and if player 6 had the better hand, player 6 would
@@ -1104,9 +1101,8 @@ public class PokerTableUtilitiesTests {
     dealCards(table, deck, 2);
 
     // Set bets and bankrolls.
-    final List<BigDecimal> bets = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 9)
-        .map(i -> new BigDecimal(i * 100))
-        .collect(toList());
+    final List<BigDecimal> bets =
+        Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 9).map(i -> new BigDecimal(i * 100)).collect(toList());
     final List<BigDecimal> chips =
         Stream.of(0, 0, 0, 0, 0, 0, 0, 0, 0, 500).map(BigDecimal::new).collect(toList());
     final List<Boolean> allIn =
@@ -1124,13 +1120,12 @@ public class PokerTableUtilitiesTests {
     assertEquals(9, table.getWinners().size());
     assertEquals(
         Stream.of(1000, 900, 800, 700, 650, 600, 300, 250, 200)
-            .map(BigDecimal::new).collect(toList()),
+            .map(BigDecimal::new)
+            .collect(toList()),
         table.getWinners().stream().map(WinnerModel::getWinnings).collect(toList()));
   }
 
-  /**
-   * Case where all but one player have folded.
-   */
+  /** Case where all but one player have folded. */
   @Test
   public void testDetermineWinners_6() {
     // Setup.
@@ -1149,9 +1144,11 @@ public class PokerTableUtilitiesTests {
     determineWinners(table);
 
     // Verify.
-    players.forEach(p -> assertEquals(
-        players.indexOf(p) == 0 ? new BigDecimal(5500) : new BigDecimal(500),
-        p.getChips()));
+    players.forEach(
+        p ->
+            assertEquals(
+                players.indexOf(p) == 0 ? new BigDecimal(5500) : new BigDecimal(500),
+                p.getChips()));
     assertEquals(1, table.getWinners().size());
     assertEquals(players.get(0).getId(), table.getWinners().get(0).getId());
     assertEquals(new BigDecimal(5000), table.getWinners().get(0).getWinnings());
@@ -1160,9 +1157,7 @@ public class PokerTableUtilitiesTests {
         table.getWinners().get(0).getCards());
   }
 
-  /**
-   * Common case where we have many wagers but only one winner.
-   */
+  /** Common case where we have many wagers but only one winner. */
   @Test
   public void testDetermineWinners_7() {
     // Setup.
@@ -1180,17 +1175,17 @@ public class PokerTableUtilitiesTests {
     determineWinners(table);
 
     // Verify.
-    players.forEach(p -> assertEquals(
-        players.indexOf(p) == 0 ? new BigDecimal(5500) : new BigDecimal(500),
-        p.getChips()));
+    players.forEach(
+        p ->
+            assertEquals(
+                players.indexOf(p) == 0 ? new BigDecimal(5500) : new BigDecimal(500),
+                p.getChips()));
     assertEquals(1, table.getWinners().size());
     assertEquals(players.get(0).getId(), table.getWinners().get(0).getId());
     assertEquals(new BigDecimal(5000), table.getWinners().get(0).getWinnings());
   }
 
-  /**
-   * Basic test of card dealing where all players are active in the hand.
-   */
+  /** Basic test of card dealing where all players are active in the hand. */
   @Test
   public void testDealCards_1() {
     // Setup.
@@ -1292,9 +1287,7 @@ public class PokerTableUtilitiesTests {
     assertEquals(bb, table.getMinRaise());
   }
 
-  /**
-   * Test of card dealing where some players are not active in the hand.
-   */
+  /** Test of card dealing where some players are not active in the hand. */
   @Test
   public void testDealCards_2() {
     // Setup.
@@ -1366,9 +1359,7 @@ public class PokerTableUtilitiesTests {
     assertEquals(usedCards.get(14), table.getSharedCards().get(4));
   }
 
-  /**
-   * Basic test of general case where sb and bb both have enough chips to post their blinds.
-   */
+  /** Basic test of general case where sb and bb both have enough chips to post their blinds. */
   @Test
   public void testPerformBlindBets_1() {
     // Setup.
@@ -1479,9 +1470,7 @@ public class PokerTableUtilitiesTests {
     // TODO: Check that cards were dealt
   }
 
-  /**
-   * Ensuring the blinds are increased
-   */
+  /** Ensuring the blinds are increased */
   @Test
   public void testNewHandSetup_2() {
     final PokerTableModel table = getSamplePokerTable(10);
@@ -1537,26 +1526,26 @@ public class PokerTableUtilitiesTests {
     final GamePlayerModel p5 = table.getPlayers().get(5);
     final GamePlayerModel p6 = table.getPlayers().get(6);
 
-//    card(Clubs, Four),  // Dealer 2nd Card
-//    card(Clubs, Five), // Player 8 2nd Card
-//    card(Hearts, Nine), // Player 7 2nd Card
-//    card(Hearts, Jack), // Player 6 2nd Card
-//    card(Clubs, Jack), // Player 5 2nd Card
-//    card(Spades, Eight), // Player 4 2nd Card
-//    card(Spades, Nine), // Player 3 2nd Card
-//    card(Diamonds, Queen), // Player 2 2nd Card
-//    card(Hearts, King), // Player 1 2nd Card
-//    card(Spades, Jack), // Player 0 2nd Card = 41
-//    card(Clubs, Three),  // Dealer 1st Card = 42
-//    card(Diamonds, Three), // Player 8 1st Card = 43
-//    card(Diamonds, Jack), // Player 7 1st Card = 44
-//    card(Hearts, Ace), // Player 6 1st Card = 45
-//    card(Diamonds, Ace), // Player 5 1st Card = 46
-//    card(Spades, Three), // Player 4 1st Card = 47
-//    card(Spades, Two), // Player 3 1st Card = 48
-//    card(Hearts, Queen), // Player 2 1st Card = 49
-//    card(Diamonds, King), // Player 1 1st Card = 50
-//    card(Spades, Ace) // Player 0 1st Card = 51
+    //    card(Clubs, Four),  // Dealer 2nd Card
+    //    card(Clubs, Five), // Player 8 2nd Card
+    //    card(Hearts, Nine), // Player 7 2nd Card
+    //    card(Hearts, Jack), // Player 6 2nd Card
+    //    card(Clubs, Jack), // Player 5 2nd Card
+    //    card(Spades, Eight), // Player 4 2nd Card
+    //    card(Spades, Nine), // Player 3 2nd Card
+    //    card(Diamonds, Queen), // Player 2 2nd Card
+    //    card(Hearts, King), // Player 1 2nd Card
+    //    card(Spades, Jack), // Player 0 2nd Card = 41
+    //    card(Clubs, Three),  // Dealer 1st Card = 42
+    //    card(Diamonds, Three), // Player 8 1st Card = 43
+    //    card(Diamonds, Jack), // Player 7 1st Card = 44
+    //    card(Hearts, Ace), // Player 6 1st Card = 45
+    //    card(Diamonds, Ace), // Player 5 1st Card = 46
+    //    card(Spades, Three), // Player 4 1st Card = 47
+    //    card(Spades, Two), // Player 3 1st Card = 48
+    //    card(Hearts, Queen), // Player 2 1st Card = 49
+    //    card(Diamonds, King), // Player 1 1st Card = 50
+    //    card(Spades, Ace) // Player 0 1st Card = 51
 
     deck.getCards().set(46, card(Spades, Ace));
     deck.getCards().set(36, card(Spades, Jack));
@@ -1608,35 +1597,30 @@ public class PokerTableUtilitiesTests {
     assertEquals(1, winners.stream().filter(w -> w.getId().equals(p8.getId())).count());
     assertEquals(1, winners.stream().filter(w -> w.getId().equals(p9.getId())).count());
 
-    assertEquals(bd(1184), Objects.requireNonNull(winners
-        .stream()
-        .filter(w -> w.getId().equals(p3.getId()))
-        .findFirst()
-        .orElse(null))
-        .getWinnings());
-    assertEquals(bd(1184), Objects.requireNonNull(winners
-        .stream()
-        .filter(w -> w.getId().equals(p5.getId()))
-        .findFirst()
-        .orElse(null))
-        .getWinnings());
-    assertEquals(bd(1184), Objects.requireNonNull(winners
-        .stream()
-        .filter(w -> w.getId().equals(p6.getId()))
-        .findFirst()
-        .orElse(null))
-        .getWinnings());
-    assertEquals(bd(584), Objects.requireNonNull(winners
-        .stream()
-        .filter(w -> w.getId().equals(p8.getId()))
-        .findFirst()
-        .orElse(null))
-        .getWinnings());
-    assertEquals(bd(584), Objects.requireNonNull(winners
-        .stream()
-        .filter(w -> w.getId().equals(p9.getId()))
-        .findFirst()
-        .orElse(null))
-        .getWinnings());
+    assertEquals(
+        bd(1184),
+        Objects.requireNonNull(
+                winners.stream().filter(w -> w.getId().equals(p3.getId())).findFirst().orElse(null))
+            .getWinnings());
+    assertEquals(
+        bd(1184),
+        Objects.requireNonNull(
+                winners.stream().filter(w -> w.getId().equals(p5.getId())).findFirst().orElse(null))
+            .getWinnings());
+    assertEquals(
+        bd(1184),
+        Objects.requireNonNull(
+                winners.stream().filter(w -> w.getId().equals(p6.getId())).findFirst().orElse(null))
+            .getWinnings());
+    assertEquals(
+        bd(584),
+        Objects.requireNonNull(
+                winners.stream().filter(w -> w.getId().equals(p8.getId())).findFirst().orElse(null))
+            .getWinnings());
+    assertEquals(
+        bd(584),
+        Objects.requireNonNull(
+                winners.stream().filter(w -> w.getId().equals(p9.getId())).findFirst().orElse(null))
+            .getWinnings());
   }
 }

@@ -34,14 +34,11 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Static utility class for performing operations on a PokerTableModel object.
- */
+/** Static utility class for performing operations on a PokerTableModel object. */
 @Slf4j
 public final class PokerTableUtilities {
 
-  private PokerTableUtilities() {
-  }
+  private PokerTableUtilities() {}
 
   /**
    * Creates a clone of the argument poker table which has new player objects with face down cards.
@@ -50,8 +47,8 @@ public final class PokerTableUtilities {
    *
    * @param table Poker table.
    * @return A clone of the table with all cards hidden (face down, i.e. client has no way of
-   * knowing what these cards are because the values will not be sent to any clients if the table is
-   * first processed by this method).
+   *     knowing what these cards are because the values will not be sent to any clients if the
+   *     table is first processed by this method).
    */
   public static PokerTableModel hideCards(final PokerTableModel table) {
     // Clone table, creating deep copy of player list and cards.
@@ -168,10 +165,10 @@ public final class PokerTableUtilities {
    *       first active player before the player that raised.
    * </ol>
    *
-   * @param table    Poker table.
-   * @param action   Action that was performed.
+   * @param table Poker table.
+   * @param action Action that was performed.
    * @param playerId ID of the player that performed the action.
-   * @param raise    The amount raised if action was Raise, null otherwise.
+   * @param raise The amount raised if action was Raise, null otherwise.
    */
   public static void handlePlayerAction(
       final PokerTableModel table,
@@ -260,12 +257,12 @@ public final class PokerTableUtilities {
         // Update toCall field for other players.
         players.forEach(
             p -> {
-//              final BigDecimal pToCall = p.getControls().getToCall();
-//              final BigDecimal pBankRoll = p.getControls().getBankRoll();
-//              p.setToCall(is(sum(raise, pToCall)).gt(pBankRoll) ? pBankRoll : sum(raise, pToCall));
+              //              final BigDecimal pToCall = p.getControls().getToCall();
+              //              final BigDecimal pBankRoll = p.getControls().getBankRoll();
+              //              p.setToCall(is(sum(raise, pToCall)).gt(pBankRoll) ? pBankRoll :
+              // sum(raise, pToCall));
               final BigDecimal pToCall = wager.subtract(p.getBet());
               p.setToCall(is(pToCall).gte(p.getChips()) ? p.getChips() : pToCall);
-
             });
         break;
     }
@@ -311,7 +308,7 @@ public final class PokerTableUtilities {
    * </ol>
    *
    * @param table Poker table.
-   * @param deck  Deck being used on this poker table.
+   * @param deck Deck being used on this poker table.
    */
   public static void setupNewHand(final PokerTableModel table, final DeckModel deck) {
     // Validate Pre-Conditions #1, #2 and #3.
@@ -377,7 +374,7 @@ public final class PokerTableUtilities {
    * </ol>
    *
    * @param table Poker table.
-   * @param deck  Deck.
+   * @param deck Deck.
    */
   public static void dealCards(
       final PokerTableModel table, final DeckModel deck, final int numCards) {
@@ -392,22 +389,26 @@ public final class PokerTableUtilities {
     deck.restoreAndShuffle();
     final int dealer = table.getDealer();
 
-    IntStream.range(0, numCards).forEach(i -> {
-      for (int j = (dealer + 1) % players.size(); j != dealer; j = (j + 1) % players.size()) {
-        if (!players.get(j).isFolded() && !players.get(j).isOut()) {
-          players.get(j).getCards().add(deck.draw());
-        }
-      }
-      players.get(dealer).getCards().add(deck.draw());
-    });
+    IntStream.range(0, numCards)
+        .forEach(
+            i -> {
+              for (int j = (dealer + 1) % players.size();
+                  j != dealer;
+                  j = (j + 1) % players.size()) {
+                if (!players.get(j).isFolded() && !players.get(j).isOut()) {
+                  players.get(j).getCards().add(deck.draw());
+                }
+              }
+              players.get(dealer).getCards().add(deck.draw());
+            });
 
     // TODO: Temporarily dealing the shared cards.
     table.getSharedCards().add(deck.draw());
     table.getSharedCards().add(deck.draw());
     table.getSharedCards().add(deck.draw());
-    deck.draw();  // Burn card.
+    deck.draw(); // Burn card.
     table.getSharedCards().add(deck.draw());
-    deck.draw();  // Burn card.
+    deck.draw(); // Burn card.
     table.getSharedCards().add(deck.draw());
   }
 
@@ -476,8 +477,11 @@ public final class PokerTableUtilities {
 
     // Update toCall field for all players.
     players.forEach(
-        p -> p.setToCall(is(maxBet.subtract(p.getBet())).gte(p.getChips()) ? p.getChips()
-            : maxBet.subtract(p.getBet())));
+        p ->
+            p.setToCall(
+                is(maxBet.subtract(p.getBet())).gte(p.getChips())
+                    ? p.getChips()
+                    : maxBet.subtract(p.getBet())));
 
     // Update lastToAct, actingPlaying and playerThatActed.
     table.setLastToAct(bbIndex);
@@ -501,11 +505,8 @@ public final class PokerTableUtilities {
             .distinct()
             .collect(toList());
 
-    final List<BigDecimal> bets = players
-        .stream()
-        .map(GamePlayerModel::getBet)
-        .sorted()
-        .collect(toList());
+    final List<BigDecimal> bets =
+        players.stream().map(GamePlayerModel::getBet).sorted().collect(toList());
 
     if (allInBets.isEmpty()
         || !bets.get(bets.size() - 1).equals(allInBets.get(allInBets.size() - 1))) {
@@ -583,10 +584,10 @@ public final class PokerTableUtilities {
    *   <li>Returns the previous/next active player in the rotation.
    * </ol>
    *
-   * @param table      Poker table.
+   * @param table Poker table.
    * @param startIndex Index in players list.
-   * @param forward    Should be <code>true</code> if searching forward, <code>false</code> if
-   *                   searching backward.
+   * @param forward Should be <code>true</code> if searching forward, <code>false</code> if
+   *     searching backward.
    * @return The active player next in the rotation after the player at index startIndex.
    */
   public static int getNextActivePlayer(
@@ -611,10 +612,10 @@ public final class PokerTableUtilities {
   /**
    * Returns the ith next active player.
    *
-   * @param table      Poker table.
+   * @param table Poker table.
    * @param startIndex Start index.
-   * @param i          i.
-   * @param forward    Forward or backward.
+   * @param i i.
+   * @param forward Forward or backward.
    * @return ith next active player.
    */
   public static int getIthNextActivePlayer(
@@ -673,8 +674,8 @@ public final class PokerTableUtilities {
    *
    * <ol>
    *   <b>Pre-Conditions:</b>
-   *   <li>There must be at least 1 person who hasn't folded or been eliminated.</li>
-   *   <li>The total in all side pots must be greater than 0.</li>
+   *   <li>There must be at least 1 person who hasn't folded or been eliminated.
+   *   <li>The total in all side pots must be greater than 0.
    * </ol>
    *
    * @param table Poker table.
@@ -683,11 +684,8 @@ public final class PokerTableUtilities {
     generateSidePots(table);
 
     // Get the list of players who have not been eliminated and who have not folded.
-    final List<GamePlayerModel> candidates = table
-        .getPlayers()
-        .stream()
-        .filter(p -> !p.isOut() && !p.isFolded())
-        .collect(toList());
+    final List<GamePlayerModel> candidates =
+        table.getPlayers().stream().filter(p -> !p.isOut() && !p.isFolded()).collect(toList());
 
     final List<PotModel> pots = table.getPots();
 
@@ -698,32 +696,40 @@ public final class PokerTableUtilities {
     // Check how many players are in the hand (i.e. check if all but one folded).
     if (candidates.size() == 1) {
       candidates.get(0).addChips(getPotTotal(pots));
-      table.setWinners(singletonList(new WinnerModel(
-          candidates.get(0).getId(),
-          getPotTotal(pots),
-          asList(FACE_DOWN_CARD, FACE_DOWN_CARD, FACE_DOWN_CARD, FACE_DOWN_CARD, FACE_DOWN_CARD)
-      )));
+      table.setWinners(
+          singletonList(
+              new WinnerModel(
+                  candidates.get(0).getId(),
+                  getPotTotal(pots),
+                  asList(
+                      FACE_DOWN_CARD,
+                      FACE_DOWN_CARD,
+                      FACE_DOWN_CARD,
+                      FACE_DOWN_CARD,
+                      FACE_DOWN_CARD))));
       return;
     }
 
     // More than 1 player means we need to give out winnings based on hand strength.
-    final List<HandRankModel> handRanks = candidates
-        .stream()
-        .map(p -> {
-          final List<CardModel> cards = new ArrayList<>(p.getCards());
-          cards.addAll(table.getSharedCards()); // TODO: Don't add to this, make new List
-          final HandRankModel handRank = rankHand(cards);
-          handRank.setId(p.getId());
-          return handRank;
-        })
-        .collect(toList());
+    final List<HandRankModel> handRanks =
+        candidates.stream()
+            .map(
+                p -> {
+                  final List<CardModel> cards = new ArrayList<>(p.getCards());
+                  cards.addAll(table.getSharedCards()); // TODO: Don't add to this, make new List
+                  final HandRankModel handRank = rankHand(cards);
+                  handRank.setId(p.getId());
+                  return handRank;
+                })
+            .collect(toList());
 
     final Map<Integer, List<HandRankModel>> rankMap = splitHandsByRank(handRanks);
-    final Map<UUID, WinnerModel> winners = new HashMap<UUID, WinnerModel>() {
-      {
-        handRanks.forEach(r -> put(r.getId(), new WinnerModel(r.getId(), ZERO, r.getHand())));
-      }
-    };
+    final Map<UUID, WinnerModel> winners =
+        new HashMap<UUID, WinnerModel>() {
+          {
+            handRanks.forEach(r -> put(r.getId(), new WinnerModel(r.getId(), ZERO, r.getHand())));
+          }
+        };
 
     // Iterate over ranks, from highest to lowest.
     for (final int rank : rankMap.keySet().stream().sorted((a, b) -> b - a).collect(toList())) {
@@ -732,43 +738,42 @@ public final class PokerTableUtilities {
         break;
       }
       /*
-            Determine how many people are entitled to each side-pot.
-            Give (pot total)/(count) to each person who is entitled to a share of the side-pot.
-       */
-      final List<GamePlayerModel> players = rankMap.get(rank)
-          .stream()
-          .map(p -> table.getPlayer(p.getId()))
-          .collect(toList());
+           Determine how many people are entitled to each side-pot.
+           Give (pot total)/(count) to each person who is entitled to a share of the side-pot.
+      */
+      final List<GamePlayerModel> players =
+          rankMap.get(rank).stream().map(p -> table.getPlayer(p.getId())).collect(toList());
 
       // Iterate over all side-pots.
       for (final PotModel pot : pots) {
         // Determine which players are entitled to this particular side-pot.
-        final List<GamePlayerModel> playersEntitledToPot = players
-            .stream()
-            .filter(p -> is(p.getBet()).gte(pot.getWager()))  // Players bet has to be >= pots wager
-            .collect(toList());
+        final List<GamePlayerModel> playersEntitledToPot =
+            players.stream()
+                .filter(
+                    p -> is(p.getBet()).gte(pot.getWager())) // Players bet has to be >= pots wager
+                .collect(toList());
         final int count = playersEntitledToPot.size();
         if (count == 0) {
           continue;
         }
         // TODO: Figure out exactly how rounding works here
-        final BigDecimal winnings = pot.getTotal()
-            .divide(new BigDecimal(count), RoundingMode.FLOOR);
-        playersEntitledToPot.forEach(p -> {
-          p.addChips(winnings);
-          winners.get(p.getId()).increaseWinnings(winnings);
-        });
+        final BigDecimal winnings =
+            pot.getTotal().divide(new BigDecimal(count), RoundingMode.FLOOR);
+        playersEntitledToPot.forEach(
+            p -> {
+              p.addChips(winnings);
+              winners.get(p.getId()).increaseWinnings(winnings);
+            });
         // If at least 1 player was entitled to this side-pot, the new total should be 0.
         pot.setTotal(ZERO);
       }
     }
 
-    table.setWinners(winners
-        .values()
-        .stream()
-        .filter(w -> is(w.getWinnings()).gt(ZERO))
-        .sorted((a, b) -> b.getWinnings().compareTo(a.getWinnings()))
-        .collect(toList()));
+    table.setWinners(
+        winners.values().stream()
+            .filter(w -> is(w.getWinnings()).gt(ZERO))
+            .sorted((a, b) -> b.getWinnings().compareTo(a.getWinnings()))
+            .collect(toList()));
   }
 
   /**
@@ -790,7 +795,7 @@ public final class PokerTableUtilities {
    *       winning card.
    * </ol>
    *
-   * @param table       Poker table.
+   * @param table Poker table.
    * @param broadcaster Runnable that will broadcast the table to the client.
    */
   public static void handleEndOfHand(final PokerTableModel table, final Runnable broadcaster) {
@@ -798,16 +803,18 @@ public final class PokerTableUtilities {
     table.setBetting(false);
     determineWinners(table);
     table.setDisplayHandSummary(true);
-    broadcaster.run();  // Broadcast hand.
+    broadcaster.run(); // Broadcast hand.
 
     // Not clearing cards until next hand begins.
-    table.getPlayers().forEach(
-        p -> {
-          p.setFolded(false); // Should always be reset false.
-          p.setAllIn(false); // Should always be reset to false.
-          p.setOut(is(p.getChips()).eq(ZERO)); // True when 0 chips left.
-          p.setControls(new TableControlsModel(p.getChips())); // Keep bankRoll.
-        });
+    table
+        .getPlayers()
+        .forEach(
+            p -> {
+              p.setFolded(false); // Should always be reset false.
+              p.setAllIn(false); // Should always be reset to false.
+              p.setOut(is(p.getChips()).eq(ZERO)); // True when 0 chips left.
+              p.setControls(new TableControlsModel(p.getChips())); // Keep bankRoll.
+            });
   }
 
   /**

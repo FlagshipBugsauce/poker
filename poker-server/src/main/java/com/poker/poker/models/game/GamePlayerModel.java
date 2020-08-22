@@ -20,39 +20,27 @@ import lombok.Setter;
 @Schema(description = "Model representing a player in a game.")
 public class GamePlayerModel extends PlayerModel {
 
-  /**
-   * Specifies whether a player is active.
-   */
+  /** Specifies whether a player is active. */
   @Schema(description = "Specifies whether a player is active.", example = "true")
   protected boolean away = false;
 
-  /**
-   * Specifies whether a player is out of the game.
-   */
+  /** Specifies whether a player is out of the game. */
   @Schema(description = "Specifies whether a player is out of the game.", example = "false")
   protected boolean out = false;
 
-  /**
-   * Cards.
-   */
+  /** Cards. */
   @Schema(description = "Cards")
   protected List<CardModel> cards = new ArrayList<>();
 
-  /**
-   * Player controls.
-   */
+  /** Player controls. */
   @Schema(implementation = TableControlsModel.class)
   protected TableControlsModel controls = new TableControlsModel();
 
-  /**
-   * Player is no longer in the hand when this is true.
-   */
+  /** Player is no longer in the hand when this is true. */
   @Schema(description = "Player is no longer in the hand when this is true.", example = "false")
   protected boolean folded = false;
 
-  /**
-   * Player bet entire bankroll.
-   */
+  /** Player bet entire bankroll. */
   @Schema(description = "Player bet entire bankroll.", example = "false")
   protected boolean allIn = false;
 
@@ -84,8 +72,8 @@ public class GamePlayerModel extends PlayerModel {
   }
 
   /**
-   * Getter for player's current bank roll which bypasses the need to get this through the
-   * <code>controls</code> field.
+   * Getter for player's current bank roll which bypasses the need to get this through the <code>
+   * controls</code> field.
    *
    * @return Players current number of chips (bank roll).
    */
@@ -94,8 +82,8 @@ public class GamePlayerModel extends PlayerModel {
   }
 
   /**
-   * Setter for player's current bank roll which bypasses the need to set this through the
-   * <code>controls</code> field.
+   * Setter for player's current bank roll which bypasses the need to set this through the <code>
+   * controls</code> field.
    *
    * @param value The value that the player's bank roll should be set to.
    */
@@ -124,8 +112,8 @@ public class GamePlayerModel extends PlayerModel {
   }
 
   /**
-   * Getter for player's current wager which bypasses the need to get this through the
-   * <code>controls</code> field.
+   * Getter for player's current wager which bypasses the need to get this through the <code>
+   * controls</code> field.
    *
    * @return Current wager in a hand.
    */
@@ -134,8 +122,8 @@ public class GamePlayerModel extends PlayerModel {
   }
 
   /**
-   * Setter for player's current wager which bypasses the need to set this through the
-   * <code>controls</code> field.
+   * Setter for player's current wager which bypasses the need to set this through the <code>
+   * controls</code> field.
    *
    * @param value The value that the player's current wager should be set to.
    */
@@ -144,8 +132,8 @@ public class GamePlayerModel extends PlayerModel {
   }
 
   /**
-   * Getter for player's to call amount which bypasses the need to get this through the
-   * <code>controls</code> field.
+   * Getter for player's to call amount which bypasses the need to get this through the <code>
+   * controls</code> field.
    *
    * @return Amount required to call in a hand.
    */
@@ -154,8 +142,8 @@ public class GamePlayerModel extends PlayerModel {
   }
 
   /**
-   * Setter for player's to call amount which bypasses the need to set this through the
-   * <code>controls</code> field.
+   * Setter for player's to call amount which bypasses the need to set this through the <code>
+   * controls</code> field.
    *
    * @param value The value that the player's to call amount should be set to.
    */
