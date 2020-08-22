@@ -5,6 +5,7 @@ import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {provideMockStore} from '@ngrx/store/testing';
 import {ChatService} from '../../shared/web-socket/chat.service';
 import {MockChatService} from '../../testing/mock-services';
+import {GameModule} from '../../game/game.module';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
@@ -13,7 +14,7 @@ describe('HomeComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [HomeComponent],
-      imports: [SharedModule, HttpClientTestingModule],
+      imports: [SharedModule, HttpClientTestingModule, GameModule],
       providers: [
         provideMockStore(),
         {

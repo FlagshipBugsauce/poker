@@ -3,12 +3,12 @@
     {{initials}}
   </div>
   <div class="card-box">
-    <div *ngIf="cards[0] && !hideCards" class="card-container left">
-      <pkr-card #card1 [card]="cards[0]" size="md"></pkr-card>
+    <div *ngIf="cards[0] && !hiddenCards[0]" class="card-container left">
+      <pkr-card [card]="cards[0]" size="md"></pkr-card>
     </div>
-    <!--    <div class="card-container right">-->
-    <!--      <pkr-card size="md" [card]="cards[1]" [faceDown]="!dealer"></pkr-card>-->
-    <!--    </div>-->
+    <div *ngIf="cards[1] && !hiddenCards[1]" class="card-container right">
+      <pkr-card [card]="cards[1]" size="md"></pkr-card>
+    </div>
   </div>
   <div class="name-box">
     <div class="name">

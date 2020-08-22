@@ -28,27 +28,69 @@ import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
   styleUrls: ['./poker-table.component.scss']
 })
 export class PokerTableComponent implements OnInit, OnDestroy {
-  // If this is true, we'll seed the table with sample data.
+  // If this is true, we'll seed the table with sample data - TODO: May not be needed.
   @Input() design: boolean = false;
 
-  numPlayers: number = 0;
+  /**
+   * Number of players. TODO: May not be needed.
+   */
+  public numPlayers: number = 0;
+
+  /**
+   * Reference to the AFK popup, used to display/hide the modal.
+   */
   @ViewChild('afkPopup') afkPopup: PopupAfkComponent;
   public width: number = 1;
+
+  /**
+   * Collection of objects used to position the player box components.
+   */
   public playerBoxes: { number: number; top: number; left: number }[];
+
+  /**
+   * Model of the game. TODO: May not be needed here anymore.
+   */
   public game: GameModel;
+
   /**
    * Used to ensure we're not maintaining multiple subscriptions.
    */
   public ngDestroyed$ = new Subject<any>();
+
+  /**
+   * Players in the game.
+   */
   public players: GamePlayerModel[] = [];
+
+  /**
+   * Index of the player that is acting. TODO: I don't think this is needed here anymore.
+   */
   public actingIndex: number;
+
+  /**
+   * Flag used to determine when a hand summary should be displayed. TODO: May not be needed here.
+   */
   public displaySummary: boolean = false;
+
+  /**
+   * Object used to position the logo in the center of the poker table.
+   */
   public logoPosition: { top: number; left: number; logoWidth: number; } = {
     logoWidth: 0,
     top: 0,
     left: 0
   };
+
+  /**
+   * Object used to position the deck component.
+   */
   public deckPosition: { top: number; left: number; width: number } = {top: 0, left: 0, width: 200};
+
+  /**
+   * Object used to position the community cards component.
+   */
+  public communityCardsPosition: { top: number; left: number; width: number } =
+    {top: 0, left: 0, width: 200};
   public numPlayersSet: boolean = false;
   public timerValue: number[] = [0];
   public timerIndex: number = 0;
@@ -64,22 +106,38 @@ export class PokerTableComponent implements OnInit, OnDestroy {
     private timerStore: Store<MiscEventsStateContainer>) {
   }
 
+  /**
+   * Height of the component, calculated dynamically based on window size.
+   */
   public get height(): number {
     return this.width / this.sizeRatio;
   }
 
+  /**
+   * Width of the poker table, calculated dynamically based on window size.
+   */
   public get tableWidth(): number {
     return this.width * 0.8;
   }
 
+  /**
+   * Height of the poker table, calculated dynamically based on window size.
+   */
   public get tableHeight(): number {
     return this.tableWidth * 0.5;
   }
 
+  /**
+   * Border radius of the table, calculated dynamically based on window size.
+   */
   public get tableBorderRadius(): number {
     return this.tableHeight * 0.5;
   }
 
+  /**
+   * Left position of the table, calculated dynamically based on window size such that the table
+   * is properly centered.
+   */
   public get leftTableOffset(): number {
     return this.width * 0.1;
   }
@@ -94,11 +152,6 @@ export class PokerTableComponent implements OnInit, OnDestroy {
       this.players &&
       this.players.length > 0 &&
       this.players[0].id != null;
-  }
-
-  public get acting(): boolean {
-    return this.safeToCheck ?
-      this.players[this.actingIndex].id === this.user.id && !this.displaySummary : false;
   }
 
   public get playersIndex(): number {
@@ -226,6 +279,9 @@ export class PokerTableComponent implements OnInit, OnDestroy {
     this.deckPosition.width = 80;  // TODO: Revisit this.
     this.deckPosition.top = this.tableHeight / 2.55 - this.deckPosition.width / 2;
     this.deckPosition.left = this.tableWidth * 0.26;
+    this.communityCardsPosition.width = this.deckPosition.width;
+    this.communityCardsPosition.top = this.deckPosition.top;
+    this.communityCardsPosition.left = this.deckPosition.left + this.deckPosition.width + 20;
   }
 
   /**

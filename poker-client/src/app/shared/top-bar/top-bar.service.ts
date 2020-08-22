@@ -110,6 +110,13 @@ export class TopBarService {
     };
   }
 
+  public get aboutMenuItems(): DropDownMenuItem {
+    return {
+      text: APP_ROUTES.ABOUT.label,
+      anchor: APP_ROUTES.ABOUT.path
+    };
+  }
+
   /**
    * Helper to update menu items whenever a state change is detected.
    */
@@ -122,5 +129,6 @@ export class TopBarService {
     } else {
       this.topBarMenuItems.push(this.unauthenticatedAccountMenuItems);
     }
+    this.topBarMenuItems.push(this.aboutMenuItems);
   }
 }

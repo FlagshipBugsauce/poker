@@ -1,6 +1,7 @@
 import {PokerTableModel} from '../../api/models/poker-table-model';
+import {GamePlayerModel} from '../../api/models/game-player-model';
 
-export const table: PokerTableModel = {
+export const table1: PokerTableModel = {
   players: [
     {
       id: '181acdbf-bb98-4ae1-895c-187d79f793b6',
@@ -132,3 +133,213 @@ export const table: PokerTableModel = {
   minRaise: 420,
   pot: 420
 };
+
+export const table2: PokerTableModel = {
+  players: [
+    {
+      id: '24800f75-0353-4c83-b13c-af388bd9a9ac',
+      firstName: 'Jackson',
+      lastName: 'McGee',
+      away: false,
+      out: false,
+      cards: [
+        {
+          suit: 'Back',
+          value: 'Back'
+        },
+        {
+          suit: 'Back',
+          value: 'Back'
+        }
+      ],
+      controls: {
+        bankRoll: 67,
+        currentBet: 2,
+        toCall: 0
+      },
+      folded: false,
+      allIn: false,
+      chips: 67,
+      bet: 2,
+      toCall: 0
+    },
+    {
+      id: '3eb401ed-f9c4-4dfe-9920-3dffdc52d9ba',
+      firstName: 'Testy',
+      lastName: 'McGoo',
+      away: true,
+      out: false,
+      cards: [
+        {
+          suit: 'Back',
+          value: 'Back'
+        },
+        {
+          suit: 'Back',
+          value: 'Back'
+        }
+      ],
+      controls: {
+        bankRoll: 69,
+        currentBet: 0,
+        toCall: 2
+      },
+      folded: true,
+      allIn: false,
+      chips: 69,
+      bet: 0,
+      toCall: 2
+    },
+    {
+      id: 'f9ee2f0a-fc87-4a57-b436-aeff792a5dd6',
+      firstName: 'Testy',
+      lastName: 'McGee',
+      away: true,
+      out: false,
+      cards: [
+        {
+          suit: 'Back',
+          value: 'Back'
+        },
+        {
+          suit: 'Back',
+          value: 'Back'
+        }
+      ],
+      controls: {
+        bankRoll: 68,
+        currentBet: 0,
+        toCall: 2
+      },
+      folded: true,
+      allIn: false,
+      chips: 68,
+      bet: 0,
+      toCall: 2
+    },
+    {
+      id: '00000000-0000-0000-0000-000000000000',
+      firstName: 'admin',
+      lastName: 'admin',
+      away: false,
+      out: false,
+      cards: [
+        {
+          suit: 'Back',
+          value: 'Back'
+        },
+        {
+          suit: 'Back',
+          value: 'Back'
+        }
+      ],
+      controls: {
+        bankRoll: 69,
+        currentBet: 1,
+        toCall: 1
+      },
+      folded: false,
+      allIn: false,
+      chips: 69,
+      bet: 1,
+      toCall: 1
+    }
+  ],
+  actingPlayer: 3,
+  playerThatActed: 2,
+  dealer: 2,
+  displayHandSummary: false,
+  summary: null,
+  winners: [
+    {
+      id: '00000000-0000-0000-0000-000000000000',
+      winnings: 3,
+      cards: [
+        {
+          suit: 'Back',
+          value: 'Back'
+        },
+        {
+          suit: 'Back',
+          value: 'Back'
+        },
+        {
+          suit: 'Back',
+          value: 'Back'
+        },
+        {
+          suit: 'Back',
+          value: 'Back'
+        },
+        {
+          suit: 'Back',
+          value: 'Back'
+        }
+      ]
+    }
+  ],
+  eventTracker: 5,
+  minRaise: 2,
+  pot: 3,
+  pots: [
+    {
+      wager: 2,
+      total: 3
+    }
+  ],
+  blind: 1,
+  round: 2,
+  lastToAct: 0,
+  betting: true,
+  sharedCards: [
+    {
+      suit: 'Hearts',
+      value: 'Six'
+    },
+    {
+      suit: 'Hearts',
+      value: 'King'
+    },
+    {
+      suit: 'Diamonds',
+      value: 'Nine'
+    },
+    {
+      suit: 'Spades',
+      value: 'Six'
+    },
+    {
+      suit: 'Clubs',
+      value: 'Five'
+    }
+  ]
+};
+
+export const samplePlayer: GamePlayerModel = {
+  id: '24800f75-0353-4c83-b13c-af388bd9a9ac',
+  firstName: 'Jackson',
+  lastName: 'McGee',
+  away: false,
+  out: false,
+  cards: [
+    {
+      suit: 'Spades',
+      value: 'Ace'
+    },
+    {
+      suit: 'Hearts',
+      value: 'Ace'
+    }
+  ],
+  controls: {
+    bankRoll: 67,
+    currentBet: 2,
+    toCall: 0
+  },
+  folded: false,
+  allIn: false,
+  chips: 67,
+  bet: 2,
+  toCall: 0
+};
+

@@ -28,6 +28,10 @@ export class HandSummaryComponent implements OnInit, OnDestroy {
    */
   public ngDestroyed$ = new Subject<any>();
 
+  public get safe(): boolean {
+    return this.players != null;
+  }
+
   constructor(
     private pokerTableStore: Store<PokerTableStateContainer>,
     public cardService: CardService
@@ -63,4 +67,15 @@ export class HandSummaryComponent implements OnInit, OnDestroy {
     this.ngDestroyed$.complete();
   }
 
+  public getPlayer(id: string): GamePlayerModel {
+    return this.safe ? this.players.find(p => p.id === id) : null;
+  }
+
+  public getName(player: GamePlayerModel): string {
+    return `${player.firstName} ${player.lastName}`;
+  }
+
+  public getWinnerMessage(winner: WinnerModel): string {
+    return `${this.getName(this.getPlayer(winner.id))} won $${winner.winnings}`;
+  }
 }

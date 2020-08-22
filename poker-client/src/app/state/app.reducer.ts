@@ -10,7 +10,6 @@ import {
   gamePlayerUpdated,
   gameToastReceived,
   generalChatMsgReceived,
-  handCompleted,
   hideCards,
   hideFailedSignInWarning,
   joinLobby,
@@ -125,11 +124,6 @@ const gameModelReducerInternal = createReducer<GameModel>(
   on(gameModelUpdated, (state: GameModel, newState: GameModel) => newState),
   on(gamePhaseChanged, (state: GameModel, phase: { phase: GamePhase }) =>
     ({...state, phase: phase.phase})),
-  on(handCompleted, (state: GameModel, id: { id: string }) => {
-    const hands: string[] = state.hands.map(h => h);
-    hands.push(id.id);
-    return ({...state, hands});
-  }),
   on(playerAwayToggled, (state: GameModel, player: GamePlayerModel) => {
     const players: GamePlayerModel[] = state
     .players.map(p => p.id === player.id ? player : ({...p}));
@@ -279,7 +273,7 @@ export const timerInitialState: MiscEventsState = {
   timer: {id: '0', duration: -1},
   deal: {id: '0', numCards: -1},
   hide: {id: '0'},
-  hiddenCards: Array(10).fill(true)
+  hiddenCards: Array(10).fill(Array(2).fill(true))
 };
 
 const miscEventsReducerInternal = createReducer<MiscEventsState>(
@@ -287,9 +281,13 @@ const miscEventsReducerInternal = createReducer<MiscEventsState>(
   on(startTimer, (state: MiscEventsState, timer: TimerModel) => ({...state, timer})),
   on(dealCards, (state: MiscEventsState, deal: DealModel) => ({...state, deal})),
   on(hideCards, (state: MiscEventsState, hide: HideCardsModel) =>
-    ({...state, hide, hiddenCards: Array(10).fill(true)})),
-  on(showCard, (state: MiscEventsState, card: { card: number }) =>
-    ({...state, hiddenCards: state.hiddenCards.map((c, i) => i === card.card ? false : c)}))
+    ({...state, hide, hiddenCards: Array(10).fill(Array(2).fill(true))})),
+  on(showCard, (state: MiscEventsState, cards: { player: number; card: number }) => ({
+    ...state,
+    hiddenCards: state.hiddenCards.map((c: boolean[], i: number) =>
+      i === cards.player ? state.hiddenCards[cards.player].map((hide: boolean, j: number) =>
+        j === cards.card ? false : hide) : c)
+  }))
 );
 
 export function miscEventsReducer(state, action) {

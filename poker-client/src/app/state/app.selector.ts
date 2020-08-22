@@ -105,6 +105,8 @@ export const selectHandSummary = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state.summary);
 export const selectHandWinners = createSelector(
   pokerTableFeature, (state: PokerTableModel) => state.winners);
+export const selectCommunityCards = createSelector(
+  pokerTableFeature, (state: PokerTableModel) => state.sharedCards);
 
 export const miscEventsFeature =
   createFeatureSelector<MiscEventsStateContainer, MiscEventsState>('miscEvents');

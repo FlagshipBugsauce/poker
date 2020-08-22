@@ -13,6 +13,7 @@ import {PlayerBoxComponent} from './poker-table/player-box/player-box.component'
 import {DeckComponent} from './poker-table/deck/deck.component';
 import {HandSummaryComponent} from './poker-table/hand-summary/hand-summary.component';
 import {TableControlsComponent} from './poker-table/table-controls/table-controls.component';
+import {CommunityCardsComponent} from './poker-table/community-cards/community-cards.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import {TableControlsComponent} from './poker-table/table-controls/table-control
     PlayerBoxComponent,
     DeckComponent,
     HandSummaryComponent,
-    TableControlsComponent
+    TableControlsComponent,
+    CommunityCardsComponent
   ],
   exports: [
     PokerTableComponent

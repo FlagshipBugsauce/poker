@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -79,6 +80,8 @@ public class PokerTableModel {
   @Schema(description = "Flag that is true when a betting round is taking place.", example = "true")
   private boolean betting = false;
 
+  private List<CardModel> sharedCards = new ArrayList<>();
+
   public PokerTableModel(final PokerTableModel table) {
     players = table.getPlayers().stream().map(GamePlayerModel::new).collect(Collectors.toList());
     actingPlayer = table.getActingPlayer();
@@ -95,6 +98,18 @@ public class PokerTableModel {
     blind = table.getBlind();
     pots = table.getPots();
     winners = table.getWinners();
+    sharedCards = table.getSharedCards();
+  }
+
+  /**
+   * Helper which retrieves the player with the specified ID from the list of players, or <code>null
+   * </code> if no such player exists.
+   *
+   * @param id ID of the player.
+   * @return Player with ID equal to <code>id</code>, or <code>null</code> if no such player exists.
+   */
+  public GamePlayerModel getPlayer(final UUID id) {
+    return players.stream().filter(p -> p.getId().equals(id)).findFirst().orElse(null);
   }
 
   public void roundStarted() {

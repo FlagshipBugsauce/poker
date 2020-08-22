@@ -9,7 +9,8 @@ export const APP_ROUTES = {
   CREATE_GAME: {path: 'create', label: 'Create'},
   JOIN_GAME: {path: 'join', label: 'Join'},
   GAME_PREFIX: {path: 'game', label: 'Game'},
-  GAME_ID: {path: 'gameId', label: 'Game ID'}
+  GAME_ID: {path: 'gameId', label: 'Game ID'},
+  ABOUT: {path: 'about', label: 'About'}
 };
 
 /**

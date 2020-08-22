@@ -28,6 +28,7 @@ import {
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 import {
+  CardModel,
   ChatMessageModel,
   ClientUserModel,
   DealModel,
@@ -45,6 +46,7 @@ import {HandSummaryComponent} from '../poker-table/hand-summary/hand-summary.com
 import {DeckComponent} from '../poker-table/deck/deck.component';
 import {GamePhase} from '../../shared/models/game-phase.enum';
 import {TableControlsComponent} from '../poker-table/table-controls/table-controls.component';
+import {CommunityCardsComponent} from '../poker-table/community-cards/community-cards.component';
 
 describe('GameComponent', () => {
   let mockStore: MockStore;
@@ -65,6 +67,8 @@ describe('GameComponent', () => {
   let mockStartTimerSelector: MemoizedSelector<MiscEventsStateContainer, TimerModel>;
   let mockDealSelector: MemoizedSelector<MiscEventsStateContainer, DealModel>;
   let mockWinnersSelector: MemoizedSelector<PokerTableStateContainer, WinnerModel[]>;
+  let mockDealerSelector: MemoizedSelector<PokerTableStateContainer, number>;
+  let mockSharedCardsSelector: MemoizedSelector<PokerTableStateContainer, CardModel[]>;
   let component: GameComponent;
   let fixture: ComponentFixture<GameComponent>;
 
@@ -79,7 +83,8 @@ describe('GameComponent', () => {
         PlayerBoxComponent,
         HandSummaryComponent,
         DeckComponent,
-        TableControlsComponent
+        TableControlsComponent,
+        CommunityCardsComponent
       ],
       imports: [SharedModule, RouterTestingModule],
       providers: [
@@ -112,6 +117,8 @@ describe('GameComponent', () => {
     mockStartTimerSelector = mockStore.overrideSelector(selectors.selectTimer, {});
     mockDealSelector = mockStore.overrideSelector(selectors.selectDeal, {});
     mockWinnersSelector = mockStore.overrideSelector(selectors.selectHandWinners, []);
+    mockDealerSelector = mockStore.overrideSelector(selectors.selectDealer, 2);
+    mockSharedCardsSelector = mockStore.overrideSelector(selectors.selectCommunityCards, []);
     fixture = TestBed.createComponent(GameComponent);
     fixture.detectChanges();
   }));

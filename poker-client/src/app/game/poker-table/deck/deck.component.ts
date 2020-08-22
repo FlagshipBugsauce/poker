@@ -6,7 +6,12 @@ import {
   PokerTableStateContainer
 } from '../../../shared/models/app-state.model';
 import {Subject} from 'rxjs';
-import {selectDeal, selectGamePhase, selectPlayers} from '../../../state/app.selector';
+import {
+  selectDeal,
+  selectDealer,
+  selectGamePhase,
+  selectPlayers
+} from '../../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
 import {GamePhase} from '../../../shared/models/game-phase.enum';
 import {DealModel} from '../../../api/models/deal-model';
@@ -19,23 +24,62 @@ import {showCard} from '../../../state/app.actions';
   styleUrls: ['./deck.component.scss']
 })
 export class DeckComponent implements OnInit, OnDestroy {
+  /**
+   * The width of the cards in the deck. This value comes from the poker table component, which
+   * calculates the width based on the size of the poker table.
+   * TODO: Currently the value is actually a constant value of 80 - need to investigate whether
+   *  this should be constant or variable based on table size.
+   */
   @Input() width: number = 200;
 
+  /**
+   * The deck is given a 3-D appearance by stacking ~20 or so cards on top of each other and
+   * off-setting their positions slightly. This field is an array of the offsets, which is used
+   * to position the cards that make up the deck.
+   */
   public cards: number[] = Array(20).fill(0).map((v, i) => i / 2.5);
 
   /**
    * Used to ensure we're not maintaining multiple subscriptions.
    */
   public ngDestroyed$ = new Subject<any>();
+
+  /**
+   * The current phase of the game. TODO: Investigate whether this is actually needed.
+   */
   public phase: GamePhase = GamePhase.Over;
+
+  /**
+   * Animated cards will only be visible when this is set to true. TODO: Investigate if necessary.
+   */
   public showMovingCard: boolean = true;
+
+  /**
+   * Object used to style (via NgStyle directive) moving cards.
+   */
   public movingCardStyle: { top: number; left: number; opacity: number; width: number } = {
     top: 20 / 2.5,
     left: 20 / 2.5,
     opacity: 0,
     width: this.width
   };
+
+  /**
+   * List of players sitting at the table.
+   */
   public players: GamePlayerModel[] = [];
+
+  /**
+   * The position of the dealer at the table. Card dealing animations need to begin at the first
+   * active player clockwise (or to the left) of the dealer.
+   */
+  public dealer: number = 0;
+
+  /**
+   * Object used to determine the amount of pixels a card should move in each frame of the dealing
+   * animation.
+   * TODO: Investigate a better solution - hard-coding these values is not ideal.
+   */
   private cardDestinations: { down: number; right: number }[] = [
     {down: 2.5, right: 4},
     {down: 2.5, right: 0.5},
@@ -68,6 +112,10 @@ export class DeckComponent implements OnInit, OnDestroy {
     this.pokerTableStore.select(selectPlayers)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((players: GamePlayerModel[]) => this.players = players);
+
+    this.pokerTableStore.select(selectDealer)
+    .pipe(takeUntil(this.ngDestroyed$))
+    .subscribe((dealer: number) => this.dealer = dealer);
   }
 
   public ngOnDestroy() {
@@ -75,16 +123,30 @@ export class DeckComponent implements OnInit, OnDestroy {
     this.ngDestroyed$.complete();
   }
 
+  /**
+   * Controller for the card dealing animation. Will begin dealing at the player immediately
+   * clockwise of the dealer. The client knows there are cards, but is hiding them until an action
+   * which reveals the cards is dispatched.
+   */
   public async dealCards(): Promise<void> {
     await this.delay(100);
-    for (let i = 0; i < this.players.length; i++) {
-      if (!this.players[i].out) {
-        await this.sendCardToPosition(i);
+    const n = this.players.length;
+    for (let i = 1; i <= 2 * n; i++) {
+      if (!this.players[(this.dealer + i) % n].out) {
+        await this.sendCardToPosition((this.dealer + i) % n, i > n ? 1 : 0);
       }
     }
   }
 
-  public async sendCardToPosition(pos: number): Promise<void> {
+  /**
+   * Triggers an animation which sends a card from the deck to the specified position. Once the card
+   * reaches that position, an action is dispatched which will un-hide the card in the player box
+   * at the specified position.
+   *
+   * @param pos The position the card is being sent to.
+   * @param card The card being dealt (can be either 0 or 1).
+   */
+  public async sendCardToPosition(pos: number, card: number): Promise<void> {
     if (pos >= 0) {
       this.showMovingCard = true;
       let timer = 0;
@@ -101,10 +163,15 @@ export class DeckComponent implements OnInit, OnDestroy {
       this.movingCardStyle.opacity = 0;
       this.movingCardStyle.width = this.width;
       this.showMovingCard = false;
-      this.miscEventStore.dispatch(showCard({card: pos}));
+      this.miscEventStore.dispatch(showCard({player: pos, card}));
     }
   }
 
+  /**
+   * Helper function which will cause a delay. Used to assist with dealing animations.
+   *
+   * @param time The duration of the delay.
+   */
   private async delay(time: number): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, time));
   }

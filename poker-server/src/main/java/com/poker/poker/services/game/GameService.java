@@ -15,7 +15,7 @@ import static com.poker.poker.utilities.PokerTableUtilities.defaultAction;
 import static com.poker.poker.utilities.PokerTableUtilities.getSystemChatActionMessage;
 import static com.poker.poker.utilities.PokerTableUtilities.handleEndOfHand;
 import static com.poker.poker.utilities.PokerTableUtilities.handlePlayerAction;
-import static com.poker.poker.utilities.PokerTableUtilities.newHandSetup;
+import static com.poker.poker.utilities.PokerTableUtilities.setupNewHand;
 import static java.math.BigDecimal.ZERO;
 import static java.math.RoundingMode.HALF_UP;
 
@@ -294,7 +294,7 @@ public class GameService {
     final PokerTableModel table = data.getPokerTable(game.getId());
 
     // Table setup:
-    newHandSetup(table, data.getDeck(game.getId()));
+    setupNewHand(table, data.getDeck(game.getId()));
 
     data.broadcastObfuscatedPokerTable(game.getId());
 
@@ -336,6 +336,22 @@ public class GameService {
         new GameMessageEvent<>(this, HideCards, event.getId(), new HideCardsModel()));
   }
 
+  /**
+   * Helper that returns a lambda which will broadcast the hand in the appropriate fashion, i.e. it
+   * will either hide all cards, or it will display cards of players who haven't folded. TODO: Need
+   * to investigate edge cases where hands are displayed in some order, and in some cases, the
+   * losing player is not obligated to show their cards.
+   *
+   * @param id Game ID.
+   * @param hideAll Flag that determine whether all cards are hidden or not.
+   * @return Runnable which will broadcast the poker table.
+   */
+  public Runnable getBroadcaster(final UUID id, final boolean hideAll) {
+    return hideAll
+        ? () -> data.broadcastObfuscatedPokerTable(id)
+        : () -> data.broadcastPokerTableWithFoldedCardsHidden(id);
+  }
+
   @Async
   @EventListener
   public void handleGameAction(final GameActionEvent event) throws InterruptedException {
@@ -344,7 +360,6 @@ public class GameService {
 
     // Update table + player models.
     handlePlayerAction(table, event.getType(), event.getPlayerId(), adjustWager(table, event));
-
     publishSystemChatMessageEvent(game.getId(), getSystemChatActionMessage(table, event));
     data.broadcastObfuscatedPokerTable(game.getId());
 
@@ -361,14 +376,8 @@ public class GameService {
     }
 
     // If we get here, then the hand (and possibly the game) is over.
-    handleEndOfHand(table);
-    // Let's display the summary and cards (if appropriate).
-    if (numPlayersRemaining > 1) {
-      data.broadcastPokerTable(game.getId());
-    } else {
-      data.broadcastObfuscatedPokerTable(game.getId());
-    }
-    publishPlayerWonHandChatMessage(game.getId());
+    handleEndOfHand(table, getBroadcaster(game.getId(), numPlayersRemaining <= 1));
+
     publishTimerMessage(game.getId(), appConfig.getHandSummaryDurationInMs());
     Thread.sleep(appConfig.getHandSummaryDurationInMs());
 
