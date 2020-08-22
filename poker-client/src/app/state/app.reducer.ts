@@ -288,8 +288,6 @@ const miscEventsReducerInternal = createReducer<MiscEventsState>(
       i === cards.player ? state.hiddenCards[cards.player].map((hide: boolean, j: number) =>
         j === cards.card ? false : hide) : c)
   }))
-  // on(showCard, (state: MiscEventsState, card: { card: number }) =>
-  //   ({...state, hiddenCards: state.hiddenCards.map((c, i) => i === card.card ? false : c)}))
 );
 
 export function miscEventsReducer(state, action) {
