@@ -5,7 +5,7 @@ import {AppStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {createGame} from '../../state/app.actions';
 import {CreateGameService} from '../../shared/web-socket/create-game.service';
-import {GameParameterModel} from '../../api/models/game-parameter-model';
+import {GameParameter} from '../../api/models/game-parameter';
 
 @Component({
   selector: 'pkr-create',
@@ -50,6 +50,6 @@ export class CreateComponent implements OnInit, OnDestroy {
       buyIn: values.buyIn,
       maxPlayers: values.maxPlayers,
       name: values.name
-    } as GameParameterModel));
+    } as GameParameter));
   }
 }

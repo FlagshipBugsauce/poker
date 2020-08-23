@@ -5,9 +5,9 @@ import {AppStateContainer, PokerTableStateContainer} from "../../../shared/model
 import {selectLoggedInUser, selectPlayers, selectPokerTable} from "../../../state/app.selector";
 import {takeUntil} from "rxjs/operators";
 import {Subject} from "rxjs";
-import {GamePlayerModel} from "../../../api/models/game-player-model";
-import {ClientUserModel} from "../../../api/models/client-user-model";
-import {PokerTableModel} from "../../../api/models/poker-table-model";
+import {GamePlayer} from "../../../api/models/game-player";
+import {ClientUser} from "../../../api/models/client-user";
+import {PokerTable} from "../../../api/models/poker-table";
 import {GameAction} from "../../../shared/models/game-action.enum";
 import {performGameAction} from "../../../state/app.actions";
 
@@ -26,10 +26,10 @@ export class TableControlsComponent implements OnInit, OnDestroy {
   @ViewChild('raiseInput') public raiseInput: ElementRef;
 
   public actions = GameAction;
-  public players: GamePlayerModel[] = [];
-  public player: GamePlayerModel;
-  public user: ClientUserModel;
-  public table: PokerTableModel;
+  public players: GamePlayer[] = [];
+  public player: GamePlayer;
+  public user: ClientUser;
+  public table: PokerTable;
   /**
    * Used to ensure we're not maintaining multiple subscriptions.
    */
@@ -85,11 +85,11 @@ export class TableControlsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.appStore.select(selectLoggedInUser)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((user: ClientUserModel) => this.user = user);
+    .subscribe((user: ClientUser) => this.user = user);
 
     this.pokerTableStore.select(selectPlayers)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((players: GamePlayerModel[]) => {
+    .subscribe((players: GamePlayer[]) => {
       // TODO: Should replace this with request for one players data.
       this.players = players;
       if (players && players.length > 0) {
@@ -99,7 +99,7 @@ export class TableControlsComponent implements OnInit, OnDestroy {
 
     this.pokerTableStore.select(selectPokerTable)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((table: PokerTableModel) => {
+    .subscribe((table: PokerTable) => {
       this.table = table;
       if (this.safe && this.table.players[this.table.actingPlayer].id === this.user.id) {
         this.raise = this.minRaise;

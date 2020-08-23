@@ -1,13 +1,13 @@
 package com.poker.poker.services;
 
 import com.poker.poker.config.constants.AppConstants;
-import com.poker.poker.models.ApiSuccessModel;
+import com.poker.poker.models.ApiSuccess;
 import com.poker.poker.models.enums.UserGroup;
-import com.poker.poker.models.user.AuthRequestModel;
-import com.poker.poker.models.user.AuthResponseModel;
-import com.poker.poker.models.user.ClientUserModel;
-import com.poker.poker.models.user.NewAccountModel;
-import com.poker.poker.models.user.UserModel;
+import com.poker.poker.models.user.AuthRequest;
+import com.poker.poker.models.user.AuthResponse;
+import com.poker.poker.models.user.ClientUser;
+import com.poker.poker.models.user.NewAccount;
+import com.poker.poker.models.user.User;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import com.poker.poker.validation.exceptions.ForbiddenException;
@@ -40,34 +40,34 @@ public class UserService {
   private final UuidService uuidService;
 
   /**
-   * Authenticates the user if the email and password provided in the AuthRequestModel is valid.
+   * Authenticates the user if the email and password provided in the AuthRequest is valid.
    *
-   * @param authRequestModel A model containing an email and a password.
-   * @return An AuthResponseModel containing a JWT which can be used to access secured endpoints.
+   * @param authRequest A model containing an email and a password.
+   * @return An AuthResponse containing a JWT which can be used to access secured endpoints.
    */
-  public AuthResponseModel authenticate(final AuthRequestModel authRequestModel) {
+  public AuthResponse authenticate(final AuthRequest authRequest) {
     try {
-      log.debug("Attempting to authenticate user with email: {}.", authRequestModel.getEmail());
+      log.debug("Attempting to authenticate user with email: {}.", authRequest.getEmail());
       authenticationManager.authenticate(
           new UsernamePasswordAuthenticationToken(
-              authRequestModel.getEmail(), authRequestModel.getPassword()));
+              authRequest.getEmail(), authRequest.getPassword()));
     } catch (BadCredentialsException e) {
       log.error(
           "Authentication of user {} failed because the password provided is invalid.",
-          authRequestModel.getEmail());
+          authRequest.getEmail());
       throw appConstants.getBadPasswordException();
     }
 
-    log.debug("Authentication of user {} was successful.", authRequestModel.getEmail());
+    log.debug("Authentication of user {} was successful.", authRequest.getEmail());
     final UserDetails userDetails =
-        customUserDetailsService.loadUserByUsername(authRequestModel.getEmail());
+        customUserDetailsService.loadUserByUsername(authRequest.getEmail());
     final String jwt = jwtService.generateToken(userDetails);
 
-    final UserModel user = userRepository.findUserDocumentByEmail(authRequestModel.getEmail());
+    final User user = userRepository.findUserDocumentByEmail(authRequest.getEmail());
 
-    return new AuthResponseModel(
+    return new AuthResponse(
         jwt,
-        new ClientUserModel(
+        new ClientUser(
             user.getId(),
             user.getEmail(),
             user.getGroup(),
@@ -79,17 +79,17 @@ public class UserService {
    * Performs a pseudo authentication when client provides a JWT.
    *
    * @param jwt Authentication token.
-   * @return AuthResponseModel containing the same data that is returned when a client authenticates
-   *     normally.
+   * @return AuthResponse containing the same data that is returned when a client authenticates
+   * normally.
    */
-  public AuthResponseModel authenticateWithJwt(final String jwt) {
+  public AuthResponse authenticateWithJwt(final String jwt) {
     final String email = jwtService.extractEmail(jwt);
     final UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
     if (jwtService.validateToken(jwt, userDetails)) {
-      final UserModel user = userRepository.findUserDocumentByEmail(email);
-      return new AuthResponseModel(
+      final User user = userRepository.findUserDocumentByEmail(email);
+      return new AuthResponse(
           jwt,
-          new ClientUserModel(
+          new ClientUser(
               user.getId(),
               user.getEmail(),
               user.getGroup(),
@@ -101,36 +101,35 @@ public class UserService {
   }
 
   /**
-   * Creates a new account, provided the NewAccountModel contains an email that has not yet been
-   * used.
+   * Creates a new account, provided the NewAccount contains an email that has not yet been used.
    *
-   * @param newAccountModel A model containing the information necessary to create a new account.
-   * @return An ApiSuccessModel, if the account is created successfully.
+   * @param newAccount A model containing the information necessary to create a new account.
+   * @return An ApiSuccess, if the account is created successfully.
    * @throws BadRequestException If the account is not created successfully.
    */
-  public ApiSuccessModel register(final NewAccountModel newAccountModel)
+  public ApiSuccess register(final NewAccount newAccount)
       throws BadRequestException {
     // Log
-    log.debug("Attempting to create account for user with email: {}.", newAccountModel.getEmail());
+    log.debug("Attempting to create account for user with email: {}.", newAccount.getEmail());
 
     // Make sure that the email doesn't already exist:
-    if (userRepository.findUserDocumentByEmail(newAccountModel.getEmail()) != null) {
-      log.error("Failed to create account for with email: {}.", newAccountModel.getEmail());
+    if (userRepository.findUserDocumentByEmail(newAccount.getEmail()) != null) {
+      log.error("Failed to create account for with email: {}.", newAccount.getEmail());
       throw appConstants.getRegistrationFailedException();
     }
 
     // Create a user with random UUID, in the "Client" user group.
     userRepository.save(
-        new UserModel(
+        new User(
             UUID.randomUUID(),
-            newAccountModel.getEmail(),
-            passwordEncoder.encode(newAccountModel.getPassword()),
+            newAccount.getEmail(),
+            passwordEncoder.encode(newAccount.getPassword()),
             UserGroup.Client,
-            newAccountModel.getFirstName(),
-            newAccountModel.getLastName()));
+            newAccount.getFirstName(),
+            newAccount.getLastName()));
 
-    log.info("Account created successfully for email: {}.", newAccountModel.getEmail());
-    return new ApiSuccessModel("Account created successfully.");
+    log.info("Account created successfully for email: {}.", newAccount.getEmail());
+    return new ApiSuccess("Account created successfully.");
   }
 
   /**
@@ -141,47 +140,47 @@ public class UserService {
    */
   public void validate(final String jwt, final List<UserGroup> groupsAllowed)
       throws ForbiddenException {
-    final UserModel userModel =
+    final User user =
         userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt));
     // User is not in the correct group.
-    if (!groupsAllowed.contains(userModel.getGroup())) {
+    if (!groupsAllowed.contains(user.getGroup())) {
       log.error(
           "User: {}, was denied access. Groups allowed: {}. User's group: {}.",
-          userModel.getId(),
+          user.getId(),
           groupsAllowed,
-          userModel.getGroup());
+          user.getGroup());
       throw appConstants.getInvalidGroupException();
     }
     // User is in the correct group.
     else {
       log.debug(
           "User: {} attempted to validate and was successful. Groups allowed: {}.",
-          userModel.getId(),
+          user.getId(),
           groupsAllowed);
     }
   }
 
   /**
-   * Generates a UserModel from a user id.
+   * Generates a User from a user id.
    *
    * @param userId The UUID of the user.
-   * @return A UserModel associated to the ID provided.
+   * @return A User associated to the ID provided.
    */
-  public ClientUserModel getUserInfo(final String userId) {
+  public ClientUser getUserInfo(final String userId) {
     // Check if the string provided is a valid UUID.
     uuidService.checkIfValidAndThrowBadRequest(userId);
     // We know the UUID is valid.
     final UUID id = UUID.fromString(userId);
-    final UserModel userModel = userRepository.findUserDocumentById(id);
-    if (userModel == null) {
+    final User user = userRepository.findUserDocumentById(id);
+    if (user == null) {
       log.error("Could not find user with ID of {}.", userId);
       throw appConstants.getUserInfoNotFoundException();
     }
-    return new ClientUserModel(
+    return new ClientUser(
         id,
-        userModel.getEmail(),
-        userModel.getGroup(),
-        userModel.getFirstName(),
-        userModel.getLastName());
+        user.getEmail(),
+        user.getGroup(),
+        user.getFirstName(),
+        user.getLastName());
   }
 }

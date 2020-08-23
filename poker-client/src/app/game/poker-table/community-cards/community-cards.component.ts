@@ -4,7 +4,7 @@ import {Store} from '@ngrx/store';
 import {PokerTableStateContainer} from '../../../shared/models/app-state.model';
 import {selectCommunityCards} from '../../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
-import {CardModel} from '../../../api/models/card-model';
+import {Card} from '../../../api/models/card';
 
 @Component({
   selector: 'pkr-community-cards',
@@ -18,7 +18,7 @@ export class CommunityCardsComponent implements OnInit, OnDestroy {
    */
   public ngDestroyed$: Subject<any> = new Subject<any>();
 
-  public cards: CardModel[] = [];
+  public cards: Card[] = [];
 
   constructor(private pokerTableStore: Store<PokerTableStateContainer>) {
   }
@@ -26,7 +26,7 @@ export class CommunityCardsComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.pokerTableStore.select(selectCommunityCards)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((cards: CardModel[]) => this.cards = cards);
+    .subscribe((cards: Card[]) => this.cards = cards);
   }
 
   public ngOnDestroy(): void {

@@ -8,7 +8,7 @@ import {AppStateContainer, GameStateContainer} from '../../shared/models/app-sta
 import {Store} from '@ngrx/store';
 import {leaveGame, leaveLobby} from '../../state/app.actions';
 import {selectGameModel, selectJwt} from '../../state/app.selector';
-import {GameModel} from '../../api/models';
+import {Game} from '../../api/models';
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +25,7 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
   /** The page the user is attempting to access. */
   public link: string;
 
-  public gameModel: GameModel;
+  public gameModel: Game;
 
   private jwt: string;
 
@@ -35,7 +35,7 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
     private appStore: Store<AppStateContainer>,
     private gameStore: Store<GameStateContainer>) {
     this.gameStore.select(selectGameModel)
-    .subscribe((gameModel: GameModel) => this.gameModel = gameModel);
+    .subscribe((gameModel: Game) => this.gameModel = gameModel);
     this.appStore.select(selectJwt).subscribe(jwt => this.jwt = jwt);
   }
 

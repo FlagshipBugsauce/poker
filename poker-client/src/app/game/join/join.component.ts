@@ -8,7 +8,7 @@ import {selectGameList} from '../../state/app.selector';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {WebSocketService} from '../../shared/web-socket/web-socket.service';
-import {GameListModel} from '../../api/models/game-list-model';
+import {GameList} from '../../api/models/game-list';
 
 @Component({
   selector: 'pkr-join',
@@ -33,7 +33,7 @@ export class JoinComponent implements OnInit, OnDestroy {
   /** Helper subject which assists in terminating subscriptions. */
   public ngDestroyed$ = new Subject();
   /** List of games used internally. */
-  private gamesInternal: GameListModel[];
+  private gamesInternal: GameList[];
 
   constructor(
     private apiConfiguration: ApiConfiguration,
@@ -48,9 +48,9 @@ export class JoinComponent implements OnInit, OnDestroy {
   }
 
   /** Returns a slice of the list of games for pagination. */
-  public get games(): GameListModel[] {
+  public get games(): GameList[] {
     return this.gamesInternal ? this.gamesInternal
-      .map((game: GameListModel) => ({...game}))
+      .map((game: GameList) => ({...game}))
       .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize) :
       [];
   }
@@ -62,7 +62,7 @@ export class JoinComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.gameListStore.select(selectGameList)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((games: GameListModel[]) => this.gamesInternal = games);
+    .subscribe((games: GameList[]) => this.gamesInternal = games);
 
     // Subscribe to game list topic.
     this.webSocketService.subscribeToGameListTopic();
@@ -72,7 +72,7 @@ export class JoinComponent implements OnInit, OnDestroy {
    * Shows the confirmation popup that will take a player to the game they clicked on.
    * @param game GetGameModel with based information about the game.
    */
-  public showConfirmationPopup(game: GameListModel): void {
+  public showConfirmationPopup(game: GameList): void {
     this.popupContent[0].body = `Attempting to join game "${game.parameters.name}".`;
     this.popupOkCloseProcedure = () => {
       // Join the lobby.

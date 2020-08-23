@@ -19,7 +19,7 @@ import {
   selectTimer
 } from '../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
-import {ClientUserModel, GameModel, GamePlayerModel, TimerModel} from '../../api/models';
+import {ClientUser, Game, GamePlayer, Timer} from '../../api/models';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 
 @Component({
@@ -50,7 +50,7 @@ export class PokerTableComponent implements OnInit, OnDestroy {
   /**
    * Model of the game. TODO: May not be needed here anymore.
    */
-  public game: GameModel;
+  public game: Game;
 
   /**
    * Used to ensure we're not maintaining multiple subscriptions.
@@ -60,7 +60,7 @@ export class PokerTableComponent implements OnInit, OnDestroy {
   /**
    * Players in the game.
    */
-  public players: GamePlayerModel[] = [];
+  public players: GamePlayer[] = [];
 
   /**
    * Index of the player that is acting. TODO: I don't think this is needed here anymore.
@@ -184,15 +184,15 @@ export class PokerTableComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.appStore.select(selectLoggedInUser)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((user: ClientUserModel) => this.user = user);
+    .subscribe((user: ClientUser) => this.user = user);
 
     this.gameStore.select(selectGameModel)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((game: GameModel) => this.game = game);
+    .subscribe((game: Game) => this.game = game);
 
     this.pokerTableStore.select(selectPlayers)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((players: GamePlayerModel[]) => {
+    .subscribe((players: GamePlayer[]) => {
       this.players = players;
       if (players) {
         this.initializePlayerBoxes(players.length);
@@ -217,7 +217,7 @@ export class PokerTableComponent implements OnInit, OnDestroy {
 
     this.timerStore.select(selectTimer)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((timer: TimerModel) => {
+    .subscribe((timer: Timer) => {
       this.timerIndex++;
       // tslint:disable-next-line:no-bitwise
       this.timerValue.push(timer.duration | 0);

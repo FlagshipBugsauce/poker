@@ -39,12 +39,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.poker.poker.models.enums.CardSuit;
 import com.poker.poker.models.enums.CardValue;
-import com.poker.poker.models.game.CardModel;
-import com.poker.poker.models.game.DeckModel;
-import com.poker.poker.models.game.GamePlayerModel;
-import com.poker.poker.models.game.PokerTableModel;
-import com.poker.poker.models.game.TableControlsModel;
-import com.poker.poker.models.game.WinnerModel;
+import com.poker.poker.models.game.Card;
+import com.poker.poker.models.game.Deck;
+import com.poker.poker.models.game.GamePlayer;
+import com.poker.poker.models.game.PokerTable;
+import com.poker.poker.models.game.TableControls;
+import com.poker.poker.models.game.Winner;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -68,35 +68,26 @@ public class PokerTableUtilitiesTests {
   public static final int SAMPLE_MAX_BANKROLL = 2000;
   public static final BigDecimal SAMPLE_BLIND = new BigDecimal(10);
 
-  public PokerTableModel getSamplePokerTable(final int numPlayers) {
-    final PokerTableModel table = new PokerTableModel();
-    table.setPlayers(getSamplePlayers(numPlayers, SAMPLE_MIN_BANKROLL, SAMPLE_MAX_BANKROLL));
-    // Safe to assume this works
-    table.setBlind(SAMPLE_BLIND);
-
-    return table;
-  }
-
   /**
    * Simulates a hand by setting up a table, then performing a sequence of actions. TODO: Document
    * the sequence of moves.
    *
    * @param table Poker table.
-   * @param deck Deck (can use a mocked deck to ensure players are given specific cards).
+   * @param deck  Deck (can use a mocked deck to ensure players are given specific cards).
    */
   public static void performAndVerifyHandActionSequence_1(
-      final PokerTableModel table, final DeckModel deck) {
-    final List<GamePlayerModel> players = table.getPlayers();
-    final GamePlayerModel p0 = players.get(0);
-    final GamePlayerModel p1 = players.get(1);
-    final GamePlayerModel p2 = players.get(2);
-    final GamePlayerModel p3 = players.get(3);
-    final GamePlayerModel p4 = players.get(4);
-    final GamePlayerModel p5 = players.get(5);
-    final GamePlayerModel p6 = players.get(6);
-    final GamePlayerModel p7 = players.get(7);
-    final GamePlayerModel p8 = players.get(8);
-    final GamePlayerModel p9 = players.get(9);
+      final PokerTable table, final Deck deck) {
+    final List<GamePlayer> players = table.getPlayers();
+    final GamePlayer p0 = players.get(0);
+    final GamePlayer p1 = players.get(1);
+    final GamePlayer p2 = players.get(2);
+    final GamePlayer p3 = players.get(3);
+    final GamePlayer p4 = players.get(4);
+    final GamePlayer p5 = players.get(5);
+    final GamePlayer p6 = players.get(6);
+    final GamePlayer p7 = players.get(7);
+    final GamePlayer p8 = players.get(8);
+    final GamePlayer p9 = players.get(9);
     table.setRound(3);
     table.setDealer(8);
     final List<BigDecimal> chips =
@@ -295,12 +286,49 @@ public class PokerTableUtilitiesTests {
     assertEquals(expectedActingPlayers, playersThatActed);
   }
 
-  public GamePlayerModel getRandomPlayer(final int bankRollMin, final int bankRollMax) {
-    final GamePlayerModel player = new GamePlayerModel();
+  public static void verifyHandAction(
+      final PokerTable table,
+      final GamePlayer player,
+      final GamePlayer nextPlayer,
+      final int expectedChips,
+      final int expectedBet,
+      final int expectedMinRaise,
+      final int expectedToCall,
+      final int expectedPotTotal,
+      final boolean expectedAllinStatus,
+      final boolean expectedFoldedStatus,
+      final int expectedLastToAct,
+      final int expectedActingPlayer) {
+    assertEquals(bd(expectedChips), player.getChips());
+    assertEquals(bd(expectedBet), player.getBet());
+    assertEquals(bd(expectedMinRaise), table.getMinRaise());
+    assertEquals(bd(expectedToCall), nextPlayer.getToCall());
+    assertEquals(bd(expectedPotTotal), getPotTotal(table.getPots()));
+    assertEquals(expectedAllinStatus, player.isAllIn());
+    assertEquals(expectedFoldedStatus, player.isFolded());
+    assertEquals(expectedLastToAct, table.getLastToAct());
+    assertEquals(expectedActingPlayer, table.getActingPlayer());
+  }
+
+  public static BigDecimal bd(final int val) {
+    return new BigDecimal(val);
+  }
+
+  public PokerTable getSamplePokerTable(final int numPlayers) {
+    final PokerTable table = new PokerTable();
+    table.setPlayers(getSamplePlayers(numPlayers, SAMPLE_MIN_BANKROLL, SAMPLE_MAX_BANKROLL));
+    // Safe to assume this works
+    table.setBlind(SAMPLE_BLIND);
+
+    return table;
+  }
+
+  public GamePlayer getRandomPlayer(final int bankRollMin, final int bankRollMax) {
+    final GamePlayer player = new GamePlayer();
     player.setId(UUID.randomUUID());
     player.setFirstName(RandomStringUtils.randomAlphabetic(10));
     player.setLastName(RandomStringUtils.randomAlphabetic(10));
-    final TableControlsModel controls = new TableControlsModel();
+    final TableControls controls = new TableControls();
     final int bankRollRange = bankRollMax - bankRollMin + 1;
     controls.setBankRoll(new BigDecimal(Math.round(Math.random() * bankRollRange + bankRollMin)));
     player.setControls(controls);
@@ -319,8 +347,8 @@ public class PokerTableUtilitiesTests {
    *
    * @param table Poker table.
    */
-  public void createFakeBets1(final PokerTableModel table) {
-    final List<GamePlayerModel> players = table.getPlayers();
+  public void createFakeBets1(final PokerTable table) {
+    final List<GamePlayer> players = table.getPlayers();
     players.get(0).getControls().setCurrentBet(new BigDecimal(10));
     players.get(1).getControls().setCurrentBet(new BigDecimal(20));
     players.get(2).getControls().setCurrentBet(new BigDecimal(40));
@@ -343,8 +371,8 @@ public class PokerTableUtilitiesTests {
    *
    * @param table Poker table.
    */
-  public void createFakeBets2(final PokerTableModel table) {
-    final List<GamePlayerModel> players = table.getPlayers();
+  public void createFakeBets2(final PokerTable table) {
+    final List<GamePlayer> players = table.getPlayers();
     players.get(0).getControls().setCurrentBet(new BigDecimal(10));
     players.get(1).getControls().setCurrentBet(new BigDecimal(20));
     players.get(2).getControls().setCurrentBet(new BigDecimal(40));
@@ -376,8 +404,8 @@ public class PokerTableUtilitiesTests {
    *
    * @param table Poker table.
    */
-  public void createFakeBets3(final PokerTableModel table) {
-    final List<GamePlayerModel> players = table.getPlayers();
+  public void createFakeBets3(final PokerTable table) {
+    final List<GamePlayer> players = table.getPlayers();
     players.get(0).getControls().setCurrentBet(new BigDecimal(10));
     players.get(1).getControls().setCurrentBet(new BigDecimal(20));
     players.get(2).getControls().setCurrentBet(new BigDecimal(40));
@@ -413,8 +441,8 @@ public class PokerTableUtilitiesTests {
    *
    * @param table Poker table.
    */
-  public void createFakeBets4(final PokerTableModel table) {
-    final List<GamePlayerModel> players = table.getPlayers();
+  public void createFakeBets4(final PokerTable table) {
+    final List<GamePlayer> players = table.getPlayers();
     players.get(0).getControls().setCurrentBet(new BigDecimal(1200));
     players.get(1).getControls().setCurrentBet(new BigDecimal(2400));
     players.get(2).getControls().setCurrentBet(new BigDecimal(40));
@@ -466,8 +494,8 @@ public class PokerTableUtilitiesTests {
    *
    * @param table Poker table.
    */
-  public void createFakeBets5(final PokerTableModel table) {
-    final List<GamePlayerModel> players = table.getPlayers();
+  public void createFakeBets5(final PokerTable table) {
+    final List<GamePlayer> players = table.getPlayers();
     players.get(0).getControls().setCurrentBet(new BigDecimal(1000));
     players.get(1).getControls().setCurrentBet(new BigDecimal(500));
     players.get(1).getControls().setBankRoll(ZERO);
@@ -496,8 +524,8 @@ public class PokerTableUtilitiesTests {
    *
    * @param table Poker table.
    */
-  public void createAllButOneFoldedScenario(final PokerTableModel table) {
-    final List<GamePlayerModel> players = table.getPlayers();
+  public void createAllButOneFoldedScenario(final PokerTable table) {
+    final List<GamePlayer> players = table.getPlayers();
     players.forEach(
         p -> {
           p.getControls().setCurrentBet(new BigDecimal(1000));
@@ -527,61 +555,33 @@ public class PokerTableUtilitiesTests {
    *
    * @param table Poker table.
    */
-  public void createFakeHand(final PokerTableModel table) {
-    final List<CardModel> cards = getSampleCards();
-    final List<GamePlayerModel> players = table.getPlayers();
+  public void createFakeHand(final PokerTable table) {
+    final List<Card> cards = getSampleCards();
+    final List<GamePlayer> players = table.getPlayers();
     for (int i = 0; i < players.size(); i++) {
       players.get(i).setCards(Collections.singletonList(cards.get(i)));
     }
   }
 
-  public static BigDecimal bd(final int val) {
-    return new BigDecimal(val);
-  }
-
-  public static void verifyHandAction(
-      final PokerTableModel table,
-      final GamePlayerModel player,
-      final GamePlayerModel nextPlayer,
-      final int expectedChips,
-      final int expectedBet,
-      final int expectedMinRaise,
-      final int expectedToCall,
-      final int expectedPotTotal,
-      final boolean expectedAllinStatus,
-      final boolean expectedFoldedStatus,
-      final int expectedLastToAct,
-      final int expectedActingPlayer) {
-    assertEquals(bd(expectedChips), player.getChips());
-    assertEquals(bd(expectedBet), player.getBet());
-    assertEquals(bd(expectedMinRaise), table.getMinRaise());
-    assertEquals(bd(expectedToCall), nextPlayer.getToCall());
-    assertEquals(bd(expectedPotTotal), getPotTotal(table.getPots()));
-    assertEquals(expectedAllinStatus, player.isAllIn());
-    assertEquals(expectedFoldedStatus, player.isFolded());
-    assertEquals(expectedLastToAct, table.getLastToAct());
-    assertEquals(expectedActingPlayer, table.getActingPlayer());
-  }
-
-  public List<GamePlayerModel> getSamplePlayers(
+  public List<GamePlayer> getSamplePlayers(
       final int numPlayers, final int bankRollMin, final int bankRollMax) {
     return IntStream.range(0, numPlayers)
         .mapToObj(i -> getRandomPlayer(bankRollMin, bankRollMax))
         .collect(toList());
   }
 
-  public List<CardModel> getSampleCards() {
+  public List<Card> getSampleCards() {
     return asList(
-        new CardModel(Spades, CardValue.Two),
-        new CardModel(Spades, CardValue.Seven),
-        new CardModel(Spades, CardValue.Nine),
-        new CardModel(Spades, CardValue.Jack),
-        new CardModel(Spades, CardValue.Ace),
-        new CardModel(CardSuit.Hearts, Six),
-        new CardModel(CardSuit.Hearts, CardValue.Five),
-        new CardModel(CardSuit.Diamonds, CardValue.Ten),
-        new CardModel(CardSuit.Diamonds, CardValue.Three),
-        new CardModel(CardSuit.Clubs, CardValue.Two));
+        new Card(Spades, CardValue.Two),
+        new Card(Spades, CardValue.Seven),
+        new Card(Spades, CardValue.Nine),
+        new Card(Spades, CardValue.Jack),
+        new Card(Spades, CardValue.Ace),
+        new Card(CardSuit.Hearts, Six),
+        new Card(CardSuit.Hearts, CardValue.Five),
+        new Card(CardSuit.Diamonds, CardValue.Ten),
+        new Card(CardSuit.Diamonds, CardValue.Three),
+        new Card(CardSuit.Clubs, CardValue.Two));
   }
 
   /**
@@ -614,8 +614,8 @@ public class PokerTableUtilitiesTests {
    *
    * @return Sample deck with specified hands.
    */
-  public DeckModel getSampleDeck_1() {
-    final List<CardModel> cards =
+  public Deck getSampleDeck_1() {
+    final List<Card> cards =
         new ArrayList<>(
             asList(
                 card(Spades, Six),
@@ -672,7 +672,7 @@ public class PokerTableUtilitiesTests {
                 card(Spades, Ace) // Player 0 1st Card = 51
                 ));
 
-    final DeckModel mockDeck = Mockito.spy(DeckModel.class);
+    final Deck mockDeck = Mockito.spy(Deck.class);
     Mockito.doNothing().when(mockDeck).restoreAndShuffle();
     mockDeck.setCards(cards);
     return mockDeck;
@@ -685,8 +685,8 @@ public class PokerTableUtilitiesTests {
    *
    * @return Sample deck with specified hands.
    */
-  public DeckModel getSampleDeck_2() {
-    final List<CardModel> cards =
+  public Deck getSampleDeck_2() {
+    final List<Card> cards =
         new ArrayList<>(
             asList(
                 card(Diamonds, Two),
@@ -743,7 +743,7 @@ public class PokerTableUtilitiesTests {
                 card(Spades, Two) // Player 0 1st Card
                 ));
 
-    final DeckModel mockDeck = Mockito.spy(DeckModel.class);
+    final Deck mockDeck = Mockito.spy(Deck.class);
     Mockito.doNothing().when(mockDeck).restoreAndShuffle();
     mockDeck.setCards(cards);
     return mockDeck;
@@ -752,7 +752,7 @@ public class PokerTableUtilitiesTests {
   /** Basic test where there are no side-pots. */
   @Test
   public void testPotGeneration_1() {
-    final PokerTableModel table = getSamplePokerTable(10);
+    final PokerTable table = getSamplePokerTable(10);
     createFakeBets1(table);
 
     // Test.
@@ -765,7 +765,7 @@ public class PokerTableUtilitiesTests {
 
   @Test
   public void testPotGeneration_2() {
-    final PokerTableModel table = getSamplePokerTable(10);
+    final PokerTable table = getSamplePokerTable(10);
     createFakeBets2(table);
 
     // Test.
@@ -784,7 +784,7 @@ public class PokerTableUtilitiesTests {
 
   @Test
   public void testPotGeneration_3() {
-    final PokerTableModel table = getSamplePokerTable(10);
+    final PokerTable table = getSamplePokerTable(10);
     createFakeBets3(table);
 
     // Test.
@@ -803,7 +803,7 @@ public class PokerTableUtilitiesTests {
 
   @Test
   public void testPotGeneration_4() {
-    final PokerTableModel table = getSamplePokerTable(10);
+    final PokerTable table = getSamplePokerTable(10);
     createFakeBets4(table);
 
     // Test.
@@ -824,7 +824,7 @@ public class PokerTableUtilitiesTests {
 
   @Test
   public void testPotGeneration_5() {
-    final PokerTableModel table = getSamplePokerTable(10);
+    final PokerTable table = getSamplePokerTable(10);
     createFakeBets5(table);
 
     // Test.
@@ -850,9 +850,9 @@ public class PokerTableUtilitiesTests {
   @Test
   public void testDetermineWinners_1() {
     // Setup.
-    final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
-    final DeckModel deck = getSampleDeck_1();
+    final PokerTable table = getSamplePokerTable(10);
+    final List<GamePlayer> players = table.getPlayers();
+    final Deck deck = getSampleDeck_1();
     table.setDealer(9);
     dealCards(table, deck, 2);
 
@@ -912,7 +912,7 @@ public class PokerTableUtilitiesTests {
     // Expecting player 1 with 4-of-a-kind to win 800
     // Expecting player 3 with K/Q/10/9/2 Flush to win 500
     // Winners should be sorted according to amount won.
-    final List<WinnerModel> winners = table.getWinners();
+    final List<Winner> winners = table.getWinners();
     assertEquals(new BigDecimal(1000), winners.get(0).getWinnings());
     assertEquals(new BigDecimal(800), winners.get(1).getWinnings());
     assertEquals(new BigDecimal(500), winners.get(2).getWinnings());
@@ -925,9 +925,9 @@ public class PokerTableUtilitiesTests {
   @Test
   public void testDetermineWinners_2() {
     // Setup.
-    final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
-    final DeckModel deck = getSampleDeck_2();
+    final PokerTable table = getSamplePokerTable(10);
+    final List<GamePlayer> players = table.getPlayers();
+    final Deck deck = getSampleDeck_2();
     table.setDealer(9);
     dealCards(table, deck, 2);
 
@@ -946,7 +946,7 @@ public class PokerTableUtilitiesTests {
     // Verify.
     // Expecting players 5 and 6 to tie with a 10->Ace straight, winning 1000 chips each.
     // Expecting player 7 to win the remaining chips with a 9->K straight.
-    final List<WinnerModel> winners = table.getWinners();
+    final List<Winner> winners = table.getWinners();
     winners.forEach(w -> assertEquals(new BigDecimal(500), w.getWinnings()));
     assertEquals(10, winners.size());
   }
@@ -954,9 +954,9 @@ public class PokerTableUtilitiesTests {
   @Test
   public void testDetermineWinners_3() {
     // Setup.
-    final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
-    final DeckModel deck = getSampleDeck_2();
+    final PokerTable table = getSamplePokerTable(10);
+    final List<GamePlayer> players = table.getPlayers();
+    final Deck deck = getSampleDeck_2();
     table.setDealer(9);
     dealCards(table, deck, 2);
 
@@ -1016,7 +1016,7 @@ public class PokerTableUtilitiesTests {
     // Verify.
     // Expecting players 5 and 6 to tie with a 10->Ace straight, winning 1000 chips each.
     // Expecting player 7 to win the remaining chips with a 9->K straight.
-    final List<WinnerModel> winners = table.getWinners();
+    final List<Winner> winners = table.getWinners();
     assertEquals(new BigDecimal(1000), winners.get(0).getWinnings());
     assertEquals(new BigDecimal(1000), winners.get(1).getWinnings());
     assertEquals(new BigDecimal(600), winners.get(2).getWinnings());
@@ -1033,9 +1033,9 @@ public class PokerTableUtilitiesTests {
   @Test
   public void testDetermineWinners_4() {
     // Setup.
-    final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
-    final DeckModel deck = getSampleDeck_2();
+    final PokerTable table = getSamplePokerTable(10);
+    final List<GamePlayer> players = table.getPlayers();
+    final Deck deck = getSampleDeck_2();
     table.setDealer(9);
     dealCards(table, deck, 2);
 
@@ -1065,7 +1065,7 @@ public class PokerTableUtilitiesTests {
     // Verify.
     // Expecting players 5 and 6 to tie with a 10->Ace straight, winning 1000 chips each.
     // Expecting player 7 to win the remaining chips with a 9->K straight.
-    final List<WinnerModel> winners = table.getWinners();
+    final List<Winner> winners = table.getWinners();
     assertEquals(6, winners.size());
     assertEquals(new BigDecimal(1766), winners.get(0).getWinnings());
     assertEquals(new BigDecimal(1766), winners.get(1).getWinnings());
@@ -1094,9 +1094,9 @@ public class PokerTableUtilitiesTests {
   @Test
   public void testDetermineWinners_5() {
     // Setup.
-    final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
-    final DeckModel deck = getSampleDeck_1();
+    final PokerTable table = getSamplePokerTable(10);
+    final List<GamePlayer> players = table.getPlayers();
+    final Deck deck = getSampleDeck_1();
     table.setDealer(9);
     dealCards(table, deck, 2);
 
@@ -1122,17 +1122,17 @@ public class PokerTableUtilitiesTests {
         Stream.of(1000, 900, 800, 700, 650, 600, 300, 250, 200)
             .map(BigDecimal::new)
             .collect(toList()),
-        table.getWinners().stream().map(WinnerModel::getWinnings).collect(toList()));
+        table.getWinners().stream().map(Winner::getWinnings).collect(toList()));
   }
 
   /** Case where all but one player have folded. */
   @Test
   public void testDetermineWinners_6() {
     // Setup.
-    final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
+    final PokerTable table = getSamplePokerTable(10);
+    final List<GamePlayer> players = table.getPlayers();
     table.setDealer(9);
-    dealCards(table, new DeckModel(), 2);
+    dealCards(table, new Deck(), 2);
 
     // Set bets and bankrolls.
     players.forEach(p -> p.setChips(new BigDecimal(500)));
@@ -1161,8 +1161,8 @@ public class PokerTableUtilitiesTests {
   @Test
   public void testDetermineWinners_7() {
     // Setup.
-    final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
+    final PokerTable table = getSamplePokerTable(10);
+    final List<GamePlayer> players = table.getPlayers();
     table.setDealer(9);
     dealCards(table, getSampleDeck_1(), 2);
 
@@ -1189,14 +1189,14 @@ public class PokerTableUtilitiesTests {
   @Test
   public void testDealCards_1() {
     // Setup.
-    final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
-    final DeckModel deck = new DeckModel();
+    final PokerTable table = getSamplePokerTable(10);
+    final List<GamePlayer> players = table.getPlayers();
+    final Deck deck = new Deck();
     table.setDealer(9);
 
     // Test.
     dealCards(table, deck, 2);
-    final List<CardModel> usedCards = deck.getUsedCards();
+    final List<Card> usedCards = deck.getUsedCards();
 
     // Verify.
     for (int i = 0; i < players.size(); i++) {
@@ -1219,8 +1219,8 @@ public class PokerTableUtilitiesTests {
   @Test
   public void testPerformBlindBets_2() {
     // Setup.
-    final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
+    final PokerTable table = getSamplePokerTable(10);
+    final List<GamePlayer> players = table.getPlayers();
     table.setDealer(3); // sb = 4, bb = 5
     players.get(4).setOut(true);
     players.get(5).setOut(true);
@@ -1259,8 +1259,8 @@ public class PokerTableUtilitiesTests {
   @Test
   public void testPerformBlindBets_3() {
     // Setup.
-    final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
+    final PokerTable table = getSamplePokerTable(10);
+    final List<GamePlayer> players = table.getPlayers();
     table.setDealer(3); // sb = 4, bb = 5
     table.setActingPlayer(4); // Satisfy Pre-Condition.
     final BigDecimal bbBankRollInitial = new BigDecimal(15);
@@ -1291,9 +1291,9 @@ public class PokerTableUtilitiesTests {
   @Test
   public void testDealCards_2() {
     // Setup.
-    final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
-    final DeckModel deck = new DeckModel();
+    final PokerTable table = getSamplePokerTable(10);
+    final List<GamePlayer> players = table.getPlayers();
+    final Deck deck = new Deck();
     table.setDealer(9);
     // Eliminate 3 players
     players.get(2).setOut(true);
@@ -1302,7 +1302,7 @@ public class PokerTableUtilitiesTests {
 
     // Test.
     dealCards(table, deck, 2);
-    final List<CardModel> usedCards = deck.getUsedCards();
+    final List<Card> usedCards = deck.getUsedCards();
 
     // Verify.
     int j = 0;
@@ -1325,9 +1325,9 @@ public class PokerTableUtilitiesTests {
   @Test
   public void testDealCards_3() {
     // Setup.
-    final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
-    final DeckModel deck = new DeckModel();
+    final PokerTable table = getSamplePokerTable(10);
+    final List<GamePlayer> players = table.getPlayers();
+    final Deck deck = new Deck();
     table.setDealer(9);
     // Eliminate 3 players
     players.get(2).setOut(true);
@@ -1339,7 +1339,7 @@ public class PokerTableUtilitiesTests {
 
     // Test.
     dealCards(table, deck, 2);
-    final List<CardModel> usedCards = deck.getUsedCards();
+    final List<Card> usedCards = deck.getUsedCards();
 
     // Verify.
     int j = 0;
@@ -1363,8 +1363,8 @@ public class PokerTableUtilitiesTests {
   @Test
   public void testPerformBlindBets_1() {
     // Setup.
-    final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
+    final PokerTable table = getSamplePokerTable(10);
+    final List<GamePlayer> players = table.getPlayers();
     table.setDealer(3); // sb = 4, bb = 5
     table.setActingPlayer(4); // Satisfy Pre-Condition.
     final BigDecimal sbBankRollInitial = players.get(4).getControls().getBankRoll();
@@ -1397,8 +1397,8 @@ public class PokerTableUtilitiesTests {
   @Test
   public void testPerformBlindBets_4() {
     // Setup.
-    final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
+    final PokerTable table = getSamplePokerTable(10);
+    final List<GamePlayer> players = table.getPlayers();
     table.setDealer(3); // sb = 4, bb = 5
     table.setActingPlayer(4); // Satisfy Pre-Condition.
     final BigDecimal bbBankRollInitial = new BigDecimal(5);
@@ -1445,10 +1445,10 @@ public class PokerTableUtilitiesTests {
    */
   @Test
   public void testNewHandSetup_1() {
-    final PokerTableModel table = getSamplePokerTable(10);
-    final List<GamePlayerModel> players = table.getPlayers();
-    final DeckModel deck = new DeckModel();
-    final List<CardModel> dealtCards = deck.peek(10);
+    final PokerTable table = getSamplePokerTable(10);
+    final List<GamePlayer> players = table.getPlayers();
+    final Deck deck = new Deck();
+    final List<Card> dealtCards = deck.peek(10);
 
     table.setDealer(0);
     table.setRound(0);
@@ -1473,8 +1473,8 @@ public class PokerTableUtilitiesTests {
   /** Ensuring the blinds are increased */
   @Test
   public void testNewHandSetup_2() {
-    final PokerTableModel table = getSamplePokerTable(10);
-    final DeckModel deck = new DeckModel();
+    final PokerTable table = getSamplePokerTable(10);
+    final Deck deck = new Deck();
 
     table.setRound(-1);
     final BigDecimal sb = table.getBlind();
@@ -1493,23 +1493,23 @@ public class PokerTableUtilitiesTests {
    */
   @Test
   public void testHandleHandAction_1() {
-    final PokerTableModel table = getSamplePokerTable(10);
-    final DeckModel deck = getSampleDeck_1();
+    final PokerTable table = getSamplePokerTable(10);
+    final Deck deck = getSampleDeck_1();
 
     performAndVerifyHandActionSequence_1(table, deck);
   }
 
   @Test
   public void testFullHand_1() {
-    final PokerTableModel table = getSamplePokerTable(10);
-    final DeckModel deck = getSampleDeck_1();
+    final PokerTable table = getSamplePokerTable(10);
+    final Deck deck = getSampleDeck_1();
 
     // Test.
     performAndVerifyHandActionSequence_1(table, deck);
     determineWinners(table);
 
     // Verify.
-    final List<WinnerModel> winners = table.getWinners();
+    final List<Winner> winners = table.getWinners();
     assertEquals(1, winners.size());
     assertEquals(bd(4720), winners.get(0).getWinnings());
     assertEquals(table.getPlayers().get(3).getId(), winners.get(0).getId());
@@ -1521,10 +1521,10 @@ public class PokerTableUtilitiesTests {
    */
   @Test
   public void testFullHand_2() {
-    final PokerTableModel table = getSamplePokerTable(10);
-    final DeckModel deck = getSampleDeck_1();
-    final GamePlayerModel p5 = table.getPlayers().get(5);
-    final GamePlayerModel p6 = table.getPlayers().get(6);
+    final PokerTable table = getSamplePokerTable(10);
+    final Deck deck = getSampleDeck_1();
+    final GamePlayer p5 = table.getPlayers().get(5);
+    final GamePlayer p6 = table.getPlayers().get(6);
 
     //    card(Clubs, Four),  // Dealer 2nd Card
     //    card(Clubs, Five), // Player 8 2nd Card
@@ -1557,7 +1557,7 @@ public class PokerTableUtilitiesTests {
     determineWinners(table);
 
     // Verify.
-    final List<WinnerModel> winners = table.getWinners();
+    final List<Winner> winners = table.getWinners();
     assertEquals(2, winners.size());
     assertEquals(bd(4720 / 2), winners.get(0).getWinnings());
     assertEquals(bd(4720 / 2), winners.get(1).getWinnings());
@@ -1572,22 +1572,22 @@ public class PokerTableUtilitiesTests {
    */
   @Test
   public void testFullHand_3() {
-    final PokerTableModel table = getSamplePokerTable(10);
-    final DeckModel deck = getSampleDeck_2();
-    final GamePlayerModel p3 = table.getPlayers().get(3);
-    final GamePlayerModel p5 = table.getPlayers().get(5);
-    final GamePlayerModel p6 = table.getPlayers().get(6);
-    final GamePlayerModel p8 = table.getPlayers().get(8);
-    final GamePlayerModel p9 = table.getPlayers().get(9);
+    final PokerTable table = getSamplePokerTable(10);
+    final Deck deck = getSampleDeck_2();
+    final GamePlayer p3 = table.getPlayers().get(3);
+    final GamePlayer p5 = table.getPlayers().get(5);
+    final GamePlayer p6 = table.getPlayers().get(6);
+    final GamePlayer p8 = table.getPlayers().get(8);
+    final GamePlayer p9 = table.getPlayers().get(9);
 
     // Test.
     performAndVerifyHandActionSequence_1(table, deck);
     determineWinners(table);
 
     // Verify.
-    final List<WinnerModel> winners = table.getWinners();
+    final List<Winner> winners = table.getWinners();
     assertEquals(5, winners.size());
-    assertEquals(bd(4720), sum(winners.stream().map(WinnerModel::getWinnings).collect(toList())));
+    assertEquals(bd(4720), sum(winners.stream().map(Winner::getWinnings).collect(toList())));
     assertEquals(3, winners.stream().filter(w -> w.getWinnings().equals(bd(1184))).count());
     assertEquals(2, winners.stream().filter(w -> w.getWinnings().equals(bd(584))).count());
 

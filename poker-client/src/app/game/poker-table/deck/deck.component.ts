@@ -14,8 +14,8 @@ import {
 } from '../../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
 import {GamePhase} from '../../../shared/models/game-phase.enum';
-import {DealModel} from '../../../api/models/deal-model';
-import {GamePlayerModel} from '../../../api/models/game-player-model';
+import {Deal} from '../../../api/models/deal';
+import {GamePlayer} from '../../../api/models/game-player';
 import {showCard} from '../../../state/app.actions';
 
 @Component({
@@ -67,7 +67,7 @@ export class DeckComponent implements OnInit, OnDestroy {
   /**
    * List of players sitting at the table.
    */
-  public players: GamePlayerModel[] = [];
+  public players: GamePlayer[] = [];
 
   /**
    * The position of the dealer at the table. Card dealing animations need to begin at the first
@@ -107,11 +107,11 @@ export class DeckComponent implements OnInit, OnDestroy {
 
     this.miscEventStore.select(selectDeal)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((deal: DealModel) => this.dealCards());
+    .subscribe((deal: Deal) => this.dealCards());
 
     this.pokerTableStore.select(selectPlayers)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((players: GamePlayerModel[]) => this.players = players);
+    .subscribe((players: GamePlayer[]) => this.players = players);
 
     this.pokerTableStore.select(selectDealer)
     .pipe(takeUntil(this.ngDestroyed$))

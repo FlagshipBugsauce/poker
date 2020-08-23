@@ -12,17 +12,17 @@ import {
   signOut
 } from './app.actions';
 import {catchError, exhaustMap, switchMap, tap} from 'rxjs/operators';
-import {AuthRequestModel} from '../api/models/auth-request-model';
+import {AuthRequest} from '../api/models/auth-request';
 import {of} from 'rxjs';
-import {AuthResponseModel} from '../api/models/auth-response-model';
+import {AuthResponse} from '../api/models/auth-response';
 import {ToastService} from '../shared/toast.service';
 import {Router} from '@angular/router';
 import {APP_ROUTES} from '../app-routes';
 import {WebSocketService} from '../shared/web-socket/web-socket.service';
 import {CookieService} from 'ngx-cookie-service';
-import {ClientMessageModel} from '../api/models/client-message-model';
+import {ClientMessage} from '../api/models/client-message';
 import {WebsocketService} from "../api/services";
-import {PrivateTopicModel} from "../api/models/private-topic-model";
+import {PrivateTopic} from "../api/models/private-topic";
 
 @Injectable()
 export class AppEffects {
@@ -36,7 +36,7 @@ export class AppEffects {
     exhaustMap((action: { jwt: string }) =>
       this.usersService.authorizeWithJwt({body: {jwt: action.jwt}})
       .pipe(
-        switchMap((response: AuthResponseModel) => {
+        switchMap((response: AuthResponse) => {
           this.webSocketService.subscribeToCurrentGameTopic(response.userDetails.id);
           this.router.navigate([`/${APP_ROUTES.HOME.path}`]).then();
           return [
@@ -60,7 +60,7 @@ export class AppEffects {
    */
   requestCurrentGameUpdate$ = createEffect(() => this.actions$.pipe(
     ofType(requestCurrentGameUpdate),
-    tap((messageModel: ClientMessageModel) => this.webSocketService.send(
+    tap((messageModel: ClientMessage) => this.webSocketService.send(
       '/topic/game/current/update', {userId: messageModel.userId}))
   ), {dispatch: false});
   /**
@@ -72,10 +72,10 @@ export class AppEffects {
    */
   signIn$ = createEffect(() => this.actions$.pipe(
     ofType(signIn),
-    exhaustMap((action: AuthRequestModel) =>
+    exhaustMap((action: AuthRequest) =>
       this.usersService.authorize({body: action})
       .pipe(
-        switchMap((response: AuthResponseModel) => {
+        switchMap((response: AuthResponse) => {
           this.toastService.show(
             'Login Successful!',
             {classname: 'bg-light toast-md', delay: 5000}
@@ -98,7 +98,7 @@ export class AppEffects {
   requestPrivateTopic$ = createEffect(() => this.actions$.pipe(
     ofType(requestPrivateTopic),
     exhaustMap(() => this.websocketService.getPrivateTopic()
-    .pipe(tap((response: PrivateTopicModel) =>
+    .pipe(tap((response: PrivateTopic) =>
       this.webSocketService.subscribeToPrivateTopic(response.id))))
   ), {dispatch: false})
 

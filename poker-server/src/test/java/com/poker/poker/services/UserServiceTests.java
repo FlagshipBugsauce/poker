@@ -3,8 +3,8 @@ package com.poker.poker.services;
 import com.poker.poker.common.TestBaseClass;
 import com.poker.poker.config.constants.AppConstants;
 import com.poker.poker.models.enums.UserGroup;
-import com.poker.poker.models.user.AuthResponseModel;
-import com.poker.poker.models.user.UserModel;
+import com.poker.poker.models.user.AuthResponse;
+import com.poker.poker.models.user.User;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import com.poker.poker.validation.exceptions.ForbiddenException;
@@ -53,13 +53,13 @@ public class UserServiceTests extends TestBaseClass {
     Mockito.when(jwtService.generateToken(Mockito.any(UserDetails.class)))
         .thenReturn(getSampleJwt());
     Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail()))
-        .thenReturn(getUserModel());
+        .thenReturn(getUser());
 
     // When
-    AuthResponseModel response = userService.authenticate(getSampleAuthRequestModel());
+    AuthResponse response = userService.authenticate(getSampleAuthRequest());
 
     // Then
-    Assertions.assertEquals(response, getSampleAuthResponseModel());
+    Assertions.assertEquals(response, getSampleAuthResponse());
   }
 
   @Test
@@ -70,19 +70,19 @@ public class UserServiceTests extends TestBaseClass {
 
     // When/Then
     Assertions.assertThrows(
-        BadRequestException.class, () -> userService.authenticate(getSampleAuthRequestModel()));
+        BadRequestException.class, () -> userService.authenticate(getSampleAuthRequest()));
   }
 
   @Test
   public void testRegistrationWithUniqueEmail() {
     // Given
     Mockito.when(userRepository.findUserDocumentByEmail(Mockito.anyString()))
-        .thenReturn(getUserModel());
+        .thenReturn(getUser());
     Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail())).thenReturn(null);
-    Mockito.when(userRepository.save(getUserModel())).thenReturn(null);
+    Mockito.when(userRepository.save(getUser())).thenReturn(null);
 
     // When/Then
-    Assertions.assertNotNull(userService.register(getSampleNewAccountModel()));
+    Assertions.assertNotNull(userService.register(getSampleNewAccount()));
   }
 
   @Test
@@ -90,12 +90,12 @@ public class UserServiceTests extends TestBaseClass {
     // Given
     Mockito.when(userRepository.findUserDocumentByEmail(Mockito.anyString())).thenReturn(null);
     Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail()))
-        .thenReturn(getUserModel());
-    Mockito.when(userRepository.save(getUserModel())).thenReturn(null);
+        .thenReturn(getUser());
+    Mockito.when(userRepository.save(getUser())).thenReturn(null);
 
     // When/Then
     Assertions.assertThrows(
-        BadRequestException.class, () -> userService.register(getSampleNewAccountModel()));
+        BadRequestException.class, () -> userService.register(getSampleNewAccount()));
   }
 
   /** Testing that validation works correctly when a user is a member of the Client group. */
@@ -105,7 +105,7 @@ public class UserServiceTests extends TestBaseClass {
     final String jwt = "token";
     Mockito.when(jwtService.extractEmail(jwt)).thenReturn(getSampleEmail());
     Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail()))
-        .thenReturn(getUserModel());
+        .thenReturn(getUser());
 
     // When/Then
     Assertions.assertThrows(
@@ -119,8 +119,8 @@ public class UserServiceTests extends TestBaseClass {
   public void testUserGroupValidation02() {
     // Given
     final String jwt = "token";
-    final UserModel guestUser =
-        new UserModel(
+    final User guestUser =
+        new User(
             UUID.randomUUID(),
             getSampleEmail(),
             passwordEncoder.encode(getSamplePassword()),
@@ -143,8 +143,8 @@ public class UserServiceTests extends TestBaseClass {
   public void testUserGroupValidation03() {
     // Given
     final String jwt = "token";
-    final UserModel adminUser =
-        new UserModel(
+    final User adminUser =
+        new User(
             UUID.randomUUID(),
             getSampleEmail(),
             passwordEncoder.encode(getSamplePassword()),

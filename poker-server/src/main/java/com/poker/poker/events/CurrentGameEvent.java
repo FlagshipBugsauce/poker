@@ -1,6 +1,6 @@
 package com.poker.poker.events;
 
-import com.poker.poker.models.game.CurrentGameModel;
+import com.poker.poker.models.game.CurrentGame;
 import java.util.UUID;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
@@ -12,16 +12,20 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class CurrentGameEvent extends ApplicationEvent {
 
-  /** User ID. */
+  /**
+   * User ID.
+   */
   private final UUID userId;
 
-  /** Information about the game a player is currently in. */
-  private final CurrentGameModel currentGameModel;
+  /**
+   * Information about the game a player is currently in.
+   */
+  private final CurrentGame currentGame;
 
   public CurrentGameEvent(
-      Object source, final UUID userId, final CurrentGameModel currentGameModel) {
+      Object source, final UUID userId, final CurrentGame currentGame) {
     super(source);
     this.userId = userId;
-    this.currentGameModel = currentGameModel;
+    this.currentGame = currentGame;
   }
 }

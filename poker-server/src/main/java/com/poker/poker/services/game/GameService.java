@@ -42,18 +42,18 @@ import com.poker.poker.events.StartHandEvent;
 import com.poker.poker.events.SystemChatMessageEvent;
 import com.poker.poker.events.ToastMessageEvent;
 import com.poker.poker.events.WaitForPlayerEvent;
-import com.poker.poker.models.ApiSuccessModel;
-import com.poker.poker.models.game.CurrentGameModel;
-import com.poker.poker.models.game.DealModel;
-import com.poker.poker.models.game.GameModel;
-import com.poker.poker.models.game.GameParameterModel;
-import com.poker.poker.models.game.GamePlayerModel;
-import com.poker.poker.models.game.HideCardsModel;
-import com.poker.poker.models.game.LobbyModel;
-import com.poker.poker.models.game.LobbyPlayerModel;
-import com.poker.poker.models.game.PokerTableModel;
-import com.poker.poker.models.game.TimerModel;
-import com.poker.poker.models.user.UserModel;
+import com.poker.poker.models.ApiSuccess;
+import com.poker.poker.models.game.CurrentGame;
+import com.poker.poker.models.game.Deal;
+import com.poker.poker.models.game.Game;
+import com.poker.poker.models.game.GameParameter;
+import com.poker.poker.models.game.GamePlayer;
+import com.poker.poker.models.game.HideCards;
+import com.poker.poker.models.game.Lobby;
+import com.poker.poker.models.game.LobbyPlayer;
+import com.poker.poker.models.game.PokerTable;
+import com.poker.poker.models.game.Timer;
+import com.poker.poker.models.user.User;
 import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -96,7 +96,7 @@ public class GameService {
         data.isUserInGame(event.getId()) ? data.getUsersGame(event.getId()).getId() : null;
     publisher.publishEvent(
         new CurrentGameEvent(
-            this, event.getId(), new CurrentGameModel(data.isUserInGame(event.getId()), id)));
+            this, event.getId(), new CurrentGame(data.isUserInGame(event.getId()), id)));
   }
 
   /**
@@ -106,8 +106,8 @@ public class GameService {
    */
   @EventListener
   public void createGame(final CreateGameEvent event) {
-    final GameParameterModel params = event.getGameParameterModel();
-    final UserModel user = event.getHost();
+    final GameParameter params = event.getGameParameter();
+    final User user = event.getHost();
 
     if (data.isUserInGame(user.getId())) {
       return; // User can only be in one game at a time.
@@ -118,7 +118,7 @@ public class GameService {
     // TODO: Refactor this to use generic message (requires client refactor also).
     publisher.publishEvent(
         new PublishMessageEvent<>(
-            this, "/topic/game/create/" + user.getId(), new ApiSuccessModel(gameId.toString())));
+            this, "/topic/game/create/" + user.getId(), new ApiSuccess(gameId.toString())));
   }
 
   /**
@@ -128,12 +128,12 @@ public class GameService {
    */
   @EventListener
   public void joinLobby(final JoinGameEvent event) {
-    final LobbyModel lobby = data.getLobby(event.getGameId());
+    final Lobby lobby = data.getLobby(event.getGameId());
     if (data.isUserInGame(event.getUser().getId())) {
       return;
     }
-    final UserModel user = event.getUser();
-    final LobbyPlayerModel player = new LobbyPlayerModel(user, false, false);
+    final User user = event.getUser();
+    final LobbyPlayer player = new LobbyPlayer(user, false, false);
     lobby.getPlayers().add(player);
     data.userJoinedGame(user.getId(), lobby.getId());
 
@@ -154,9 +154,9 @@ public class GameService {
     if (!data.isUserInGame(event.getUser().getId())) {
       return;
     }
-    final UserModel user = event.getUser();
-    final LobbyModel lobby = data.getUsersLobby(user.getId());
-    final LobbyPlayerModel player = data.getLobbyPlayer(user.getId());
+    final User user = event.getUser();
+    final Lobby lobby = data.getUsersLobby(user.getId());
+    final LobbyPlayer player = data.getLobbyPlayer(user.getId());
 
     lobby.getPlayers().removeIf(p -> p.getId().equals(user.getId()));
     data.removeUserIdToGameIdMapping(user.getId());
@@ -189,9 +189,9 @@ public class GameService {
     if (!data.isUserInGame(userId)) {
       return;
     }
-    final LobbyModel lobby = data.getUsersLobby(userId);
+    final Lobby lobby = data.getUsersLobby(userId);
     synchronized (lobby.getPlayers()) {
-      final LobbyPlayerModel player = data.getLobbyPlayer(userId);
+      final LobbyPlayer player = data.getLobbyPlayer(userId);
       player.setReady(!player.isReady());
       publishSystemChatMessageEvent(
           lobby.getId(),
@@ -209,8 +209,8 @@ public class GameService {
    */
   @EventListener
   public void start(final StartGameEvent event) {
-    final GameModel game = data.getUsersGame(event.getId());
-    final LobbyModel lobby = data.getUsersLobby(event.getId());
+    final Game game = data.getUsersGame(event.getId());
+    final Lobby lobby = data.getUsersLobby(event.getId());
 
     // Check that all players are ready.
     if (lobby.getPlayers().stream().anyMatch(p -> !p.isReady())) {
@@ -228,7 +228,7 @@ public class GameService {
    *
    * @param game The game the player is in.
    */
-  public void updateCurrentGameTopic(final GameModel game) {
+  public void updateCurrentGameTopic(final Game game) {
     game.getPlayers()
         .forEach(
             player -> publisher.publishEvent(new PublishCurrentGameEvent(this, player.getId())));
@@ -264,10 +264,10 @@ public class GameService {
   @Async
   @EventListener
   public void afk(final AwayStatusEvent event) {
-    final GameModel game = data.getUsersGame(event.getId());
-    final PokerTableModel table = data.getPokerTable(game.getId());
-    final GamePlayerModel player = data.getPlayer(event.getId());
-    final GamePlayerModel acting = table.getPlayers().get(table.getActingPlayer());
+    final Game game = data.getUsersGame(event.getId());
+    final PokerTable table = data.getPokerTable(game.getId());
+    final GamePlayer player = data.getPlayer(event.getId());
+    final GamePlayer acting = table.getPlayers().get(table.getActingPlayer());
     player.setAway(event.isAway());
 
     // If the players away status is true, and it's their turn, draw their card for them.
@@ -290,8 +290,8 @@ public class GameService {
   @Async
   @EventListener
   public void startHand(final StartHandEvent event) throws InterruptedException {
-    final GameModel game = data.getGame(event.getId());
-    final PokerTableModel table = data.getPokerTable(game.getId());
+    final Game game = data.getGame(event.getId());
+    final PokerTable table = data.getPokerTable(game.getId());
 
     // Table setup:
     setupNewHand(table, data.getDeck(game.getId()));
@@ -317,7 +317,7 @@ public class GameService {
   @Async
   @EventListener
   public void broadcastPlayerCards(final PublishCardsEvent event) {
-    final GameModel game = data.getGame(event.getId());
+    final Game game = data.getGame(event.getId());
     game.getPlayers()
         .forEach(
             p -> publisher.publishEvent(new PrivateMessageEvent<>(this, PlayerData, p.getId(), p)));
@@ -326,14 +326,14 @@ public class GameService {
   @Async
   @EventListener
   public void dealCards(final DealCardsEvent event) {
-    publisher.publishEvent(new GameMessageEvent<>(this, Deal, event.getId(), new DealModel()));
+    publisher.publishEvent(new GameMessageEvent<>(this, Deal, event.getId(), new Deal()));
   }
 
   @Async
   @EventListener
   public void hideCards(final HideCardsEvent event) {
     publisher.publishEvent(
-        new GameMessageEvent<>(this, HideCards, event.getId(), new HideCardsModel()));
+        new GameMessageEvent<>(this, HideCards, event.getId(), new HideCards()));
   }
 
   /**
@@ -355,8 +355,8 @@ public class GameService {
   @Async
   @EventListener
   public void handleGameAction(final GameActionEvent event) throws InterruptedException {
-    final GameModel game = data.getUsersGame(event.getPlayerId());
-    final PokerTableModel table = data.getPokerTable(game.getId());
+    final Game game = data.getUsersGame(event.getPlayerId());
+    final PokerTable table = data.getPokerTable(game.getId());
 
     // Update table + player models.
     handlePlayerAction(table, event.getType(), event.getPlayerId(), adjustWager(table, event));
@@ -399,21 +399,21 @@ public class GameService {
   }
 
   private void publishPlayerWonHandChatMessage(final UUID id) {
-    final PokerTableModel table = data.getPokerTable(id);
+    final PokerTable table = data.getPokerTable(id);
     assert table.getSummary() != null;
     assert table.isDisplayHandSummary();
-    final GamePlayerModel winner = table.getPlayers().get(table.getSummary().getWinner());
+    final GamePlayer winner = table.getPlayers().get(table.getSummary().getWinner());
     publishSystemChatMessageEvent(
         id, String.format("%s %s won the hand.", winner.getFirstName(), winner.getLastName()));
   }
 
   private void publishTimerMessage(final UUID id, final int durationInMs) {
-    final GameModel game = data.getGame(id);
+    final Game game = data.getGame(id);
     final BigDecimal duration =
         new BigDecimal(durationInMs).divide(new BigDecimal(1000), 10, HALF_UP);
     publisher.publishEvent(
         new GameMessageEvent<>(
-            this, Timer, game.getId(), new TimerModel(UUID.randomUUID(), duration)));
+            this, Timer, game.getId(), new Timer(UUID.randomUUID(), duration)));
   }
 
   /**
@@ -425,9 +425,9 @@ public class GameService {
   @Async
   @EventListener
   public void waitForAction(final WaitForPlayerEvent event) throws InterruptedException {
-    final GameModel game = data.getUsersGame(event.getId());
-    final PokerTableModel table = data.getPokerTable(game.getId());
-    final GamePlayerModel player = data.getPlayer(event.getId());
+    final Game game = data.getUsersGame(event.getId());
+    final PokerTable table = data.getPokerTable(game.getId());
+    final GamePlayer player = data.getPlayer(event.getId());
     final int tracker = table.getEventTracker();
     data.broadcastObfuscatedPokerTable(game.getId());
 
@@ -465,7 +465,7 @@ public class GameService {
   @Async
   @EventListener
   public void gameOver(final GameOverEvent event) {
-    final GameModel game = data.getGame(event.getId());
+    final Game game = data.getGame(event.getId());
     game.setPhase(Over);
 
     // TODO: Save game in DB

@@ -7,10 +7,10 @@ import com.poker.poker.events.JoinGameEvent;
 import com.poker.poker.events.LeaveLobbyEvent;
 import com.poker.poker.events.ReadyEvent;
 import com.poker.poker.events.StartGameEvent;
-import com.poker.poker.models.ApiSuccessModel;
-import com.poker.poker.models.game.ActiveStatusModel;
-import com.poker.poker.models.game.GameParameterModel;
-import com.poker.poker.models.user.UserModel;
+import com.poker.poker.models.ApiSuccess;
+import com.poker.poker.models.game.ActiveStatus;
+import com.poker.poker.models.game.GameParameter;
+import com.poker.poker.models.user.User;
 import com.poker.poker.repositories.UserRepository;
 import com.poker.poker.services.JwtService;
 import com.poker.poker.services.UserService;
@@ -58,176 +58,158 @@ public class GameController {
   /**
    * Creates a game.
    *
-   * @param jwt Authorization token.
-   * @param gameParameterModel Model containing the information necessary to create a game.
-   * @return An ApiSuccessModel containing the game's UUID in the message field if the request was
-   *     successful, otherwise returns a 400 or 403.
+   * @param jwt           Authorization token.
+   * @param gameParameter Model containing the information necessary to create a game.
+   * @return An ApiSuccess containing the game's UUID in the message field if the request was
+   * successful, otherwise returns a 400 or 403.
    */
   @Operation(
       summary = "Create a new game",
       description = "Creates a new game and returns the UUID to the client.",
       tags = "game")
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Creation of game was successful.",
-            content =
-                @Content(
-                    schema = @Schema(implementation = ApiSuccessModel.class),
-                    mediaType = MediaType.APPLICATION_JSON_VALUE))
-      })
+  @ApiResponses(@ApiResponse(
+      responseCode = "200",
+      description = "Creation of game was successful.",
+      content =
+      @Content(
+          schema = @Schema(implementation = ApiSuccess.class),
+          mediaType = MediaType.APPLICATION_JSON_VALUE)))
   @RequestMapping(value = "/create", method = RequestMethod.POST)
-  public ResponseEntity<ApiSuccessModel> createGame(
+  public ResponseEntity<ApiSuccess> createGame(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
-      @Valid @RequestBody GameParameterModel gameParameterModel) {
-    final UserModel host = jwtService.getUserDocument(jwt);
+      @Valid @RequestBody GameParameter gameParameter) {
+    final User host = jwtService.getUserDocument(jwt);
     userService.validate(jwt, gameConstants.getClientGroups());
-    publisher.publishEvent(new CreateGameEvent(this, gameParameterModel, host));
+    publisher.publishEvent(new CreateGameEvent(this, gameParameter, host));
     return ResponseEntity.ok(
-        new ApiSuccessModel(data.getUsersGame(host.getId()).getId().toString()));
+        new ApiSuccess(data.getUsersGame(host.getId()).getId().toString()));
   }
 
   /**
    * Endpoint which allows players to join games.
    *
-   * @param jwt Authorization token.
+   * @param jwt    Authorization token.
    * @param gameId The ID of the game the player wishes to join.
-   * @return An ApiSuccessModel indicating the attempt to join was successful, otherwise returns a
-   *     BAD REQUEST status.
+   * @return An ApiSuccess indicating the attempt to join was successful, otherwise returns a BAD
+   * REQUEST status.
    */
   @Operation(
       summary = "Joins a game",
       description = "Joins the game with the provided UUID, provided such a game exists.",
       tags = "game")
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Game was joined successfully.",
-            content =
-                @Content(
-                    schema = @Schema(implementation = ApiSuccessModel.class),
-                    mediaType = MediaType.APPLICATION_JSON_VALUE))
-      })
+  @ApiResponses(@ApiResponse(
+      responseCode = "200",
+      description = "Game was joined successfully.",
+      content =
+      @Content(
+          schema = @Schema(implementation = ApiSuccess.class),
+          mediaType = MediaType.APPLICATION_JSON_VALUE)))
   @RequestMapping(value = "/join/{gameId}", method = RequestMethod.POST)
-  public ResponseEntity<ApiSuccessModel> joinGame(
+  public ResponseEntity<ApiSuccess> joinGame(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
       @PathVariable String gameId) {
     userService.validate(jwt, gameConstants.getClientGroups());
     uuidService.checkIfValidAndThrowBadRequest(gameId);
-    final UserModel user = jwtService.getUserDocument(jwt);
+    final User user = jwtService.getUserDocument(jwt);
     final UUID game = UUID.fromString(gameId);
     publisher.publishEvent(new JoinGameEvent(this, game, user));
-    return ResponseEntity.ok(new ApiSuccessModel("Request Completed."));
+    return ResponseEntity.ok(new ApiSuccess("Request Completed."));
   }
 
   @Operation(
       summary = "Ready to Start",
       description = "Request sent when a player is ready for the game to start.",
       tags = "game")
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Request handled successfully.",
-            content =
-                @Content(
-                    schema = @Schema(implementation = ApiSuccessModel.class),
-                    mediaType = MediaType.APPLICATION_JSON_VALUE))
-      })
+  @ApiResponses(@ApiResponse(
+      responseCode = "200",
+      description = "Request handled successfully.",
+      content =
+      @Content(
+          schema = @Schema(implementation = ApiSuccess.class),
+          mediaType = MediaType.APPLICATION_JSON_VALUE)))
   @RequestMapping(value = "/ready", method = RequestMethod.POST)
-  public ResponseEntity<ApiSuccessModel> ready(
+  public ResponseEntity<ApiSuccess> ready(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
     userService.validate(jwt, gameConstants.getClientGroups());
     publisher.publishEvent(
         new ReadyEvent(
             this, userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt)).getId()));
-    return ResponseEntity.ok(new ApiSuccessModel("Ready status toggled."));
+    return ResponseEntity.ok(new ApiSuccess("Ready status toggled."));
   }
 
   @Operation(
       summary = "Leave Game Lobby",
       description = "Request sent when a player leaves a game lobby.",
       tags = "game")
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Request handled successfully.",
-            content =
-                @Content(
-                    schema = @Schema(implementation = ApiSuccessModel.class),
-                    mediaType = MediaType.APPLICATION_JSON_VALUE))
-      })
+  @ApiResponses(@ApiResponse(
+      responseCode = "200",
+      description = "Request handled successfully.",
+      content =
+      @Content(
+          schema = @Schema(implementation = ApiSuccess.class),
+          mediaType = MediaType.APPLICATION_JSON_VALUE)))
   @RequestMapping(value = "/leave-lobby", method = RequestMethod.POST)
-  public ResponseEntity<ApiSuccessModel> leaveLobby(
+  public ResponseEntity<ApiSuccess> leaveLobby(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
     userService.validate(jwt, gameConstants.getClientGroups());
     publisher.publishEvent(
         new LeaveLobbyEvent(
             this, userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt))));
-    return ResponseEntity.ok(new ApiSuccessModel("Player left lobby."));
+    return ResponseEntity.ok(new ApiSuccess("Player left lobby."));
   }
 
   /**
    * Starts a game.
    *
    * @param jwt JWT.
-   * @return ApiSuccessModel with 200 status if the request is successful, throws otherwise.
+   * @return ApiSuccess with 200 status if the request is successful, throws otherwise.
    */
   @Operation(
       summary = "Start Game",
       description = "Starts the game, provided all preconditions are satisfied..",
       tags = "game")
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Game started successfully.",
-            content =
-                @Content(
-                    schema = @Schema(implementation = ApiSuccessModel.class),
-                    mediaType = MediaType.APPLICATION_JSON_VALUE))
-      })
+  @ApiResponses(@ApiResponse(
+      responseCode = "200",
+      description = "Game started successfully.",
+      content =
+      @Content(
+          schema = @Schema(implementation = ApiSuccess.class),
+          mediaType = MediaType.APPLICATION_JSON_VALUE)))
   @RequestMapping(value = "/start", method = RequestMethod.POST)
-  public ResponseEntity<ApiSuccessModel> startGame(
+  public ResponseEntity<ApiSuccess> startGame(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
     userService.validate(jwt, gameConstants.getClientGroups());
-    final UserModel user = userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt));
+    final User user = userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt));
     publisher.publishEvent(new StartGameEvent(this, user.getId()));
-    return ResponseEntity.ok(new ApiSuccessModel("The game has been started successfully."));
+    return ResponseEntity.ok(new ApiSuccess("The game has been started successfully."));
   }
 
   /**
    * Sets the status that indicates whether a player is active or not.
    *
    * @param jwt JWT.
-   * @param activeStatusModel Model containing the active status.
-   * @return ApiSuccessModel with 200 status if the request is successful, throws otherwise.
+   * @param activeStatus Model containing the active status.
+   * @return ApiSuccess with 200 status if the request is successful, throws otherwise.
    */
   @Operation(
       summary = "Set Active Status",
       description = "Sets the status that indicates whether a player is active or not.",
       tags = "game")
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Creation of game was successful.",
-            content =
-                @Content(
-                    schema = @Schema(implementation = ApiSuccessModel.class),
-                    mediaType = MediaType.APPLICATION_JSON_VALUE))
-      })
+  @ApiResponses(@ApiResponse(
+      responseCode = "200",
+      description = "Creation of game was successful.",
+      content =
+      @Content(
+          schema = @Schema(implementation = ApiSuccess.class),
+          mediaType = MediaType.APPLICATION_JSON_VALUE)))
   @RequestMapping(value = "/active", method = RequestMethod.POST)
-  public ResponseEntity<ApiSuccessModel> setActiveStatus(
+  public ResponseEntity<ApiSuccess> setActiveStatus(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,
-      @Valid @RequestBody ActiveStatusModel activeStatusModel) {
+      @Valid @RequestBody ActiveStatus activeStatus) {
     userService.validate(jwt, gameConstants.getClientGroups());
     final UUID userId = userRepository.findUserDocumentById(jwtService.getUserId(jwt)).getId();
-    publisher.publishEvent(new AwayStatusEvent(this, userId, activeStatusModel.isAway()));
+    publisher.publishEvent(new AwayStatusEvent(this, userId, activeStatus.isAway()));
 
-    return ResponseEntity.ok(new ApiSuccessModel("PLayers status changed successfully."));
+    return ResponseEntity.ok(new ApiSuccess("PLayers status changed successfully."));
   }
 }

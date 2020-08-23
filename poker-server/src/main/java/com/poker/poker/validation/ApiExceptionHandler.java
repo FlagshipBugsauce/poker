@@ -4,7 +4,7 @@ import com.poker.poker.controllers.GameController;
 import com.poker.poker.controllers.HandController;
 import com.poker.poker.controllers.TestController;
 import com.poker.poker.controllers.UserController;
-import com.poker.poker.models.ApiErrorModel;
+import com.poker.poker.models.ApiError;
 import com.poker.poker.validation.exceptions.BadRequestException;
 import com.poker.poker.validation.exceptions.ForbiddenException;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -41,20 +41,17 @@ public class ApiExceptionHandler {
    * @param e Exception that was thrown.
    * @return Response with bad request status and any relevant information.
    */
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            responseCode = "400",
-            description = "Bad request.",
-            content =
-                @Content(
-                    schema = @Schema(implementation = ApiErrorModel.class),
-                    mediaType = "application/json"))
-      })
+  @ApiResponses(@ApiResponse(
+      responseCode = "400",
+      description = "Bad request.",
+      content =
+      @Content(
+          schema = @Schema(implementation = ApiError.class),
+          mediaType = "application/json")))
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ExceptionHandler(BadRequestException.class)
-  protected ResponseEntity<ApiErrorModel> handleBadRequestExceptions(final BadRequestException e) {
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getApiErrorModel());
+  protected ResponseEntity<ApiError> handleBadRequestExceptions(final BadRequestException e) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getApiError());
   }
 
   /**
@@ -63,19 +60,16 @@ public class ApiExceptionHandler {
    * @param e Exception that was thrown.
    * @return Response with forbidden status and any relevant information.
    */
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            responseCode = "403",
-            description = "Forbidden.",
-            content =
-                @Content(
-                    schema = @Schema(implementation = ApiErrorModel.class),
-                    mediaType = "application/json"))
-      })
+  @ApiResponses(@ApiResponse(
+      responseCode = "403",
+      description = "Forbidden.",
+      content =
+      @Content(
+          schema = @Schema(implementation = ApiError.class),
+          mediaType = "application/json")))
   @ResponseStatus(HttpStatus.FORBIDDEN)
   @ExceptionHandler(ForbiddenException.class)
-  protected ResponseEntity<ApiErrorModel> handleForbiddenExceptions(final ForbiddenException e) {
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getApiErrorModel());
+  protected ResponseEntity<ApiError> handleForbiddenExceptions(final ForbiddenException e) {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getApiError());
   }
 }

@@ -6,11 +6,11 @@ import {MemoizedSelector} from '@ngrx/store';
 import {GameStateContainer} from '../../shared/models/app-state.model';
 import * as selectors from '../../state/app.selector';
 import {mockGameModel} from '../../testing/mock-models';
-import {GameModel} from '../../api/models';
+import {Game} from '../../api/models';
 
 describe('EndComponent', () => {
   let mockStore: MockStore;
-  let mockGameSelector: MemoizedSelector<GameStateContainer, GameModel>;
+  let mockGameSelector: MemoizedSelector<GameStateContainer, Game>;
   let component: EndComponent;
   let fixture: ComponentFixture<EndComponent>;
 

@@ -16,7 +16,7 @@ import {
   PokerTableStateContainer
 } from '../../shared/models/app-state.model';
 import * as selectors from '../../state/app.selector';
-import {DrawGameDataModel} from '../../api/models/draw-game-data-model';
+import {DrawGameData} from '../../api/models/draw-game-data';
 import {
   mockChatMessage,
   mockGameData,
@@ -28,15 +28,15 @@ import {
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 import {WebSocketService} from '../../shared/web-socket/web-socket.service';
 import {
-  CardModel,
-  ChatMessageModel,
-  ClientUserModel,
-  DealModel,
-  GameModel,
-  GamePlayerModel,
-  HandSummaryModel,
-  TimerModel,
-  WinnerModel
+  Card,
+  ChatMessage,
+  ClientUser,
+  Deal,
+  Game,
+  GamePlayer,
+  HandSummary,
+  Timer,
+  Winner
 } from '../../api/models';
 import {MockChatService, MockWebSocketService} from '../../testing/mock-services';
 import {ChatService} from '../../shared/web-socket/chat.service';
@@ -50,25 +50,25 @@ import {CommunityCardsComponent} from '../poker-table/community-cards/community-
 
 describe('GameComponent', () => {
   let mockStore: MockStore;
-  let mockGameDataSelector: MemoizedSelector<GameDataStateContainer, DrawGameDataModel[]>;
+  let mockGameDataSelector: MemoizedSelector<GameDataStateContainer, DrawGameData[]>;
   let mockGameStateSelector: MemoizedSelector<GameStateContainer, string>;
-  let mockLoggedInUserSelector: MemoizedSelector<AppStateContainer, ClientUserModel>;
+  let mockLoggedInUserSelector: MemoizedSelector<AppStateContainer, ClientUser>;
   let mockJwtSelector: MemoizedSelector<AppStateContainer, string>;
-  let mockGeneralChatSelector: MemoizedSelector<ChatStateContainer, ChatMessageModel>;
+  let mockGeneralChatSelector: MemoizedSelector<ChatStateContainer, ChatMessage>;
   let mockAuthenticatedSelector: MemoizedSelector<AppStateContainer, boolean>;
-  let mockGameSelector: MemoizedSelector<GameStateContainer, GameModel>;
-  let mockPlayersSelector: MemoizedSelector<PokerTableStateContainer, GamePlayerModel[]>;
+  let mockGameSelector: MemoizedSelector<GameStateContainer, Game>;
+  let mockPlayersSelector: MemoizedSelector<PokerTableStateContainer, GamePlayer[]>;
   let mockActingPlayerSelector: MemoizedSelector<PokerTableStateContainer, number>;
   let mockDisplayHandSummarySelector: MemoizedSelector<PokerTableStateContainer, boolean>;
   let mockGamePhaseSelector: MemoizedSelector<GameStateContainer, string>;
   let mockPlayerThatActedSelector: MemoizedSelector<PokerTableStateContainer, number>;
-  let mockHandSummarySelector: MemoizedSelector<PokerTableStateContainer, HandSummaryModel>;
+  let mockHandSummarySelector: MemoizedSelector<PokerTableStateContainer, HandSummary>;
   let mockAwayStatusSelector: MemoizedSelector<PlayerDataStateContainer, boolean>;
-  let mockStartTimerSelector: MemoizedSelector<MiscEventsStateContainer, TimerModel>;
-  let mockDealSelector: MemoizedSelector<MiscEventsStateContainer, DealModel>;
-  let mockWinnersSelector: MemoizedSelector<PokerTableStateContainer, WinnerModel[]>;
+  let mockStartTimerSelector: MemoizedSelector<MiscEventsStateContainer, Timer>;
+  let mockDealSelector: MemoizedSelector<MiscEventsStateContainer, Deal>;
+  let mockWinnersSelector: MemoizedSelector<PokerTableStateContainer, Winner[]>;
   let mockDealerSelector: MemoizedSelector<PokerTableStateContainer, number>;
-  let mockSharedCardsSelector: MemoizedSelector<PokerTableStateContainer, CardModel[]>;
+  let mockSharedCardsSelector: MemoizedSelector<PokerTableStateContainer, Card[]>;
   let component: GameComponent;
   let fixture: ComponentFixture<GameComponent>;
 

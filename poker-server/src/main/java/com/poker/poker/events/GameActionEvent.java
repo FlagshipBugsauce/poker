@@ -1,7 +1,7 @@
 package com.poker.poker.events;
 
 import com.poker.poker.models.enums.GameAction;
-import com.poker.poker.models.game.GameActionModel;
+import com.poker.poker.models.game.GameActionData;
 import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.Getter;
@@ -19,7 +19,7 @@ public class GameActionEvent extends ApplicationEvent {
   /** Raise amount (if applicable). */
   private final BigDecimal raise;
 
-  public GameActionEvent(final Object source, final GameActionModel model) {
+  public GameActionEvent(final Object source, final GameActionData model) {
     super(source);
     playerId = model.getPlayerId();
     type = model.getActionType();

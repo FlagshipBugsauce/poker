@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {ClientUserModel, LobbyModel, LobbyPlayerModel} from 'src/app/api/models';
+import {ClientUser, Lobby, LobbyPlayer} from 'src/app/api/models';
 import {AppStateContainer, LobbyStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {notReady, readyUp, startGame} from '../../state/app.actions';
@@ -35,9 +35,9 @@ export class LobbyComponent implements OnInit, OnDestroy {
   /** Observable used to determine whether a player is ready or not. */
   public ready$: Observable<boolean>;
   /** Observable of the model for the user currently logged in. */
-  public userModel$: Observable<ClientUserModel>;
+  public userModel$: Observable<ClientUser>;
   /** Model representing the lobby. */
-  public lobbyModel: LobbyModel;
+  public lobbyModel: Lobby;
   /** Helper subject which assists in terminating subscriptions. */
   public ngDestroyed$ = new Subject();
   /**
@@ -57,7 +57,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
   public get canStart(): boolean {
     if (this.lobbyModel.players !== undefined) {
       const canStart: boolean = this.lobbyModel.players
-      .find((player: LobbyPlayerModel) =>
+      .find((player: LobbyPlayer) =>
         !player.ready) === undefined && this.lobbyModel.players.length > 1;
       if (!this.lastCanStart && canStart) {
         this.displayCanStartAlert = true;
@@ -83,7 +83,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
     this.ready$ = this.appStore.select(selectReadyStatus);
     this.lobbyStore.select(selectLobbyModel)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((lobbyModel: LobbyModel) => this.lobbyModel = lobbyModel);
+    .subscribe((lobbyModel: Lobby) => this.lobbyModel = lobbyModel);
     this.userModel$ = this.appStore.select(selectLoggedInUser);
   }
 

@@ -1,5 +1,5 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {DrawGameDataModel, GameModel} from 'src/app/api/models';
+import {DrawGameData, Game} from 'src/app/api/models';
 import {GameStateContainer} from '../../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {selectGameModel} from '../../state/app.selector';
@@ -15,7 +15,7 @@ export class EndComponent implements OnInit, OnDestroy {
   /**
    * Game data that is used to display a summary of what occurred in the game.
    */
-  @Input() gameData: DrawGameDataModel[] = [] as DrawGameDataModel[];
+  @Input() gameData: DrawGameData[] = [] as DrawGameData[];
 
   /**
    * Array of numbers used for the game summary.
@@ -24,7 +24,7 @@ export class EndComponent implements OnInit, OnDestroy {
   /**
    * Getter for the game model.
    */
-  public gameModel: GameModel;
+  public gameModel: Game;
   public ngDestroyed$ = new Subject();
 
   constructor(private gameStore: Store<GameStateContainer>) {
@@ -37,7 +37,7 @@ export class EndComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.gameStore.select(selectGameModel)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((gameModel: GameModel) => {
+    .subscribe((gameModel: Game) => {
       this.gameModel = gameModel;
     });
   }

@@ -1,6 +1,6 @@
 /* tslint:disable:no-bitwise */
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {CardModel, GamePlayerModel, PokerTableModel, UserModel} from '../../../api/models';
+import {Card, GamePlayer, PokerTable, User} from '../../../api/models';
 import {CardSuit, CardValue} from '../../../shared/models/card.enum';
 import {Store} from '@ngrx/store';
 import {
@@ -38,20 +38,20 @@ export class PlayerBoxComponent implements OnInit, OnDestroy {
             1     0     9      */
 
   @Input() player: number;
-  public publicCards: CardModel[] = [
+  public publicCards: Card[] = [
     {value: CardValue.Ace, suit: CardSuit.Spades},
     {value: CardValue.Ace, suit: CardSuit.Spades}
   ];
-  public privateCards: CardModel[] = [
+  public privateCards: Card[] = [
     {value: CardValue.Ace, suit: CardSuit.Spades},
     {value: CardValue.Ace, suit: CardSuit.Spades}
   ];
 
   public hideCards: boolean = false;
   public hiddenCards: boolean[] = [false, false];
-  public loggedInUser: UserModel;
-  public table: PokerTableModel;
-  public playerModel: GamePlayerModel = {} as GamePlayerModel;
+  public loggedInUser: User;
+  public table: PokerTable;
+  public playerModel: GamePlayer = {} as GamePlayer;
   public dealerButtonPath: string = 'assets/icons/game/dealer.svg';
   public awayIconPath: string = 'assets/icons/afk.svg';
   public initials: string = 'AB';
@@ -59,7 +59,7 @@ export class PlayerBoxComponent implements OnInit, OnDestroy {
   public bankRoll: number = 420.69;
   public away: boolean = false;
   public ngDestroyed$: Subject<any> = new Subject<any>();
-  public players: GamePlayerModel[];
+  public players: GamePlayer[];
 
   constructor(
     private appStore: Store<AppStateContainer>,
@@ -82,7 +82,7 @@ export class PlayerBoxComponent implements OnInit, OnDestroy {
     return this.safe ? this.playerModel.controls.currentBet : 0;
   }
 
-  public get cards(): CardModel[] {
+  public get cards(): Card[] {
     return !this.safe ? [{value: CardValue.Ace, suit: CardSuit.Spades}] :
       this.loggedInUser.id === this.playerModel.id ? this.privateCards : this.publicCards;
   }
@@ -102,11 +102,11 @@ export class PlayerBoxComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.pokerTableStore.select(selectPokerTable)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((table: PokerTableModel) => this.table = table);
+    .subscribe((table: PokerTable) => this.table = table);
 
     this.pokerTableStore.select(selectPlayers)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((players: GamePlayerModel[]) => {
+    .subscribe((players: GamePlayer[]) => {
       this.players = players;
       this.playerModel = players ? players[this.player] : null;
       if (this.playerModel) {
@@ -121,11 +121,11 @@ export class PlayerBoxComponent implements OnInit, OnDestroy {
 
     this.appStore.select(selectLoggedInUser)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((user: UserModel) => this.loggedInUser = user);
+    .subscribe((user: User) => this.loggedInUser = user);
 
     this.privatePlayerDataStore.select(selectPrivateCards)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((cards: CardModel[]) => this.privateCards = cards);
+    .subscribe((cards: Card[]) => this.privateCards = cards);
 
     // this.miscEventStore.select(selectHiddenCards)
     // .pipe(takeUntil(this.ngDestroyed$))

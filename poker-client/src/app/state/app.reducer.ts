@@ -34,19 +34,19 @@ import {
 import {AppState, ChatContainer, MiscEventsState} from '../shared/models/app-state.model';
 import {TopBarLobbyModel} from '../shared/models/top-bar-lobby.model';
 import {
-  AuthResponseModel,
-  ChatMessageModel,
-  CurrentGameModel,
-  DealModel,
-  DrawGameDataContainerModel,
-  GameModel,
-  GamePlayerModel,
-  HideCardsModel,
-  LobbyModel,
-  LobbyPlayerModel,
-  PokerTableModel,
-  TimerModel,
-  ToastModel
+  AuthResponse,
+  ChatMessage,
+  CurrentGame,
+  Deal,
+  DrawGameDataContainer,
+  Game,
+  GamePlayer,
+  HideCards,
+  Lobby,
+  LobbyPlayer,
+  PokerTable,
+  Timer,
+  Toast
 } from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
 import {GamePhase} from '../shared/models/game-phase.enum';
@@ -80,7 +80,7 @@ const appReducerLocal = createReducer<AppState>(
   on(notReady, (state: AppState) => ({...state, ready: false})),
   on(
     signInSuccess,
-    (state: AppState, response: AuthResponseModel) =>
+    (state: AppState, response: AuthResponse) =>
       ({
         ...state,
         jwt: response.jwt,
@@ -91,7 +91,7 @@ const appReducerLocal = createReducer<AppState>(
   on(signInFail, (state: AppState) => ({...state, showSignInFail: true})),
   on(hideFailedSignInWarning, (state: AppState) => ({...state, showSignInFail: false})),
   on(updateCurrentGame,
-    (state: AppState, currentGame: CurrentGameModel) => ({...state, currentGame}))
+    (state: AppState, currentGame: CurrentGame) => ({...state, currentGame}))
 );
 
 export function appReducer(state: AppState, action) {
@@ -101,49 +101,49 @@ export function appReducer(state: AppState, action) {
 /**
  * GameData reducer and initial state.
  */
-export const gameDataInitialState: DrawGameDataContainerModel = {
+export const gameDataInitialState: DrawGameDataContainer = {
   gameData: []
 };
-const gameDataReducerInternal = createReducer<DrawGameDataContainerModel>(
+const gameDataReducerInternal = createReducer<DrawGameDataContainer>(
   gameDataInitialState,
   on(gameDataUpdated,
-    (state: DrawGameDataContainerModel, newState: DrawGameDataContainerModel) => newState));
+    (state: DrawGameDataContainer, newState: DrawGameDataContainer) => newState));
 
-export function gameDataReducer(state: DrawGameDataContainerModel, action) {
+export function gameDataReducer(state: DrawGameDataContainer, action) {
   return gameDataReducerInternal(state, action);
 }
 
 /**
  * GameModel reducer and initial state.
  */
-export const gameModelInitialState: GameModel = {
+export const gameModelInitialState: Game = {
   players: []
-} as GameModel;
-const gameModelReducerInternal = createReducer<GameModel>(
+} as Game;
+const gameModelReducerInternal = createReducer<Game>(
   gameModelInitialState,
-  on(gameModelUpdated, (state: GameModel, newState: GameModel) => newState),
-  on(gamePhaseChanged, (state: GameModel, phase: { phase: GamePhase }) =>
+  on(gameModelUpdated, (state: Game, newState: Game) => newState),
+  on(gamePhaseChanged, (state: Game, phase: { phase: GamePhase }) =>
     ({...state, phase: phase.phase})),
-  on(playerAwayToggled, (state: GameModel, player: GamePlayerModel) => {
-    const players: GamePlayerModel[] = state
+  on(playerAwayToggled, (state: Game, player: GamePlayer) => {
+    const players: GamePlayer[] = state
     .players.map(p => p.id === player.id ? player : ({...p}));
     return ({...state, players});
   }),
-  on(gamePlayerUpdated, (state: GameModel, player: GamePlayerModel) => {
-    const players: GamePlayerModel[] = state
+  on(gamePlayerUpdated, (state: Game, player: GamePlayer) => {
+    const players: GamePlayer[] = state
     .players.map(p => p.id === player.id ? player : ({...p}));
     return ({...state, players});
   })
 );
 
-export function gameModelReducer(state: GameModel, action) {
+export function gameModelReducer(state: Game, action) {
   return gameModelReducerInternal(state, action);
 }
 
 /**
  * LobbyModel reducer and initial state.
  */
-export const lobbyModelInitialState: LobbyModel = {
+export const lobbyModelInitialState: Lobby = {
   parameters: {
     maxPlayers: 0,
     name: '',
@@ -155,23 +155,23 @@ export const lobbyModelInitialState: LobbyModel = {
     lastName: ''
   },
   players: []
-} as LobbyModel;
-const lobbyModelReducerInternal = createReducer<LobbyModel>(
+} as Lobby;
+const lobbyModelReducerInternal = createReducer<Lobby>(
   lobbyModelInitialState,
-  on(lobbyModelUpdated, (state: LobbyModel, newState: LobbyModel) => newState),
-  on(playerReadyToggled, (state: LobbyModel, player: LobbyPlayerModel) =>
+  on(lobbyModelUpdated, (state: Lobby, newState: Lobby) => newState),
+  on(playerReadyToggled, (state: Lobby, player: LobbyPlayer) =>
     ({...state, players: state.players.map(p => p.id === player.id ? player : p)})),
-  on(playerJoinedLobby, (state: LobbyModel, player: LobbyPlayerModel) => {
-    const players: LobbyPlayerModel[] = state.players.map(p => ({...p}));
+  on(playerJoinedLobby, (state: Lobby, player: LobbyPlayer) => {
+    const players: LobbyPlayer[] = state.players.map(p => ({...p}));
     players.push(player);
     return ({...state, players});
   }),
-  on(playerLeftLobby, (state: LobbyModel, player: LobbyPlayerModel) => {
+  on(playerLeftLobby, (state: Lobby, player: LobbyPlayer) => {
     // Filter out player that left.
-    const players: LobbyPlayerModel[] =
+    const players: LobbyPlayer[] =
       state.players.map(p => ({...p})).filter(p => p.id !== player.id);
     // Updating host (host is always players[0]).
-    let host: LobbyPlayerModel;
+    let host: LobbyPlayer;
     if (players.length > 0) {
       players[0].host = true;
       host = players[0];
@@ -180,7 +180,7 @@ const lobbyModelReducerInternal = createReducer<LobbyModel>(
   })
 );
 
-export function lobbyModelReducer(state: LobbyModel, action) {
+export function lobbyModelReducer(state: Lobby, action) {
   return lobbyModelReducerInternal(state, action);
 }
 
@@ -200,21 +200,21 @@ export function gameListReducer(state: GameListContainerModel, action) {
 /**
  * Player data initial state.
  */
-export const playerDataInitialState: GamePlayerModel = {} as GamePlayerModel;
-const playerDataReducerInternal = createReducer<GamePlayerModel>(
+export const playerDataInitialState: GamePlayer = {} as GamePlayer;
+const playerDataReducerInternal = createReducer<GamePlayer>(
   playerDataInitialState,
   on(playerDataUpdated,
-    (state: GamePlayerModel, newState: GamePlayerModel) => newState));
+    (state: GamePlayer, newState: GamePlayer) => newState));
 
-export function playerDataReducer(state: GamePlayerModel, action) {
+export function playerDataReducer(state: GamePlayer, action) {
   return playerDataReducerInternal(state, action);
 }
 
 // TODO: Don't think I actually need this...
-export const toastDataInitialState: ToastModel = {} as ToastModel;
-const toastDataReducerInternal = createReducer<ToastModel>(
+export const toastDataInitialState: Toast = {} as Toast;
+const toastDataReducerInternal = createReducer<Toast>(
   toastDataInitialState,
-  on(gameToastReceived, (state: ToastModel, newState: ToastModel) => newState));
+  on(gameToastReceived, (state: Toast, newState: Toast) => newState));
 
 export function toastDataReducer(state, action) {
   return toastDataReducerInternal(state, action);
@@ -238,10 +238,10 @@ export const chatInitialState: ChatContainer = {
 const chatReducerInternal = createReducer<ChatContainer>(
   chatInitialState,
   on(generalChatMsgReceived,
-    (state: ChatContainer, message: ChatMessageModel) =>
+    (state: ChatContainer, message: ChatMessage) =>
       ({...chatInitialState, generalChat: message})),
   on(gameChatMsgReceived,
-    (state: ChatContainer, message: ChatMessageModel) =>
+    (state: ChatContainer, message: ChatMessage) =>
       ({...chatInitialState, gameChat: message})),
   on(closeChat, (state: ChatContainer) => chatInitialState)
 );
@@ -250,16 +250,16 @@ export function chatReducer(state, action) {
   return chatReducerInternal(state, action);
 }
 
-export const pokerTableInitialState: PokerTableModel = {
+export const pokerTableInitialState: PokerTable = {
   players: []
-} as PokerTableModel;
+} as PokerTable;
 
-const pokerTableReducerInternal = createReducer<PokerTableModel>(
+const pokerTableReducerInternal = createReducer<PokerTable>(
   pokerTableInitialState,
   on(pokerTableUpdate,
-    (state: PokerTableModel, table: PokerTableModel) => table),
-  on(playerAwayToggled, (state: PokerTableModel, player: GamePlayerModel) => {
-    const players: GamePlayerModel[] = state
+    (state: PokerTable, table: PokerTable) => table),
+  on(playerAwayToggled, (state: PokerTable, player: GamePlayer) => {
+    const players: GamePlayer[] = state
     .players.map(p => p.id === player.id ? player : ({...p}));
     return ({...state, players});
   })
@@ -278,9 +278,9 @@ export const timerInitialState: MiscEventsState = {
 
 const miscEventsReducerInternal = createReducer<MiscEventsState>(
   timerInitialState,
-  on(startTimer, (state: MiscEventsState, timer: TimerModel) => ({...state, timer})),
-  on(dealCards, (state: MiscEventsState, deal: DealModel) => ({...state, deal})),
-  on(hideCards, (state: MiscEventsState, hide: HideCardsModel) =>
+  on(startTimer, (state: MiscEventsState, timer: Timer) => ({...state, timer})),
+  on(dealCards, (state: MiscEventsState, deal: Deal) => ({...state, deal})),
+  on(hideCards, (state: MiscEventsState, hide: HideCards) =>
     ({...state, hide, hiddenCards: Array(10).fill(Array(2).fill(true))})),
   on(showCard, (state: MiscEventsState, cards: { player: number; card: number }) => ({
     ...state,
@@ -294,12 +294,12 @@ export function miscEventsReducer(state, action) {
   return miscEventsReducerInternal(state, action);
 }
 
-export const privatePlayerDataInitialState: GamePlayerModel = {};
+export const privatePlayerDataInitialState: GamePlayer = {};
 
-const privatePlayerDataReducerInternal = createReducer<GamePlayerModel>(
+const privatePlayerDataReducerInternal = createReducer<GamePlayer>(
   privatePlayerDataInitialState,
   on(privatePlayerDataUpdated,
-    (state: GamePlayerModel, newState: GamePlayerModel) => newState));
+    (state: GamePlayer, newState: GamePlayer) => newState));
 
 export function privatePlayerDataReducer(state, action) {
   return privatePlayerDataReducerInternal(state, action);

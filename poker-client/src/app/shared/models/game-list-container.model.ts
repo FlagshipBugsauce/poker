@@ -1,5 +1,5 @@
-import {GameListModel} from '../../api/models/game-list-model';
+import {GameList} from '../../api/models/game-list';
 
 export interface GameListContainerModel {
-  gameList: GameListModel[];
+  gameList: GameList[];
 }

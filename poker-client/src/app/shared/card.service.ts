@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {CardSuit, CardValue} from './models/card.enum';
-import {CardModel} from '../api/models/card-model';
+import {Card} from '../api/models/card';
 
 export enum CardSize {
   ExtraSmall = 'xs',
@@ -54,11 +54,11 @@ export class CardService {
    * Returns a symbolic representation of a card, i.e. AS for Ace of Spades.
    * @param card The card being converted to alphanumeric characters.
    */
-  public getCardShortName(card: CardModel): string {
+  public getCardShortName(card: Card): string {
     return `${this.valueMapping[card.value]}${this.suitMapping[card.suit]}`;
   }
 
-  public cardName(card: CardModel): string {
+  public cardName(card: Card): string {
     return card.suit === CardSuit.Back ? 'Card' : `${card.value} of ${card.suit}`;
   }
 
@@ -66,7 +66,7 @@ export class CardService {
    * Returns the path to the image of a card.
    * @param card The card.
    */
-  public getCardImagePath(card: CardModel): string {
+  public getCardImagePath(card: Card): string {
     return `assets/icons/cards/${this.getCardShortName(card)}.svg`;
   }
 

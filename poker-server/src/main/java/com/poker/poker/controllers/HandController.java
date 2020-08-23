@@ -2,7 +2,7 @@ package com.poker.poker.controllers;
 
 import com.poker.poker.config.constants.GameConstants;
 import com.poker.poker.events.DrawCardEvent;
-import com.poker.poker.models.ApiSuccessModel;
+import com.poker.poker.models.ApiSuccess;
 import com.poker.poker.services.JwtService;
 import com.poker.poker.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,22 +39,19 @@ public class HandController {
       summary = "Draws a card.",
       description = "Draws a card from the top of the deck.",
       tags = "game")
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Draw was successful.",
-            content =
-                @Content(
-                    schema = @Schema(implementation = ApiSuccessModel.class),
-                    mediaType = MediaType.APPLICATION_JSON_VALUE))
-      })
+  @ApiResponses(@ApiResponse(
+      responseCode = "200",
+      description = "Draw was successful.",
+      content =
+      @Content(
+          schema = @Schema(implementation = ApiSuccess.class),
+          mediaType = MediaType.APPLICATION_JSON_VALUE)))
   @RequestMapping(value = "/draw", method = RequestMethod.POST)
-  public ResponseEntity<ApiSuccessModel> draw(
+  public ResponseEntity<ApiSuccess> draw(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {
     userService.validate(jwt, constants.getClientGroups());
     final UUID id = jwtService.getUserDocument(jwt).getId();
     publisher.publishEvent(new DrawCardEvent(this, id));
-    return ResponseEntity.ok(new ApiSuccessModel("Card drawn."));
+    return ResponseEntity.ok(new ApiSuccess("Card drawn."));
   }
 }

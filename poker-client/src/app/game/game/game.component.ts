@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {DrawGameDataModel, GameModel} from 'src/app/api/models';
+import {DrawGameData, Game} from 'src/app/api/models';
 import {LobbyComponent} from '../lobby/lobby.component';
 import {LeaveGameGuardService} from './leave-game-guard.service';
 import {PopupComponent, PopupContentModel} from 'src/app/shared/popup/popup.component';
@@ -32,7 +32,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   @ViewChild('popup') public confirmationPopup: PopupComponent;
   /** A summary of what occurred in the game. */
-  public gameData: DrawGameDataModel[] = [] as DrawGameDataModel[];
+  public gameData: DrawGameData[] = [] as DrawGameData[];
   /**
    * Content for the popup that appears when leaving the page (except when refreshing or going to
    * external site).
@@ -44,7 +44,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   /** Helper subject which assists in terminating subscriptions. */
   public ngDestroyed$ = new Subject();
   /** The model representing the state of the game at any given point in time. */
-  public gameModel: GameModel;
+  public gameModel: Game;
   public phase: GamePhase = GamePhase.Lobby;
 
   constructor(
@@ -74,14 +74,14 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   public ngOnInit(): void {
     this.leaveGameGuardService.canLeave = false;  // Need to set this to false when page loads.
     this.gameStore.select(selectGameModel).pipe(takeUntil(this.ngDestroyed$)).subscribe(
-      (game: GameModel) => this.gameModel = game);
+      (game: Game) => this.gameModel = game);
 
     this.gameStore.select(selectGamePhase)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((phase: GamePhase) => this.phase = phase);
 
     this.gameDataStore.select(selectGameData).pipe(takeUntil(this.ngDestroyed$)).subscribe(
-      (data: DrawGameDataModel[]) => this.gameData = data ? data : this.gameData);
+      (data: DrawGameData[]) => this.gameData = data ? data : this.gameData);
   }
 
   /**

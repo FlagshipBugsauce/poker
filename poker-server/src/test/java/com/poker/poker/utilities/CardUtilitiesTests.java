@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.poker.poker.models.enums.CardSuit;
 import com.poker.poker.models.enums.CardValue;
-import com.poker.poker.models.game.CardModel;
+import com.poker.poker.models.game.Card;
 import com.poker.poker.models.game.HandRankModel;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,17 +44,17 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("MagicNumber")
 public class CardUtilitiesTests {
 
-  public static List<CardModel> getAllWithValue(final CardValue value) {
+  public static List<Card> getAllWithValue(final CardValue value) {
     return Arrays.stream(CardSuit.values())
         .filter(suit -> suit != CardSuit.Back)
-        .map(suit -> new CardModel(suit, value))
+        .map(suit -> new Card(suit, value))
         .collect(Collectors.toList());
   }
 
-  public static List<CardModel> getAllWithSuit(final CardSuit suit) {
+  public static List<Card> getAllWithSuit(final CardSuit suit) {
     return Arrays.stream(CardValue.values())
         .filter(v -> v != CardValue.Back)
-        .map(value -> new CardModel(suit, value))
+        .map(value -> new Card(suit, value))
         .sorted(valueSorter())
         .collect(Collectors.toList());
   }
@@ -67,71 +67,71 @@ public class CardUtilitiesTests {
     return suits.get((int) (Math.random() * suits.size()));
   }
 
-  public static CardModel getCard(final CardValue value) {
+  public static Card getCard(final CardValue value) {
     return getCard(getRandomSuit(), value);
   }
 
-  public static CardModel getCard(final CardSuit suit, final CardValue value) {
-    return new CardModel(suit, value);
+  public static Card getCard(final CardSuit suit, final CardValue value) {
+    return new Card(suit, value);
   }
 
-  public static List<CardModel> getPairWithKickers(
+  public static List<Card> getPairWithKickers(
       final CardValue pair,
       final CardValue kicker1,
       final CardValue kicker2,
       final CardValue kicker3) {
     return new ArrayList<>(
         Arrays.asList(
-            new CardModel(Hearts, pair),
-            new CardModel(Spades, pair),
-            new CardModel(getRandomSuit(), kicker1),
-            new CardModel(getRandomSuit(), kicker2),
-            new CardModel(getRandomSuit(), kicker3)));
+            new Card(Hearts, pair),
+            new Card(Spades, pair),
+            new Card(getRandomSuit(), kicker1),
+            new Card(getRandomSuit(), kicker2),
+            new Card(getRandomSuit(), kicker3)));
   }
 
-  public static List<CardModel> getTwoPairWithKicker(
+  public static List<Card> getTwoPairWithKicker(
       final CardValue pair1, final CardValue pair2, final CardValue kicker) {
     return new ArrayList<>(
         Arrays.asList(
-            new CardModel(Hearts, pair1),
-            new CardModel(Spades, pair1),
-            new CardModel(Hearts, pair2),
-            new CardModel(Spades, pair2),
-            new CardModel(getRandomSuit(), kicker)));
+            new Card(Hearts, pair1),
+            new Card(Spades, pair1),
+            new Card(Hearts, pair2),
+            new Card(Spades, pair2),
+            new Card(getRandomSuit(), kicker)));
   }
 
-  public static List<CardModel> getSetWithKickers(
+  public static List<Card> getSetWithKickers(
       final CardValue set, final CardValue kicker1, final CardValue kicker2) {
     return new ArrayList<>(
         Arrays.asList(
-            new CardModel(Hearts, set),
-            new CardModel(Spades, set),
-            new CardModel(Clubs, set),
-            new CardModel(getRandomSuit(), kicker1),
-            new CardModel(getRandomSuit(), kicker2)));
+            new Card(Hearts, set),
+            new Card(Spades, set),
+            new Card(Clubs, set),
+            new Card(getRandomSuit(), kicker1),
+            new Card(getRandomSuit(), kicker2)));
   }
 
-  public static List<CardModel> getFullHouse(final CardValue set, final CardValue pair) {
+  public static List<Card> getFullHouse(final CardValue set, final CardValue pair) {
     return new ArrayList<>(
         Arrays.asList(
-            new CardModel(Hearts, set),
-            new CardModel(Spades, set),
-            new CardModel(Clubs, set),
-            new CardModel(Spades, pair),
-            new CardModel(Hearts, pair)));
+            new Card(Hearts, set),
+            new Card(Spades, set),
+            new Card(Clubs, set),
+            new Card(Spades, pair),
+            new Card(Hearts, pair)));
   }
 
   /** Basic test to see if this method can detect a straight flush. */
   @Test
   public void testCheckForStraightFlush_1() {
     // Given.
-    final List<CardModel> cards = getAllWithSuit(Spades).subList(3, 8);
-    cards.add(new CardModel(Hearts, Eight));
-    cards.add(new CardModel(Diamonds, Two));
+    final List<Card> cards = getAllWithSuit(Spades).subList(3, 8);
+    cards.add(new Card(Hearts, Eight));
+    cards.add(new Card(Diamonds, Two));
     Collections.shuffle(cards);
 
     // Test.
-    final List<CardModel> straightFlush = checkForStraightFlush(cards);
+    final List<Card> straightFlush = checkForStraightFlush(cards);
 
     // Verify.
     assertEquals(getAllWithSuit(Spades).subList(3, 8), straightFlush);
@@ -144,11 +144,11 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForStraightFlush_2() {
     // Given.
-    final List<CardModel> cards = getAllWithSuit(Spades).subList(3, 10);
+    final List<Card> cards = getAllWithSuit(Spades).subList(3, 10);
     Collections.shuffle(cards);
 
     // Test.
-    final List<CardModel> straightFlush = checkForStraightFlush(cards);
+    final List<Card> straightFlush = checkForStraightFlush(cards);
 
     // Verify.
     assertEquals(getAllWithSuit(Spades).subList(5, 10), straightFlush);
@@ -158,12 +158,12 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForStraightFlush_3() {
     // Given.
-    final List<CardModel> cards = getAllWithSuit(Spades).subList(3, 7);
+    final List<Card> cards = getAllWithSuit(Spades).subList(3, 7);
     cards.addAll(getAllWithSuit(Spades).subList(8, 10));
     Collections.shuffle(cards);
 
     // Test.
-    final List<CardModel> straightFlush = checkForStraightFlush(cards);
+    final List<Card> straightFlush = checkForStraightFlush(cards);
 
     // Verify.
     assertNull(straightFlush);
@@ -173,7 +173,7 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForStraightFlush_4() {
     // Given.
-    final List<CardModel> cards =
+    final List<Card> cards =
         Arrays.asList(
             getCard(Spades, Ace),
             getCard(Spades, Two),
@@ -183,7 +183,7 @@ public class CardUtilitiesTests {
             getCard(Hearts, Ace),
             getCard(Clubs, Ace));
     Collections.shuffle(cards);
-    final List<CardModel> expected =
+    final List<Card> expected =
         Arrays.asList(
             getCard(Spades, Ace),
             getCard(Spades, Two),
@@ -192,7 +192,7 @@ public class CardUtilitiesTests {
             getCard(Spades, Five));
 
     // Test.
-    final List<CardModel> straightFlush = checkForStraightFlush(cards);
+    final List<Card> straightFlush = checkForStraightFlush(cards);
 
     // Verify.
     assertEquals(expected, straightFlush);
@@ -205,17 +205,17 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForFourOfAKind_1() {
     // Given.
-    final List<CardModel> cards = getAllWithValue(Ace);
-    cards.add(new CardModel(Clubs, Eight));
-    cards.add(new CardModel(Clubs, Two));
-    cards.add(new CardModel(Diamonds, Six));
+    final List<Card> cards = getAllWithValue(Ace);
+    cards.add(new Card(Clubs, Eight));
+    cards.add(new Card(Clubs, Two));
+    cards.add(new Card(Diamonds, Six));
     Collections.shuffle(cards);
-    final List<CardModel> expected = getAllWithValue(Ace);
-    expected.add(new CardModel(Clubs, Eight));
+    final List<Card> expected = getAllWithValue(Ace);
+    expected.add(new Card(Clubs, Eight));
     expected.sort(valueSorter());
 
     // Test.
-    final List<CardModel> fourOfAKind = checkForFourOfAKind(cards);
+    final List<Card> fourOfAKind = checkForFourOfAKind(cards);
     fourOfAKind.sort(valueSorter());
 
     // Verify.
@@ -230,17 +230,17 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForFourOfAKind_2() {
     // Given.
-    final List<CardModel> cards = getAllWithValue(Two);
-    cards.add(new CardModel(Clubs, Eight));
-    cards.add(new CardModel(Clubs, King));
-    cards.add(new CardModel(Diamonds, Six));
+    final List<Card> cards = getAllWithValue(Two);
+    cards.add(new Card(Clubs, Eight));
+    cards.add(new Card(Clubs, King));
+    cards.add(new Card(Diamonds, Six));
     Collections.shuffle(cards);
-    final List<CardModel> expected = getAllWithValue(Two);
-    expected.add(new CardModel(Clubs, King));
+    final List<Card> expected = getAllWithValue(Two);
+    expected.add(new Card(Clubs, King));
     expected.sort(valueSorter());
 
     // Test.
-    final List<CardModel> fourOfAKind = checkForFourOfAKind(cards);
+    final List<Card> fourOfAKind = checkForFourOfAKind(cards);
     fourOfAKind.sort(valueSorter());
 
     // Verify.
@@ -254,22 +254,22 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForFourOfAKind_3() {
     // Given.
-    final List<CardModel> cards =
+    final List<Card> cards =
         Arrays.asList(
-            new CardModel(Clubs, Eight),
-            new CardModel(Diamonds, Eight),
-            new CardModel(Hearts, Eight),
-            new CardModel(Clubs, Four),
-            new CardModel(Spades, Four),
-            new CardModel(Diamonds, King),
-            new CardModel(Hearts, Ace));
+            new Card(Clubs, Eight),
+            new Card(Diamonds, Eight),
+            new Card(Hearts, Eight),
+            new Card(Clubs, Four),
+            new Card(Spades, Four),
+            new Card(Diamonds, King),
+            new Card(Hearts, Ace));
     Collections.shuffle(cards);
-    final List<CardModel> expected = getAllWithValue(Two);
-    expected.add(new CardModel(Clubs, King));
+    final List<Card> expected = getAllWithValue(Two);
+    expected.add(new Card(Clubs, King));
     expected.sort(valueSorter());
 
     // Test.
-    final List<CardModel> fourOfAKind = checkForFourOfAKind(cards);
+    final List<Card> fourOfAKind = checkForFourOfAKind(cards);
 
     // Verify.
     assertNull(fourOfAKind);
@@ -282,26 +282,26 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForFullHouse_1() {
     // Given.
-    final List<CardModel> cards =
+    final List<Card> cards =
         Arrays.asList(
-            new CardModel(Clubs, Eight),
-            new CardModel(Diamonds, Eight),
-            new CardModel(Hearts, Eight),
-            new CardModel(Clubs, Four),
-            new CardModel(Spades, Four),
-            new CardModel(Diamonds, King),
-            new CardModel(Hearts, Ace));
+            new Card(Clubs, Eight),
+            new Card(Diamonds, Eight),
+            new Card(Hearts, Eight),
+            new Card(Clubs, Four),
+            new Card(Spades, Four),
+            new Card(Diamonds, King),
+            new Card(Hearts, Ace));
     Collections.shuffle(cards);
-    final List<CardModel> expected =
+    final List<Card> expected =
         Arrays.asList(
-            new CardModel(Hearts, Eight),
-            new CardModel(Clubs, Eight),
-            new CardModel(Diamonds, Eight),
-            new CardModel(Spades, Four),
-            new CardModel(Clubs, Four));
+            new Card(Hearts, Eight),
+            new Card(Clubs, Eight),
+            new Card(Diamonds, Eight),
+            new Card(Spades, Four),
+            new Card(Clubs, Four));
 
     // Test.
-    final List<CardModel> fullHouse = checkForFullHouse(cards);
+    final List<Card> fullHouse = checkForFullHouse(cards);
 
     // Verify.
     assertEquals(expected, fullHouse);
@@ -314,26 +314,26 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForFullHouse_2() {
     // Given.
-    final List<CardModel> cards =
+    final List<Card> cards =
         Arrays.asList(
-            new CardModel(Clubs, Two),
-            new CardModel(Diamonds, Two),
-            new CardModel(Hearts, Two),
-            new CardModel(Clubs, Four),
-            new CardModel(Spades, Four),
-            new CardModel(Diamonds, King),
-            new CardModel(Hearts, Ace));
+            new Card(Clubs, Two),
+            new Card(Diamonds, Two),
+            new Card(Hearts, Two),
+            new Card(Clubs, Four),
+            new Card(Spades, Four),
+            new Card(Diamonds, King),
+            new Card(Hearts, Ace));
     Collections.shuffle(cards);
-    final List<CardModel> expected =
+    final List<Card> expected =
         Arrays.asList(
-            new CardModel(Hearts, Two),
-            new CardModel(Clubs, Two),
-            new CardModel(Diamonds, Two),
-            new CardModel(Spades, Four),
-            new CardModel(Clubs, Four));
+            new Card(Hearts, Two),
+            new Card(Clubs, Two),
+            new Card(Diamonds, Two),
+            new Card(Spades, Four),
+            new Card(Clubs, Four));
 
     // Test.
-    final List<CardModel> fullHouse = checkForFullHouse(cards);
+    final List<Card> fullHouse = checkForFullHouse(cards);
 
     // Verify.
     assertEquals(expected, fullHouse);
@@ -343,19 +343,19 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForFullHouse_3() {
     // Given.
-    final List<CardModel> cards =
+    final List<Card> cards =
         Arrays.asList(
-            new CardModel(Clubs, Two),
-            new CardModel(Diamonds, Two),
-            new CardModel(Hearts, King),
-            new CardModel(Clubs, Four),
-            new CardModel(Spades, Four),
-            new CardModel(Diamonds, King),
-            new CardModel(Hearts, Ace));
+            new Card(Clubs, Two),
+            new Card(Diamonds, Two),
+            new Card(Hearts, King),
+            new Card(Clubs, Four),
+            new Card(Spades, Four),
+            new Card(Diamonds, King),
+            new Card(Hearts, Ace));
     Collections.shuffle(cards);
 
     // Test.
-    final List<CardModel> fullHouse = checkForFullHouse(cards);
+    final List<Card> fullHouse = checkForFullHouse(cards);
 
     // Verify.
     assertNull(fullHouse);
@@ -365,19 +365,19 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForFullHouse_4() {
     // Given.
-    final List<CardModel> cards =
+    final List<Card> cards =
         Arrays.asList(
-            new CardModel(Clubs, Two),
-            new CardModel(Diamonds, Two),
-            new CardModel(Hearts, Two),
-            new CardModel(Clubs, Four),
-            new CardModel(Spades, Five),
-            new CardModel(Diamonds, King),
-            new CardModel(Hearts, Ace));
+            new Card(Clubs, Two),
+            new Card(Diamonds, Two),
+            new Card(Hearts, Two),
+            new Card(Clubs, Four),
+            new Card(Spades, Five),
+            new Card(Diamonds, King),
+            new Card(Hearts, Ace));
     Collections.shuffle(cards);
 
     // Test.
-    final List<CardModel> fullHouse = checkForFullHouse(cards);
+    final List<Card> fullHouse = checkForFullHouse(cards);
 
     // Verify.
     assertNull(fullHouse);
@@ -387,16 +387,16 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForFlush_1() {
     // Given.
-    final List<CardModel> cards = getAllWithSuit(Spades).subList(4, 7);
+    final List<Card> cards = getAllWithSuit(Spades).subList(4, 7);
     cards.addAll(getAllWithSuit(Spades).subList(9, 11));
-    cards.add(new CardModel(Clubs, Two));
-    cards.add(new CardModel(Clubs, Six));
+    cards.add(new Card(Clubs, Two));
+    cards.add(new Card(Clubs, Six));
     Collections.shuffle(cards);
-    final List<CardModel> expected = getAllWithSuit(Spades).subList(4, 7);
+    final List<Card> expected = getAllWithSuit(Spades).subList(4, 7);
     expected.addAll(getAllWithSuit(Spades).subList(9, 11));
 
     // Test.
-    final List<CardModel> flush = checkForFlush(cards);
+    final List<Card> flush = checkForFlush(cards);
 
     // Verify.
     assertEquals(expected, flush);
@@ -406,14 +406,14 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForFlush_2() {
     // Given.
-    final List<CardModel> cards = getAllWithSuit(Spades).subList(4, 8);
-    cards.add(new CardModel(Clubs, Two));
-    cards.add(new CardModel(Clubs, Six));
-    cards.add(new CardModel(Diamonds, Six));
+    final List<Card> cards = getAllWithSuit(Spades).subList(4, 8);
+    cards.add(new Card(Clubs, Two));
+    cards.add(new Card(Clubs, Six));
+    cards.add(new Card(Diamonds, Six));
     Collections.shuffle(cards);
 
     // Test.
-    final List<CardModel> flush = checkForFlush(cards);
+    final List<Card> flush = checkForFlush(cards);
 
     // Verify.
     assertNull(flush);
@@ -423,17 +423,17 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForFlush_3() {
     // Given.
-    final List<CardModel> cards = getAllWithSuit(Spades).subList(10, 13);
+    final List<Card> cards = getAllWithSuit(Spades).subList(10, 13);
     cards.addAll(getAllWithSuit(Spades).subList(2, 4));
-    cards.add(new CardModel(Clubs, Two));
-    cards.add(new CardModel(Clubs, Six));
+    cards.add(new Card(Clubs, Two));
+    cards.add(new Card(Clubs, Six));
     Collections.shuffle(cards);
-    final List<CardModel> expected = getAllWithSuit(Spades).subList(10, 13);
+    final List<Card> expected = getAllWithSuit(Spades).subList(10, 13);
     expected.addAll(getAllWithSuit(Spades).subList(2, 4));
     expected.sort(valueSorter());
 
     // Test.
-    final List<CardModel> flush = checkForFlush(cards);
+    final List<Card> flush = checkForFlush(cards);
 
     // Verify.
     assertEquals(expected, flush);
@@ -442,26 +442,26 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForStraight_1() {
     // Given.
-    final List<CardModel> cards =
+    final List<Card> cards =
         Arrays.asList(
-            new CardModel(Hearts, Two),
-            new CardModel(Spades, Three),
-            new CardModel(Diamonds, Four),
-            new CardModel(Clubs, Five),
-            new CardModel(Hearts, Six),
-            new CardModel(Diamonds, Three),
-            new CardModel(Spades, Two));
+            new Card(Hearts, Two),
+            new Card(Spades, Three),
+            new Card(Diamonds, Four),
+            new Card(Clubs, Five),
+            new Card(Hearts, Six),
+            new Card(Diamonds, Three),
+            new Card(Spades, Two));
     Collections.shuffle(cards);
-    final List<CardModel> expected =
+    final List<Card> expected =
         Arrays.asList(
-            new CardModel(Spades, Two),
-            new CardModel(Spades, Three),
-            new CardModel(Diamonds, Four),
-            new CardModel(Clubs, Five),
-            new CardModel(Hearts, Six));
+            new Card(Spades, Two),
+            new Card(Spades, Three),
+            new Card(Diamonds, Four),
+            new Card(Clubs, Five),
+            new Card(Hearts, Six));
 
     // Test
-    final List<CardModel> straight = checkForStraight(cards);
+    final List<Card> straight = checkForStraight(cards);
 
     // Verify.
     assertEquals(expected, straight);
@@ -470,19 +470,19 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForStraight_2() {
     // Given.
-    final List<CardModel> cards =
+    final List<Card> cards =
         Arrays.asList(
-            new CardModel(Hearts, Eight),
-            new CardModel(Spades, Three),
-            new CardModel(Diamonds, Four),
-            new CardModel(Clubs, Five),
-            new CardModel(Hearts, Six),
-            new CardModel(Diamonds, Three),
-            new CardModel(Spades, Ten));
+            new Card(Hearts, Eight),
+            new Card(Spades, Three),
+            new Card(Diamonds, Four),
+            new Card(Clubs, Five),
+            new Card(Hearts, Six),
+            new Card(Diamonds, Three),
+            new Card(Spades, Ten));
     Collections.shuffle(cards);
 
     // Test
-    final List<CardModel> straight = checkForStraight(cards);
+    final List<Card> straight = checkForStraight(cards);
 
     // Verify.
     assertNull(straight);
@@ -491,26 +491,26 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForStraight_3() {
     // Given.
-    final List<CardModel> cards =
+    final List<Card> cards =
         Arrays.asList(
-            new CardModel(Hearts, Two),
-            new CardModel(Spades, Three),
-            new CardModel(Diamonds, Four),
-            new CardModel(Clubs, Five),
-            new CardModel(Hearts, Six),
-            new CardModel(Diamonds, Seven),
-            new CardModel(Spades, Eight));
+            new Card(Hearts, Two),
+            new Card(Spades, Three),
+            new Card(Diamonds, Four),
+            new Card(Clubs, Five),
+            new Card(Hearts, Six),
+            new Card(Diamonds, Seven),
+            new Card(Spades, Eight));
     Collections.shuffle(cards);
-    final List<CardModel> expected =
+    final List<Card> expected =
         Arrays.asList(
-            new CardModel(Diamonds, Four),
-            new CardModel(Clubs, Five),
-            new CardModel(Hearts, Six),
-            new CardModel(Diamonds, Seven),
-            new CardModel(Spades, Eight));
+            new Card(Diamonds, Four),
+            new Card(Clubs, Five),
+            new Card(Hearts, Six),
+            new Card(Diamonds, Seven),
+            new Card(Spades, Eight));
 
     // Test
-    final List<CardModel> straight = checkForStraight(cards);
+    final List<Card> straight = checkForStraight(cards);
 
     // Verify.
     assertEquals(expected, straight);
@@ -519,26 +519,26 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForSet_1() {
     // Given.
-    final List<CardModel> cards =
+    final List<Card> cards =
         Arrays.asList(
-            new CardModel(Hearts, Two),
-            new CardModel(Spades, Two),
-            new CardModel(Diamonds, Two),
-            new CardModel(Clubs, Five),
-            new CardModel(Hearts, Six),
-            new CardModel(Diamonds, Seven),
-            new CardModel(Spades, Eight));
+            new Card(Hearts, Two),
+            new Card(Spades, Two),
+            new Card(Diamonds, Two),
+            new Card(Clubs, Five),
+            new Card(Hearts, Six),
+            new Card(Diamonds, Seven),
+            new Card(Spades, Eight));
     Collections.shuffle(cards);
-    final List<CardModel> expected =
+    final List<Card> expected =
         Arrays.asList(
-            new CardModel(Spades, Two),
-            new CardModel(Hearts, Two),
-            new CardModel(Diamonds, Two),
-            new CardModel(Diamonds, Seven),
-            new CardModel(Spades, Eight));
+            new Card(Spades, Two),
+            new Card(Hearts, Two),
+            new Card(Diamonds, Two),
+            new Card(Diamonds, Seven),
+            new Card(Spades, Eight));
 
     // Test
-    final List<CardModel> set = checkForSet(cards);
+    final List<Card> set = checkForSet(cards);
 
     // Verify
     assertEquals(expected, set);
@@ -547,19 +547,19 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForSet_2() {
     // Given.
-    final List<CardModel> cards =
+    final List<Card> cards =
         Arrays.asList(
-            new CardModel(Hearts, Two),
-            new CardModel(Spades, Two),
-            new CardModel(Diamonds, Ten),
-            new CardModel(Clubs, Five),
-            new CardModel(Hearts, Six),
-            new CardModel(Diamonds, Seven),
-            new CardModel(Spades, Eight));
+            new Card(Hearts, Two),
+            new Card(Spades, Two),
+            new Card(Diamonds, Ten),
+            new Card(Clubs, Five),
+            new Card(Hearts, Six),
+            new Card(Diamonds, Seven),
+            new Card(Spades, Eight));
     Collections.shuffle(cards);
 
     // Test
-    final List<CardModel> set = checkForSet(cards);
+    final List<Card> set = checkForSet(cards);
 
     // Verify
     assertNull(set);
@@ -568,26 +568,26 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForSet_3() {
     // Given.
-    final List<CardModel> cards =
+    final List<Card> cards =
         Arrays.asList(
-            new CardModel(Hearts, Jack),
-            new CardModel(Spades, Jack),
-            new CardModel(Diamonds, Two),
-            new CardModel(Clubs, Five),
-            new CardModel(Hearts, Six),
-            new CardModel(Diamonds, Jack),
-            new CardModel(Spades, Ace));
+            new Card(Hearts, Jack),
+            new Card(Spades, Jack),
+            new Card(Diamonds, Two),
+            new Card(Clubs, Five),
+            new Card(Hearts, Six),
+            new Card(Diamonds, Jack),
+            new Card(Spades, Ace));
     Collections.shuffle(cards);
-    final List<CardModel> expected =
+    final List<Card> expected =
         Arrays.asList(
-            new CardModel(Spades, Jack),
-            new CardModel(Hearts, Jack),
-            new CardModel(Diamonds, Jack),
-            new CardModel(Hearts, Six),
-            new CardModel(Spades, Ace));
+            new Card(Spades, Jack),
+            new Card(Hearts, Jack),
+            new Card(Diamonds, Jack),
+            new Card(Hearts, Six),
+            new Card(Spades, Ace));
 
     // Test
-    final List<CardModel> set = checkForSet(cards);
+    final List<Card> set = checkForSet(cards);
 
     // Verify
     assertEquals(expected, set);
@@ -596,26 +596,26 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForTwoPairs_1() {
     // Given.
-    final List<CardModel> cards =
+    final List<Card> cards =
         Arrays.asList(
-            new CardModel(Hearts, Jack),
-            new CardModel(Spades, Jack),
-            new CardModel(Diamonds, Two),
-            new CardModel(Clubs, Two),
-            new CardModel(Hearts, Six),
-            new CardModel(Diamonds, Seven),
-            new CardModel(Spades, Ace));
+            new Card(Hearts, Jack),
+            new Card(Spades, Jack),
+            new Card(Diamonds, Two),
+            new Card(Clubs, Two),
+            new Card(Hearts, Six),
+            new Card(Diamonds, Seven),
+            new Card(Spades, Ace));
     Collections.shuffle(cards);
-    final List<CardModel> expected =
+    final List<Card> expected =
         Arrays.asList(
-            new CardModel(Spades, Jack),
-            new CardModel(Hearts, Jack),
-            new CardModel(Clubs, Two),
-            new CardModel(Diamonds, Two),
-            new CardModel(Spades, Ace));
+            new Card(Spades, Jack),
+            new Card(Hearts, Jack),
+            new Card(Clubs, Two),
+            new Card(Diamonds, Two),
+            new Card(Spades, Ace));
 
     // Test
-    final List<CardModel> twoPairs = checkForTwoPair(cards);
+    final List<Card> twoPairs = checkForTwoPair(cards);
 
     // Verify
     assertEquals(expected, twoPairs);
@@ -624,19 +624,19 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckForTwoPairs_2() {
     // Given.
-    final List<CardModel> cards =
+    final List<Card> cards =
         Arrays.asList(
-            new CardModel(Hearts, Jack),
-            new CardModel(Spades, Jack),
-            new CardModel(Diamonds, Two),
-            new CardModel(Clubs, Nine),
-            new CardModel(Hearts, Six),
-            new CardModel(Diamonds, Seven),
-            new CardModel(Spades, Ace));
+            new Card(Hearts, Jack),
+            new Card(Spades, Jack),
+            new Card(Diamonds, Two),
+            new Card(Clubs, Nine),
+            new Card(Hearts, Six),
+            new Card(Diamonds, Seven),
+            new Card(Spades, Ace));
     Collections.shuffle(cards);
 
     // Test
-    final List<CardModel> twoPairs = checkForTwoPair(cards);
+    final List<Card> twoPairs = checkForTwoPair(cards);
 
     // Verify
     assertNull(twoPairs);
@@ -645,26 +645,26 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckPair_1() {
     // Given.
-    final List<CardModel> cards =
+    final List<Card> cards =
         Arrays.asList(
-            new CardModel(Hearts, Jack),
-            new CardModel(Spades, Jack),
-            new CardModel(Diamonds, Two),
-            new CardModel(Clubs, Three),
-            new CardModel(Hearts, Four),
-            new CardModel(Diamonds, Eight),
-            new CardModel(Spades, Nine));
+            new Card(Hearts, Jack),
+            new Card(Spades, Jack),
+            new Card(Diamonds, Two),
+            new Card(Clubs, Three),
+            new Card(Hearts, Four),
+            new Card(Diamonds, Eight),
+            new Card(Spades, Nine));
     Collections.shuffle(cards);
-    final List<CardModel> expected =
+    final List<Card> expected =
         Arrays.asList(
-            new CardModel(Spades, Jack),
-            new CardModel(Hearts, Jack),
-            new CardModel(Hearts, Four),
-            new CardModel(Diamonds, Eight),
-            new CardModel(Spades, Nine));
+            new Card(Spades, Jack),
+            new Card(Hearts, Jack),
+            new Card(Hearts, Four),
+            new Card(Diamonds, Eight),
+            new Card(Spades, Nine));
 
     // Test
-    final List<CardModel> pair = checkForPair(cards);
+    final List<Card> pair = checkForPair(cards);
 
     // Verify
     assertEquals(expected, pair);
@@ -673,19 +673,19 @@ public class CardUtilitiesTests {
   @Test
   public void testCheckPair_2() {
     // Given.
-    final List<CardModel> cards =
+    final List<Card> cards =
         Arrays.asList(
-            new CardModel(Hearts, Jack),
-            new CardModel(Spades, King),
-            new CardModel(Diamonds, Two),
-            new CardModel(Clubs, Three),
-            new CardModel(Hearts, Four),
-            new CardModel(Diamonds, Eight),
-            new CardModel(Spades, Nine));
+            new Card(Hearts, Jack),
+            new Card(Spades, King),
+            new Card(Diamonds, Two),
+            new Card(Clubs, Three),
+            new Card(Hearts, Four),
+            new Card(Diamonds, Eight),
+            new Card(Spades, Nine));
     Collections.shuffle(cards);
 
     // Test
-    final List<CardModel> pair = checkForPair(cards);
+    final List<Card> pair = checkForPair(cards);
 
     // Verify
     assertNull(pair);
@@ -698,101 +698,101 @@ public class CardUtilitiesTests {
   @Test
   public void testRankHand_1() {
     // Given.
-    final List<CardModel> worstHand =
+    final List<Card> worstHand =
         Arrays.asList(
-            new CardModel(Hearts, Two),
-            new CardModel(Spades, Three),
-            new CardModel(Diamonds, Four),
-            new CardModel(Clubs, Five),
-            new CardModel(Hearts, Seven),
-            new CardModel(Diamonds, Eight),
-            new CardModel(Spades, Nine));
+            new Card(Hearts, Two),
+            new Card(Spades, Three),
+            new Card(Diamonds, Four),
+            new Card(Clubs, Five),
+            new Card(Hearts, Seven),
+            new Card(Diamonds, Eight),
+            new Card(Spades, Nine));
 
-    final List<CardModel> bestHighCard =
+    final List<Card> bestHighCard =
         Arrays.asList(
-            new CardModel(Hearts, Ace),
-            new CardModel(Spades, King),
-            new CardModel(Diamonds, Queen),
-            new CardModel(Clubs, Jack),
-            new CardModel(Hearts, Nine),
-            new CardModel(Diamonds, Eight),
-            new CardModel(Spades, Seven));
+            new Card(Hearts, Ace),
+            new Card(Spades, King),
+            new Card(Diamonds, Queen),
+            new Card(Clubs, Jack),
+            new Card(Hearts, Nine),
+            new Card(Diamonds, Eight),
+            new Card(Spades, Seven));
 
-    final List<CardModel> worstPair = getPairWithKickers(Two, Three, Four, Five);
+    final List<Card> worstPair = getPairWithKickers(Two, Three, Four, Five);
     worstPair.addAll(Arrays.asList(getCard(Clubs, Seven), getCard(Diamonds, Eight)));
 
-    final List<CardModel> bestPair = getPairWithKickers(Ace, King, Queen, Jack);
+    final List<Card> bestPair = getPairWithKickers(Ace, King, Queen, Jack);
     bestPair.addAll(Arrays.asList(getCard(Nine), getCard(Eight)));
 
-    final List<CardModel> worstTwoPair = getTwoPairWithKicker(Two, Three, Four);
+    final List<Card> worstTwoPair = getTwoPairWithKicker(Two, Three, Four);
     worstTwoPair.addAll(Arrays.asList(getCard(Five), getCard(Seven)));
 
-    final List<CardModel> bestTwoPair = getTwoPairWithKicker(Ace, King, Queen);
+    final List<Card> bestTwoPair = getTwoPairWithKicker(Ace, King, Queen);
     bestTwoPair.addAll(Arrays.asList(getCard(Jack), getCard(Nine)));
 
-    final List<CardModel> worstSet = getSetWithKickers(Two, Three, Four);
+    final List<Card> worstSet = getSetWithKickers(Two, Three, Four);
     worstSet.addAll(Arrays.asList(getCard(Five), getCard(Seven)));
 
-    final List<CardModel> bestSet = getSetWithKickers(Ace, King, Queen);
+    final List<Card> bestSet = getSetWithKickers(Ace, King, Queen);
     bestSet.addAll(Arrays.asList(getCard(Jack), getCard(Nine)));
 
     // Also a set.
-    final List<CardModel> worstStraight =
+    final List<Card> worstStraight =
         Arrays.asList(
-            new CardModel(Hearts, Ace),
-            new CardModel(Spades, Two),
-            new CardModel(Diamonds, Three),
-            new CardModel(Clubs, Four),
-            new CardModel(Hearts, Five),
-            new CardModel(Diamonds, Ace),
-            new CardModel(Spades, Ace));
+            new Card(Hearts, Ace),
+            new Card(Spades, Two),
+            new Card(Diamonds, Three),
+            new Card(Clubs, Four),
+            new Card(Hearts, Five),
+            new Card(Diamonds, Ace),
+            new Card(Spades, Ace));
 
     // Also a set.
-    final List<CardModel> bestStraight =
+    final List<Card> bestStraight =
         Arrays.asList(
-            new CardModel(Hearts, Ace),
-            new CardModel(Spades, King),
-            new CardModel(Diamonds, Queen),
-            new CardModel(Clubs, Jack),
-            new CardModel(Hearts, Ten),
-            new CardModel(Diamonds, Ace),
-            new CardModel(Spades, Ace));
+            new Card(Hearts, Ace),
+            new Card(Spades, King),
+            new Card(Diamonds, Queen),
+            new Card(Clubs, Jack),
+            new Card(Hearts, Ten),
+            new Card(Diamonds, Ace),
+            new Card(Spades, Ace));
 
     // Also a straight.
-    final List<CardModel> worstFlush =
+    final List<Card> worstFlush =
         Arrays.asList(
-            new CardModel(Hearts, Two),
-            new CardModel(Hearts, Three),
-            new CardModel(Hearts, Four),
-            new CardModel(Hearts, Five),
-            new CardModel(Hearts, Seven),
-            new CardModel(Diamonds, Six),
-            new CardModel(Spades, Eight));
+            new Card(Hearts, Two),
+            new Card(Hearts, Three),
+            new Card(Hearts, Four),
+            new Card(Hearts, Five),
+            new Card(Hearts, Seven),
+            new Card(Diamonds, Six),
+            new Card(Spades, Eight));
 
     // Also a straight.
-    final List<CardModel> bestFlush =
+    final List<Card> bestFlush =
         Arrays.asList(
-            new CardModel(Hearts, King),
-            new CardModel(Hearts, Queen),
-            new CardModel(Hearts, Jack),
-            new CardModel(Hearts, Ace),
-            new CardModel(Hearts, Nine),
-            new CardModel(Diamonds, Ten),
-            new CardModel(Spades, Ace));
+            new Card(Hearts, King),
+            new Card(Hearts, Queen),
+            new Card(Hearts, Jack),
+            new Card(Hearts, Ace),
+            new Card(Hearts, Nine),
+            new Card(Diamonds, Ten),
+            new Card(Spades, Ace));
 
-    final List<CardModel> worstFullHouse = getFullHouse(Two, Three);
+    final List<Card> worstFullHouse = getFullHouse(Two, Three);
     worstFullHouse.addAll(Arrays.asList(getCard(Spades, Four), getCard(Spades, Five)));
 
-    final List<CardModel> bestFullHouse = getFullHouse(Ace, King);
+    final List<Card> bestFullHouse = getFullHouse(Ace, King);
     bestFullHouse.addAll(Arrays.asList(getCard(Diamonds, King), getCard(Spades, Queen)));
 
-    final List<CardModel> worstFourOfAKind = getAllWithValue(Two);
+    final List<Card> worstFourOfAKind = getAllWithValue(Two);
     worstFourOfAKind.addAll(Arrays.asList(getCard(Three), getCard(Four), getCard(Five)));
 
-    final List<CardModel> bestFourOfAKind = getAllWithValue(Ace);
+    final List<Card> bestFourOfAKind = getAllWithValue(Ace);
     bestFourOfAKind.addAll(Arrays.asList(getCard(King), getCard(King), getCard(King)));
 
-    final List<CardModel> worstStraightFlush =
+    final List<Card> worstStraightFlush =
         Arrays.asList(
             getCard(Spades, Ace),
             getCard(Spades, Two),
@@ -802,7 +802,7 @@ public class CardUtilitiesTests {
             getCard(Hearts, Ace),
             getCard(Clubs, Ace));
 
-    final List<CardModel> bestStraightFlush = getAllWithSuit(Spades).subList(8, 13);
+    final List<Card> bestStraightFlush = getAllWithSuit(Spades).subList(8, 13);
     bestStraightFlush.addAll(Arrays.asList(getCard(Hearts, Ace), getCard(Clubs, Ace)));
 
     // Shuffle hands.

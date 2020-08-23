@@ -8,7 +8,7 @@ import {RequestBuilder} from '../request-builder';
 import {Observable} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
 
-import {PrivateTopicModel} from '../models/private-topic-model';
+import {PrivateTopic} from '../models/private-topic';
 
 
 /**
@@ -40,7 +40,7 @@ export class WebsocketService extends BaseService {
    *
    * This method doesn't expect any request body.
    */
-  getPrivateTopic$Response(params?: {}): Observable<StrictHttpResponse<PrivateTopicModel>> {
+  getPrivateTopic$Response(params?: {}): Observable<StrictHttpResponse<PrivateTopic>> {
 
     const rb = new RequestBuilder(this.rootUrl, WebsocketService.GetPrivateTopicPath, 'get');
     if (params) {
@@ -53,7 +53,7 @@ export class WebsocketService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<PrivateTopicModel>;
+        return r as StrictHttpResponse<PrivateTopic>;
       })
     );
   }
@@ -68,10 +68,10 @@ export class WebsocketService extends BaseService {
    *
    * This method doesn't expect any request body.
    */
-  getPrivateTopic(params?: {}): Observable<PrivateTopicModel> {
+  getPrivateTopic(params?: {}): Observable<PrivateTopic> {
 
     return this.getPrivateTopic$Response(params).pipe(
-      map((r: StrictHttpResponse<PrivateTopicModel>) => r.body as PrivateTopicModel)
+      map((r: StrictHttpResponse<PrivateTopic>) => r.body as PrivateTopic)
     );
   }
 

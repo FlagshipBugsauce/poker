@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {ChatMessageModel} from '../../../api/models';
+import {ChatMessage} from '../../../api/models';
 
 @Component({
   selector: 'pkr-chat-message',
@@ -8,7 +8,7 @@ import {ChatMessageModel} from '../../../api/models';
 })
 export class ChatMessageComponent implements OnInit {
 
-  @Input() message: ChatMessageModel;
+  @Input() message: ChatMessage;
 
   constructor() {
   }

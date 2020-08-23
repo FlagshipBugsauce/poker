@@ -2,9 +2,9 @@ package com.poker.poker.controllers;
 
 import com.poker.poker.events.DealCardsEvent;
 import com.poker.poker.events.PrivateMessageEvent;
-import com.poker.poker.models.ModelModel;
+import com.poker.poker.models.Models;
 import com.poker.poker.models.enums.MessageType;
-import com.poker.poker.models.user.UserModel;
+import com.poker.poker.models.user.User;
 import com.poker.poker.services.JwtService;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.UUID;
@@ -35,8 +35,8 @@ public class TestController {
      Endpoint so that schemas are generated which are used to generate client models.
   */
   @GetMapping("/models")
-  public ResponseEntity<ModelModel> models() {
-    return ResponseEntity.ok(new ModelModel());
+  public ResponseEntity<Models> models() {
+    return ResponseEntity.ok(new Models());
   }
 
   @GetMapping("/deal")
@@ -48,7 +48,7 @@ public class TestController {
   public void sendPrivateMessage(
       @Parameter(hidden = true) @RequestHeader("Authorization") final String jwt,
       @RequestBody final String message) {
-    final UserModel user = jwtService.getUserDocument(jwt);
+    final User user = jwtService.getUserDocument(jwt);
     publisher.publishEvent(
         new PrivateMessageEvent<>(this, MessageType.Debug, user.getId(), message));
   }

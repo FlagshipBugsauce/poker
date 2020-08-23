@@ -13,17 +13,17 @@ import static java.math.BigDecimal.ROUND_CEILING;
 import com.poker.poker.config.AppConfig;
 import com.poker.poker.events.GameMessageEvent;
 import com.poker.poker.models.enums.GamePhase;
-import com.poker.poker.models.game.DeckModel;
-import com.poker.poker.models.game.DrawGameDataContainerModel;
-import com.poker.poker.models.game.DrawGameDataModel;
-import com.poker.poker.models.game.GameListModel;
-import com.poker.poker.models.game.GameModel;
-import com.poker.poker.models.game.GameParameterModel;
-import com.poker.poker.models.game.GamePlayerModel;
-import com.poker.poker.models.game.LobbyModel;
-import com.poker.poker.models.game.LobbyPlayerModel;
-import com.poker.poker.models.game.PokerTableModel;
-import com.poker.poker.models.user.UserModel;
+import com.poker.poker.models.game.Deck;
+import com.poker.poker.models.game.DrawGameData;
+import com.poker.poker.models.game.DrawGameDataContainer;
+import com.poker.poker.models.game.Game;
+import com.poker.poker.models.game.GameList;
+import com.poker.poker.models.game.GameParameter;
+import com.poker.poker.models.game.GamePlayer;
+import com.poker.poker.models.game.Lobby;
+import com.poker.poker.models.game.LobbyPlayer;
+import com.poker.poker.models.game.PokerTable;
+import com.poker.poker.models.user.User;
 import com.poker.poker.models.websocket.GenericServerMessage;
 import com.poker.poker.services.WebSocketService;
 import java.math.BigDecimal;
@@ -55,15 +55,17 @@ public class GameDataService {
   private final AppConfig appConfig;
   private final ApplicationEventPublisher publisher;
   private final WebSocketService webSocketService;
-  private final Map<UUID, GameModel> games;
-  private final Map<UUID, LobbyModel> lobbys;
-  private final Map<UUID, DeckModel> decks;
-  private final Map<UUID, PokerTableModel> tables;
-  private final Map<UUID, DrawGameDataContainerModel> summaries;
-  /** Mapping from user ID to game ID. Can be used to retrieve the game a user is in. */
+  private final Map<UUID, com.poker.poker.models.game.Game> games;
+  private final Map<UUID, Lobby> lobbys;
+  private final Map<UUID, Deck> decks;
+  private final Map<UUID, com.poker.poker.models.game.PokerTable> tables;
+  private final Map<UUID, DrawGameDataContainer> summaries;
+  /**
+   * Mapping from user ID to game ID. Can be used to retrieve the game a user is in.
+   */
   private final Map<UUID, UUID> userIdToGameIdMap;
 
-  private List<GameListModel> gameList;
+  private List<com.poker.poker.models.game.GameList> gameList;
   private boolean useCachedGameList = false;
 
   public GameDataService(
@@ -140,7 +142,7 @@ public class GameDataService {
   /**
    * Broadcasts certain game data, such as the game phase.
    *
-   * <p>TODO: May deprecate this and replace with PokerTableModel.
+   * <p>TODO: May deprecate this and replace with PokerTable.
    *
    * @param id Game ID of the game to broadcast.
    */
@@ -159,15 +161,15 @@ public class GameDataService {
    *
    * @return An ActiveGameModel which is a subset of a game document.
    */
-  public List<GameListModel> getLobbyList() {
+  public List<com.poker.poker.models.game.GameList> getLobbyList() {
     gameList = new ArrayList<>();
-    for (final LobbyModel lobbyModel : lobbys.values()) {
+    for (final Lobby lobby : lobbys.values()) {
       gameList.add(
-          new GameListModel(
-              lobbyModel.getId(),
-              lobbyModel.getParameters(),
-              lobbyModel.getHost(),
-              lobbyModel.getPlayers().size()));
+          new GameList(
+              lobby.getId(),
+              lobby.getParameters(),
+              lobby.getHost(),
+              lobby.getPlayers().size()));
     }
     useCachedGameList = true;
     return gameList;
@@ -177,10 +179,10 @@ public class GameDataService {
    * Sets up all the required mappings when a game is created and returns the ID of the new game.
    *
    * @param params Parameters of the new game.
-   * @param user User who created the game.
+   * @param user   User who created the game.
    * @return ID of the new game.
    */
-  public UUID newGame(final GameParameterModel params, final UserModel user) {
+  public UUID newGame(final GameParameter params, final User user) {
     final UUID gameId = UUID.randomUUID();
     assert games.get(gameId) == null;
     assert lobbys.get(gameId) == null;
@@ -189,19 +191,19 @@ public class GameDataService {
     assert summaries.get(gameId) == null;
     assert userIdToGameIdMap.get(user.getId()) == null;
 
-    final GameModel game =
-        new GameModel(
+    final com.poker.poker.models.game.Game game =
+        new Game(
             gameId, GamePhase.Lobby, new ArrayList<>(), appConfig.getTimeToActInMs() / 1000);
 
-    final LobbyPlayerModel host = new LobbyPlayerModel(user, false, true);
-    final List<LobbyPlayerModel> players = Collections.synchronizedList(new ArrayList<>());
+    final LobbyPlayer host = new LobbyPlayer(user, false, true);
+    final List<LobbyPlayer> players = Collections.synchronizedList(new ArrayList<>());
     players.add(host);
 
     games.put(gameId, game);
-    lobbys.put(gameId, new LobbyModel(gameId, host, params, players));
-    decks.put(gameId, new DeckModel());
-    tables.put(gameId, new PokerTableModel());
-    summaries.put(gameId, new DrawGameDataContainerModel(new ArrayList<>()));
+    lobbys.put(gameId, new Lobby(gameId, host, params, players));
+    decks.put(gameId, new Deck());
+    tables.put(gameId, new PokerTable());
+    summaries.put(gameId, new DrawGameDataContainer(new ArrayList<>()));
     userIdToGameIdMap.put(host.getId(), gameId);
 
     cachedGameListIsOutdated();
@@ -209,12 +211,12 @@ public class GameDataService {
     return gameId;
   }
 
-  public GameModel getGame(final UUID id) {
+  public com.poker.poker.models.game.Game getGame(final UUID id) {
     assert games.get(id) != null;
     return games.get(id);
   }
 
-  public GameModel getUsersGame(final UUID id) {
+  public com.poker.poker.models.game.Game getUsersGame(final UUID id) {
     assert userIdToGameIdMap.get(id) != null;
     assert games.get(userIdToGameIdMap.get(id)) != null;
     return games.get(userIdToGameIdMap.get(id));
@@ -254,12 +256,12 @@ public class GameDataService {
     userIdToGameIdMap.remove(userId);
   }
 
-  public LobbyModel getLobby(final UUID id) {
+  public Lobby getLobby(final UUID id) {
     assert lobbys.get(id) != null;
     return lobbys.get(id);
   }
 
-  public LobbyModel getUsersLobby(final UUID id) {
+  public Lobby getUsersLobby(final UUID id) {
     assert userIdToGameIdMap.get(id) != null;
     assert lobbys.get(userIdToGameIdMap.get(id)) != null;
     return lobbys.get(userIdToGameIdMap.get(id));
@@ -277,10 +279,10 @@ public class GameDataService {
     assert games.get(id) != null;
     assert tables.get(id) != null;
     assert summaries.get(id) != null;
-    final GameModel game = games.get(id);
+    final com.poker.poker.models.game.Game game = games.get(id);
     game.setPlayers(
         lobbys.get(id).getPlayers().stream()
-            .map(GamePlayerModel::new)
+            .map(GamePlayer::new)
             .collect(Collectors.toList()));
     Collections.shuffle(game.getPlayers());
 
@@ -291,10 +293,10 @@ public class GameDataService {
         .get(id)
         .setGameData(
             game.getPlayers().stream()
-                .map(p -> new DrawGameDataModel(p, false, new ArrayList<>()))
+                .map(p -> new DrawGameData(p, false, new ArrayList<>()))
                 .collect(Collectors.toList()));
 
-    final LobbyModel lobby = lobbys.remove(id);
+    final Lobby lobby = lobbys.remove(id);
     tables.get(id).setPlayers(game.getPlayers());
     tables
         .get(id)
@@ -311,34 +313,34 @@ public class GameDataService {
     publisher.publishEvent(new GameMessageEvent<>(this, GamePhaseChanged, id, Play));
   }
 
-  public PokerTableModel getPokerTable(final UUID id) {
+  public com.poker.poker.models.game.PokerTable getPokerTable(final UUID id) {
     assert tables.get(id) != null;
     return tables.get(id);
   }
 
-  public DeckModel getDeck(final UUID id) {
+  public Deck getDeck(final UUID id) {
     assert decks.get(id) != null;
     return decks.get(id);
   }
 
-  public DrawGameDataContainerModel getGameSummary(final UUID id) {
+  public DrawGameDataContainer getGameSummary(final UUID id) {
     assert summaries.get(id) != null;
     return summaries.get(id);
   }
 
-  public LobbyPlayerModel getLobbyPlayer(final UUID playerId) {
+  public LobbyPlayer getLobbyPlayer(final UUID playerId) {
     assert isUserInGame(playerId);
     assert lobbys.get(userIdToGameIdMap.get(playerId)) != null;
     return getLobbyPlayer(userIdToGameIdMap.get(playerId), playerId);
   }
 
-  public LobbyPlayerModel getLobbyPlayer(final UUID lobbyId, final UUID playerId) {
+  public LobbyPlayer getLobbyPlayer(final UUID lobbyId, final UUID playerId) {
     assert lobbys.get(lobbyId) != null;
     assert lobbys.get(lobbyId).getPlayers() != null;
     assert isUserInGame(playerId);
     assert userIdToGameIdMap.get(playerId).equals(lobbyId);
 
-    final LobbyPlayerModel player =
+    final LobbyPlayer player =
         lobbys.get(lobbyId).getPlayers().stream()
             .filter(p -> p.getId().equals(playerId))
             .findFirst()
@@ -348,19 +350,19 @@ public class GameDataService {
     return player;
   }
 
-  public GamePlayerModel getPlayer(final UUID playerId) {
+  public GamePlayer getPlayer(final UUID playerId) {
     assert isUserInGame(playerId);
     assert games.get(userIdToGameIdMap.get(playerId)) != null;
     return getPlayer(userIdToGameIdMap.get(playerId), playerId);
   }
 
-  public GamePlayerModel getPlayer(final UUID gameId, final UUID playerId) {
+  public GamePlayer getPlayer(final UUID gameId, final UUID playerId) {
     assert games.get(gameId) != null;
     assert games.get(gameId).getPlayers() != null;
     assert isUserInGame(playerId);
     assert userIdToGameIdMap.get(playerId).equals(gameId);
 
-    final GamePlayerModel player =
+    final GamePlayer player =
         games.get(gameId).getPlayers().stream()
             .filter(p -> p.getId().equals(playerId))
             .findFirst()
