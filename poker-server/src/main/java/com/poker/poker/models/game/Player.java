@@ -16,24 +16,18 @@ import lombok.Setter;
 @Schema(description = "Player of a game.")
 public abstract class Player {
 
-  /**
-   * Player's user ID.
-   */
+  /** Player's user ID. */
   @Schema(
       description = "User's ID.",
       example = "0a7d95ef-94ba-47bc-b591-febb365bc543",
       implementation = UUID.class)
   protected UUID id;
 
-  /**
-   * Player's first name.
-   */
+  /** Player's first name. */
   @Schema(description = "User's first name.", example = "Fred")
   protected String firstName;
 
-  /**
-   * Player's last name.
-   */
+  /** Player's last name. */
   @Schema(description = "User's last name.", example = "Flintstone")
   protected String lastName;
 

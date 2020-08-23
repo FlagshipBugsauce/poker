@@ -71,9 +71,7 @@ public final class CardUtilities {
    */
   public static final int RANK_BASE = 15;
 
-  /**
-   * Face down card.
-   */
+  /** Face down card. */
   public static final Card FACE_DOWN_CARD = new Card(CardSuit.Back, CardValue.Back);
 
   /**
@@ -139,19 +137,15 @@ public final class CardUtilities {
           new Evaluator(Pair, CardUtilities::checkForPair),
           new Evaluator(HighCard, CardUtilities::checkForHighCard));
 
-  /**
-   * Private constructor to prevent creating instances of static class.
-   */
-  private CardUtilities() {
-  }
+  /** Private constructor to prevent creating instances of static class. */
+  private CardUtilities() {}
 
   public static Card card(final CardSuit suit, final CardValue value) {
     return new Card(suit, value);
   }
 
   /**
-   * All methods in this class that take in a collection of cards must satisfy these
-   * pre-conditions.
+   * All methods in this class that take in a collection of cards must satisfy these pre-conditions.
    *
    * <ol>
    *   <b>Pre-Conditions:</b>
@@ -590,7 +584,7 @@ public final class CardUtilities {
    * checkForSet methods. If no set is found, <code>null</code> is returned.
    *
    * @param values Mapping of lists of cards, keyed by the value associated with the cards in each
-   *               list.
+   *     list.
    * @return The highest set found in the map.
    */
   public static List<Card> findSet(final Map<CardValue, List<Card>> values) {
@@ -644,7 +638,7 @@ public final class CardUtilities {
    * checkForTwoPair methods. If no pair is found, <code>null</code> is returned.
    *
    * @param values Mapping of lists of cards, keyed by the value associated with the cards in each
-   *               list.
+   *     list.
    * @return The highest pair found in the map.
    */
   public static List<Card> findFirstPair(final Map<CardValue, List<Card>> values) {
@@ -665,8 +659,8 @@ public final class CardUtilities {
    * </code> is returned.
    *
    * @param values Mapping of lists of cards, keyed by the value associated with the cards in each
-   *               list.
-   * @param first  The first pair that was found (needed to avoid returning the same pair).
+   *     list.
+   * @param first The first pair that was found (needed to avoid returning the same pair).
    * @return The best pair that isn't the pair in the <code>first</code> argument.
    */
   public static List<Card> findSecondPair(
@@ -803,8 +797,7 @@ public final class CardUtilities {
    * @param result Part of a 5 card hand that needs to be padded with kickers.
    * @return A 5 card hand with the best possible kickers.
    */
-  private static List<Card> addKickers(
-      final List<Card> cards, final List<Card> result) {
+  private static List<Card> addKickers(final List<Card> cards, final List<Card> result) {
     assert sharedPreCondition(cards);
 
     cards.sort(valueSorter(DESCENDING));

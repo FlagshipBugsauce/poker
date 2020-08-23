@@ -38,7 +38,7 @@ public class Deck {
   /**
    * Creates a list of Card lists, simulating dealing a hand of cards.
    *
-   * @param numPlayers      The number of players in the hand.
+   * @param numPlayers The number of players in the hand.
    * @param numCardsPerHand The number of cards to give each player.
    * @return A list of Card lists for each player.
    */

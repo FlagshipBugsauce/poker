@@ -73,10 +73,9 @@ public class PokerTableUtilitiesTests {
    * the sequence of moves.
    *
    * @param table Poker table.
-   * @param deck  Deck (can use a mocked deck to ensure players are given specific cards).
+   * @param deck Deck (can use a mocked deck to ensure players are given specific cards).
    */
-  public static void performAndVerifyHandActionSequence_1(
-      final PokerTable table, final Deck deck) {
+  public static void performAndVerifyHandActionSequence_1(final PokerTable table, final Deck deck) {
     final List<GamePlayer> players = table.getPlayers();
     final GamePlayer p0 = players.get(0);
     final GamePlayer p1 = players.get(1);

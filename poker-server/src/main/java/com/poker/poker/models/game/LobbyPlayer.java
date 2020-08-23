@@ -27,9 +27,9 @@ public class LobbyPlayer extends Player {
    * Constructor that takes in a User as well as the ready status and whether this player is
    * currently the host of game.
    *
-   * @param user  The general model of the player (does not contain game related information).
+   * @param user The general model of the player (does not contain game related information).
    * @param ready Flag which specifies if the player's ready status should be true or false.
-   * @param host  Flag which specifies if the player is the host of the game.
+   * @param host Flag which specifies if the player is the host of the game.
    */
   public LobbyPlayer(final User user, boolean ready, boolean host) {
     super(user);

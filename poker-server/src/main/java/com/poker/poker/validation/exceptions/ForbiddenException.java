@@ -8,13 +8,12 @@ import lombok.Getter;
 @Data
 public class ForbiddenException extends RuntimeException {
 
-  @Getter
-  private final ApiError apiError;
+  @Getter private final ApiError apiError;
 
   /**
    * Creates an ForbiddenException with an error object.
    *
-   * @param errorType   The type of the error.
+   * @param errorType The type of the error.
    * @param description Description of the error;
    */
   public ForbiddenException(final String errorType, final String description) {

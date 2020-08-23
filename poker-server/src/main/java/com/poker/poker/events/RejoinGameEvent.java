@@ -7,9 +7,7 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class RejoinGameEvent extends ApplicationEvent {
 
-  /**
-   * User who is rejoining a game.
-   */
+  /** User who is rejoining a game. */
   private final User user;
 
   public RejoinGameEvent(final Object source, final User user) {

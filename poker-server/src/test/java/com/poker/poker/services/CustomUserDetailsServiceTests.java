@@ -36,8 +36,7 @@ public class CustomUserDetailsServiceTests extends TestBaseClass {
        test whether the CustomUserDetailsService is behaving as expected.
     */
     Mockito.when(userRepository.findUserDocumentByEmail(Mockito.anyString())).thenReturn(null);
-    Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail()))
-        .thenReturn(getUser());
+    Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail())).thenReturn(getUser());
   }
 
   @Test

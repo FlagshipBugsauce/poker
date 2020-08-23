@@ -11,13 +11,9 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Hand summary.")
 public class HandSummary {
 
-  /**
-   * The winning card.
-   */
+  /** The winning card. */
   private Card card;
 
-  /**
-   * Index of the winning player in the player list in the game model and poker table model.
-   */
+  /** Index of the winning player in the player list in the game model and poker table model. */
   private int winner;
 }

@@ -10,19 +10,13 @@ import lombok.Data;
 @Schema(description = "Contains a hand with it's corresponding rank.")
 public class HandRankModel implements Comparable<HandRankModel> {
 
-  /**
-   * Numerical rank of the hand (higher means better hand).
-   */
+  /** Numerical rank of the hand (higher means better hand). */
   @Schema(description = "Hand rank.", example = "42069")
   private final int rank;
-  /**
-   * Hand associated with the rank.
-   */
+  /** Hand associated with the rank. */
   @ArraySchema(schema = @Schema(implementation = Card.class))
   private final List<Card> hand;
-  /**
-   * Player's ID.
-   */
+  /** Player's ID. */
   @Schema(description = "Player's ID.")
   private UUID id;
 

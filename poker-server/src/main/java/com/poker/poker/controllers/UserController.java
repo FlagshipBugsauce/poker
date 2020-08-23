@@ -52,18 +52,18 @@ public class UserController {
           "The client must call this endpoint in order to obtain a JWT, which must be passed in "
               + "the header of most requests.",
       tags = "users")
-  @ApiResponses(@ApiResponse(
-      responseCode = "200",
-      description =
-          "Authorization was successful. A JWT should be returned, which can be used "
-              + "to access secured endpoints.",
-      content =
-      @Content(
-          schema = @Schema(implementation = AuthResponse.class),
-          mediaType = MediaType.APPLICATION_JSON_VALUE)))
+  @ApiResponses(
+      @ApiResponse(
+          responseCode = "200",
+          description =
+              "Authorization was successful. A JWT should be returned, which can be used "
+                  + "to access secured endpoints.",
+          content =
+              @Content(
+                  schema = @Schema(implementation = AuthResponse.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE)))
   @RequestMapping(value = "/auth", method = RequestMethod.POST)
-  public ResponseEntity<AuthResponse> authorize(
-      @RequestBody AuthRequest authRequest) {
+  public ResponseEntity<AuthResponse> authorize(@RequestBody AuthRequest authRequest) {
     return ResponseEntity.ok(userService.authenticate(authRequest));
   }
 
@@ -79,27 +79,28 @@ public class UserController {
           "If the client has a JWT stored in a cookie, it can call this endpoint to authenticate "
               + "using the JWT stored in the cookie.",
       tags = "users")
-  @ApiResponses(@ApiResponse(
-      responseCode = "200",
-      description = "Authorization was successful.",
-      content =
-      @Content(
-          schema = @Schema(implementation = AuthResponse.class),
-          mediaType = MediaType.APPLICATION_JSON_VALUE)))
+  @ApiResponses(
+      @ApiResponse(
+          responseCode = "200",
+          description = "Authorization was successful.",
+          content =
+              @Content(
+                  schema = @Schema(implementation = AuthResponse.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE)))
   @RequestMapping(value = "/auth-with-jwt", method = RequestMethod.POST)
-  public ResponseEntity<AuthResponse> authorizeWithJwt(
-      @RequestBody JwtAuthRequest jwtAuthRequest) {
+  public ResponseEntity<AuthResponse> authorizeWithJwt(@RequestBody JwtAuthRequest jwtAuthRequest) {
     return ResponseEntity.ok(userService.authenticateWithJwt(jwtAuthRequest.getJwt()));
   }
 
   @Operation(summary = "Register", description = "Create an account.", tags = "register")
-  @ApiResponses(@ApiResponse(
-      responseCode = "200",
-      description = "Account creation was successful.",
-      content =
-      @Content(
-          schema = @Schema(implementation = ApiSuccess.class),
-          mediaType = MediaType.APPLICATION_JSON_VALUE)))
+  @ApiResponses(
+      @ApiResponse(
+          responseCode = "200",
+          description = "Account creation was successful.",
+          content =
+              @Content(
+                  schema = @Schema(implementation = ApiSuccess.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE)))
   @RequestMapping(value = "/register", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccess> register(@RequestBody NewAccount newAccount) {
     return ResponseEntity.ok(userService.register(newAccount));
@@ -109,13 +110,14 @@ public class UserController {
       summary = "Get User Info",
       description = "Retrieve user information for user with provided ID.",
       tags = "getUserInfo")
-  @ApiResponses(@ApiResponse(
-      responseCode = "200",
-      description = "User information retrieved successfully.",
-      content =
-      @Content(
-          schema = @Schema(implementation = ClientUser.class),
-          mediaType = MediaType.APPLICATION_JSON_VALUE)))
+  @ApiResponses(
+      @ApiResponse(
+          responseCode = "200",
+          description = "User information retrieved successfully.",
+          content =
+              @Content(
+                  schema = @Schema(implementation = ClientUser.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE)))
   @GetMapping("/getUserInfo/{userId}")
   public ResponseEntity<ClientUser> getUserInfo(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt,

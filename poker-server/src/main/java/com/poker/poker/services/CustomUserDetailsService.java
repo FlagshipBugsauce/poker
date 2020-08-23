@@ -26,7 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
       log.error(appConstants.getEmailCouldNotBeFound(), s);
       throw appConstants.getBadPasswordException();
     }
-    return new org.springframework.security.core.userdetails.User(user.getEmail(),
-        user.getPassword(), new ArrayList<>());
+    return new org.springframework.security.core.userdetails.User(
+        user.getEmail(), user.getPassword(), new ArrayList<>());
   }
 }

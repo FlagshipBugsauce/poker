@@ -80,7 +80,7 @@ public class UserService {
    *
    * @param jwt Authentication token.
    * @return AuthResponse containing the same data that is returned when a client authenticates
-   * normally.
+   *     normally.
    */
   public AuthResponse authenticateWithJwt(final String jwt) {
     final String email = jwtService.extractEmail(jwt);
@@ -107,8 +107,7 @@ public class UserService {
    * @return An ApiSuccess, if the account is created successfully.
    * @throws BadRequestException If the account is not created successfully.
    */
-  public ApiSuccess register(final NewAccount newAccount)
-      throws BadRequestException {
+  public ApiSuccess register(final NewAccount newAccount) throws BadRequestException {
     // Log
     log.debug("Attempting to create account for user with email: {}.", newAccount.getEmail());
 
@@ -140,8 +139,7 @@ public class UserService {
    */
   public void validate(final String jwt, final List<UserGroup> groupsAllowed)
       throws ForbiddenException {
-    final User user =
-        userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt));
+    final User user = userRepository.findUserDocumentByEmail(jwtService.extractEmail(jwt));
     // User is not in the correct group.
     if (!groupsAllowed.contains(user.getGroup())) {
       log.error(
@@ -177,10 +175,6 @@ public class UserService {
       throw appConstants.getUserInfoNotFoundException();
     }
     return new ClientUser(
-        id,
-        user.getEmail(),
-        user.getGroup(),
-        user.getFirstName(),
-        user.getLastName());
+        id, user.getEmail(), user.getGroup(), user.getFirstName(), user.getLastName());
   }
 }

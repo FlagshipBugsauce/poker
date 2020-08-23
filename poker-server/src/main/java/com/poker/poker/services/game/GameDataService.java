@@ -60,9 +60,7 @@ public class GameDataService {
   private final Map<UUID, Deck> decks;
   private final Map<UUID, com.poker.poker.models.game.PokerTable> tables;
   private final Map<UUID, DrawGameDataContainer> summaries;
-  /**
-   * Mapping from user ID to game ID. Can be used to retrieve the game a user is in.
-   */
+  /** Mapping from user ID to game ID. Can be used to retrieve the game a user is in. */
   private final Map<UUID, UUID> userIdToGameIdMap;
 
   private List<com.poker.poker.models.game.GameList> gameList;
@@ -166,10 +164,7 @@ public class GameDataService {
     for (final Lobby lobby : lobbys.values()) {
       gameList.add(
           new GameList(
-              lobby.getId(),
-              lobby.getParameters(),
-              lobby.getHost(),
-              lobby.getPlayers().size()));
+              lobby.getId(), lobby.getParameters(), lobby.getHost(), lobby.getPlayers().size()));
     }
     useCachedGameList = true;
     return gameList;
@@ -179,7 +174,7 @@ public class GameDataService {
    * Sets up all the required mappings when a game is created and returns the ID of the new game.
    *
    * @param params Parameters of the new game.
-   * @param user   User who created the game.
+   * @param user User who created the game.
    * @return ID of the new game.
    */
   public UUID newGame(final GameParameter params, final User user) {
@@ -192,8 +187,7 @@ public class GameDataService {
     assert userIdToGameIdMap.get(user.getId()) == null;
 
     final com.poker.poker.models.game.Game game =
-        new Game(
-            gameId, GamePhase.Lobby, new ArrayList<>(), appConfig.getTimeToActInMs() / 1000);
+        new Game(gameId, GamePhase.Lobby, new ArrayList<>(), appConfig.getTimeToActInMs() / 1000);
 
     final LobbyPlayer host = new LobbyPlayer(user, false, true);
     final List<LobbyPlayer> players = Collections.synchronizedList(new ArrayList<>());
@@ -281,9 +275,7 @@ public class GameDataService {
     assert summaries.get(id) != null;
     final com.poker.poker.models.game.Game game = games.get(id);
     game.setPlayers(
-        lobbys.get(id).getPlayers().stream()
-            .map(GamePlayer::new)
-            .collect(Collectors.toList()));
+        lobbys.get(id).getPlayers().stream().map(GamePlayer::new).collect(Collectors.toList()));
     Collections.shuffle(game.getPlayers());
 
     game.getPlayers()

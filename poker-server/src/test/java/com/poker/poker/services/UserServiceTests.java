@@ -52,8 +52,7 @@ public class UserServiceTests extends TestBaseClass {
         .thenReturn(getUserDetails());
     Mockito.when(jwtService.generateToken(Mockito.any(UserDetails.class)))
         .thenReturn(getSampleJwt());
-    Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail()))
-        .thenReturn(getUser());
+    Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail())).thenReturn(getUser());
 
     // When
     AuthResponse response = userService.authenticate(getSampleAuthRequest());
@@ -76,8 +75,7 @@ public class UserServiceTests extends TestBaseClass {
   @Test
   public void testRegistrationWithUniqueEmail() {
     // Given
-    Mockito.when(userRepository.findUserDocumentByEmail(Mockito.anyString()))
-        .thenReturn(getUser());
+    Mockito.when(userRepository.findUserDocumentByEmail(Mockito.anyString())).thenReturn(getUser());
     Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail())).thenReturn(null);
     Mockito.when(userRepository.save(getUser())).thenReturn(null);
 
@@ -89,8 +87,7 @@ public class UserServiceTests extends TestBaseClass {
   public void testRegistrationWithEmailThatAlreadyExists() {
     // Given
     Mockito.when(userRepository.findUserDocumentByEmail(Mockito.anyString())).thenReturn(null);
-    Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail()))
-        .thenReturn(getUser());
+    Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail())).thenReturn(getUser());
     Mockito.when(userRepository.save(getUser())).thenReturn(null);
 
     // When/Then
@@ -104,8 +101,7 @@ public class UserServiceTests extends TestBaseClass {
     // Given
     final String jwt = "token";
     Mockito.when(jwtService.extractEmail(jwt)).thenReturn(getSampleEmail());
-    Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail()))
-        .thenReturn(getUser());
+    Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail())).thenReturn(getUser());
 
     // When/Then
     Assertions.assertThrows(

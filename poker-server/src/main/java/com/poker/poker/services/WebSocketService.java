@@ -174,8 +174,7 @@ public class WebSocketService {
     sendPublicMessage(
         appConfig.getGameTopic() + gameId,
         new GenericServerMessage<>(
-            MessageType.Toast,
-            new Toast(message, new ToastClass("bg-light toast-" + size, 5000))));
+            MessageType.Toast, new Toast(message, new ToastClass("bg-light toast-" + size, 5000))));
   }
 
   @EventListener

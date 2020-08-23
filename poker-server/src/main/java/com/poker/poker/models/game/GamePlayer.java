@@ -20,39 +20,27 @@ import lombok.Setter;
 @Schema(description = "Model representing a player in a game.")
 public class GamePlayer extends Player {
 
-  /**
-   * Specifies whether a player is active.
-   */
+  /** Specifies whether a player is active. */
   @Schema(description = "Specifies whether a player is active.", example = "true")
   protected boolean away = false;
 
-  /**
-   * Specifies whether a player is out of the game.
-   */
+  /** Specifies whether a player is out of the game. */
   @Schema(description = "Specifies whether a player is out of the game.", example = "false")
   protected boolean out = false;
 
-  /**
-   * Cards.
-   */
+  /** Cards. */
   @Schema(description = "Cards")
   protected List<Card> cards = new ArrayList<>();
 
-  /**
-   * Player controls.
-   */
+  /** Player controls. */
   @Schema(implementation = TableControls.class)
   protected TableControls controls = new TableControls();
 
-  /**
-   * Player is no longer in the hand when this is true.
-   */
+  /** Player is no longer in the hand when this is true. */
   @Schema(description = "Player is no longer in the hand when this is true.", example = "false")
   protected boolean folded = false;
 
-  /**
-   * Player bet entire bankroll.
-   */
+  /** Player bet entire bankroll. */
   @Schema(description = "Player bet entire bankroll.", example = "false")
   protected boolean allIn = false;
 

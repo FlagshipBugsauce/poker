@@ -13,7 +13,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "server-state")
 public class ServerState {
 
-  @Id
-  private UUID id;
+  @Id private UUID id;
   private boolean initialized;
 }

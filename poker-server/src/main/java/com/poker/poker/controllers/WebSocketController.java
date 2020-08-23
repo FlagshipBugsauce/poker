@@ -101,9 +101,9 @@ public class WebSocketController {
           responseCode = "200",
           description = "Private topic successfully created.",
           content =
-          @Content(
-              schema = @Schema(implementation = PrivateTopic.class),
-              mediaType = MediaType.APPLICATION_JSON_VALUE)))
+              @Content(
+                  schema = @Schema(implementation = PrivateTopic.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE)))
   @GetMapping("/private-topic")
   public ResponseEntity<PrivateTopic> getPrivateTopic(
       @Parameter(hidden = true) @RequestHeader("Authorization") final String jwt) {

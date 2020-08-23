@@ -41,13 +41,14 @@ public class ApiExceptionHandler {
    * @param e Exception that was thrown.
    * @return Response with bad request status and any relevant information.
    */
-  @ApiResponses(@ApiResponse(
-      responseCode = "400",
-      description = "Bad request.",
-      content =
-      @Content(
-          schema = @Schema(implementation = ApiError.class),
-          mediaType = "application/json")))
+  @ApiResponses(
+      @ApiResponse(
+          responseCode = "400",
+          description = "Bad request.",
+          content =
+              @Content(
+                  schema = @Schema(implementation = ApiError.class),
+                  mediaType = "application/json")))
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ExceptionHandler(BadRequestException.class)
   protected ResponseEntity<ApiError> handleBadRequestExceptions(final BadRequestException e) {
@@ -60,13 +61,14 @@ public class ApiExceptionHandler {
    * @param e Exception that was thrown.
    * @return Response with forbidden status and any relevant information.
    */
-  @ApiResponses(@ApiResponse(
-      responseCode = "403",
-      description = "Forbidden.",
-      content =
-      @Content(
-          schema = @Schema(implementation = ApiError.class),
-          mediaType = "application/json")))
+  @ApiResponses(
+      @ApiResponse(
+          responseCode = "403",
+          description = "Forbidden.",
+          content =
+              @Content(
+                  schema = @Schema(implementation = ApiError.class),
+                  mediaType = "application/json")))
   @ResponseStatus(HttpStatus.FORBIDDEN)
   @ExceptionHandler(ForbiddenException.class)
   protected ResponseEntity<ApiError> handleForbiddenExceptions(final ForbiddenException e) {

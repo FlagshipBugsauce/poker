@@ -39,13 +39,14 @@ public class HandController {
       summary = "Draws a card.",
       description = "Draws a card from the top of the deck.",
       tags = "game")
-  @ApiResponses(@ApiResponse(
-      responseCode = "200",
-      description = "Draw was successful.",
-      content =
-      @Content(
-          schema = @Schema(implementation = ApiSuccess.class),
-          mediaType = MediaType.APPLICATION_JSON_VALUE)))
+  @ApiResponses(
+      @ApiResponse(
+          responseCode = "200",
+          description = "Draw was successful.",
+          content =
+              @Content(
+                  schema = @Schema(implementation = ApiSuccess.class),
+                  mediaType = MediaType.APPLICATION_JSON_VALUE)))
   @RequestMapping(value = "/draw", method = RequestMethod.POST)
   public ResponseEntity<ApiSuccess> draw(
       @Parameter(hidden = true) @RequestHeader("Authorization") String jwt) {

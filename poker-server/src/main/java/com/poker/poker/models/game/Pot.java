@@ -16,15 +16,11 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Side-pot of a poker game.")
 public class Pot {
 
-  /**
-   * The maximum wager in this side-pot.
-   */
+  /** The maximum wager in this side-pot. */
   @Schema(description = "The maximum wager in this side-pot.", implementation = BigDecimal.class)
   private BigDecimal wager = BigDecimal.ZERO;
 
-  /**
-   * The total amount in this side-pot.
-   */
+  /** The total amount in this side-pot. */
   @Schema(description = "The total amount in this side-pot.", implementation = BigDecimal.class)
   private BigDecimal total = BigDecimal.ZERO;
 

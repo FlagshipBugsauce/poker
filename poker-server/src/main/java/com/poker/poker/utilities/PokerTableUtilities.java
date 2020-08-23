@@ -34,9 +34,7 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Static utility class for performing operations on a PokerTable object.
- */
+/** Static utility class for performing operations on a PokerTable object. */
 @Slf4j
 public final class PokerTableUtilities {
 
@@ -49,8 +47,8 @@ public final class PokerTableUtilities {
    *
    * @param table Poker table.
    * @return A clone of the table with all cards hidden (face down, i.e. client has no way of
-   * knowing what these cards are because the values will not be sent to any clients if the table is
-   * first processed by this method).
+   *     knowing what these cards are because the values will not be sent to any clients if the
+   *     table is first processed by this method).
    */
   public static PokerTable hideCards(final PokerTable table) {
     // Clone table, creating deep copy of player list and cards.
@@ -378,8 +376,7 @@ public final class PokerTableUtilities {
    * @param table Poker table.
    * @param deck Deck.
    */
-  public static void dealCards(
-      final PokerTable table, final Deck deck, final int numCards) {
+  public static void dealCards(final PokerTable table, final Deck deck, final int numCards) {
     // Validate Pre-Conditions.
     assert table != null;
     assert deck != null;
@@ -614,10 +611,10 @@ public final class PokerTableUtilities {
   /**
    * Returns the ith next active player.
    *
-   * @param table      Poker table.
+   * @param table Poker table.
    * @param startIndex Start index.
-   * @param i          i.
-   * @param forward    Forward or backward.
+   * @param i i.
+   * @param forward Forward or backward.
    * @return ith next active player.
    */
   public static int getIthNextActivePlayer(

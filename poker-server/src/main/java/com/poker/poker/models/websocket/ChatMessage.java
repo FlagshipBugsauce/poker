@@ -12,23 +12,17 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Message sent to chat.")
 public class ChatMessage {
 
-  /**
-   * Time the message was sent.
-   */
+  /** Time the message was sent. */
   @Schema(description = "Time the message was sent.", implementation = Date.class)
   private Date timestamp;
 
-  /**
-   * Author of the message. If the message was sent by the system, author will be null.
-   */
+  /** Author of the message. If the message was sent by the system, author will be null. */
   @Schema(
       description = "Author of the message. Null if the message was sent by the system.",
       example = "Jackson McGee")
   private String author;
 
-  /**
-   * Message.
-   */
+  /** Message. */
   @Schema(description = "Message", example = "Jackson McGee drew the Ace of Spaces.")
   private String message;
 }

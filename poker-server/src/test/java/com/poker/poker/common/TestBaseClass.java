@@ -37,10 +37,10 @@ public class TestBaseClass {
   private final UUID zeroUUID = new UUID(0, 0);
   private final long tokenExpirationInMillis = 1000 * 60 * 60 * 24 * 14;
   private final ObjectMapper objectMapper = new ObjectMapper();
-  private final AuthRequest sampleAuthRequest =
-      new AuthRequest(sampleEmail, samplePassword);
-  private final UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-      sampleEmail, samplePassword, new ArrayList<>());
+  private final AuthRequest sampleAuthRequest = new AuthRequest(sampleEmail, samplePassword);
+  private final UserDetails userDetails =
+      new org.springframework.security.core.userdetails.User(
+          sampleEmail, samplePassword, new ArrayList<>());
   private final User user =
       new User(
           zeroUUID,
@@ -51,8 +51,7 @@ public class TestBaseClass {
           sampleLastName);
   private final ClientUser sampleClientUser =
       new ClientUser(zeroUUID, sampleEmail, sampleUserGroup, sampleFirstName, sampleLastName);
-  private final AuthResponse sampleAuthResponse =
-      new AuthResponse(sampleJwt, sampleClientUser);
+  private final AuthResponse sampleAuthResponse = new AuthResponse(sampleJwt, sampleClientUser);
   private final NewAccount sampleNewAccount =
       new NewAccount(sampleEmail, samplePassword, sampleFirstName, sampleLastName);
   private final ApiSuccess sampleRegisterSuccessModel = new ApiSuccess("Success.");

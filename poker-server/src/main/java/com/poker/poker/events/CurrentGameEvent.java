@@ -12,18 +12,13 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class CurrentGameEvent extends ApplicationEvent {
 
-  /**
-   * User ID.
-   */
+  /** User ID. */
   private final UUID userId;
 
-  /**
-   * Information about the game a player is currently in.
-   */
+  /** Information about the game a player is currently in. */
   private final CurrentGame currentGame;
 
-  public CurrentGameEvent(
-      Object source, final UUID userId, final CurrentGame currentGame) {
+  public CurrentGameEvent(Object source, final UUID userId, final CurrentGame currentGame) {
     super(source);
     this.userId = userId;
     this.currentGame = currentGame;

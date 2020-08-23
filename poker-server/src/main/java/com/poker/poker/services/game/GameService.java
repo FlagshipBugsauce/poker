@@ -332,8 +332,7 @@ public class GameService {
   @Async
   @EventListener
   public void hideCards(final HideCardsEvent event) {
-    publisher.publishEvent(
-        new GameMessageEvent<>(this, HideCards, event.getId(), new HideCards()));
+    publisher.publishEvent(new GameMessageEvent<>(this, HideCards, event.getId(), new HideCards()));
   }
 
   /**
@@ -412,8 +411,7 @@ public class GameService {
     final BigDecimal duration =
         new BigDecimal(durationInMs).divide(new BigDecimal(1000), 10, HALF_UP);
     publisher.publishEvent(
-        new GameMessageEvent<>(
-            this, Timer, game.getId(), new Timer(UUID.randomUUID(), duration)));
+        new GameMessageEvent<>(this, Timer, game.getId(), new Timer(UUID.randomUUID(), duration)));
   }
 
   /**

@@ -10,15 +10,11 @@ import lombok.Data;
 @Schema(description = "Deal model that is sent to the client to trigger a deal event.")
 public class Deal {
 
-  /**
-   * ID of the deal event.
-   */
+  /** ID of the deal event. */
   @Schema(description = "ID of the deal event.", implementation = UUID.class)
   private UUID id;
 
-  /**
-   * Number of cards to deal.
-   */
+  /** Number of cards to deal. */
   @Schema(description = "Number of cards to deal.", example = "2")
   private int numCards;
 
