@@ -4,60 +4,113 @@
   </h3>
   <div class="card-body bg-light text-dark">
     <p>
-      This is an experimental, online, multiplayer, poker application. This application was made
-      using Spring Boot, Angular, MongoDB and will be deployed to AWS (S3 for client, elastic
-      beanstalk for backend). The plan is to build this project in stages.
+      This is a multiplayer, poker application for the browser which is still being actively
+      developed. The
+      stack being used is Spring Boot, Angular, MongoDB and the application will be deployed to AWS
+      (current plan is to host the client on S3 and to host the backend using elastic beanstalk).
     </p>
     <p>
-      This process will begin by creating the basic infrastructure needed to facilitate a poker
-      game, i.e., a user account system, a basic UI, DB storage, etc...
+      Due to my inexperience with the technologies being used in this project, along with my
+      inexperience when it comes to building a project of this size from scratch, it’s not really
+      possible to foresee many of the problems I’ll face during development. In other words, it's
+      not really possible to come up with a detailed plan ahead of time. At the time of starting the
+      project, many details were unclear (such as how the backend would communicate with the
+      frontend) and in order to figure these details out, I decided the best approach was to tackle
+      this project in a series of small stages, where the complexity of various parts of the
+      application would be slowly increased with each stage. The idea here is that if and when some
+      problem with the current design emerged, the amount of refactoring would be as little as
+      possible.
     </p>
-    <p>
-      Next, is designing and implementing the infrastructure needed to create and start games. This
-      requires a game creation page, a list of joinable games and some kind of game lobby, where
-      players wait for a game to begin.
-    </p>
-    <p>
-      Next is adding some kind of simple game that begins once the host of a game lobby opts to
-      start the game. The idea here is to gradually increase the complexity of the simple game.
-      As the complexity increases, more issues will arise, and they can be fixed when things are
-      still as simple as possible. Even though each iteration is basically being scrapped, the
-      issues being resolved are difficult to predict, and so, it should end up saving time in the
-      long-run, since these issues can be fixed before things are too complex.
-    </p>
-    <p>
-      The "simple game" will begin as a game where players click a button and are given a random
-      number from 1 to 100. The player who rolls the highest number wins. The next iteration of this
-      game involves adding multiple rounds. In this iteration, the player who wins the most rounds,
-      wins the game. After adding rounds, the game will transition from rolling a random number to
-      drawing a card. Following this, the focus will be on creating a more effective UI, to weed
-      out some of the issues related to communication between the client and the server. Next, the
-      concept of an away status will be added. As in, if a player does not perform an action within
-      some reasonable time frame, the server will perform a default action on their behalf, and
-      transition their status to "Away". When a player is "Away", the server will not wait for the
-      player to act and will instead perform a default action on their behalf immediately, whenever
-      it is this player's turn. Next, the ability to leave and rejoin an ongoing game will be added.
-      After this, a simple game chat will be added, so that players can communicate and also so that
-      system events can be communicated in a convenient manner, i.e. game events like which player
-      wins a hand, etc...
-    </p>
-    <p>
-      Once we get to this stage, it is time to transition the "simple game" to something that more
-      closely resembles a game of poker. Next on the agenda is building a UI for the game itself
-      that closely resembles a typical online poker game UI, as in, it looks like a poker table from
-      above. Next, is to introduce betting to the game. The idea here is that instead of drawing a
-      card and seeing who wins, each player will be dealt a card that only they can see. A round of
-      poker-style betting will follow. The game will continue until each player runs out of chips.
-      <b>This is the current stage of development.</b>
-    </p>
-    <p>
-      What will follow, is transitioning from dealing one card, to two, and adding the typical
-      NL Hold'em game flow, i.e., cards are dealt, pre-flop betting, flop, post-flop betting, turn,
-      post-turn betting, river, final round of betting, etc... That is to say, this is almost done.
-      Once the basic game flow is working correctly, the final task will involve polishing the UI
-      and ensuring the business logic is robust enough to handle all edge cases. I may also expand
-      the scope of this project from simple one-table tournaments, to cash games, multi-table
-      tournaments, etc... For now however, the focus is on the simplest type of poker game possible.
-    </p>
+    <h3>Project Roadmap</h3>
+    <ol>
+      <li>
+        Implement the basic infrastructure needed for this kind of application. This includes things
+        like setting up the Angular and Spring Boot projects, implementing a rudimentary user
+        account system, setting up a database, designing and implementing a basic UI, setting up
+        unit tests, etc...
+      </li>
+      <li>
+        Design and implement the basic infrastructure required for players to create join and start
+        games. For this kind of application, this involves designing and implementing some kind of
+        interface for a player to create a game with specific parameters (such as the buy-in and
+        maximum number of players), as well as some kind of interface for players to join games that
+        have been created. Once players join a game, there needs to be some kind of lobby interface,
+        where players can wait for more players to join before the game starts. In the background,
+        there needs to be some system to track all of this as well, as in, some system that is
+        tracking which games exist, which players are in these games, and so on.
+      </li>
+      <li>
+        This point is where the small incremental steps begin. Poker is a fairly complex game, so
+        before jumping straight into designing and implementing all the logic and interfaces needed
+        for poker, I decided to start with something much simpler – a simple game that consists of
+        players clicking a button to generate a random number between 1 and 100. Whoever rolls the
+        highest number wins. The UI here will be every simple, just a “card” with text summarizing
+        what has happened, i.e. “Jimmy McGee rolled 25.” There were a number of issues that were
+        resolved in this stage, mostly related to the system being used to facilitate communication
+        between the client and the backend.
+      </li>
+      <li>
+        Increase the complexity of the roll game by adding rounds and a slightly more complex UI
+        that summarizes what has happened in each round. A round consists of each player in the game
+        rolling a number and the winner of a round is the player who rolled the highest number. At
+        the end of the specified number of rounds, whoever had the highest score wins the game. The
+        UI can be something like a table that shows what players have rolled and has some visual
+        indicators of who won, whose turn it is, scores, etc… There were a number of issues that
+        were resolved in this stage, mostly related to the system being used to handle events on the
+        backend and displaying useful information in the UI.
+      </li>
+      <li>
+        Increase the complexity of the multi-round roll game by replacing random numbers with random
+        cards, as in, transitioning the “roll game” to a “draw game”. This involves representing
+        cards programmatically, finding scalable card images (ideally .svg images) so that cards can
+        be displayed at various sizes without losing quality, implementing a system for the client
+        to display cards in an aesthetically pleasing manner (with tool-tips), etc… Many issues were
+        resolved in this stage, mostly related to displaying cards effectively in the UI.
+      </li>
+      <li>
+        Increase the complexity of the multi-round “draw game” by replacing the basic table UI with
+        the typical UI used in most online poker games (a bird’s eye view of a poker table). Many
+        issues were resolved in this stage, mostly related to displaying information effectively,
+        with a good aesthetic, in the UI.
+      </li>
+      <li>
+        At some point, add a player chat feature, so that players can chat with each other, and also
+        so that system messages can be communicated unobtrusively (too much toast spam was becoming
+        a problem).
+      </li>
+      <li>
+        Transition the game from each player "drawing" a card, to being "dealt" a hidden card. After
+        all players receive a card, a round of poker-style betting will occur before winner(s) are
+        determined. Players will have the ability to fold, check, call and raise. Once the round of
+        betting is finished, any players who are still in the hand (haven't folded) will have their
+        cards compared and the player with the best card will win. There are some edge cases here
+        where multiple players can win, which need to be fleshed out. Many issues were resolved in
+        this stage related to the general flow of betting (there are many edge cases to account
+        for), handling cases with side-pots properly, etc…
+      </li>
+      <li>
+        Transition from being dealt one card, to being dealt two cards. This will involve
+        implementing a hand ranking system, a more advanced UI (adding card dealing animation), and
+        much more. Many issues related to edge cases where hands have the same rank, or with
+        side-pots were resolved here. <b>This is the current stage of development.</b>
+      </li>
+      <li>
+        The final stage where the complexity of the game is increased involves adding the full flow
+        of a NL Hold ‘em game. Instead of one round of betting after being dealt card, the game will
+        continue after the cards are dealt with another round of betting, followed by the flop, etc…
+      </li>
+      <li>
+        Now that game logic is set in stone, some time can be spent polishing up the code by
+        ensuring code is properly documented, code is clean (no needless repetition) and readable,
+        etc… Everything is unit tested thoroughly, pre-conditions added everywhere to ensure game
+        logic is air-tight.
+      </li>
+      <li>
+        Add stat tracking and game replays.
+      </li>
+      <li>
+        Look into hosting options for the backend (current plan is to use elastic beanstalk).
+      </li>
+    </ol>
   </div>
 </div>
