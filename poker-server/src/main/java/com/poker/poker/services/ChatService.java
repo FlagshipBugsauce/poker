@@ -3,7 +3,7 @@ package com.poker.poker.services;
 import com.poker.poker.events.ChatMessageEvent;
 import com.poker.poker.events.PublishMessageEvent;
 import com.poker.poker.events.SystemChatMessageEvent;
-import com.poker.poker.models.websocket.ChatMessageModel;
+import com.poker.poker.models.websocket.ChatMessage;
 import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @AllArgsConstructor
-@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class ChatService {
 
   private final ApplicationEventPublisher publisher;
@@ -29,8 +29,8 @@ public class ChatService {
    */
   @EventListener
   public void handleChatMessageEvent(final ChatMessageEvent event) {
-    final ChatMessageModel message =
-        new ChatMessageModel(
+    final ChatMessage message =
+        new ChatMessage(
             new Date(),
             event.getUser().getFirstName() + " " + event.getUser().getLastName(),
             event.getMessage());
@@ -48,7 +48,7 @@ public class ChatService {
    */
   @EventListener
   public void handleSystemMessageEvent(final SystemChatMessageEvent event) {
-    final ChatMessageModel message = new ChatMessageModel(new Date(), null, event.getMessage());
+    final ChatMessage message = new ChatMessage(new Date(), null, event.getMessage());
     // If a game ID is provided, then broadcast to that game only, otherwise, broadcast to general.
     final String topic =
         event.getGameId() == null ? "/topic/chat/general" : "/topic/chat/" + event.getGameId();

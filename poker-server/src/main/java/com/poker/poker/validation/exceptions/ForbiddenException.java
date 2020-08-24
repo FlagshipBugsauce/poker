@@ -1,6 +1,6 @@
 package com.poker.poker.validation.exceptions;
 
-import com.poker.poker.models.ApiErrorModel;
+import com.poker.poker.models.ApiError;
 import java.util.Date;
 import lombok.Data;
 import lombok.Getter;
@@ -8,7 +8,7 @@ import lombok.Getter;
 @Data
 public class ForbiddenException extends RuntimeException {
 
-  @Getter private final ApiErrorModel apiErrorModel;
+  @Getter private final ApiError apiError;
 
   /**
    * Creates an ForbiddenException with an error object.
@@ -17,6 +17,6 @@ public class ForbiddenException extends RuntimeException {
    * @param description Description of the error;
    */
   public ForbiddenException(final String errorType, final String description) {
-    apiErrorModel = new ApiErrorModel(errorType, description, new Date());
+    apiError = new ApiError(errorType, description, new Date());
   }
 }

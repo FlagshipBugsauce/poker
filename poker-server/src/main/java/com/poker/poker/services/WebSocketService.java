@@ -7,12 +7,12 @@ import com.poker.poker.events.PrivateMessageEvent;
 import com.poker.poker.events.PublishMessageEvent;
 import com.poker.poker.events.ToastMessageEvent;
 import com.poker.poker.models.enums.MessageType;
-import com.poker.poker.models.user.UserModel;
+import com.poker.poker.models.user.User;
 import com.poker.poker.models.websocket.GenericServerMessage;
-import com.poker.poker.models.websocket.PrivateTopicModel;
-import com.poker.poker.models.websocket.ToastClassModel;
-import com.poker.poker.models.websocket.ToastModel;
-import com.poker.poker.models.websocket.WebSocketInfoModel;
+import com.poker.poker.models.websocket.PrivateTopic;
+import com.poker.poker.models.websocket.Toast;
+import com.poker.poker.models.websocket.ToastClass;
+import com.poker.poker.models.websocket.WebSocketInfo;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -41,7 +41,7 @@ public class WebSocketService {
    * compose a topic that only one user will know about. This allows the application to broadcast
    * private data to a specific user.
    */
-  private final Map<UUID, WebSocketInfoModel> privateSockets;
+  private final Map<UUID, WebSocketInfo> privateSockets;
 
   private final SimpMessagingTemplate template;
 
@@ -74,10 +74,10 @@ public class WebSocketService {
    * @param user The user requesting a private topic.
    * @return The UUID component of the topic.
    */
-  public PrivateTopicModel requestPrivateTopic(final UserModel user) {
+  public PrivateTopic requestPrivateTopic(final User user) {
     final UUID privateId = UUID.randomUUID();
-    privateSockets.put(user.getId(), new WebSocketInfoModel(privateId, new Date()));
-    return new PrivateTopicModel(privateId);
+    privateSockets.put(user.getId(), new WebSocketInfo(privateId, new Date()));
+    return new PrivateTopic(privateId);
   }
 
   /**
@@ -85,7 +85,7 @@ public class WebSocketService {
    *
    * @param user The ID of the user the topic is used to communicate with.
    */
-  public void removePrivateTopic(final UserModel user) {
+  public void removePrivateTopic(final User user) {
     // TODO: Add validation
     privateSockets.remove(user.getId());
   }
@@ -99,14 +99,14 @@ public class WebSocketService {
    */
   public <T> void sendPrivateMessage(final UUID recipient, final GenericServerMessage<T> data) {
     // TODO: Add validation
-    final WebSocketInfoModel model = privateSockets.get(recipient);
+    final WebSocketInfo model = privateSockets.get(recipient);
     template.convertAndSend("/topic/secure/" + model.getSecureTopicId(), data);
     model.setLastActivity(new Date());
   }
 
   @EventListener
   public <T> void privateMessageEventHandler(final PrivateMessageEvent<T> event) {
-    final WebSocketInfoModel socketInfo = privateSockets.get(event.getId());
+    final WebSocketInfo socketInfo = privateSockets.get(event.getId());
     if (socketInfo == null) {
       log.debug("Player with ID {} has no private socket.", event.getId());
       return;
@@ -174,14 +174,13 @@ public class WebSocketService {
     sendPublicMessage(
         appConfig.getGameTopic() + gameId,
         new GenericServerMessage<>(
-            MessageType.Toast,
-            new ToastModel(message, new ToastClassModel("bg-light toast-" + size, 5000))));
+            MessageType.Toast, new Toast(message, new ToastClass("bg-light toast-" + size, 5000))));
   }
 
   @EventListener
   public void updateCurrentGameForUser(final CurrentGameEvent currentGameEvent) {
     template.convertAndSend(
         appConfig.getCurrentGameTopic() + currentGameEvent.getUserId(),
-        currentGameEvent.getCurrentGameModel());
+        currentGameEvent.getCurrentGame());
   }
 }

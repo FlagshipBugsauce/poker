@@ -3,7 +3,7 @@ import {WebSocketService} from '../shared/web-socket/web-socket.service';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {closeChat, sendChatMessage, startChat} from './app.actions';
 import {tap} from 'rxjs/operators';
-import {ClientMessageModel} from '../api/models/client-message-model';
+import {ClientMessage} from '../api/models/client-message';
 import {AppStateContainer} from '../shared/models/app-state.model';
 import {Store} from '@ngrx/store';
 import {selectJwt} from './app.selector';
@@ -16,7 +16,7 @@ export class ChatEffects {
 
   startChat$ = createEffect(() => this.actions$.pipe(
     ofType(startChat),
-    tap((action: ClientMessageModel) => this.chatService.subscribeToChatTopic(action.gameId))
+    tap((action: ClientMessage) => this.chatService.subscribeToChatTopic(action.gameId))
   ), {dispatch: false});
 
   closeChat$ = createEffect(() => this.actions$.pipe(
@@ -25,7 +25,7 @@ export class ChatEffects {
 
   sendChatMessage$ = createEffect(() => this.actions$.pipe(
     ofType(sendChatMessage),
-    tap((action: ClientMessageModel) =>
+    tap((action: ClientMessage) =>
       this.webSocketService.send('/topic/chat/send', {jwt: this.jwt, ...action}))
   ), {dispatch: false});
 

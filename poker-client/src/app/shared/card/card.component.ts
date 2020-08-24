@@ -1,6 +1,6 @@
 /* tslint:disable */
 import {Component, Input, OnInit} from '@angular/core';
-import {CardModel} from '../../api/models';
+import {Card} from '../../api/models';
 import {CardService, CardSize} from '../card.service';
 import {CardSuit, CardValue} from '../models/card.enum';
 
@@ -14,7 +14,7 @@ export class CardComponent implements OnInit {
   /**
    * Models of the card (default value of Ace of Spades).
    */
-  @Input() card: CardModel = {suit: CardSuit.Spades, value: CardValue.Ace};
+  @Input() card: Card = {suit: CardSuit.Spades, value: CardValue.Ace};
 
   /**
    * Size of the card.

@@ -14,8 +14,8 @@ public class HandRankModel implements Comparable<HandRankModel> {
   @Schema(description = "Hand rank.", example = "42069")
   private final int rank;
   /** Hand associated with the rank. */
-  @ArraySchema(schema = @Schema(implementation = CardModel.class))
-  private final List<CardModel> hand;
+  @ArraySchema(schema = @Schema(implementation = Card.class))
+  private final List<Card> hand;
   /** Player's ID. */
   @Schema(description = "Player's ID.")
   private UUID id;

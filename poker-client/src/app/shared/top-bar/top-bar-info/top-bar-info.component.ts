@@ -9,7 +9,7 @@ import {
   selectLobbyInfo
 } from '../../../state/app.selector';
 import {joinLobby, rejoinGame} from '../../../state/app.actions';
-import {CurrentGameModel} from '../../../api/models/current-game-model';
+import {CurrentGame} from '../../../api/models/current-game';
 import {Router} from '@angular/router';
 import {APP_ROUTES} from '../../../app-routes';
 
@@ -21,7 +21,7 @@ import {APP_ROUTES} from '../../../app-routes';
 export class TopBarInfoComponent implements OnInit {
   public lobbyInfo: TopBarLobbyModel;
   public lastLobbyInfo: TopBarLobbyModel;
-  public currentGame: CurrentGameModel;
+  public currentGame: CurrentGame;
   private jwt: string;
 
   constructor(
@@ -39,7 +39,7 @@ export class TopBarInfoComponent implements OnInit {
     this.store.select(selectLastLobbyInfo)
     .subscribe(lobbyInfo => this.lastLobbyInfo = lobbyInfo);
     this.store.select(selectCurrentGame)
-    .subscribe((currentGame: CurrentGameModel) =>  this.currentGame = currentGame);
+    .subscribe((currentGame: CurrentGame) => this.currentGame = currentGame);
     this.store.select(selectJwt).subscribe(jwt => this.jwt = jwt);
   }
 

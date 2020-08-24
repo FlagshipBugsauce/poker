@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {UsersService} from 'src/app/api/services';
-import {ApiSuccessModel, NewAccountModel} from 'src/app/api/models';
+import {ApiSuccess, NewAccount} from 'src/app/api/models';
 import {ToastService} from '../toast.service';
 
 @Component({
@@ -53,8 +53,8 @@ export class RegisterComponent implements OnInit {
         password: values.password,
         firstName: values.firstName,
         lastName: values.lastName
-      } as NewAccountModel
-    }).subscribe((response: ApiSuccessModel) => {
+      } as NewAccount
+    }).subscribe((response: ApiSuccess) => {
       this.toastService.show('Registration Successful!', {
         classname: 'bg-light toast-md',
         delay: 5000

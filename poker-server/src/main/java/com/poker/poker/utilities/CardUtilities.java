@@ -32,7 +32,7 @@ import com.google.common.collect.ImmutableMap;
 import com.poker.poker.models.enums.CardSuit;
 import com.poker.poker.models.enums.CardValue;
 import com.poker.poker.models.enums.HandType;
-import com.poker.poker.models.game.CardModel;
+import com.poker.poker.models.game.Card;
 import com.poker.poker.models.game.HandRankModel;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,7 +72,7 @@ public final class CardUtilities {
   public static final int RANK_BASE = 15;
 
   /** Face down card. */
-  public static final CardModel FACE_DOWN_CARD = new CardModel(CardSuit.Back, CardValue.Back);
+  public static final Card FACE_DOWN_CARD = new Card(CardSuit.Back, CardValue.Back);
 
   /**
    * Mapping of card values to a number that is less than 15. These values are used for sorting and
@@ -140,8 +140,8 @@ public final class CardUtilities {
   /** Private constructor to prevent creating instances of static class. */
   private CardUtilities() {}
 
-  public static CardModel card(final CardSuit suit, final CardValue value) {
-    return new CardModel(suit, value);
+  public static Card card(final CardSuit suit, final CardValue value) {
+    return new Card(suit, value);
   }
 
   /**
@@ -157,7 +157,7 @@ public final class CardUtilities {
    * @param cards Cards.
    * @return <code>true</code> if all pre-conditions are satisfied.
    */
-  public static boolean sharedPreCondition(final Collection<CardModel> cards) {
+  public static boolean sharedPreCondition(final Collection<Card> cards) {
     // Validate Pre-Conditions.
     assert cards != null;
     assert cards.stream().noneMatch(Objects::isNull);
@@ -172,7 +172,7 @@ public final class CardUtilities {
    * @param card Card.
    * @return The value of a card.
    */
-  public static int val(final CardModel card) {
+  public static int val(final Card card) {
     return cardValues.get(card.getValue());
   }
 
@@ -183,7 +183,7 @@ public final class CardUtilities {
    * @param card Card.
    * @return Value of a card, treating Ace as 1.
    */
-  public static int lowAceVal(final CardModel card) {
+  public static int lowAceVal(final Card card) {
     return card.getValue() == Ace ? 1 : cardValues.get(card.getValue());
   }
 
@@ -194,7 +194,7 @@ public final class CardUtilities {
    * @param card Card.
    * @return The value of a card's suit.
    */
-  public static int suitVal(final CardModel card) {
+  public static int suitVal(final Card card) {
     return cardSuitValues.get(card.getSuit());
   }
 
@@ -215,7 +215,7 @@ public final class CardUtilities {
    *
    * @return Comparator that sorts cards in ascending order based on their value.
    */
-  public static Comparator<CardModel> valueSorter() {
+  public static Comparator<Card> valueSorter() {
     return valueSorter(ASCENDING);
   }
 
@@ -228,7 +228,7 @@ public final class CardUtilities {
    *              DESCENDING</code> constants as the argument.
    * @return Comparator that sorts cards in the specified order based on their value.
    */
-  public static Comparator<CardModel> valueSorter(final int order) {
+  public static Comparator<Card> valueSorter(final int order) {
     return (a, b) -> (val(a) == val(b) ? suitVal(a) - suitVal(b) : val(a) - val(b)) * order;
   }
 
@@ -239,7 +239,7 @@ public final class CardUtilities {
    *
    * @return Comparator that sorts cards in ascending order based on their value.
    */
-  public static Comparator<CardModel> lowAceValueSorter() {
+  public static Comparator<Card> lowAceValueSorter() {
     return lowAceValueSorter(ASCENDING);
   }
 
@@ -252,7 +252,7 @@ public final class CardUtilities {
    *              DESCENDING</code> constants as the argument.
    * @return Comparator that sorts cards in the specified order based on their value.
    */
-  public static Comparator<CardModel> lowAceValueSorter(final int order) {
+  public static Comparator<Card> lowAceValueSorter(final int order) {
     return (a, b) ->
         (val(a) == val(b) ? suitVal(a) - suitVal(b) : lowAceVal(a) - lowAceVal(b)) * order;
   }
@@ -263,7 +263,7 @@ public final class CardUtilities {
    *
    * @return Comparator that sorts cards in ascending order based on their suit.
    */
-  public static Comparator<CardModel> suitSorter() {
+  public static Comparator<Card> suitSorter() {
     return suitSorter(ASCENDING);
   }
 
@@ -275,7 +275,7 @@ public final class CardUtilities {
    *              DESCENDING</code> constants as the argument.
    * @return Comparator that sorts cards in the specified order based on their suit.
    */
-  public static Comparator<CardModel> suitSorter(final int order) {
+  public static Comparator<Card> suitSorter(final int order) {
     return (a, b) -> (suitVal(a) == suitVal(b) ? val(a) - val(b) : suitVal(a) - suitVal(b)) * order;
   }
 
@@ -286,10 +286,10 @@ public final class CardUtilities {
    * @param cards Cards.
    * @return Map keyed by suit, which stores lists of cards which have the same suit.
    */
-  public static Map<CardSuit, List<CardModel>> splitBySuit(final Collection<CardModel> cards) {
+  public static Map<CardSuit, List<Card>> splitBySuit(final Collection<Card> cards) {
     assert sharedPreCondition(cards);
 
-    final Map<CardSuit, List<CardModel>> result = new HashMap<>();
+    final Map<CardSuit, List<Card>> result = new HashMap<>();
     for (final CardSuit suit : CardSuit.values()) {
       result.put(
           suit,
@@ -305,10 +305,10 @@ public final class CardUtilities {
    * @param cards Cards.
    * @return Map keyed by value, which stores lists of cards which have the same value.
    */
-  public static Map<CardValue, List<CardModel>> splitByValue(final Collection<CardModel> cards) {
+  public static Map<CardValue, List<Card>> splitByValue(final Collection<Card> cards) {
     assert sharedPreCondition(cards);
 
-    final Map<CardValue, List<CardModel>> result = new HashMap<>();
+    final Map<CardValue, List<Card>> result = new HashMap<>();
     for (final CardValue v : CardValue.values()) {
       result.put(
           v, cards.stream().filter(c -> c.getValue() == v).sorted(suitSorter()).collect(toList()));
@@ -338,17 +338,17 @@ public final class CardUtilities {
    * @return Five consecutive cards, if there are 5 consecutive cards in <code>cards</code>, <code>
    * null</code> otherwise.
    */
-  public static List<CardModel> checkForFiveConsecutiveCards(final Collection<CardModel> cards) {
+  public static List<Card> checkForFiveConsecutiveCards(final Collection<Card> cards) {
     assert sharedPreCondition(cards);
 
     if (cards.size() < 5) {
       return null;
     }
 
-    final List<CardModel> lowAceCards =
-        cards.stream().map(CardModel::new).sorted(lowAceValueSorter()).collect(toList());
-    final List<CardModel> highAceCards =
-        cards.stream().map(CardModel::new).sorted(valueSorter()).collect(toList());
+    final List<Card> lowAceCards =
+        cards.stream().map(Card::new).sorted(lowAceValueSorter()).collect(toList());
+    final List<Card> highAceCards =
+        cards.stream().map(Card::new).sorted(valueSorter()).collect(toList());
 
     int lowIndex1 = -1, lowIndex2 = -1;
 
@@ -394,13 +394,13 @@ public final class CardUtilities {
    * @return The cards that make up the straight flush, or <code>null</code> if there is no straight
    *     flush.
    */
-  public static List<CardModel> checkForStraightFlush(final Collection<CardModel> cards) {
+  public static List<Card> checkForStraightFlush(final Collection<Card> cards) {
     assert sharedPreCondition(cards);
 
-    List<CardModel> result = null;
-    final Map<CardSuit, List<CardModel>> suitedCards = splitBySuit(cards);
-    for (final List<CardModel> suited : suitedCards.values()) {
-      final List<CardModel> temp = checkForFiveConsecutiveCards(suited);
+    List<Card> result = null;
+    final Map<CardSuit, List<Card>> suitedCards = splitBySuit(cards);
+    for (final List<Card> suited : suitedCards.values()) {
+      final List<Card> temp = checkForFiveConsecutiveCards(suited);
       result = temp == null ? result : temp;
     }
     return result;
@@ -431,11 +431,11 @@ public final class CardUtilities {
    * @return The best 5-card hand that includes 4-of-a-kind if there are four of the same card in
    *     <code>cards</code>, otherwise returns <code>null</code>.
    */
-  public static List<CardModel> checkForFourOfAKind(final List<CardModel> cards) {
+  public static List<Card> checkForFourOfAKind(final List<Card> cards) {
     assert sharedPreCondition(cards);
 
-    final Map<CardValue, List<CardModel>> values = splitByValue(cards);
-    List<CardModel> result = null;
+    final Map<CardValue, List<Card>> values = splitByValue(cards);
+    List<Card> result = null;
     for (final CardValue v : CardValue.values()) {
       if (values.get(v).size() == 4) {
         result = values.get(v);
@@ -479,22 +479,22 @@ public final class CardUtilities {
    * @return The best full house found in the provided cards, or <code>null</code> if no full house
    *     is found.
    */
-  public static List<CardModel> checkForFullHouse(final Collection<CardModel> cards) {
+  public static List<Card> checkForFullHouse(final Collection<Card> cards) {
     assert sharedPreCondition(cards);
 
-    final Map<CardValue, List<CardModel>> values = splitByValue(cards);
-    List<CardModel> set = findSet(values);
+    final Map<CardValue, List<Card>> values = splitByValue(cards);
+    List<Card> set = findSet(values);
     if (set == null) {
       return null;
     }
 
-    List<CardModel> pair = findSecondPair(values, set);
+    List<Card> pair = findSecondPair(values, set);
     if (pair == null) {
       return null;
     }
     set.sort(valueSorter());
     pair.sort(valueSorter());
-    final List<CardModel> result = new ArrayList<>(set);
+    final List<Card> result = new ArrayList<>(set);
     result.addAll(pair);
     return result;
   }
@@ -522,11 +522,11 @@ public final class CardUtilities {
    * @param cards Cards.
    * @return The best flush in the cards provided if a flush is found, otherwise <code>null</code>.
    */
-  public static List<CardModel> checkForFlush(final Collection<CardModel> cards) {
+  public static List<Card> checkForFlush(final Collection<Card> cards) {
     assert sharedPreCondition(cards);
 
-    final Map<CardSuit, List<CardModel>> suitedCards = splitBySuit(cards);
-    List<CardModel> result = null;
+    final Map<CardSuit, List<Card>> suitedCards = splitBySuit(cards);
+    List<Card> result = null;
     for (final CardSuit suit : CardSuit.values()) {
       if (suitedCards.get(suit).size() >= 5) {
         result =
@@ -560,14 +560,14 @@ public final class CardUtilities {
    * @param cards Cards
    * @return The best straight if a straight is found, otherwise <code>null</code>.
    */
-  public static List<CardModel> checkForStraight(final Collection<CardModel> cards) {
+  public static List<Card> checkForStraight(final Collection<Card> cards) {
     assert sharedPreCondition(cards);
 
-    final Map<CardValue, List<CardModel>> values = splitByValue(cards);
-    final Collection<CardModel> result = new ArrayList<>();
+    final Map<CardValue, List<Card>> values = splitByValue(cards);
+    final Collection<Card> result = new ArrayList<>();
 
     // Keep cards with distinct values only.
-    for (final List<CardModel> sameValuedCards : values.values()) {
+    for (final List<Card> sameValuedCards : values.values()) {
       if (!sameValuedCards.isEmpty()) {
         result.add(sameValuedCards.get(0));
       }
@@ -587,8 +587,8 @@ public final class CardUtilities {
    *     list.
    * @return The highest set found in the map.
    */
-  public static List<CardModel> findSet(final Map<CardValue, List<CardModel>> values) {
-    List<CardModel> set = null;
+  public static List<Card> findSet(final Map<CardValue, List<Card>> values) {
+    List<Card> set = null;
     for (final CardValue v : CardValue.values()) {
       if (values.get(v).size() >= 3) {
         set = set == null ? values.get(v) : set;
@@ -621,11 +621,11 @@ public final class CardUtilities {
    * @param cards Cards.
    * @return The best flush in the cards provided if a flush is found, otherwise <code>null</code>.
    */
-  public static List<CardModel> checkForSet(final List<CardModel> cards) {
+  public static List<Card> checkForSet(final List<Card> cards) {
     assert sharedPreCondition(cards);
 
-    final Map<CardValue, List<CardModel>> values = splitByValue(cards);
-    List<CardModel> set = findSet(values);
+    final Map<CardValue, List<Card>> values = splitByValue(cards);
+    List<Card> set = findSet(values);
     if (set == null) {
       return null;
     }
@@ -641,8 +641,8 @@ public final class CardUtilities {
    *     list.
    * @return The highest pair found in the map.
    */
-  public static List<CardModel> findFirstPair(final Map<CardValue, List<CardModel>> values) {
-    List<CardModel> pair = null;
+  public static List<Card> findFirstPair(final Map<CardValue, List<Card>> values) {
+    List<Card> pair = null;
     for (final CardValue v : CardValue.values()) {
       if (values.get(v).size() >= 2) {
         pair = pair == null ? values.get(v) : pair;
@@ -663,9 +663,9 @@ public final class CardUtilities {
    * @param first The first pair that was found (needed to avoid returning the same pair).
    * @return The best pair that isn't the pair in the <code>first</code> argument.
    */
-  public static List<CardModel> findSecondPair(
-      final Map<CardValue, List<CardModel>> values, final List<CardModel> first) {
-    List<CardModel> pair = null;
+  public static List<Card> findSecondPair(
+      final Map<CardValue, List<Card>> values, final List<Card> first) {
+    List<Card> pair = null;
     for (final CardValue v : CardValue.values()) {
       if (values.get(v).size() >= 2 && !values.get(v).equals(first)) {
         pair = pair == null ? values.get(v) : pair;
@@ -702,16 +702,16 @@ public final class CardUtilities {
    * @return The best two pairs with the best kicker in the cards provided if two pairs are found,
    *     otherwise <code>null</code>.
    */
-  public static List<CardModel> checkForTwoPair(final List<CardModel> cards) {
+  public static List<Card> checkForTwoPair(final List<Card> cards) {
     assert sharedPreCondition(cards);
 
-    final Map<CardValue, List<CardModel>> values = splitByValue(cards);
-    List<CardModel> pair1 = findFirstPair(values);
+    final Map<CardValue, List<Card>> values = splitByValue(cards);
+    List<Card> pair1 = findFirstPair(values);
     if (pair1 == null) {
       return null;
     }
 
-    List<CardModel> pair2 = findSecondPair(values, pair1);
+    List<Card> pair2 = findSecondPair(values, pair1);
     if (pair2 == null) {
       return null;
     }
@@ -746,10 +746,10 @@ public final class CardUtilities {
    * @param cards Cards.
    * @return The best pair in the cards provided if a pair is found, otherwise <code>null</code>.
    */
-  public static List<CardModel> checkForPair(final List<CardModel> cards) {
+  public static List<Card> checkForPair(final List<Card> cards) {
     assert sharedPreCondition(cards);
 
-    List<CardModel> pair = findFirstPair(splitByValue(cards));
+    List<Card> pair = findFirstPair(splitByValue(cards));
     if (pair == null) {
       return null;
     }
@@ -772,7 +772,7 @@ public final class CardUtilities {
    * @param cards Cards.
    * @return The five highest cards in sorted order.
    */
-  public static List<CardModel> checkForHighCard(final List<CardModel> cards) {
+  public static List<Card> checkForHighCard(final List<Card> cards) {
     assert sharedPreCondition(cards);
 
     cards.sort(valueSorter());
@@ -797,13 +797,12 @@ public final class CardUtilities {
    * @param result Part of a 5 card hand that needs to be padded with kickers.
    * @return A 5 card hand with the best possible kickers.
    */
-  private static List<CardModel> addKickers(
-      final List<CardModel> cards, final List<CardModel> result) {
+  private static List<Card> addKickers(final List<Card> cards, final List<Card> result) {
     assert sharedPreCondition(cards);
 
     cards.sort(valueSorter(DESCENDING));
-    final List<CardModel> kickers = new ArrayList<>();
-    for (final CardModel card : cards) {
+    final List<Card> kickers = new ArrayList<>();
+    for (final Card card : cards) {
       if (!result.contains(card)) {
         kickers.add(card);
       }
@@ -832,12 +831,12 @@ public final class CardUtilities {
    * @return The best 5 card hand that can be made with the list of 7 cards provided, along with the
    *     numerical ranking of the best hand.
    */
-  public static HandRankModel rankHand(final List<CardModel> cards) {
+  public static HandRankModel rankHand(final List<Card> cards) {
     assert sharedPreCondition(cards);
     assert cards.size() == 7;
 
     int rank;
-    List<CardModel> bestHand = null;
+    List<Card> bestHand = null;
     HandType handType = HighCard;
 
     for (final Evaluator evaluator : evaluators) {
@@ -888,9 +887,9 @@ public final class CardUtilities {
   private static final class Evaluator {
 
     private final HandType type;
-    private final Function<List<CardModel>, List<CardModel>> evaluator;
+    private final Function<List<Card>, List<Card>> evaluator;
 
-    public final List<CardModel> evaluate(final List<CardModel> cards) {
+    public final List<Card> evaluate(final List<Card> cards) {
       return evaluator.apply(cards);
     }
   }

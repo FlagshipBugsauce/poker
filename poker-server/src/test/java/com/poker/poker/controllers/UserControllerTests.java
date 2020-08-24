@@ -1,7 +1,7 @@
 package com.poker.poker.controllers;
 
 import com.poker.poker.common.TestBaseClass;
-import com.poker.poker.models.user.AuthRequestModel;
+import com.poker.poker.models.user.AuthRequest;
 import com.poker.poker.services.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,16 +27,16 @@ public class UserControllerTests extends TestBaseClass {
 
   @BeforeEach
   public void setup() {
-    this.mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
+    mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
   }
 
   @Test
   public void testAuthEndpointReturnsJwt() throws Exception {
     // Given
-    final String inputJson = getObjectMapper().writeValueAsString(getSampleAuthRequestModel());
+    final String inputJson = getObjectMapper().writeValueAsString(getSampleAuthRequest());
     final String uri = baseMapping + "/auth";
-    Mockito.when(userService.authenticate(Mockito.any(AuthRequestModel.class)))
-        .thenReturn(getSampleAuthResponseModel());
+    Mockito.when(userService.authenticate(Mockito.any(AuthRequest.class)))
+        .thenReturn(getSampleAuthResponse());
 
     // When
     final MockHttpServletResponse response = mockAuthResponse(mockMvc, uri, inputJson);
@@ -44,16 +44,16 @@ public class UserControllerTests extends TestBaseClass {
     // Then
     Assertions.assertEquals(HttpStatus.OK.value(), response.getStatus());
     Assertions.assertEquals(
-        getObjectMapper().writeValueAsString(getSampleAuthResponseModel()),
+        getObjectMapper().writeValueAsString(getSampleAuthResponse()),
         response.getContentAsString());
   }
 
   @Test
   public void testRegistrationEndpointReturnsSuccess() throws Exception {
     // Given
-    final String inputJson = getObjectMapper().writeValueAsString(getSampleNewAccountModel());
+    final String inputJson = getObjectMapper().writeValueAsString(getSampleNewAccount());
     final String uri = baseMapping + "/register";
-    Mockito.when(userService.register(getSampleNewAccountModel()))
+    Mockito.when(userService.register(getSampleNewAccount()))
         .thenReturn(getSampleRegisterSuccessModel());
 
     // When

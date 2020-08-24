@@ -9,7 +9,7 @@ import {
 } from '../../../state/app.selector';
 import {Observable, Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
-import {GamePlayerModel, HandSummaryModel, WinnerModel} from '../../../api/models';
+import {GamePlayer, HandSummary, Winner} from '../../../api/models';
 import {CardService} from '../../../shared/card.service';
 
 @Component({
@@ -19,9 +19,9 @@ import {CardService} from '../../../shared/card.service';
 })
 export class HandSummaryComponent implements OnInit, OnDestroy {
   @Input() width: number = 200;
-  public summary: HandSummaryModel;
-  public winners: WinnerModel[];
-  public players: GamePlayerModel[];
+  public summary: HandSummary;
+  public winners: Winner[];
+  public players: GamePlayer[];
   public displayHandSummary$: Observable<boolean>;
   /**
    * Used to ensure we're not maintaining multiple subscriptions.
@@ -39,7 +39,7 @@ export class HandSummaryComponent implements OnInit, OnDestroy {
   }
 
   public get name(): string {
-    let winner: GamePlayerModel;
+    let winner: GamePlayer;
     if (this.players && this.summary) {
       winner = this.players[this.summary.winner];
     } else {
@@ -53,13 +53,13 @@ export class HandSummaryComponent implements OnInit, OnDestroy {
     .pipe(takeUntil(this.ngDestroyed$));
     this.pokerTableStore.select(selectHandSummary)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((summary: HandSummaryModel) => this.summary = summary);
+    .subscribe((summary: HandSummary) => this.summary = summary);
     this.pokerTableStore.select(selectHandWinners)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((winners: WinnerModel[]) => this.winners = winners);
+    .subscribe((winners: Winner[]) => this.winners = winners);
     this.pokerTableStore.select(selectPlayers)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((players: GamePlayerModel[]) => this.players = players);
+    .subscribe((players: GamePlayer[]) => this.players = players);
   }
 
   public ngOnDestroy() {
@@ -67,15 +67,15 @@ export class HandSummaryComponent implements OnInit, OnDestroy {
     this.ngDestroyed$.complete();
   }
 
-  public getPlayer(id: string): GamePlayerModel {
+  public getPlayer(id: string): GamePlayer {
     return this.safe ? this.players.find(p => p.id === id) : null;
   }
 
-  public getName(player: GamePlayerModel): string {
+  public getName(player: GamePlayer): string {
     return `${player.firstName} ${player.lastName}`;
   }
 
-  public getWinnerMessage(winner: WinnerModel): string {
+  public getWinnerMessage(winner: Winner): string {
     return `${this.getName(this.getPlayer(winner.id))} won $${winner.winnings}`;
   }
 }

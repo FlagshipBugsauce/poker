@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {AuthRequestModel} from 'src/app/api/models';
+import {AuthRequest} from 'src/app/api/models';
 import {AppStateContainer} from '../models/app-state.model';
 import {Store} from '@ngrx/store';
 import {hideFailedSignInWarning, signIn} from '../../state/app.actions';
@@ -37,10 +37,10 @@ export class LoginComponent implements OnInit, OnDestroy {
   //   password: 'jonathan'
   // } as AuthRequestModel;
   public showFailedSignIn$: Observable<boolean>;
-  private quickCredentials: AuthRequestModel = {
+  private quickCredentials: AuthRequest = {
     email: '',
     password: ''
-  } as AuthRequestModel;
+  } as AuthRequest;
 
   constructor(
     private router: Router,

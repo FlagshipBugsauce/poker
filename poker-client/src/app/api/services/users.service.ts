@@ -8,12 +8,12 @@ import {RequestBuilder} from '../request-builder';
 import {Observable} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
 
-import {ApiSuccessModel} from '../models/api-success-model';
-import {AuthRequestModel} from '../models/auth-request-model';
-import {AuthResponseModel} from '../models/auth-response-model';
-import {ClientUserModel} from '../models/client-user-model';
-import {JwtAuthRequestModel} from '../models/jwt-auth-request-model';
-import {NewAccountModel} from '../models/new-account-model';
+import {ApiSuccess} from '../models/api-success';
+import {AuthRequest} from '../models/auth-request';
+import {AuthResponse} from '../models/auth-response';
+import {ClientUser} from '../models/client-user';
+import {JwtAuthRequest} from '../models/jwt-auth-request';
+import {NewAccount} from '../models/new-account';
 
 
 /**
@@ -36,6 +36,11 @@ export class UsersService extends BaseService {
   static readonly RegisterPath = '/user/register';
 
   /**
+   * Path part for operation authorizeWithJwt
+   */
+  static readonly AuthorizeWithJwtPath = '/user/auth-with-jwt';
+
+  /**
    * Register.
    *
    * Create an account.
@@ -46,8 +51,8 @@ export class UsersService extends BaseService {
    * This method sends `application/json` and handles request body of type `application/json`.
    */
   register$Response(params: {
-      body: NewAccountModel
-  }): Observable<StrictHttpResponse<ApiSuccessModel>> {
+    body: NewAccount
+  }): Observable<StrictHttpResponse<ApiSuccess>> {
 
     const rb = new RequestBuilder(this.rootUrl, UsersService.RegisterPath, 'post');
     if (params) {
@@ -61,10 +66,15 @@ export class UsersService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<ApiSuccessModel>;
+        return r as StrictHttpResponse<ApiSuccess>;
       })
     );
   }
+
+  /**
+   * Path part for operation getUserInfo
+   */
+  static readonly GetUserInfoPath = '/user/getUserInfo/{userId}';
 
   /**
    * Register.
@@ -77,18 +87,13 @@ export class UsersService extends BaseService {
    * This method sends `application/json` and handles request body of type `application/json`.
    */
   register(params: {
-      body: NewAccountModel
-  }): Observable<ApiSuccessModel> {
+    body: NewAccount
+  }): Observable<ApiSuccess> {
 
     return this.register$Response(params).pipe(
-      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
+      map((r: StrictHttpResponse<ApiSuccess>) => r.body as ApiSuccess)
     );
   }
-
-  /**
-   * Path part for operation getUserInfo
-   */
-  static readonly GetUserInfoPath = '/user/getUserInfo/{userId}';
 
   /**
    * Get User Info.
@@ -103,7 +108,7 @@ export class UsersService extends BaseService {
   getUserInfo$Response(params: {
     userId: string;
 
-  }): Observable<StrictHttpResponse<ClientUserModel>> {
+  }): Observable<StrictHttpResponse<ClientUser>> {
 
     const rb = new RequestBuilder(this.rootUrl, UsersService.GetUserInfoPath, 'get');
     if (params) {
@@ -117,51 +122,15 @@ export class UsersService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<ClientUserModel>;
+        return r as StrictHttpResponse<ClientUser>;
       })
     );
   }
-
-  /**
-   * Path part for operation authorizeWithJwt
-   */
-  static readonly AuthorizeWithJwtPath = '/user/auth-with-jwt';
 
   /**
    * Path part for operation authorize
    */
   static readonly AuthorizePath = '/user/auth';
-
-  /**
-   * Authenticate.
-   *
-   * The client must call this endpoint in order to obtain a JWT, which must be passed in the header of most requests.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `authorize()` instead.
-   *
-   * This method sends `application/json` and handles request body of type `application/json`.
-   */
-  authorize$Response(params: {
-      body: AuthRequestModel
-  }): Observable<StrictHttpResponse<AuthResponseModel>> {
-
-    const rb = new RequestBuilder(this.rootUrl, UsersService.AuthorizePath, 'post');
-    if (params) {
-
-
-      rb.body(params.body, 'application/json');
-    }
-    return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<AuthResponseModel>;
-      })
-    );
-  }
 
   /**
    * Get User Info.
@@ -176,10 +145,41 @@ export class UsersService extends BaseService {
   getUserInfo(params: {
     userId: string;
 
-  }): Observable<ClientUserModel> {
+  }): Observable<ClientUser> {
 
     return this.getUserInfo$Response(params).pipe(
-      map((r: StrictHttpResponse<ClientUserModel>) => r.body as ClientUserModel)
+      map((r: StrictHttpResponse<ClientUser>) => r.body as ClientUser)
+    );
+  }
+
+  /**
+   * Authenticate.
+   *
+   * The client must call this endpoint in order to obtain a JWT, which must be passed in the header of most requests.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `authorize()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  authorize$Response(params: {
+    body: AuthRequest
+  }): Observable<StrictHttpResponse<AuthResponse>> {
+
+    const rb = new RequestBuilder(this.rootUrl, UsersService.AuthorizePath, 'post');
+    if (params) {
+
+
+      rb.body(params.body, 'application/json');
+    }
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<AuthResponse>;
+      })
     );
   }
 
@@ -194,11 +194,11 @@ export class UsersService extends BaseService {
    * This method sends `application/json` and handles request body of type `application/json`.
    */
   authorize(params: {
-      body: AuthRequestModel
-  }): Observable<AuthResponseModel> {
+    body: AuthRequest
+  }): Observable<AuthResponse> {
 
     return this.authorize$Response(params).pipe(
-      map((r: StrictHttpResponse<AuthResponseModel>) => r.body as AuthResponseModel)
+      map((r: StrictHttpResponse<AuthResponse>) => r.body as AuthResponse)
     );
   }
 
@@ -213,8 +213,8 @@ export class UsersService extends BaseService {
    * This method sends `application/json` and handles request body of type `application/json`.
    */
   authorizeWithJwt$Response(params: {
-    body: JwtAuthRequestModel
-  }): Observable<StrictHttpResponse<AuthResponseModel>> {
+    body: JwtAuthRequest
+  }): Observable<StrictHttpResponse<AuthResponse>> {
 
     const rb = new RequestBuilder(this.rootUrl, UsersService.AuthorizeWithJwtPath, 'post');
     if (params) {
@@ -228,7 +228,7 @@ export class UsersService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<AuthResponseModel>;
+        return r as StrictHttpResponse<AuthResponse>;
       })
     );
   }
@@ -244,11 +244,11 @@ export class UsersService extends BaseService {
    * This method sends `application/json` and handles request body of type `application/json`.
    */
   authorizeWithJwt(params: {
-    body: JwtAuthRequestModel
-  }): Observable<AuthResponseModel> {
+    body: JwtAuthRequest
+  }): Observable<AuthResponse> {
 
     return this.authorizeWithJwt$Response(params).pipe(
-      map((r: StrictHttpResponse<AuthResponseModel>) => r.body as AuthResponseModel)
+      map((r: StrictHttpResponse<AuthResponse>) => r.body as AuthResponse)
     );
   }
 

@@ -1,9 +1,9 @@
 package com.poker.poker.scheduled;
 
 import com.poker.poker.config.constants.AppConstants;
-import com.poker.poker.models.ServerStateModel;
+import com.poker.poker.models.ServerState;
 import com.poker.poker.models.enums.UserGroup;
-import com.poker.poker.models.user.UserModel;
+import com.poker.poker.models.user.User;
 import com.poker.poker.repositories.ServerStateRepository;
 import com.poker.poker.repositories.UserRepository;
 import java.util.UUID;
@@ -36,7 +36,7 @@ public class Initialization {
   @Scheduled(cron = "0 0/1 * * * ?") // Runs at the start of every minute
   public void initialize() {
     // Check if the server has been initialized.
-    ServerStateModel serverState = serverStateRepository.findServerStateById(new UUID(0, 0));
+    ServerState serverState = serverStateRepository.findServerStateById(new UUID(0, 0));
     if (serverState != null && serverState.isInitialized()) {
       return;
     }
@@ -46,7 +46,7 @@ public class Initialization {
 
     // First thing we need to do is create an admin user
     userRepository.save(
-        new UserModel(
+        new User(
             new UUID(0, 0), // 0-UUID for admin
             appConstants.getDefaultAdminEmail(),
             passwordEncoder.encode(appConstants.getDefaultAdminPassword()),
@@ -55,7 +55,7 @@ public class Initialization {
             appConstants.getDefaultAdminLastName()));
 
     serverStateRepository.save(
-        new ServerStateModel(
+        new ServerState(
             new UUID(0, 0), // 0-UUID for server state
             true));
     // Now we have an admin user and the server state record has been added.

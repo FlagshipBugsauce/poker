@@ -14,13 +14,7 @@ import {
   PrivatePlayerDataStateContainer
 } from '../shared/models/app-state.model';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
-import {
-  DrawGameDataContainerModel,
-  GameModel,
-  GamePlayerModel,
-  LobbyModel,
-  PokerTableModel
-} from '../api/models';
+import {DrawGameDataContainer, Game, GamePlayer, Lobby, PokerTable} from '../api/models';
 import {GameListContainerModel} from '../shared/models/game-list-container.model';
 
 export const appFeature =
@@ -52,31 +46,31 @@ export const selectGameList = createSelector(
 );
 
 export const lobbyFeature =
-  createFeatureSelector<LobbyStateContainer, LobbyModel>('lobbyModel');
+  createFeatureSelector<LobbyStateContainer, Lobby>('lobbyModel');
 /** Lobby document selector. */
-export const selectLobbyModel = createSelector(lobbyFeature, (state: LobbyModel) => state);
+export const selectLobbyModel = createSelector(lobbyFeature, (state: Lobby) => state);
 
 export const gameFeature =
-  createFeatureSelector<GameStateContainer, GameModel>('gameModel');
+  createFeatureSelector<GameStateContainer, Game>('gameModel');
 /** Game document selector. */
-export const selectGameModel = createSelector(gameFeature, (state: GameModel) => state);
+export const selectGameModel = createSelector(gameFeature, (state: Game) => state);
 /** Game state selector. */
-export const selectGamePhase = createSelector(gameFeature, (state: GameModel) => state.phase);
+export const selectGamePhase = createSelector(gameFeature, (state: Game) => state.phase);
 
 export const gameDataFeature =
-  createFeatureSelector<GameDataStateContainer, DrawGameDataContainerModel>('gameData');
+  createFeatureSelector<GameDataStateContainer, DrawGameDataContainer>('gameData');
 /** Game data selector. */
 export const selectGameData = createSelector(
-  gameDataFeature, (state: DrawGameDataContainerModel) => state.gameData);
+  gameDataFeature, (state: DrawGameDataContainer) => state.gameData);
 
 export const playerDataFeature =
-  createFeatureSelector<PlayerDataStateContainer, GamePlayerModel>('playerData');
+  createFeatureSelector<PlayerDataStateContainer, GamePlayer>('playerData');
 /** Game data selector. */
 export const selectPlayerData = createSelector(
-  playerDataFeature, (state: GamePlayerModel) => state);
+  playerDataFeature, (state: GamePlayer) => state);
 /** Away status selector. */
 export const selectAwayStatus = createSelector(
-  playerDataFeature, (state: GamePlayerModel) => state.away);
+  playerDataFeature, (state: GamePlayer) => state.away);
 
 export const chatFeature =
   createFeatureSelector<ChatStateContainer, ChatContainer>('chats');
@@ -88,25 +82,25 @@ export const selectGameChat = createSelector(
   chatFeature, (state: ChatContainer) => state.gameChat);
 
 export const pokerTableFeature =
-  createFeatureSelector<PokerTableStateContainer, PokerTableModel>('tableState');
+  createFeatureSelector<PokerTableStateContainer, PokerTable>('tableState');
 export const selectPokerTable = createSelector(
-  pokerTableFeature, (state: PokerTableModel) => state);
+  pokerTableFeature, (state: PokerTable) => state);
 export const selectPlayerThatActed = createSelector(
-  pokerTableFeature, (state: PokerTableModel) => state.playerThatActed);
+  pokerTableFeature, (state: PokerTable) => state.playerThatActed);
 export const selectPlayers = createSelector(
-  pokerTableFeature, (state: PokerTableModel) => state.players);
+  pokerTableFeature, (state: PokerTable) => state.players);
 export const selectDealer = createSelector(
-  pokerTableFeature, (state: PokerTableModel) => state.dealer);
+  pokerTableFeature, (state: PokerTable) => state.dealer);
 export const selectDisplayHandSummary = createSelector(
-  pokerTableFeature, (state: PokerTableModel) => state.displayHandSummary);
+  pokerTableFeature, (state: PokerTable) => state.displayHandSummary);
 export const selectActingPlayer = createSelector(
-  pokerTableFeature, (state: PokerTableModel) => state.actingPlayer);
+  pokerTableFeature, (state: PokerTable) => state.actingPlayer);
 export const selectHandSummary = createSelector(
-  pokerTableFeature, (state: PokerTableModel) => state.summary);
+  pokerTableFeature, (state: PokerTable) => state.summary);
 export const selectHandWinners = createSelector(
-  pokerTableFeature, (state: PokerTableModel) => state.winners);
+  pokerTableFeature, (state: PokerTable) => state.winners);
 export const selectCommunityCards = createSelector(
-  pokerTableFeature, (state: PokerTableModel) => state.sharedCards);
+  pokerTableFeature, (state: PokerTable) => state.sharedCards);
 
 export const miscEventsFeature =
   createFeatureSelector<MiscEventsStateContainer, MiscEventsState>('miscEvents');
@@ -119,6 +113,6 @@ export const selectHiddenCards = createSelector(miscEventsFeature,
   (state: MiscEventsState) => state.hiddenCards);
 
 export const privatePlayerDataFeature =
-  createFeatureSelector<PrivatePlayerDataStateContainer, GamePlayerModel>('privatePlayerData');
+  createFeatureSelector<PrivatePlayerDataStateContainer, GamePlayer>('privatePlayerData');
 export const selectPrivateCards = createSelector(
-  privatePlayerDataFeature, (state: GamePlayerModel) => state.cards);
+  privatePlayerDataFeature, (state: GamePlayer) => state.cards);

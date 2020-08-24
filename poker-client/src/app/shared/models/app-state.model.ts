@@ -1,18 +1,18 @@
 import {TopBarLobbyModel} from './top-bar-lobby.model';
 import {
-  CardModel,
-  ChatMessageModel,
-  ClientUserModel,
-  CurrentGameModel,
-  DealModel,
-  DrawGameDataContainerModel,
-  GameModel,
-  GamePlayerModel,
-  HideCardsModel,
-  LobbyModel,
-  PokerTableModel,
-  TimerModel,
-  ToastModel
+  Card,
+  ChatMessage,
+  ClientUser,
+  CurrentGame,
+  Deal,
+  DrawGameDataContainer,
+  Game,
+  GamePlayer,
+  HideCards,
+  Lobby,
+  PokerTable,
+  Timer,
+  Toast
 } from '../../api/models';
 import {GameListContainerModel} from './game-list-container.model';
 
@@ -22,9 +22,9 @@ export interface AppState {
   jwt?: string;
   lobbyInfo?: TopBarLobbyModel;
   lastLobbyInfo?: TopBarLobbyModel;
-  loggedInUser?: ClientUserModel;
+  loggedInUser?: ClientUser;
   ready: boolean;
-  currentGame?: CurrentGameModel;
+  currentGame?: CurrentGame;
 }
 
 export interface AppStateContainer {
@@ -32,15 +32,15 @@ export interface AppStateContainer {
 }
 
 export interface GameDataStateContainer {
-  gameData: DrawGameDataContainerModel;
+  gameData: DrawGameDataContainer;
 }
 
 export interface LobbyStateContainer {
-  lobbyModel: LobbyModel;
+  lobbyModel: Lobby;
 }
 
 export interface GameStateContainer {
-  gameModel: GameModel;
+  gameModel: Game;
 }
 
 export interface GameListStateContainer {
@@ -48,7 +48,7 @@ export interface GameListStateContainer {
 }
 
 export interface PlayerDataStateContainer {
-  playerData: GamePlayerModel;
+  playerData: GamePlayer;
 }
 
 export interface DrawnCardsStateContainer {
@@ -56,11 +56,11 @@ export interface DrawnCardsStateContainer {
 }
 
 export interface DrawnCardsContainer {
-  drawnCards: CardModel[];
+  drawnCards: Card[];
 }
 
 export interface ToastStateContainer {
-  lastToast: ToastModel;
+  lastToast: Toast;
 }
 
 export interface ChatStateContainer {
@@ -68,12 +68,12 @@ export interface ChatStateContainer {
 }
 
 export interface ChatContainer {
-  generalChat?: ChatMessageModel;
-  gameChat?: ChatMessageModel;
+  generalChat?: ChatMessage;
+  gameChat?: ChatMessage;
 }
 
 export interface PokerTableStateContainer {
-  tableState: PokerTableModel;
+  tableState: PokerTable;
 }
 
 export interface MiscEventsStateContainer {
@@ -81,12 +81,12 @@ export interface MiscEventsStateContainer {
 }
 
 export interface MiscEventsState {
-  timer?: TimerModel;
-  deal?: DealModel;
-  hide?: HideCardsModel;
+  timer?: Timer;
+  deal?: Deal;
+  hide?: HideCards;
   hiddenCards: boolean[][];
 }
 
 export interface PrivatePlayerDataStateContainer {
-  privatePlayerData: GamePlayerModel;
+  privatePlayerData: GamePlayer;
 }

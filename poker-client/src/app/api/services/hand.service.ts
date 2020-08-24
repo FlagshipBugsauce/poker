@@ -8,7 +8,7 @@ import {RequestBuilder} from '../request-builder';
 import {Observable} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
 
-import {ApiSuccessModel} from '../models/api-success-model';
+import {ApiSuccess} from '../models/api-success';
 
 
 /**
@@ -40,7 +40,7 @@ export class HandService extends BaseService {
    *
    * This method doesn't expect any request body.
    */
-  draw$Response(params?: {}): Observable<StrictHttpResponse<ApiSuccessModel>> {
+  draw$Response(params?: {}): Observable<StrictHttpResponse<ApiSuccess>> {
 
     const rb = new RequestBuilder(this.rootUrl, HandService.DrawPath, 'post');
     if (params) {
@@ -53,7 +53,7 @@ export class HandService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<ApiSuccessModel>;
+        return r as StrictHttpResponse<ApiSuccess>;
       })
     );
   }
@@ -68,10 +68,10 @@ export class HandService extends BaseService {
    *
    * This method doesn't expect any request body.
    */
-  draw(params?: {}): Observable<ApiSuccessModel> {
+  draw(params?: {}): Observable<ApiSuccess> {
 
     return this.draw$Response(params).pipe(
-      map((r: StrictHttpResponse<ApiSuccessModel>) => r.body as ApiSuccessModel)
+      map((r: StrictHttpResponse<ApiSuccess>) => r.body as ApiSuccess)
     );
   }
 

@@ -22,7 +22,7 @@ import {
 import {Router} from '@angular/router';
 import {APP_ROUTES} from '../app-routes';
 import {HandService} from '../api/services/hand.service';
-import {ActiveStatusModel, GameActionModel, GameParameterModel} from '../api/models';
+import {ActiveStatus, GameActionData, GameParameter} from '../api/models';
 import {WebSocketService} from '../shared/web-socket/web-socket.service';
 import {MessageType} from '../shared/models/message-types.enum';
 import {RejoinModel} from '../shared/models/rejoin.model';
@@ -63,14 +63,14 @@ export class GameEffects {
    */
   setAwayStatus$ = createEffect(() => this.actions$.pipe(
     ofType(setAwayStatus),
-    exhaustMap((action: ActiveStatusModel) =>
+    exhaustMap((action: ActiveStatus) =>
       this.gameService.setActiveStatus({body: action}))), {dispatch: false});
   /**
    * Creates a game.
    */
   createGame$ = createEffect(() => this.actions$.pipe(
     ofType(createGame),
-    tap((action: GameParameterModel) => {
+    tap((action: GameParameter) => {
       this.webSocketService.send(
         this.createGameService.createGameTopic,
         this.createGameService.createGamePayload(
@@ -174,7 +174,7 @@ export class GameEffects {
    */
   performGameAction$ = createEffect(() => this.actions$.pipe(
     ofType(performGameAction),
-    tap((action: GameActionModel) =>
+    tap((action: GameActionData) =>
       this.webSocketService.send('/topic/game/act', {jwt: this.jwt, data: action}))
   ), {dispatch: false});
 

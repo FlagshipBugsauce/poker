@@ -6,7 +6,7 @@ import {setAwayStatus} from '../../state/app.actions';
 import {Subject} from 'rxjs';
 import {selectGameModel} from '../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
-import {GameModel} from '../../api/models/game-model';
+import {Game} from '../../api/models/game';
 
 @Component({
   selector: 'pkr-popup-afk',
@@ -17,7 +17,7 @@ export class PopupAfkComponent implements OnInit, OnDestroy {
   @ViewChild('popup') popup: NgbActiveModal;
   public ngDestroyed$ = new Subject();
   private ngbModalRef: NgbModalRef;
-  private gameModel: GameModel;
+  private gameModel: Game;
 
   constructor(
     private ngbModal: NgbModal,
@@ -28,7 +28,7 @@ export class PopupAfkComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.gameStore.select(selectGameModel)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((data: GameModel) => this.gameModel = data);
+    .subscribe((data: Game) => this.gameModel = data);
   }
 
   public ngOnDestroy() {

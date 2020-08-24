@@ -8,14 +8,14 @@ import com.poker.poker.events.JoinGameEvent;
 import com.poker.poker.events.LeaveGameEvent;
 import com.poker.poker.events.PublishCurrentGameEvent;
 import com.poker.poker.events.RejoinGameEvent;
-import com.poker.poker.models.game.GameActionModel;
-import com.poker.poker.models.game.GameParameterModel;
-import com.poker.poker.models.game.PokerTableModel;
-import com.poker.poker.models.user.UserModel;
-import com.poker.poker.models.websocket.ClientMessageModel;
+import com.poker.poker.models.game.GameActionData;
+import com.poker.poker.models.game.GameParameter;
+import com.poker.poker.models.game.PokerTable;
+import com.poker.poker.models.user.User;
+import com.poker.poker.models.websocket.ClientMessage;
 import com.poker.poker.models.websocket.GenericServerMessage;
-import com.poker.poker.models.websocket.PrivateTopicModel;
-import com.poker.poker.models.websocket.WebSocketUpdateModel;
+import com.poker.poker.models.websocket.PrivateTopic;
+import com.poker.poker.models.websocket.WebSocketUpdate;
 import com.poker.poker.services.JwtService;
 import com.poker.poker.services.UserService;
 import com.poker.poker.services.WebSocketService;
@@ -55,7 +55,7 @@ public class WebSocketController {
   private final GameDataService data;
 
   @MessageMapping("/game/update")
-  public void getUpdate(final WebSocketUpdateModel updateModel) {
+  public void getUpdate(final WebSocketUpdate updateModel) {
     log.debug(
         "Sending update of type: {} to topic: {}.", updateModel.getType(), updateModel.getTopic());
     try {
@@ -77,7 +77,7 @@ public class WebSocketController {
           data = this.data.getPlayer(updateModel.getId());
           break;
         case PokerTable:
-          PokerTableModel table = this.data.getPokerTable(updateModel.getId());
+          PokerTable table = this.data.getPokerTable(updateModel.getId());
           table = table.isBetting() ? PokerTableUtilities.hideCards(table) : table;
           data = table;
           break;
@@ -102,18 +102,18 @@ public class WebSocketController {
           description = "Private topic successfully created.",
           content =
               @Content(
-                  schema = @Schema(implementation = PrivateTopicModel.class),
+                  schema = @Schema(implementation = PrivateTopic.class),
                   mediaType = MediaType.APPLICATION_JSON_VALUE)))
   @GetMapping("/private-topic")
-  public ResponseEntity<PrivateTopicModel> getPrivateTopic(
+  public ResponseEntity<PrivateTopic> getPrivateTopic(
       @Parameter(hidden = true) @RequestHeader("Authorization") final String jwt) {
     userService.validate(jwt, appConfig.getGeneralGroups());
-    final UserModel user = jwtService.getUserDocument(jwt);
+    final User user = jwtService.getUserDocument(jwt);
     return ResponseEntity.ok(webSocketService.requestPrivateTopic(user));
   }
 
   @MessageMapping("/chat/send")
-  public void chatMessage(final ClientMessageModel<String> messageModel) {
+  public void chatMessage(final ClientMessage<String> messageModel) {
     userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
     publisher.publishEvent(
         new ChatMessageEvent(
@@ -124,43 +124,43 @@ public class WebSocketController {
   }
 
   @MessageMapping("/game/leave")
-  public void leaveGame(final ClientMessageModel<Void> messageModel) {
+  public void leaveGame(final ClientMessage<Void> messageModel) {
     userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
     publisher.publishEvent(
         new LeaveGameEvent(this, jwtService.getUserDocument(messageModel.getJwt())));
   }
 
   @MessageMapping("/game/rejoin")
-  public void rejoinGame(final ClientMessageModel<Void> messageModel) {
+  public void rejoinGame(final ClientMessage<Void> messageModel) {
     userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
     publisher.publishEvent(
         new RejoinGameEvent(this, jwtService.getUserDocument(messageModel.getJwt())));
   }
 
   @MessageMapping("/game/current/update")
-  public void requestCurrentGameUpdate(final ClientMessageModel<Void> messageModel) {
+  public void requestCurrentGameUpdate(final ClientMessage<Void> messageModel) {
     log.debug("User {} requesting update.", messageModel.getUserId());
     publisher.publishEvent(new PublishCurrentGameEvent(this, messageModel.getUserId()));
   }
 
   @MessageMapping("/game/create")
-  public void createGame(final ClientMessageModel<GameParameterModel> messageModel) {
+  public void createGame(final ClientMessage<GameParameter> messageModel) {
     userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
-    final UserModel user = jwtService.getUserDocument(messageModel.getJwt());
+    final User user = jwtService.getUserDocument(messageModel.getJwt());
     log.debug("User {} attempting to create a game.", user.getId());
     publisher.publishEvent(new CreateGameEvent(this, messageModel.getData(), user));
   }
 
   @MessageMapping("/game/join")
-  public void joinGame(final ClientMessageModel<Void> messageModel) {
+  public void joinGame(final ClientMessage<Void> messageModel) {
     userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
-    final UserModel user = jwtService.getUserDocument(messageModel.getJwt());
+    final User user = jwtService.getUserDocument(messageModel.getJwt());
     log.debug("User {} attempting to join a game.", user.getId());
     publisher.publishEvent(new JoinGameEvent(this, messageModel.getGameId(), user));
   }
 
   @MessageMapping("/game/act")
-  public void performGameAction(final ClientMessageModel<GameActionModel> messageModel) {
+  public void performGameAction(final ClientMessage<GameActionData> messageModel) {
     userService.validate(messageModel.getJwt(), appConfig.getGeneralGroups());
     log.debug("Player performed {} action.", messageModel.getData().getActionType());
     publisher.publishEvent(new GameActionEvent(this, messageModel.getData()));

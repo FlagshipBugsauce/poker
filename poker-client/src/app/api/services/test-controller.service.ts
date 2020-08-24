@@ -8,7 +8,7 @@ import {RequestBuilder} from '../request-builder';
 import {Observable} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
 
-import {ModelModel} from '../models/model-model';
+import {Models} from '../models/models';
 
 @Injectable({
   providedIn: 'root',
@@ -41,7 +41,7 @@ export class TestControllerService extends BaseService {
    *
    * This method doesn't expect any request body.
    */
-  models$Response(params?: {}): Observable<StrictHttpResponse<ModelModel>> {
+  models$Response(params?: {}): Observable<StrictHttpResponse<Models>> {
 
     const rb = new RequestBuilder(this.rootUrl, TestControllerService.ModelsPath, 'get');
     if (params) {
@@ -54,7 +54,7 @@ export class TestControllerService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<ModelModel>;
+        return r as StrictHttpResponse<Models>;
       })
     );
   }
@@ -65,26 +65,10 @@ export class TestControllerService extends BaseService {
    *
    * This method doesn't expect any request body.
    */
-  models(params?: {}): Observable<ModelModel> {
+  models(params?: {}): Observable<Models> {
 
     return this.models$Response(params).pipe(
-      map((r: StrictHttpResponse<ModelModel>) => r.body as ModelModel)
-    );
-  }
-
-  /**
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `dealCards$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  dealCards(params: {
-    gameId: string;
-
-  }): Observable<void> {
-
-    return this.dealCards$Response(params).pipe(
-      map((r: StrictHttpResponse<void>) => r.body as void)
+      map((r: StrictHttpResponse<Models>) => r.body as Models)
     );
   }
 
@@ -113,6 +97,22 @@ export class TestControllerService extends BaseService {
       map((r: HttpResponse<any>) => {
         return (r as HttpResponse<any>).clone({body: undefined}) as StrictHttpResponse<void>;
       })
+    );
+  }
+
+  /**
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `dealCards$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  dealCards(params: {
+    gameId: string;
+
+  }): Observable<void> {
+
+    return this.dealCards$Response(params).pipe(
+      map((r: StrictHttpResponse<void>) => r.body as void)
     );
   }
 

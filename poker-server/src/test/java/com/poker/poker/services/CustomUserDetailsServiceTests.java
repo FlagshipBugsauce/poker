@@ -32,12 +32,11 @@ public class CustomUserDetailsServiceTests extends TestBaseClass {
     /*
        If the user repository tries to find a user with any email other than the sample
        email provided in TestBaseClass, then it will return null. If the sample email is
-       provided, then the appropriate UserModel will be returned, which allows us to
+       provided, then the appropriate User will be returned, which allows us to
        test whether the CustomUserDetailsService is behaving as expected.
     */
     Mockito.when(userRepository.findUserDocumentByEmail(Mockito.anyString())).thenReturn(null);
-    Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail()))
-        .thenReturn(getUserModel());
+    Mockito.when(userRepository.findUserDocumentByEmail(getSampleEmail())).thenReturn(getUser());
   }
 
   @Test

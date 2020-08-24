@@ -1,7 +1,7 @@
 package com.poker.poker.events;
 
-import com.poker.poker.models.websocket.ToastClassModel;
-import com.poker.poker.models.websocket.ToastModel;
+import com.poker.poker.models.websocket.Toast;
+import com.poker.poker.models.websocket.ToastClass;
 import java.util.UUID;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
@@ -13,12 +13,12 @@ public class ToastMessageEvent extends ApplicationEvent {
   private final UUID id;
 
   /** Toast. */
-  private final ToastModel toast;
+  private final Toast toast;
 
   public ToastMessageEvent(
       final Object source, final UUID id, final String message, final String size) {
     super(source);
     this.id = id;
-    toast = new ToastModel(message, new ToastClassModel("bg-light toast-" + size, 5000));
+    toast = new Toast(message, new ToastClass("bg-light toast-" + size, 5000));
   }
 }

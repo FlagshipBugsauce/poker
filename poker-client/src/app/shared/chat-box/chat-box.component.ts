@@ -1,5 +1,5 @@
 import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ChatMessageModel} from '../../api/models/chat-message-model';
+import {ChatMessage} from '../../api/models/chat-message';
 import {AppStateContainer, ChatStateContainer} from '../models/app-state.model';
 import {Store} from '@ngrx/store';
 import {Observable, Subject} from 'rxjs';
@@ -33,7 +33,7 @@ export class ChatBoxComponent implements OnInit, OnDestroy {
   /**
    * Messages that have been received by the chat since this component opened.
    */
-  public messages: ChatMessageModel[] = [];
+  public messages: ChatMessage[] = [];
 
   /**
    * Observable flag which is true if user has authenticated, false otherwise.
@@ -55,7 +55,7 @@ export class ChatBoxComponent implements OnInit, OnDestroy {
       this.appStore.select(selectAuthenticated).pipe(takeUntil(this.ngDestroyed$));
     this.chatStore.select(this.gameId ? selectGameChat : selectGeneralChat)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((message: ChatMessageModel) => {
+    .subscribe((message: ChatMessage) => {
       if (message.timestamp) {
         this.messages.push(message);
       }

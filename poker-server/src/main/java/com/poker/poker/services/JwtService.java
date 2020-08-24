@@ -1,7 +1,7 @@
 package com.poker.poker.services;
 
 import com.poker.poker.config.constants.AppConstants;
-import com.poker.poker.models.user.UserModel;
+import com.poker.poker.models.user.User;
 import com.poker.poker.repositories.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -18,7 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
-@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 @AllArgsConstructor
 public class JwtService {
 
@@ -40,14 +40,14 @@ public class JwtService {
    * Retrieves a user document from a JWT.
    *
    * @param token JWT.
-   * @return UserModel associated with the JWT.
+   * @return User associated with the JWT.
    */
-  public UserModel getUserDocument(String token) {
-    final UserModel userModel = userRepository.findUserDocumentByEmail(extractEmail(token));
-    if (userModel == null) {
+  public User getUserDocument(String token) {
+    final User user = userRepository.findUserDocumentByEmail(extractEmail(token));
+    if (user == null) {
       throw appConstants.getUserNotFoundException();
     }
-    return userModel;
+    return user;
   }
 
   /**

@@ -1,7 +1,7 @@
-import {PokerTableModel} from '../../api/models/poker-table-model';
-import {GamePlayerModel} from '../../api/models/game-player-model';
+import {PokerTable} from '../../api/models/poker-table';
+import {GamePlayer} from '../../api/models/game-player';
 
-export const table1: PokerTableModel = {
+export const table1: PokerTable = {
   players: [
     {
       id: '181acdbf-bb98-4ae1-895c-187d79f793b6',
@@ -134,7 +134,7 @@ export const table1: PokerTableModel = {
   pot: 420
 };
 
-export const table2: PokerTableModel = {
+export const table2: PokerTable = {
   players: [
     {
       id: '24800f75-0353-4c83-b13c-af388bd9a9ac',
@@ -315,7 +315,7 @@ export const table2: PokerTableModel = {
   ]
 };
 
-export const samplePlayer: GamePlayerModel = {
+export const samplePlayer: GamePlayer = {
   id: '24800f75-0353-4c83-b13c-af388bd9a9ac',
   firstName: 'Jackson',
   lastName: 'McGee',

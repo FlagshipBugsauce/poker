@@ -40,8 +40,8 @@ import {
   updateCurrentGame
 } from '../../state/app.actions';
 import {selectLoggedInUser} from '../../state/app.selector';
-import {ClientUserModel} from '../../api/models/client-user-model';
-import {WebSocketUpdateModel} from '../../api/models/web-socket-update-model';
+import {ClientUser} from '../../api/models/client-user';
+import {WebSocketUpdate} from '../../api/models/web-socket-update';
 import {ToastService} from "../toast.service";
 
 export enum SocketClientState {
@@ -70,7 +70,7 @@ export class WebSocketService implements OnDestroy {
   /** Socket state. */
   private state: BehaviorSubject<SocketClientState>;
   /** Model for the logged in user. */
-  private user: ClientUserModel;
+  private user: ClientUser;
 
   public secureId: string = '';
 
@@ -131,7 +131,7 @@ export class WebSocketService implements OnDestroy {
 
     this.appStore.select(selectLoggedInUser)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((user: ClientUserModel) => this.user = user);
+    .subscribe((user: ClientUser) => this.user = user);
   }
 
   public subscribeToPrivateTopic(secureId: string): void {
@@ -239,7 +239,7 @@ export class WebSocketService implements OnDestroy {
    */
   public async requestUpdate(type: MessageType, topic: string, id: string = null): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, 100));
-    this.send(`/topic/game/update`, {type, topic, id} as WebSocketUpdateModel);
+    this.send(`/topic/game/update`, {type, topic, id} as WebSocketUpdate);
     return null;
   }
 

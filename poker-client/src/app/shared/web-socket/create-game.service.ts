@@ -5,10 +5,10 @@ import {AppStateContainer} from '../models/app-state.model';
 import {Store} from '@ngrx/store';
 import {selectJwt, selectLoggedInUser} from '../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
-import {ClientUserModel} from '../../api/models/client-user-model';
-import {ClientMessageModel} from '../../api/models/client-message-model';
+import {ClientUser} from '../../api/models/client-user';
+import {ClientMessage} from '../../api/models/client-message';
 import {gameCreated} from '../../state/app.actions';
-import {GameParameterModel} from '../../api/models/game-parameter-model';
+import {GameParameter} from '../../api/models/game-parameter';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +17,7 @@ export class CreateGameService implements OnDestroy {
 
   public createGameTopic = '/topic/game/create';
   private jwt: string;
-  private user: ClientUserModel;
+  private user: ClientUser;
   private ngDestroyed$: Subject<any> = new Subject<any>();
   private createGameTopicUnsubscribe$: Subject<any>;
 
@@ -30,7 +30,7 @@ export class CreateGameService implements OnDestroy {
     .subscribe(jwt => this.jwt = jwt);
     this.appStore.select(selectLoggedInUser)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((user: ClientUserModel) => this.user = user);
+    .subscribe((user: ClientUser) => this.user = user);
   }
 
   public ngOnDestroy(): void {
@@ -52,7 +52,7 @@ export class CreateGameService implements OnDestroy {
     }
   }
 
-  public createGamePayload(data: GameParameterModel): ClientMessageModel {
-    return {jwt: this.jwt, data} as ClientMessageModel;
+  public createGamePayload(data: GameParameter): ClientMessage {
+    return {jwt: this.jwt, data} as ClientMessage;
   }
 }
