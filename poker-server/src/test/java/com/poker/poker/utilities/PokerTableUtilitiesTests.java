@@ -98,6 +98,7 @@ public class PokerTableUtilitiesTests {
     }
 
     setupNewHand(table, deck);
+    fillSharedCards(table, deck);
     verifyHandAction(table, p1, p2, 980, 20, 20, 20, 30, false, false, 1, 2);
 
     final Collection<Integer> actingPlayers = new ArrayList<>();
@@ -740,7 +741,7 @@ public class PokerTableUtilitiesTests {
                 card(Hearts, Queen), // Player 2 1st Card
                 card(Diamonds, King), // Player 1 1st Card
                 card(Spades, Two) // Player 0 1st Card
-                ));
+            ));
 
     final Deck mockDeck = Mockito.spy(Deck.class);
     Mockito.doNothing().when(mockDeck).restoreAndShuffle();
@@ -748,7 +749,26 @@ public class PokerTableUtilitiesTests {
     return mockDeck;
   }
 
-  /** Basic test where there are no side-pots. */
+  /**
+   * Helper which will fill the shared cards list on a poker table, burning cards after the flop and
+   * after the turn.
+   *
+   * @param table Poker table.
+   * @param deck  Deck.
+   */
+  public static void fillSharedCards(final PokerTable table, final Deck deck) {
+    table.getSharedCards().add(deck.draw());
+    table.getSharedCards().add(deck.draw());
+    table.getSharedCards().add(deck.draw());
+    deck.draw();
+    table.getSharedCards().add(deck.draw());
+    deck.draw();
+    table.getSharedCards().add(deck.draw());
+  }
+
+  /**
+   * Basic test where there are no side-pots.
+   */
   @Test
   public void testPotGeneration_1() {
     final PokerTable table = getSamplePokerTable(10);
@@ -854,6 +874,7 @@ public class PokerTableUtilitiesTests {
     final Deck deck = getSampleDeck_1();
     table.setDealer(9);
     dealCards(table, deck, 2);
+    fillSharedCards(table, deck);
 
     // Set bets and bankrolls
 
@@ -929,6 +950,7 @@ public class PokerTableUtilitiesTests {
     final Deck deck = getSampleDeck_2();
     table.setDealer(9);
     dealCards(table, deck, 2);
+    fillSharedCards(table, deck);
 
     // Set bets and bankrolls
 
@@ -958,6 +980,7 @@ public class PokerTableUtilitiesTests {
     final Deck deck = getSampleDeck_2();
     table.setDealer(9);
     dealCards(table, deck, 2);
+    fillSharedCards(table, deck);
 
     // Set bets and bankrolls
 
@@ -1037,6 +1060,7 @@ public class PokerTableUtilitiesTests {
     final Deck deck = getSampleDeck_2();
     table.setDealer(9);
     dealCards(table, deck, 2);
+    fillSharedCards(table, deck);
 
     // Set bets and bankrolls
     final List<BigDecimal> bets =
@@ -1098,6 +1122,7 @@ public class PokerTableUtilitiesTests {
     final Deck deck = getSampleDeck_1();
     table.setDealer(9);
     dealCards(table, deck, 2);
+    fillSharedCards(table, deck);
 
     // Set bets and bankrolls.
     final List<BigDecimal> bets =
@@ -1131,7 +1156,9 @@ public class PokerTableUtilitiesTests {
     final PokerTable table = getSamplePokerTable(10);
     final List<GamePlayer> players = table.getPlayers();
     table.setDealer(9);
-    dealCards(table, new Deck(), 2);
+    final Deck deck = new Deck();
+    dealCards(table, deck, 2);
+    fillSharedCards(table, deck);
 
     // Set bets and bankrolls.
     players.forEach(p -> p.setChips(new BigDecimal(500)));
@@ -1162,8 +1189,10 @@ public class PokerTableUtilitiesTests {
     // Setup.
     final PokerTable table = getSamplePokerTable(10);
     final List<GamePlayer> players = table.getPlayers();
+    final Deck deck = getSampleDeck_1();
     table.setDealer(9);
-    dealCards(table, getSampleDeck_1(), 2);
+    dealCards(table, deck, 2);
+    fillSharedCards(table, deck);
 
     // Set bets and bankrolls.
     players.forEach(p -> p.setChips(new BigDecimal(500)));
@@ -1195,6 +1224,7 @@ public class PokerTableUtilitiesTests {
 
     // Test.
     dealCards(table, deck, 2);
+    fillSharedCards(table, deck);
     final List<Card> usedCards = deck.getUsedCards();
 
     // Verify.
@@ -1301,6 +1331,7 @@ public class PokerTableUtilitiesTests {
 
     // Test.
     dealCards(table, deck, 2);
+    fillSharedCards(table, deck);
     final List<Card> usedCards = deck.getUsedCards();
 
     // Verify.
@@ -1338,6 +1369,7 @@ public class PokerTableUtilitiesTests {
 
     // Test.
     dealCards(table, deck, 2);
+    fillSharedCards(table, deck);
     final List<Card> usedCards = deck.getUsedCards();
 
     // Verify.
