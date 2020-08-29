@@ -349,7 +349,7 @@ public class GameService {
    * to investigate edge cases where hands are displayed in some order, and in some cases, the
    * losing player is not obligated to show their cards.
    *
-   * @param id      Game ID.
+   * @param id Game ID.
    * @param hideAll Flag that determine whether all cards are hidden or not.
    * @return Runnable which will broadcast the poker table.
    */
@@ -398,8 +398,10 @@ public class GameService {
       handleEndOfHand(table, getHandEndBroadcaster(game.getId(), true));
       publishTimerMessage(game.getId(), appConfig.getHandSummaryDurationInMs());
       Thread.sleep(appConfig.getHandSummaryDurationInMs());
-      publisher.publishEvent(numNonZeroChips(table) > 1 ?
-          new StartHandEvent(this, game.getId()) : new GameOverEvent(this, game.getId()));
+      publisher.publishEvent(
+          numNonZeroChips(table) > 1
+              ? new StartHandEvent(this, game.getId())
+              : new GameOverEvent(this, game.getId()));
       return;
     }
 
@@ -411,8 +413,10 @@ public class GameService {
       publishTimerMessage(game.getId(), appConfig.getHandSummaryDurationInMs());
       Thread.sleep(appConfig.getHandSummaryDurationInMs());
       final long numNotOut = players.stream().filter(p -> is(p.getChips()).notEq(ZERO)).count();
-      publisher.publishEvent(numNonZeroChips(table) > 1 ?
-          new StartHandEvent(this, game.getId()) : new GameOverEvent(this, game.getId()));
+      publisher.publishEvent(
+          numNonZeroChips(table) > 1
+              ? new StartHandEvent(this, game.getId())
+              : new GameOverEvent(this, game.getId()));
       return;
     }
 
@@ -458,7 +462,7 @@ public class GameService {
 
     assert table.getPlayers().get(table.getActingPlayer()).getId().equals(player.getId());
 
-//    Thread.sleep(10); // TODO: May not be necessary - having some issues with AFK actions.
+    //    Thread.sleep(10); // TODO: May not be necessary - having some issues with AFK actions.
     if (player.isAway()) {
       // Perform default action for afk players, could be AllInCheck, Check or Fold.
       publisher.publishEvent(

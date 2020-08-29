@@ -16,27 +16,19 @@ import lombok.NoArgsConstructor;
 @Schema(description = "A winner of a hand, could be one of several.")
 public class Winner {
 
-  /**
-   * The ID of the winning player.
-   */
+  /** The ID of the winning player. */
   @Schema(description = "The ID of the winning player.")
   private UUID id;
 
-  /**
-   * The amount the player won.
-   */
+  /** The amount the player won. */
   @Schema(description = "The amount the player won.")
   private BigDecimal winnings;
 
-  /**
-   * Type of hand.
-   */
+  /** Type of hand. */
   @Schema(description = "Type of hand.", example = "Full House", implementation = HandType.class)
   private HandType type;
 
-  /**
-   * The winning cards.
-   */
+  /** The winning cards. */
   @ArraySchema(schema = @Schema(description = "The winning cards.", implementation = Card.class))
   private List<Card> cards;
 

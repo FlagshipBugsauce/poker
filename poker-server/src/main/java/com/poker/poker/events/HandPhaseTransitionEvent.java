@@ -7,9 +7,7 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class HandPhaseTransitionEvent extends ApplicationEvent {
 
-  /**
-   * Game ID.
-   */
+  /** Game ID. */
   private final UUID id;
 
   public HandPhaseTransitionEvent(final Object source, final UUID id) {

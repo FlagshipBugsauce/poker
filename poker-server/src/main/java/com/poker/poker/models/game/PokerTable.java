@@ -45,66 +45,46 @@ public class PokerTable {
   @Schema(implementation = HandSummary.class)
   private HandSummary summary = null;
 
-  /**
-   * Winners of the hand.
-   */
+  /** Winners of the hand. */
   @ArraySchema(schema = @Schema(implementation = Winner.class))
   private List<Winner> winners = new ArrayList<>();
 
-  /**
-   * This is incremented whenever some action is performed.
-   */
+  /** This is incremented whenever some action is performed. */
   @Schema(description = "This is incremented whenever some action is performed.", example = "69")
   private int eventTracker = 0;
 
-  /**
-   * Minimum raise amount.
-   */
+  /** Minimum raise amount. */
   @Schema(description = "Minimum raise amount.", example = "69", implementation = BigDecimal.class)
   private BigDecimal minRaise = ZERO;
 
-  /**
-   * Total amount in the pot.
-   */
+  /** Total amount in the pot. */
   @Schema(
       description = "Total amount in the pot.",
       example = "420.69",
       implementation = BigDecimal.class)
   private BigDecimal pot = ZERO;
 
-  /**
-   * Side-pots.
-   */
+  /** Side-pots. */
   @ArraySchema(schema = @Schema(implementation = Pot.class))
   private List<Pot> pots = new ArrayList<>();
 
-  /**
-   * Blinds.
-   */
+  /** Blinds. */
   @Schema(description = "Blinds.", example = "69", implementation = BigDecimal.class)
   private BigDecimal blind = ZERO;
 
-  /**
-   * Blinds.
-   */
+  /** Blinds. */
   @Schema(description = "Current round.", example = "69")
   private int round = 0;
 
-  /**
-   * The round will end once this player has acted.
-   */
+  /** The round will end once this player has acted. */
   @Schema(description = "The round will end once this player has acted.", example = "2")
   private int lastToAct = 0;
 
-  /**
-   * Flag that is true when a betting round is taking place.
-   */
+  /** Flag that is true when a betting round is taking place. */
   @Schema(description = "Flag that is true when a betting round is taking place.", example = "true")
   private boolean betting = false;
 
-  /**
-   * Phase the hand is in.
-   */
+  /** Phase the hand is in. */
   @Schema(description = "Phase the hand is in.", example = "Flop", implementation = HandPhase.class)
   private HandPhase phase = PreFlop;
 

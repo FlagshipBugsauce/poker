@@ -406,13 +406,13 @@ public final class PokerTableUtilities {
             });
 
     // TODO: Temporarily dealing the shared cards - remove this now.
-//    table.getSharedCards().add(deck.draw());
-//    table.getSharedCards().add(deck.draw());
-//    table.getSharedCards().add(deck.draw());
-//    deck.draw(); // Burn card.
-//    table.getSharedCards().add(deck.draw());
-//    deck.draw(); // Burn card.
-//    table.getSharedCards().add(deck.draw());
+    //    table.getSharedCards().add(deck.draw());
+    //    table.getSharedCards().add(deck.draw());
+    //    table.getSharedCards().add(deck.draw());
+    //    deck.draw(); // Burn card.
+    //    table.getSharedCards().add(deck.draw());
+    //    deck.draw(); // Burn card.
+    //    table.getSharedCards().add(deck.draw());
   }
 
   /**
@@ -658,8 +658,7 @@ public final class PokerTableUtilities {
    * @param ranks List of hand rank objects.
    * @return Mapping of hand rank objects, keyed by numerical rank.
    */
-  public static Map<Integer, List<HandRank>> splitHandsByRank(
-      final Iterable<HandRank> ranks) {
+  public static Map<Integer, List<HandRank>> splitHandsByRank(final Iterable<HandRank> ranks) {
     final Map<Integer, List<HandRank>> map = new HashMap<>();
     for (final HandRank rank : ranks) {
       if (map.containsKey(rank.getRank())) {
@@ -731,8 +730,8 @@ public final class PokerTableUtilities {
     final Map<UUID, Winner> winners =
         new HashMap<UUID, Winner>() {
           {
-            handRanks.forEach(r -> put(
-                r.getId(), new Winner(r.getId(), ZERO, r.getType(), r.getHand())));
+            handRanks.forEach(
+                r -> put(r.getId(), new Winner(r.getId(), ZERO, r.getType(), r.getHand())));
           }
         };
 
@@ -855,7 +854,8 @@ public final class PokerTableUtilities {
     table.setBetting(true);
     final GamePlayer dealer = table.getPlayers().get(table.getDealer());
     final int lastToAct =
-        dealer.isFolded() ? getNextActivePlayer(table, table.getDealer(), false)
+        dealer.isFolded()
+            ? getNextActivePlayer(table, table.getDealer(), false)
             : table.getDealer();
     table.setLastToAct(lastToAct);
     table.setActingPlayer(getNextActivePlayer(table, table.getDealer(), true));
