@@ -113,9 +113,7 @@
           "builder": "@jefiozie/ngx-aws-deploy:deploy",
           "options": {
             "region": "us-east-1",
-            "bucket": "poker-test-001",
-            "secretAccessKey": "n0AUquVcHx4tdGp2KIodu9Gmb/r/EzaXNy0OkLw1",
-            "accessKeyId": "AKIAZQYR3VP4CRFCWWEV"
+            "bucket": "poker-test-001"
           }
         }
       }
