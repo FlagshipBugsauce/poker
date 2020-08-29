@@ -404,15 +404,6 @@ public final class PokerTableUtilities {
               }
               players.get(dealer).getCards().add(deck.draw());
             });
-
-    // TODO: Temporarily dealing the shared cards - remove this now.
-    //    table.getSharedCards().add(deck.draw());
-    //    table.getSharedCards().add(deck.draw());
-    //    table.getSharedCards().add(deck.draw());
-    //    deck.draw(); // Burn card.
-    //    table.getSharedCards().add(deck.draw());
-    //    deck.draw(); // Burn card.
-    //    table.getSharedCards().add(deck.draw());
   }
 
   /**
