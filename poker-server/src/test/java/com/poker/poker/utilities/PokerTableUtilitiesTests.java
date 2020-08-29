@@ -741,7 +741,7 @@ public class PokerTableUtilitiesTests {
                 card(Hearts, Queen), // Player 2 1st Card
                 card(Diamonds, King), // Player 1 1st Card
                 card(Spades, Two) // Player 0 1st Card
-            ));
+                ));
 
     final Deck mockDeck = Mockito.spy(Deck.class);
     Mockito.doNothing().when(mockDeck).restoreAndShuffle();
@@ -754,7 +754,7 @@ public class PokerTableUtilitiesTests {
    * after the turn.
    *
    * @param table Poker table.
-   * @param deck  Deck.
+   * @param deck Deck.
    */
   public static void fillSharedCards(final PokerTable table, final Deck deck) {
     table.getSharedCards().add(deck.draw());
@@ -766,9 +766,7 @@ public class PokerTableUtilitiesTests {
     table.getSharedCards().add(deck.draw());
   }
 
-  /**
-   * Basic test where there are no side-pots.
-   */
+  /** Basic test where there are no side-pots. */
   @Test
   public void testPotGeneration_1() {
     final PokerTable table = getSamplePokerTable(10);
