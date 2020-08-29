@@ -22,3 +22,16 @@ export enum CardValue {
   Two = 'Two',
   Back = 'Back'
 }
+
+export enum HandType {
+  StraightFlush = 'StraightFlush',
+  FourOfAKind = 'FourOfAKind',
+  FullHouse = 'FullHouse',
+  Flush = 'Flush',
+  Straight = 'Straight',
+  Set = 'Set',
+  TwoPair = 'TwoPair',
+  Pair = 'Pair',
+  HighCard = 'HighCard',
+  NotShown = 'NotShown'
+}

@@ -1,7 +1,7 @@
 package com.poker.poker.services.game;
 
 import static com.poker.poker.models.enums.GameAction.AllInCheck;
-import static com.poker.poker.models.enums.GamePhase.Over;
+import static com.poker.poker.models.enums.HandPhase.Over;
 import static com.poker.poker.models.enums.MessageType.Deal;
 import static com.poker.poker.models.enums.MessageType.HideCards;
 import static com.poker.poker.models.enums.MessageType.PlayerAwayToggled;
@@ -15,7 +15,12 @@ import static com.poker.poker.utilities.PokerTableUtilities.defaultAction;
 import static com.poker.poker.utilities.PokerTableUtilities.getSystemChatActionMessage;
 import static com.poker.poker.utilities.PokerTableUtilities.handleEndOfHand;
 import static com.poker.poker.utilities.PokerTableUtilities.handlePlayerAction;
+import static com.poker.poker.utilities.PokerTableUtilities.numInHand;
+import static com.poker.poker.utilities.PokerTableUtilities.numNonZeroChips;
 import static com.poker.poker.utilities.PokerTableUtilities.setupNewHand;
+import static com.poker.poker.utilities.PokerTableUtilities.setupNextPhase;
+import static com.poker.poker.utilities.PokerTableUtilities.transitionHandPhase;
+import static ir.cafebabe.math.utils.BigDecimalUtils.is;
 import static java.math.BigDecimal.ZERO;
 import static java.math.RoundingMode.HALF_UP;
 
@@ -27,6 +32,7 @@ import com.poker.poker.events.DealCardsEvent;
 import com.poker.poker.events.GameActionEvent;
 import com.poker.poker.events.GameMessageEvent;
 import com.poker.poker.events.GameOverEvent;
+import com.poker.poker.events.HandPhaseTransitionEvent;
 import com.poker.poker.events.HideCardsEvent;
 import com.poker.poker.events.JoinGameEvent;
 import com.poker.poker.events.LeaveGameEvent;
@@ -43,6 +49,7 @@ import com.poker.poker.events.SystemChatMessageEvent;
 import com.poker.poker.events.ToastMessageEvent;
 import com.poker.poker.events.WaitForPlayerEvent;
 import com.poker.poker.models.ApiSuccess;
+import com.poker.poker.models.enums.GamePhase;
 import com.poker.poker.models.game.CurrentGame;
 import com.poker.poker.models.game.Deal;
 import com.poker.poker.models.game.Game;
@@ -55,6 +62,7 @@ import com.poker.poker.models.game.PokerTable;
 import com.poker.poker.models.game.Timer;
 import com.poker.poker.models.user.User;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -345,7 +353,7 @@ public class GameService {
    * @param hideAll Flag that determine whether all cards are hidden or not.
    * @return Runnable which will broadcast the poker table.
    */
-  public Runnable getBroadcaster(final UUID id, final boolean hideAll) {
+  public Runnable getHandEndBroadcaster(final UUID id, final boolean hideAll) {
     return hideAll
         ? () -> data.broadcastObfuscatedPokerTable(id)
         : () -> data.broadcastPokerTableWithFoldedCardsHidden(id);
@@ -353,7 +361,7 @@ public class GameService {
 
   @Async
   @EventListener
-  public void handleGameAction(final GameActionEvent event) throws InterruptedException {
+  public void handleGameAction(final GameActionEvent event) {
     final Game game = data.getUsersGame(event.getPlayerId());
     final PokerTable table = data.getPokerTable(game.getId());
 
@@ -362,7 +370,6 @@ public class GameService {
     publishSystemChatMessageEvent(game.getId(), getSystemChatActionMessage(table, event));
     data.broadcastObfuscatedPokerTable(game.getId());
 
-    // TODO: Take a closer look at this logic to ensure the game flow is correct.
     // Check if hand should continue, if yes, publish wait even and return;
     final long numPlayersRemaining =
         table.getPlayers().stream().filter(p -> !p.isOut() && !p.isFolded()).count();
@@ -373,28 +380,52 @@ public class GameService {
           new WaitForPlayerEvent(this, table.getPlayers().get(table.getActingPlayer()).getId()));
       return;
     }
+    publisher.publishEvent(new HandPhaseTransitionEvent(this, game.getId()));
+  }
 
-    // If we get here, then the hand (and possibly the game) is over.
-    handleEndOfHand(table, getBroadcaster(game.getId(), numPlayersRemaining <= 1));
+  @Async
+  @EventListener
+  public void transitionToNextPhase(final HandPhaseTransitionEvent event)
+      throws InterruptedException {
+    final Game game = data.getGame(event.getId());
+    final PokerTable table = data.getPokerTable(event.getId());
+    final List<GamePlayer> players = table.getPlayers();
 
-    publishTimerMessage(game.getId(), appConfig.getHandSummaryDurationInMs());
-    Thread.sleep(appConfig.getHandSummaryDurationInMs());
-
-    // Now we need to determine whether the game is over (i.e. all players are bust, except one).
-    log.debug("Determining if game should continue.");
-    final int numRemaining =
-        (int)
-            table.getPlayers().stream()
-                .filter(p -> !p.getControls().getBankRoll().equals(ZERO)) // TODO: Check isOut?
-                .count();
-
-    if (numRemaining > 1) {
-      // Start a new hand
-      publisher.publishEvent(new StartHandEvent(this, game.getId()));
-    } else {
-      // Display game summary.
-      publisher.publishEvent(new GameOverEvent(this, game.getId()));
+    // Handle case where all players but one have folded.
+    if (numInHand(table) <= 1) {
+      log.debug("All players in game {} have folded. Ending hand.", game.getId());
+      // Then hand is over
+      handleEndOfHand(table, getHandEndBroadcaster(game.getId(), true));
+      publishTimerMessage(game.getId(), appConfig.getHandSummaryDurationInMs());
+      Thread.sleep(appConfig.getHandSummaryDurationInMs());
+      publisher.publishEvent(
+          numNonZeroChips(table) > 1
+              ? new StartHandEvent(this, game.getId())
+              : new GameOverEvent(this, game.getId()));
+      return;
     }
+
+    // Helper to transition the phase.
+    transitionHandPhase(table);
+
+    if (table.getPhase() == Over) {
+      handleEndOfHand(table, getHandEndBroadcaster(game.getId(), false));
+      publishTimerMessage(game.getId(), appConfig.getHandSummaryDurationInMs());
+      Thread.sleep(appConfig.getHandSummaryDurationInMs());
+      final long numNotOut = players.stream().filter(p -> is(p.getChips()).notEq(ZERO)).count();
+      publisher.publishEvent(
+          numNonZeroChips(table) > 1
+              ? new StartHandEvent(this, game.getId())
+              : new GameOverEvent(this, game.getId()));
+      return;
+    }
+
+    // If game is not over, then setup the next phase.
+    setupNextPhase(table, data.getDeck(game.getId()));
+    data.broadcastObfuscatedPokerTable(game.getId());
+    log.debug("Hand phase: {}, has started.", table.getPhase());
+    publisher.publishEvent(
+        new WaitForPlayerEvent(this, table.getPlayers().get(table.getActingPlayer()).getId()));
   }
 
   private void publishPlayerWonHandChatMessage(final UUID id) {
@@ -431,6 +462,7 @@ public class GameService {
 
     assert table.getPlayers().get(table.getActingPlayer()).getId().equals(player.getId());
 
+    //    Thread.sleep(10); // TODO: May not be necessary - having some issues with AFK actions.
     if (player.isAway()) {
       // Perform default action for afk players, could be AllInCheck, Check or Fold.
       publisher.publishEvent(
@@ -464,7 +496,7 @@ public class GameService {
   @EventListener
   public void gameOver(final GameOverEvent event) {
     final Game game = data.getGame(event.getId());
-    game.setPhase(Over);
+    game.setPhase(GamePhase.Over);
 
     // TODO: Save game in DB
     data.endGame(game.getId());

@@ -3,6 +3,12 @@ package com.poker.poker.utilities;
 import static com.poker.poker.models.enums.GameAction.AllInCheck;
 import static com.poker.poker.models.enums.GameAction.Check;
 import static com.poker.poker.models.enums.GameAction.Fold;
+import static com.poker.poker.models.enums.HandPhase.Flop;
+import static com.poker.poker.models.enums.HandPhase.Over;
+import static com.poker.poker.models.enums.HandPhase.PreFlop;
+import static com.poker.poker.models.enums.HandPhase.River;
+import static com.poker.poker.models.enums.HandPhase.Turn;
+import static com.poker.poker.models.enums.HandType.NotShown;
 import static com.poker.poker.utilities.BigDecimalUtilities.max;
 import static com.poker.poker.utilities.BigDecimalUtilities.sum;
 import static com.poker.poker.utilities.CardUtilities.FACE_DOWN_CARD;
@@ -15,10 +21,11 @@ import static java.util.stream.Collectors.toList;
 
 import com.poker.poker.events.GameActionEvent;
 import com.poker.poker.models.enums.GameAction;
+import com.poker.poker.models.enums.HandPhase;
 import com.poker.poker.models.game.Card;
 import com.poker.poker.models.game.Deck;
 import com.poker.poker.models.game.GamePlayer;
-import com.poker.poker.models.game.HandRankModel;
+import com.poker.poker.models.game.HandRank;
 import com.poker.poker.models.game.PokerTable;
 import com.poker.poker.models.game.Pot;
 import com.poker.poker.models.game.TableControls;
@@ -257,10 +264,6 @@ public final class PokerTableUtilities {
         // Update toCall field for other players.
         players.forEach(
             p -> {
-              //              final BigDecimal pToCall = p.getControls().getToCall();
-              //              final BigDecimal pBankRoll = p.getControls().getBankRoll();
-              //              p.setToCall(is(sum(raise, pToCall)).gt(pBankRoll) ? pBankRoll :
-              // sum(raise, pToCall));
               final BigDecimal pToCall = wager.subtract(p.getBet());
               p.setToCall(is(pToCall).gte(p.getChips()) ? p.getChips() : pToCall);
             });
@@ -334,6 +337,7 @@ public final class PokerTableUtilities {
 
     // Set the betting flag to indicate a betting round is occurring.
     table.setBetting(true);
+    table.setPhase(PreFlop);
 
     // Hide hand summary.
     table.setDisplayHandSummary(false);
@@ -400,15 +404,6 @@ public final class PokerTableUtilities {
               }
               players.get(dealer).getCards().add(deck.draw());
             });
-
-    // TODO: Temporarily dealing the shared cards.
-    table.getSharedCards().add(deck.draw());
-    table.getSharedCards().add(deck.draw());
-    table.getSharedCards().add(deck.draw());
-    deck.draw(); // Burn card.
-    table.getSharedCards().add(deck.draw());
-    deck.draw(); // Burn card.
-    table.getSharedCards().add(deck.draw());
   }
 
   /**
@@ -654,10 +649,9 @@ public final class PokerTableUtilities {
    * @param ranks List of hand rank objects.
    * @return Mapping of hand rank objects, keyed by numerical rank.
    */
-  public static Map<Integer, List<HandRankModel>> splitHandsByRank(
-      final Iterable<HandRankModel> ranks) {
-    final Map<Integer, List<HandRankModel>> map = new HashMap<>();
-    for (final HandRankModel rank : ranks) {
+  public static Map<Integer, List<HandRank>> splitHandsByRank(final Iterable<HandRank> ranks) {
+    final Map<Integer, List<HandRank>> map = new HashMap<>();
+    for (final HandRank rank : ranks) {
       if (map.containsKey(rank.getRank())) {
         map.get(rank.getRank()).add(rank);
       } else {
@@ -700,6 +694,7 @@ public final class PokerTableUtilities {
               new Winner(
                   candidates.get(0).getId(),
                   getPotTotal(pots),
+                  NotShown,
                   asList(
                       FACE_DOWN_CARD,
                       FACE_DOWN_CARD,
@@ -710,23 +705,24 @@ public final class PokerTableUtilities {
     }
 
     // More than 1 player means we need to give out winnings based on hand strength.
-    final List<HandRankModel> handRanks =
+    final List<HandRank> handRanks =
         candidates.stream()
             .map(
                 p -> {
                   final List<Card> cards = new ArrayList<>(p.getCards());
                   cards.addAll(table.getSharedCards()); // TODO: Don't add to this, make new List
-                  final HandRankModel handRank = rankHand(cards);
+                  final HandRank handRank = rankHand(cards);
                   handRank.setId(p.getId());
                   return handRank;
                 })
             .collect(toList());
 
-    final Map<Integer, List<HandRankModel>> rankMap = splitHandsByRank(handRanks);
+    final Map<Integer, List<HandRank>> rankMap = splitHandsByRank(handRanks);
     final Map<UUID, Winner> winners =
         new HashMap<UUID, Winner>() {
           {
-            handRanks.forEach(r -> put(r.getId(), new Winner(r.getId(), ZERO, r.getHand())));
+            handRanks.forEach(
+                r -> put(r.getId(), new Winner(r.getId(), ZERO, r.getType(), r.getHand())));
           }
         };
 
@@ -773,6 +769,87 @@ public final class PokerTableUtilities {
             .filter(w -> is(w.getWinnings()).gt(ZERO))
             .sorted((a, b) -> b.getWinnings().compareTo(a.getWinnings()))
             .collect(toList()));
+  }
+
+  public static int numNonZeroChips(final PokerTable table) {
+    assert table != null;
+    assert table.getPlayers() != null;
+    assert table.getPlayers().size() >= 2;
+    return (int) table.getPlayers().stream().filter(p -> is(p.getChips()).notEq(ZERO)).count();
+  }
+
+  /**
+   * Helper to determine how many players are remaining in a hand, as in, how many players have not
+   * been eliminated and who have not folded.
+   *
+   * @param table Poker table.
+   * @return Number of players who have not been eliminated and have not folded.
+   */
+  public static int numInHand(final PokerTable table) {
+    assert table != null;
+    assert table.getPlayers() != null;
+    assert table.getPlayers().size() >= 2;
+    return (int) table.getPlayers().stream().filter(p -> !p.isOut() && !p.isFolded()).count();
+  }
+
+  public static void transitionHandPhase(final PokerTable table) {
+    final HandPhase phase = table.getPhase();
+    // TODO: Validate pre-conditions.
+    assert phase != Over;
+    assert table.getPlayers().stream().filter(p -> !p.isFolded() && !p.isOut()).count() >= 2;
+
+    // If we still have players in the game, then it's time to transition to the next phase.
+    switch (phase) {
+      case PreFlop:
+        // Transition to Flop, wait for action from the first active player clockwise of dealer.
+        table.setPhase(Flop);
+        break;
+      case Flop:
+        // Transition to Turn, wait for action from the first active player clockwise of dealer.
+        table.setPhase(Turn);
+        break;
+      case Turn:
+        // Transition to River, wait for action from the first active player clockwise of dealer.
+        table.setPhase(River);
+        break;
+      case River:
+        // End game.
+        table.setPhase(Over);
+        break;
+    }
+  }
+
+  public static void setupNextPhase(final PokerTable table, final Deck deck) {
+    assert table != null;
+    assert table.getPlayers() != null;
+    assert table.getPlayers().size() >= 2;
+
+    final HandPhase phase = table.getPhase();
+    assert phase != PreFlop && phase != Over;
+
+    switch (phase) {
+      case Flop:
+        // Burn 1 card, then draw 3.
+        deck.draw();
+        table.getSharedCards().add(deck.draw());
+        table.getSharedCards().add(deck.draw());
+        table.getSharedCards().add(deck.draw());
+        break;
+      case Turn:
+      case River:
+        // Burn 1 card, then draw 1.
+        deck.draw();
+        table.getSharedCards().add(deck.draw());
+        break;
+    }
+    table.setBetting(true);
+    final GamePlayer dealer = table.getPlayers().get(table.getDealer());
+    final int lastToAct =
+        dealer.isFolded()
+            ? getNextActivePlayer(table, table.getDealer(), false)
+            : table.getDealer();
+    table.setLastToAct(lastToAct);
+    table.setActingPlayer(getNextActivePlayer(table, table.getDealer(), true));
   }
 
   /**

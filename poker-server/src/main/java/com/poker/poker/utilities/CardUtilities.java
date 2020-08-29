@@ -33,7 +33,7 @@ import com.poker.poker.models.enums.CardSuit;
 import com.poker.poker.models.enums.CardValue;
 import com.poker.poker.models.enums.HandType;
 import com.poker.poker.models.game.Card;
-import com.poker.poker.models.game.HandRankModel;
+import com.poker.poker.models.game.HandRank;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -205,7 +205,7 @@ public final class CardUtilities {
    *              DESCENDING</code> constants as the argument.
    * @return Comparator that sorts hand rank objects in the specified order.
    */
-  public static Comparator<HandRankModel> rankSorter(final int order) {
+  public static Comparator<HandRank> rankSorter(final int order) {
     return (a, b) -> order * Integer.compare(a.getRank(), b.getRank());
   }
 
@@ -831,7 +831,7 @@ public final class CardUtilities {
    * @return The best 5 card hand that can be made with the list of 7 cards provided, along with the
    *     numerical ranking of the best hand.
    */
-  public static HandRankModel rankHand(final List<Card> cards) {
+  public static HandRank rankHand(final List<Card> cards) {
     assert sharedPreCondition(cards);
     assert cards.size() == 7;
 
@@ -879,7 +879,7 @@ public final class CardUtilities {
         break;
     }
 
-    return new HandRankModel(rank, bestHand);
+    return new HandRank(rank, bestHand, handType);
   }
 
   /** Wrapper for hand evaluators. */

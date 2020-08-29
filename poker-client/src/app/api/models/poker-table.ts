@@ -48,6 +48,11 @@ export interface PokerTable {
   minRaise?: number;
 
   /**
+   * Phase the hand is in.
+   */
+  phase?: 'PreFlop' | 'Flop' | 'Turn' | 'River' | 'Over';
+
+  /**
    * Position of the player that acted.
    */
   playerThatActed?: number;

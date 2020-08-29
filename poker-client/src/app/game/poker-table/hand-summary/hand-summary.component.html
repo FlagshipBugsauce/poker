@@ -1,19 +1,16 @@
 <div *ngIf="displayHandSummary$ | async" class="hand-summary-container">
-  <div
-    [ngStyle]="{
-      'left': -(width / 2) + 'px',
-      'top': -(width * 7 / 10) + 'px'
-    }"
-    class="hand-summary-card">
-    <!--    <pkr-card-->
-    <!--      [card]="summary.card"-->
-    <!--      [pxSize]="width"></pkr-card>-->
-  </div>
-  <div
-    class="hand-summary-caption">
-    <p *ngFor="let winner of winners">
-      {{getWinnerMessage(winner)}}
-    </p>
-    <!--    {{name}} won the round!-->
+  <div class="hand-summary-caption">
+    <div *ngFor="let winner of winners">
+      <p>
+        {{getWinnerMessage(winner)}}
+      </p>
+      <div class="winning-cards">
+        <pkr-card
+          *ngFor="let card of winner.cards"
+          [card]="card"
+          [ngStyle]="{'padding': '5px'}"
+          [pxSize]="60"></pkr-card>
+      </div>
+    </div>
   </div>
 </div>

@@ -1,5 +1,9 @@
 package com.poker.poker.models.game;
 
+import static com.poker.poker.models.enums.HandPhase.PreFlop;
+import static java.math.BigDecimal.ZERO;
+
+import com.poker.poker.models.enums.HandPhase;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
@@ -51,14 +55,14 @@ public class PokerTable {
 
   /** Minimum raise amount. */
   @Schema(description = "Minimum raise amount.", example = "69", implementation = BigDecimal.class)
-  private BigDecimal minRaise = BigDecimal.ZERO;
+  private BigDecimal minRaise = ZERO;
 
   /** Total amount in the pot. */
   @Schema(
       description = "Total amount in the pot.",
       example = "420.69",
       implementation = BigDecimal.class)
-  private BigDecimal pot = BigDecimal.ZERO;
+  private BigDecimal pot = ZERO;
 
   /** Side-pots. */
   @ArraySchema(schema = @Schema(implementation = Pot.class))
@@ -66,7 +70,7 @@ public class PokerTable {
 
   /** Blinds. */
   @Schema(description = "Blinds.", example = "69", implementation = BigDecimal.class)
-  private BigDecimal blind = BigDecimal.ZERO;
+  private BigDecimal blind = ZERO;
 
   /** Blinds. */
   @Schema(description = "Current round.", example = "69")
@@ -79,6 +83,10 @@ public class PokerTable {
   /** Flag that is true when a betting round is taking place. */
   @Schema(description = "Flag that is true when a betting round is taking place.", example = "true")
   private boolean betting = false;
+
+  /** Phase the hand is in. */
+  @Schema(description = "Phase the hand is in.", example = "Flop", implementation = HandPhase.class)
+  private HandPhase phase = PreFlop;
 
   private List<Card> sharedCards = new ArrayList<>();
 
@@ -99,6 +107,7 @@ public class PokerTable {
     pots = table.getPots();
     winners = table.getWinners();
     sharedCards = table.getSharedCards();
+    phase = table.getPhase();
   }
 
   /**

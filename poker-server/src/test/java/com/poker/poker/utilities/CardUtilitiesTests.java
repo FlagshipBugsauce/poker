@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import com.poker.poker.models.enums.CardSuit;
 import com.poker.poker.models.enums.CardValue;
 import com.poker.poker.models.game.Card;
-import com.poker.poker.models.game.HandRankModel;
+import com.poker.poker.models.game.HandRank;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -826,7 +826,7 @@ public class CardUtilitiesTests {
     Collections.shuffle(bestStraightFlush);
 
     // Test.
-    final List<HandRankModel> rankedHands =
+    final List<HandRank> rankedHands =
         Arrays.asList(
             rankHand(worstHand),
             rankHand(bestHighCard),
@@ -847,7 +847,7 @@ public class CardUtilitiesTests {
             rankHand(worstStraightFlush),
             rankHand(bestStraightFlush));
     final List<Integer> rankings =
-        rankedHands.stream().map(HandRankModel::getRank).sorted().collect(Collectors.toList());
+        rankedHands.stream().map(HandRank::getRank).sorted().collect(Collectors.toList());
 
     // Verify.
     for (int i = 0; i < rankings.size(); i++) {

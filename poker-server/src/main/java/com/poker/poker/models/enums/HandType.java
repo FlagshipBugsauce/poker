@@ -9,5 +9,6 @@ public enum HandType {
   Set,
   TwoPair,
   Pair,
-  HighCard
+  HighCard,
+  NotShown
 }
