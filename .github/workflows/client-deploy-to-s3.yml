@@ -7,11 +7,14 @@ on:
       - '.github/workflows/client-deploy-to-s3.yml'
     branches:
       - develop
+
 jobs:
   deploy-client-to-s3:
     runs-on: ubuntu-latest
     env:
       working-directory: ./poker-client
+      NG_DEPLOY_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
+      NG_DEPLOY_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -25,3 +28,4 @@ jobs:
       - name: Deploy to S3
         run: npm run deploy
         working-directory: ${{env.working-directory}}
+
