@@ -879,7 +879,7 @@ public final class CardUtilities {
         break;
     }
 
-    return new HandRank(rank, bestHand);
+    return new HandRank(rank, bestHand, handType);
   }
 
   /** Wrapper for hand evaluators. */

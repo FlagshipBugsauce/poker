@@ -8,6 +8,7 @@ import static com.poker.poker.models.enums.HandPhase.Over;
 import static com.poker.poker.models.enums.HandPhase.PreFlop;
 import static com.poker.poker.models.enums.HandPhase.River;
 import static com.poker.poker.models.enums.HandPhase.Turn;
+import static com.poker.poker.models.enums.HandType.NotShown;
 import static com.poker.poker.utilities.BigDecimalUtilities.max;
 import static com.poker.poker.utilities.BigDecimalUtilities.sum;
 import static com.poker.poker.utilities.CardUtilities.FACE_DOWN_CARD;
@@ -263,10 +264,6 @@ public final class PokerTableUtilities {
         // Update toCall field for other players.
         players.forEach(
             p -> {
-              //              final BigDecimal pToCall = p.getControls().getToCall();
-              //              final BigDecimal pBankRoll = p.getControls().getBankRoll();
-              //              p.setToCall(is(sum(raise, pToCall)).gt(pBankRoll) ? pBankRoll :
-              // sum(raise, pToCall));
               final BigDecimal pToCall = wager.subtract(p.getBet());
               p.setToCall(is(pToCall).gte(p.getChips()) ? p.getChips() : pToCall);
             });
@@ -707,6 +704,7 @@ public final class PokerTableUtilities {
               new Winner(
                   candidates.get(0).getId(),
                   getPotTotal(pots),
+                  NotShown,
                   asList(
                       FACE_DOWN_CARD,
                       FACE_DOWN_CARD,
@@ -733,7 +731,8 @@ public final class PokerTableUtilities {
     final Map<UUID, Winner> winners =
         new HashMap<UUID, Winner>() {
           {
-            handRanks.forEach(r -> put(r.getId(), new Winner(r.getId(), ZERO, r.getHand())));
+            handRanks.forEach(r -> put(
+                r.getId(), new Winner(r.getId(), ZERO, r.getType(), r.getHand())));
           }
         };
 
@@ -854,6 +853,11 @@ public final class PokerTableUtilities {
         break;
     }
     table.setBetting(true);
+    final GamePlayer dealer = table.getPlayers().get(table.getDealer());
+    final int lastToAct =
+        dealer.isFolded() ? getNextActivePlayer(table, table.getDealer(), false)
+            : table.getDealer();
+    table.setLastToAct(lastToAct);
     table.setActingPlayer(getNextActivePlayer(table, table.getDealer(), true));
   }
 

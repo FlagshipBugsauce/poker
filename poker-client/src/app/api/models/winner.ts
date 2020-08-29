@@ -13,6 +13,11 @@ export interface Winner {
   id?: string;
 
   /**
+   * Type of hand.
+   */
+  type?: 'StraightFlush' | 'FourOfAKind' | 'FullHouse' | 'Flush' | 'Straight' | 'Set' | 'TwoPair' | 'Pair' | 'HighCard' | 'NotShown';
+
+  /**
    * The amount the player won.
    */
   winnings?: number;

@@ -370,7 +370,6 @@ public class GameService {
     publishSystemChatMessageEvent(game.getId(), getSystemChatActionMessage(table, event));
     data.broadcastObfuscatedPokerTable(game.getId());
 
-    // TODO: Take a closer look at this logic to ensure the game flow is correct.
     // Check if hand should continue, if yes, publish wait even and return;
     final long numPlayersRemaining =
         table.getPlayers().stream().filter(p -> !p.isOut() && !p.isFolded()).count();
@@ -397,6 +396,8 @@ public class GameService {
       log.debug("All players in game {} have folded. Ending hand.", game.getId());
       // Then hand is over
       handleEndOfHand(table, getHandEndBroadcaster(game.getId(), true));
+      publishTimerMessage(game.getId(), appConfig.getHandSummaryDurationInMs());
+      Thread.sleep(appConfig.getHandSummaryDurationInMs());
       publisher.publishEvent(numNonZeroChips(table) > 1 ?
           new StartHandEvent(this, game.getId()) : new GameOverEvent(this, game.getId()));
       return;
@@ -418,6 +419,9 @@ public class GameService {
     // If game is not over, then setup the next phase.
     setupNextPhase(table, data.getDeck(game.getId()));
     data.broadcastObfuscatedPokerTable(game.getId());
+    log.debug("Hand phase: {}, has started.", table.getPhase());
+    publisher.publishEvent(
+        new WaitForPlayerEvent(this, table.getPlayers().get(table.getActingPlayer()).getId()));
   }
 
   private void publishPlayerWonHandChatMessage(final UUID id) {
@@ -454,6 +458,7 @@ public class GameService {
 
     assert table.getPlayers().get(table.getActingPlayer()).getId().equals(player.getId());
 
+//    Thread.sleep(10); // TODO: May not be necessary - having some issues with AFK actions.
     if (player.isAway()) {
       // Perform default action for afk players, could be AllInCheck, Check or Fold.
       publisher.publishEvent(

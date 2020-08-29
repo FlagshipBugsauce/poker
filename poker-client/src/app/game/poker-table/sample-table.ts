@@ -248,32 +248,60 @@ export const table2: PokerTable = {
   actingPlayer: 3,
   playerThatActed: 2,
   dealer: 2,
-  displayHandSummary: false,
+  displayHandSummary: true,
   summary: null,
   winners: [
     {
       id: '00000000-0000-0000-0000-000000000000',
       winnings: 3,
+      type: 'FullHouse',
       cards: [
         {
-          suit: 'Back',
-          value: 'Back'
+          suit: 'Spades',
+          value: 'Ace'
         },
         {
-          suit: 'Back',
-          value: 'Back'
+          suit: 'Hearts',
+          value: 'Ace'
         },
         {
-          suit: 'Back',
-          value: 'Back'
+          suit: 'Clubs',
+          value: 'Ace'
         },
         {
-          suit: 'Back',
-          value: 'Back'
+          suit: 'Hearts',
+          value: 'King'
         },
         {
-          suit: 'Back',
-          value: 'Back'
+          suit: 'Spades',
+          value: 'King'
+        }
+      ]
+    },
+    {
+      id: 'f9ee2f0a-fc87-4a57-b436-aeff792a5dd6',
+      winnings: 3,
+      type: 'FullHouse',
+      cards: [
+        {
+          suit: 'Spades',
+          value: 'Ace'
+        },
+        {
+          suit: 'Hearts',
+          value: 'Ace'
+        },
+        {
+          suit: 'Clubs',
+          value: 'Ace'
+        },
+        {
+          suit: 'Hearts',
+          value: 'King'
+        },
+        {
+          suit: 'Spades',
+          value: 'King'
         }
       ]
     }

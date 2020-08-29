@@ -28,14 +28,14 @@ export class HandSummaryComponent implements OnInit, OnDestroy {
    */
   public ngDestroyed$ = new Subject<any>();
 
-  public get safe(): boolean {
-    return this.players != null;
-  }
-
   constructor(
     private pokerTableStore: Store<PokerTableStateContainer>,
     public cardService: CardService
   ) {
+  }
+
+  public get safe(): boolean {
+    return this.players != null;
   }
 
   public get name(): string {
@@ -76,6 +76,7 @@ export class HandSummaryComponent implements OnInit, OnDestroy {
   }
 
   public getWinnerMessage(winner: Winner): string {
-    return `${this.getName(this.getPlayer(winner.id))} won $${winner.winnings}`;
+    return `${this.getName(this.getPlayer(winner.id))} won $${winner.winnings} with
+    ${this.cardService.getHandType(winner.type)}`;
   }
 }

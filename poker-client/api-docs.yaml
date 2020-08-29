@@ -45,13 +45,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccess'
-  /game/start:
+  /game/active:
     post:
       tags:
         - game
-      summary: Start Game
-      description: Starts the game, provided all preconditions are satisfied..
-      operationId: startGame
+      summary: Set Active Status
+      description: Sets the status that indicates whether a player is active or not.
+      operationId: setActiveStatus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActiveStatus'
+        required: true
       responses:
         "400":
           description: Bad request.
@@ -66,7 +72,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
         "200":
-          description: Game started successfully.
+          description: Creation of game was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccess'
+  /game/join/{gameId}:
+    post:
+      tags:
+        - game
+      summary: Joins a game
+      description: Joins the game with the provided UUID, provided such a game exists.
+      operationId: joinGame
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "200":
+          description: Game was joined successfully.
           content:
             application/json:
               schema:
@@ -129,19 +167,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccess'
-  /game/join/{gameId}:
+  /game/start:
     post:
       tags:
         - game
-      summary: Joins a game
-      description: Joins the game with the provided UUID, provided such a game exists.
-      operationId: joinGame
-      parameters:
-        - name: gameId
-          in: path
-          required: true
-          schema:
-            type: string
+      summary: Start Game
+      description: Starts the game, provided all preconditions are satisfied..
+      operationId: startGame
       responses:
         "400":
           description: Bad request.
@@ -156,39 +188,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
         "200":
-          description: Game was joined successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccess'
-  /game/active:
-    post:
-      tags:
-        - game
-      summary: Set Active Status
-      description: Sets the status that indicates whether a player is active or not.
-      operationId: setActiveStatus
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ActiveStatus'
-        required: true
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-        "200":
-          description: Creation of game was successful.
+          description: Game started successfully.
           content:
             application/json:
               schema:
@@ -219,11 +219,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccess'
-  /test/models:
+  /test/send-private-message:
     get:
       tags:
         - test-controller
-      operationId: models
+      operationId: sendPrivateMessage
+      parameters:
+        - name: message
+          in: query
+          required: true
+          schema:
+            type: string
       responses:
         "400":
           description: Bad request.
@@ -239,10 +245,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
         "200":
           description: default response
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/Models'
   /test/deal:
     get:
       tags:
@@ -270,17 +272,11 @@ paths:
                 $ref: '#/components/schemas/ApiError'
         "200":
           description: default response
-  /test/send-private-message:
+  /test/models:
     get:
       tags:
         - test-controller
-      operationId: sendPrivateMessage
-      parameters:
-        - name: message
-          in: query
-          required: true
-          schema:
-            type: string
+      operationId: models
       responses:
         "400":
           description: Bad request.
@@ -296,6 +292,10 @@ paths:
                 $ref: '#/components/schemas/ApiError'
         "200":
           description: default response
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Models'
   /user/register:
     post:
       tags:
@@ -360,6 +360,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClientUser'
+  /user/auth-with-jwt:
+    post:
+      tags:
+        - users
+      summary: Authenticate With JWT
+      description: If the client has a JWT stored in a cookie, it can call this endpoint
+        to authenticate using the JWT stored in the cookie.
+      operationId: authorizeWithJwt
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JwtAuthRequest'
+        required: true
+      responses:
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "200":
+          description: Authorization was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
   /user/auth:
     post:
       tags:
@@ -390,39 +423,6 @@ paths:
         "200":
           description: Authorization was successful. A JWT should be returned, which
             can be used to access secured endpoints.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuthResponse'
-  /user/auth-with-jwt:
-    post:
-      tags:
-        - users
-      summary: Authenticate With JWT
-      description: If the client has a JWT stored in a cookie, it can call this endpoint
-        to authenticate using the JWT stored in the cookie.
-      operationId: authorizeWithJwt
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/JwtAuthRequest'
-        required: true
-      responses:
-        "400":
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-        "403":
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-        "200":
-          description: Authorization was successful.
           content:
             application/json:
               schema:
@@ -478,6 +478,15 @@ components:
           type: string
           description: Returned to indicate API call was successful
           example: Account created successfully.
+    ActiveStatus:
+      required:
+        - away
+      type: object
+      properties:
+        away:
+          type: boolean
+          description: Flag to determine what to set the player's active status to.
+          example: true
     GameParameter:
       required:
         - buyIn
@@ -502,15 +511,6 @@ components:
           description: Buy-in required to play in the game.
           example: 25
       description: The parameters of a game.
-    ActiveStatus:
-      required:
-        - away
-      type: object
-      properties:
-        away:
-          type: boolean
-          description: Flag to determine what to set the player's active status to.
-          example: true
     AuthRequest:
       type: object
       properties:
@@ -1155,6 +1155,16 @@ components:
           type: boolean
           description: Flag that is true when a betting round is taking place.
           example: true
+        phase:
+          type: string
+          description: Phase the hand is in.
+          example: Flop
+          enum:
+            - PreFlop
+            - Flop
+            - Turn
+            - River
+            - Over
         sharedCards:
           type: array
           items:
@@ -1306,6 +1316,21 @@ components:
         winnings:
           type: number
           description: The amount the player won.
+        type:
+          type: string
+          description: Type of hand.
+          example: Full House
+          enum:
+            - StraightFlush
+            - FourOfAKind
+            - FullHouse
+            - Flush
+            - Straight
+            - Set
+            - TwoPair
+            - Pair
+            - HighCard
+            - NotShown
         cards:
           type: array
           items:

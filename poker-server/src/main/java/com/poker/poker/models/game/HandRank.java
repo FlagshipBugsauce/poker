@@ -1,5 +1,6 @@
 package com.poker.poker.models.game;
 
+import com.poker.poker.models.enums.HandType;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
@@ -25,6 +26,12 @@ public class HandRank implements Comparable<HandRank> {
    */
   @Schema(description = "Player's ID.")
   private UUID id;
+
+  /**
+   * Type of hand.
+   */
+  @Schema(description = "Type of hand.", example = "Full House", implementation = HandType.class)
+  private final HandType type;
 
   @Override
   public int compareTo(final HandRank o) {

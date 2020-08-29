@@ -32,7 +32,8 @@ import {CommunityCardsComponent} from './poker-table/community-cards/community-c
     CommunityCardsComponent
   ],
   exports: [
-    PokerTableComponent
+    PokerTableComponent,
+    HandSummaryComponent
   ],
   imports: [
     CommonModule,

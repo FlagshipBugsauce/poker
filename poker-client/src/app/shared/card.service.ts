@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {CardSuit, CardValue} from './models/card.enum';
+import {CardSuit, CardValue, HandType} from './models/card.enum';
 import {Card} from '../api/models/card';
 
 export enum CardSize {
@@ -25,6 +25,11 @@ export class CardService {
    */
   public valueMapping = {};
 
+  /**
+   * Mapping of hand types to a friendly string.
+   */
+  public handTypeMapping = {};
+
   constructor() {
     // Face up cards:
     this.suitMapping[CardSuit.Spades] = 'S';
@@ -48,6 +53,22 @@ export class CardService {
     // Face down card:
     this.suitMapping[CardSuit.Back] = 'B';
     this.valueMapping[CardValue.Back] = '2';
+
+    // Hand type mappings:
+    this.handTypeMapping[HandType.StraightFlush] = 'a Straight Flush';
+    this.handTypeMapping[HandType.FourOfAKind] = 'Four of a Kind';
+    this.handTypeMapping[HandType.FullHouse] = 'a Full House';
+    this.handTypeMapping[HandType.Flush] = 'a Flush';
+    this.handTypeMapping[HandType.Straight] = 'a Straight';
+    this.handTypeMapping[HandType.Set] = 'Three of a Kind';
+    this.handTypeMapping[HandType.TwoPair] = 'Two Pairs';
+    this.handTypeMapping[HandType.Pair] = 'a Pair';
+    this.handTypeMapping[HandType.HighCard] = 'a High Card';
+    this.handTypeMapping[HandType.NotShown] = 'Not Shown';
+  }
+
+  public getHandType(type: string): string {
+    return this.handTypeMapping[type];
   }
 
   /**
