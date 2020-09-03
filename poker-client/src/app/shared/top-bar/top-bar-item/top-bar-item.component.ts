@@ -11,7 +11,7 @@ export class TopBarItemComponent implements OnInit {
   /**
    * Menu item that will be displayed.
    */
-  @Input() menuItem: DropDownMenuItem;
+  @Input() public menuItem: DropDownMenuItem;
 
   constructor(private router: Router) {
   }

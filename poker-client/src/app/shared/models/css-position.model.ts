@@ -1,10 +1,10 @@
-export interface CssPositionModel {
+export interface CssPosition {
   top: number;
   left: number;
 }
 
-export interface PlayerBoxPositionModel {
-  iconBox?: CssPositionModel;
-  awayIcon?: CssPositionModel;
-  chipsBox?: CssPositionModel;
+export interface PlayerBoxPosition {
+  iconBox?: CssPosition;
+  awayIcon?: CssPosition;
+  chipsBox?: CssPosition;
 }

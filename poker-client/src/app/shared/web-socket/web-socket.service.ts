@@ -144,6 +144,12 @@ export class WebSocketService implements OnDestroy {
         case MessageType.PlayerData:
           this.privatePlayerDataStore.dispatch(privatePlayerDataUpdated(data.data));
           break;
+        case MessageType.Game:
+          this.gameStore.dispatch(gameModelUpdated(data.data));
+          break;
+        case MessageType.PokerTable:
+          this.pokerTableStore.dispatch(pokerTableUpdate(data.data));
+          break;
         case MessageType.Debug:
           console.log(data);
           break;
@@ -314,7 +320,7 @@ export class WebSocketService implements OnDestroy {
   }
 
   /** Connects to the server. */
-  private connect(): Observable<Client> {
+  public connect(): Observable<Client> {
     return new Observable<Client>(observer => {
       this.state.pipe(filter(state => state === SocketClientState.CONNECTED)).subscribe(() => {
         observer.next(this.client);
