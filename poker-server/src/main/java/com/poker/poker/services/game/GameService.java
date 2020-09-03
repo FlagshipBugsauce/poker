@@ -20,8 +20,6 @@ import static com.poker.poker.utilities.PokerTableUtilities.numNonZeroChips;
 import static com.poker.poker.utilities.PokerTableUtilities.setupNewHand;
 import static com.poker.poker.utilities.PokerTableUtilities.setupNextPhase;
 import static com.poker.poker.utilities.PokerTableUtilities.transitionHandPhase;
-import static ir.cafebabe.math.utils.BigDecimalUtils.is;
-import static java.math.BigDecimal.ZERO;
 import static java.math.RoundingMode.HALF_UP;
 
 import com.poker.poker.config.AppConfig;
@@ -343,22 +341,6 @@ public class GameService {
     publisher.publishEvent(new GameMessageEvent<>(this, HideCards, event.getId(), new HideCards()));
   }
 
-  /**
-   * Helper that returns a lambda which will broadcast the hand in the appropriate fashion, i.e. it
-   * will either hide all cards, or it will display cards of players who haven't folded. TODO: Need
-   * to investigate edge cases where hands are displayed in some order, and in some cases, the
-   * losing player is not obligated to show their cards.
-   *
-   * @param id Game ID.
-   * @param hideAll Flag that determine whether all cards are hidden or not.
-   * @return Runnable which will broadcast the poker table.
-   */
-  public Runnable getHandEndBroadcaster(final UUID id, final boolean hideAll) {
-    return hideAll
-        ? () -> data.broadcastObfuscatedPokerTable(id)
-        : () -> data.broadcastPokerTableWithFoldedCardsHidden(id);
-  }
-
   @Async
   @EventListener
   public void handleGameAction(final GameActionEvent event) {
@@ -383,6 +365,32 @@ public class GameService {
     publisher.publishEvent(new HandPhaseTransitionEvent(this, game.getId()));
   }
 
+  /**
+   * Helper that returns a lambda which will broadcast the hand in the appropriate fashion, i.e. it
+   * will either hide all cards, or it will display cards of players who haven't folded. TODO: Need
+   * to investigate edge cases where hands are displayed in some order, and in some cases, the
+   * losing player is not obligated to show their cards.
+   *
+   * @param id Game ID.
+   * @param hideAll Flag that determine whether all cards are hidden or not.
+   * @return Runnable which will broadcast the poker table.
+   */
+  public Runnable getHandEndBroadcaster(final UUID id, final boolean hideAll) {
+    return () -> {
+      if (hideAll) {
+        data.broadcastObfuscatedPokerTable(id);
+      } else {
+        data.broadcastPokerTableWithFoldedCardsHidden(id);
+      }
+      publishTimerMessage(id, appConfig.getHandSummaryDurationInMs());
+      try {
+        Thread.sleep(appConfig.getHandSummaryDurationInMs());
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    };
+  }
+
   @Async
   @EventListener
   public void transitionToNextPhase(final HandPhaseTransitionEvent event)
@@ -396,8 +404,6 @@ public class GameService {
       log.debug("All players in game {} have folded. Ending hand.", game.getId());
       // Then hand is over
       handleEndOfHand(table, getHandEndBroadcaster(game.getId(), true));
-      publishTimerMessage(game.getId(), appConfig.getHandSummaryDurationInMs());
-      Thread.sleep(appConfig.getHandSummaryDurationInMs());
       publisher.publishEvent(
           numNonZeroChips(table) > 1
               ? new StartHandEvent(this, game.getId())
@@ -410,9 +416,6 @@ public class GameService {
 
     if (table.getPhase() == Over) {
       handleEndOfHand(table, getHandEndBroadcaster(game.getId(), false));
-      publishTimerMessage(game.getId(), appConfig.getHandSummaryDurationInMs());
-      Thread.sleep(appConfig.getHandSummaryDurationInMs());
-      final long numNotOut = players.stream().filter(p -> is(p.getChips()).notEq(ZERO)).count();
       publisher.publishEvent(
           numNonZeroChips(table) > 1
               ? new StartHandEvent(this, game.getId())
@@ -437,7 +440,8 @@ public class GameService {
         id, String.format("%s %s won the hand.", winner.getFirstName(), winner.getLastName()));
   }
 
-  private void publishTimerMessage(final UUID id, final int durationInMs) {
+  // TODO: Should probably refactor this to another service.
+  public void publishTimerMessage(final UUID id, final int durationInMs) {
     final Game game = data.getGame(id);
     final BigDecimal duration =
         new BigDecimal(durationInMs).divide(new BigDecimal(1000), 10, HALF_UP);

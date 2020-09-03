@@ -1,9 +1,9 @@
 /* tslint:disable */
-import {CssPositionModel} from '../../../shared/models/css-position.model';
+import {CssPosition} from '../../../shared/models/css-position.model';
 
 export class PositionHelperUtil {
-  public static getIconBoxPosition(position: number): CssPositionModel {
-    const iconBoxPosition: CssPositionModel = {top: NaN, left: NaN};
+  public static getIconBoxPosition(position: number): CssPosition {
+    const iconBoxPosition: CssPosition = {top: NaN, left: NaN};
     switch (position) {
       case 0:
       case 1:
@@ -47,8 +47,8 @@ export class PositionHelperUtil {
     return iconBoxPosition;
   }
 
-  public static getAwayIconPosition(position: number): CssPositionModel {
-    const awayIconPosition: CssPositionModel = {top: 0, left: 0};
+  public static getAwayIconPosition(position: number): CssPosition {
+    const awayIconPosition: CssPosition = {top: 0, left: 0};
     switch (position) {
       case 0:
       case 5:
@@ -74,8 +74,8 @@ export class PositionHelperUtil {
     return awayIconPosition;
   }
 
-  public static getChipsBoxPosition(position: number): CssPositionModel {
-    const chipsBoxPosition: CssPositionModel = {top: 0, left: 0};
+  public static getChipsBoxPosition(position: number): CssPosition {
+    const chipsBoxPosition: CssPosition = {top: 0, left: 0};
     switch (position) {
       case 0:
       case 1:

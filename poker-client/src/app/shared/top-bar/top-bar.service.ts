@@ -10,14 +10,6 @@ import {selectAuthenticated} from '../../state/app.selector';
   providedIn: 'root'
 })
 export class TopBarService {
-  /**
-   * Top bar menu items that is generated anew each time the application state changes.
-   */
-  public topBarMenuItems: DropDownMenuItem[] = [];
-  /**
-   * Flag selected from the application state which indicates whether a user is logged in.
-   */
-  private authenticated = initialState.authenticated;
 
   constructor(private store: Store<AppStateContainer>) {
     this.updateMenuItems();
@@ -34,12 +26,32 @@ export class TopBarService {
     return 'assets/icons/aces.svg';
   }
 
+  public static HOME_ITEM_TEXT: string = APP_ROUTES.HOME.label;
+  public static ACCOUNT_ITEM_TEXT: string = 'Account';
+  public static REGISTER_ITEM_TEXT: string = APP_ROUTES.REGISTER.label;
+  public static LOGIN_ITEM_TEXT: string = APP_ROUTES.LOGIN.label;
+  public static EDIT_PROFILE_ITEM_TEXT: string = 'Edit Profile';
+  public static VIEW_STATS_ITEM_TEXT: string = 'View Statistics';
+  public static LOGOUT_ITEM_TEXT: string = 'APP_ROUTES.LOGOUT.label';
+  public static GAME_ITEM_TEXT: string = APP_ROUTES.GAME_PREFIX.label;
+  public static CREATE_GAME_ITEM_TEXT: string = APP_ROUTES.CREATE_GAME.label;
+  public static JOIN_GAME_ITEM_TEXT: string = APP_ROUTES.JOIN_GAME.label;
+  public static ABOUT_ITEM_TEXT: string = APP_ROUTES.ABOUT.label;
+  /**
+   * Top bar menu items that is generated anew each time the application state changes.
+   */
+  public topBarMenuItems: DropDownMenuItem[] = [];
+  /**
+   * Flag selected from the application state which indicates whether a user is logged in.
+   */
+  private authenticated = initialState.authenticated;
+
   /**
    * Getter for the home menu item.
    */
   public get homeMenuItem(): DropDownMenuItem {
     return {
-      text: APP_ROUTES.HOME.label,
+      text: TopBarService.HOME_ITEM_TEXT,
       anchor: APP_ROUTES.HOME.path
     };
   }
@@ -49,15 +61,15 @@ export class TopBarService {
    */
   public get gameMenuItems(): DropDownMenuItem {
     return {
-      text: APP_ROUTES.GAME_PREFIX.label,
+      text: TopBarService.GAME_ITEM_TEXT,
       anchor: null, // TODO: Should have a generic "game" page which links to join/create/etc...
       dropDown: [
         {
-          text: APP_ROUTES.CREATE_GAME.label,
+          text: TopBarService.CREATE_GAME_ITEM_TEXT,
           anchor: APP_ROUTES.CREATE_GAME.path
         },
         {
-          text: APP_ROUTES.JOIN_GAME.label,
+          text: TopBarService.JOIN_GAME_ITEM_TEXT,
           anchor: APP_ROUTES.JOIN_GAME.path
         }
       ]
@@ -70,15 +82,15 @@ export class TopBarService {
    */
   public get unauthenticatedAccountMenuItems(): DropDownMenuItem {
     return {
-      text: 'Account',
+      text: TopBarService.ACCOUNT_ITEM_TEXT,
       anchor: null,
       dropDown: [
         {
-          text: APP_ROUTES.REGISTER.label,
+          text: TopBarService.REGISTER_ITEM_TEXT,
           anchor: APP_ROUTES.REGISTER.path
         },
         {
-          text: APP_ROUTES.LOGIN.label,
+          text: TopBarService.LOGIN_ITEM_TEXT,
           anchor: APP_ROUTES.LOGIN.path
         }
       ]
@@ -91,19 +103,19 @@ export class TopBarService {
    */
   public get authenticatedAccountMenuItems(): DropDownMenuItem {
     return {
-      text: 'Account', // TODO: Change this to parameter and add general account page.
+      text: TopBarService.ACCOUNT_ITEM_TEXT,
       anchor: null,
       dropDown: [
         {
-          text: 'Edit Profile',
+          text: TopBarService.EDIT_PROFILE_ITEM_TEXT,
           anchor: 'edit-profile'
         },
         {
-          text: 'View Statistics',
+          text: TopBarService.VIEW_STATS_ITEM_TEXT,
           anchor: 'view-statistics',
         },
         {
-          text: APP_ROUTES.LOGOUT.label,
+          text: TopBarService.LOGOUT_ITEM_TEXT,
           anchor: APP_ROUTES.LOGOUT.path
         }
       ]
@@ -112,7 +124,7 @@ export class TopBarService {
 
   public get aboutMenuItems(): DropDownMenuItem {
     return {
-      text: APP_ROUTES.ABOUT.label,
+      text: TopBarService.ABOUT_ITEM_TEXT,
       anchor: APP_ROUTES.ABOUT.path
     };
   }

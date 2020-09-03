@@ -1,5 +1,5 @@
-import {PokerTable} from '../../api/models/poker-table';
-import {GamePlayer} from '../../api/models/game-player';
+import {PokerTable} from '../api/models/poker-table';
+import {GamePlayer} from '../api/models/game-player';
 
 export const table1: PokerTable = {
   players: [

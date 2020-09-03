@@ -1,4 +1,4 @@
-import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {
   AppStateContainer,
@@ -7,19 +7,16 @@ import {
   PlayerDataStateContainer,
   PokerTableStateContainer
 } from '../../shared/models/app-state.model';
-import {drawCard, setAwayStatus} from '../../state/app.actions';
+import {refreshTable, setAwayStatus, showAllCards} from '../../state/app.actions';
 import {Subject} from 'rxjs';
 import {
-  selectActingPlayer,
   selectAwayStatus,
-  selectDisplayHandSummary,
-  selectGameModel,
   selectLoggedInUser,
   selectPlayers,
   selectTimer
 } from '../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
-import {ClientUser, Game, GamePlayer, Timer} from '../../api/models';
+import {ClientUser, GamePlayer, Timer} from '../../api/models';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
 
 @Component({
@@ -28,13 +25,6 @@ import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
   styleUrls: ['./poker-table.component.scss']
 })
 export class PokerTableComponent implements OnInit, OnDestroy {
-  // If this is true, we'll seed the table with sample data - TODO: May not be needed.
-  @Input() design: boolean = false;
-
-  /**
-   * Number of players. TODO: May not be needed.
-   */
-  public numPlayers: number = 0;
 
   /**
    * Reference to the AFK popup, used to display/hide the modal.
@@ -48,11 +38,6 @@ export class PokerTableComponent implements OnInit, OnDestroy {
   public playerBoxes: { number: number; top: number; left: number }[];
 
   /**
-   * Model of the game. TODO: May not be needed here anymore.
-   */
-  public game: Game;
-
-  /**
    * Used to ensure we're not maintaining multiple subscriptions.
    */
   public ngDestroyed$ = new Subject<any>();
@@ -61,16 +46,6 @@ export class PokerTableComponent implements OnInit, OnDestroy {
    * Players in the game.
    */
   public players: GamePlayer[] = [];
-
-  /**
-   * Index of the player that is acting. TODO: I don't think this is needed here anymore.
-   */
-  public actingIndex: number;
-
-  /**
-   * Flag used to determine when a hand summary should be displayed. TODO: May not be needed here.
-   */
-  public displaySummary: boolean = false;
 
   /**
    * Object used to position the logo in the center of the poker table.
@@ -94,8 +69,8 @@ export class PokerTableComponent implements OnInit, OnDestroy {
   public numPlayersSet: boolean = false;
   public timerValue: number[] = [0];
   public timerIndex: number = 0;
+  public minWidth: number = 1300;
   private sizeRatio: number = 5 / 3;
-  private minWidth: number = 1300;
   private user;
 
   constructor(
@@ -103,7 +78,7 @@ export class PokerTableComponent implements OnInit, OnDestroy {
     private playerDataStore: Store<PlayerDataStateContainer>,
     private gameStore: Store<GameStateContainer>,
     private pokerTableStore: Store<PokerTableStateContainer>,
-    private timerStore: Store<MiscEventsStateContainer>) {
+    private miscEventsStore: Store<MiscEventsStateContainer>) {
   }
 
   /**
@@ -146,7 +121,7 @@ export class PokerTableComponent implements OnInit, OnDestroy {
     return this.height * (1 / 6);
   }
 
-  public get safeToCheck(): boolean {
+  public get safe(): boolean {
     return this.user &&
       this.user.id &&
       this.players &&
@@ -155,7 +130,7 @@ export class PokerTableComponent implements OnInit, OnDestroy {
   }
 
   public get playersIndex(): number {
-    return this.safeToCheck ? this.players.findIndex(p => p.id === this.user.id) : -1;
+    return this.safe ? this.players.findIndex(p => p.id === this.user.id) : -1;
   }
 
   public get away(): boolean {
@@ -170,14 +145,11 @@ export class PokerTableComponent implements OnInit, OnDestroy {
   public initializePlayerBoxes(num: number): void {
     if (!this.numPlayersSet && num > 0) {
       this.numPlayersSet = true;
-      this.numPlayers = num;
-      this.delay(100).then(() => {
-        this.width = window.innerWidth - 50;
-        this.playerBoxes = Array(this.numPlayers)
-        .fill({number: 1, top: 0, left: 0})
-        .map((v, i) => ({number: i, top: 0, left: 0}));
-        this.updatePositions();
-      });
+      this.width = window.innerWidth - 50;
+      this.playerBoxes = Array(num)
+      .fill({number: 1, top: 0, left: 0})
+      .map((v, i) => ({number: i, top: 0, left: 0}));
+      this.updatePositions();
     }
   }
 
@@ -185,10 +157,6 @@ export class PokerTableComponent implements OnInit, OnDestroy {
     this.appStore.select(selectLoggedInUser)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((user: ClientUser) => this.user = user);
-
-    this.gameStore.select(selectGameModel)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((game: Game) => this.game = game);
 
     this.pokerTableStore.select(selectPlayers)
     .pipe(takeUntil(this.ngDestroyed$))
@@ -199,14 +167,6 @@ export class PokerTableComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.pokerTableStore.select(selectActingPlayer)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((actingIndex: number) => this.actingIndex = actingIndex);
-
-    this.pokerTableStore.select(selectDisplayHandSummary)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((displaySummary: boolean) => this.displaySummary = displaySummary);
-
     this.playerDataStore.select(selectAwayStatus)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((status: boolean) => {
@@ -215,7 +175,7 @@ export class PokerTableComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.timerStore.select(selectTimer)
+    this.miscEventsStore.select(selectTimer)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((timer: Timer) => {
       this.timerIndex++;
@@ -226,7 +186,7 @@ export class PokerTableComponent implements OnInit, OnDestroy {
   }
 
   @HostListener('window:resize', ['$event'])
-  onResize(event) {
+  public onResize(event) {
     const lastWidth = this.width;
     const scrollbar: boolean = document.body.scrollHeight > document.body.clientHeight;
     const margin: number = scrollbar ? 48 : 30;
@@ -238,13 +198,6 @@ export class PokerTableComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Draws a card.
-   */
-  public draw(): void {
-    this.appStore.dispatch(drawCard());
-  }
-
-  /**
    * Sets status to away.
    */
   public setStatusToAway(): void {
@@ -252,24 +205,19 @@ export class PokerTableComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Starts the timer on the poker table.
+   * Manually requests a table update.
    */
-  private async startTimer(): Promise<void> {
-    const timerIndex = this.timerIndex;
-    while (this.timerValue[timerIndex] > 0) {
-      await this.delay(1000);
-      this.timerValue[timerIndex]--;
-    }
-    this.timerValue[timerIndex] = 0;
+  public refreshTable(): void {
+    this.pokerTableStore.dispatch(refreshTable());
+    this.pokerTableStore.dispatch(showAllCards());
   }
 
   /**
    * Begins a timer which will display how much time a player has to perform an action, before the
    * action is performed for them.
    */
-
-  private updatePositions(): void {
-    for (let i = 0; i < this.numPlayers; i++) {
+  public updatePositions(): void {
+    for (let i = 0; i < this.playerBoxes.length; i++) {
       this.playerBoxes[i].top = this.dimensions(i)[0];
       this.playerBoxes[i].left = this.dimensions(i)[1];
     }
@@ -282,6 +230,18 @@ export class PokerTableComponent implements OnInit, OnDestroy {
     this.communityCardsPosition.width = this.deckPosition.width;
     this.communityCardsPosition.top = this.deckPosition.top;
     this.communityCardsPosition.left = this.deckPosition.left + this.deckPosition.width + 20;
+  }
+
+  /**
+   * Starts the timer on the poker table.
+   */
+  private async startTimer(): Promise<void> {
+    const timerIndex = this.timerIndex;
+    while (this.timerValue[timerIndex] > 0) {
+      await this.delay(1000);
+      this.timerValue[timerIndex]--;
+    }
+    this.timerValue[timerIndex] = 0;
   }
 
   /**

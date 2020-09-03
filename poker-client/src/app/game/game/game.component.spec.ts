@@ -13,16 +13,18 @@ import {
   GameStateContainer,
   MiscEventsStateContainer,
   PlayerDataStateContainer,
-  PokerTableStateContainer
+  PokerTableStateContainer,
+  PrivatePlayerDataStateContainer
 } from '../../shared/models/app-state.model';
 import * as selectors from '../../state/app.selector';
+import {selectHiddenCards, selectPrivateCards} from '../../state/app.selector';
 import {DrawGameData} from '../../api/models/draw-game-data';
 import {
   mockChatMessage,
   mockGameData,
   mockGameModel,
   mockHandSummaryModel,
-  mockPlayerModel,
+  mockNoHiddenCards,
   mockUser
 } from '../../testing/mock-models';
 import {PopupAfkComponent} from '../popup-afk/popup-afk.component';
@@ -47,6 +49,7 @@ import {DeckComponent} from '../poker-table/deck/deck.component';
 import {GamePhase} from '../../shared/models/game-phase.enum';
 import {TableControlsComponent} from '../poker-table/table-controls/table-controls.component';
 import {CommunityCardsComponent} from '../poker-table/community-cards/community-cards.component';
+import {samplePlayer, table2} from '../../testing/sample-table';
 
 describe('GameComponent', () => {
   let mockStore: MockStore;
@@ -69,6 +72,8 @@ describe('GameComponent', () => {
   let mockWinnersSelector: MemoizedSelector<PokerTableStateContainer, Winner[]>;
   let mockDealerSelector: MemoizedSelector<PokerTableStateContainer, number>;
   let mockSharedCardsSelector: MemoizedSelector<PokerTableStateContainer, Card[]>;
+  let mockPrivateCardsSelector: MemoizedSelector<PrivatePlayerDataStateContainer, Card[]>;
+  let mockHiddenCardsSelector: MemoizedSelector<MiscEventsStateContainer, boolean[][]>;
   let component: GameComponent;
   let fixture: ComponentFixture<GameComponent>;
 
@@ -107,7 +112,7 @@ describe('GameComponent', () => {
     mockGeneralChatSelector = mockStore.overrideSelector(selectors.selectGeneralChat, mockChatMessage);
     mockAuthenticatedSelector = mockStore.overrideSelector(selectors.selectAuthenticated, true);
     mockGameSelector = mockStore.overrideSelector(selectors.selectGameModel, mockGameModel);
-    mockPlayersSelector = mockStore.overrideSelector(selectors.selectPlayers, [mockPlayerModel]);
+    mockPlayersSelector = mockStore.overrideSelector(selectors.selectPlayers, table2.players);
     mockActingPlayerSelector = mockStore.overrideSelector(selectors.selectActingPlayer, 0);
     mockDisplayHandSummarySelector = mockStore.overrideSelector(selectors.selectDisplayHandSummary, false);
     mockGamePhaseSelector = mockStore.overrideSelector(selectors.selectGamePhase, GamePhase.Play);
@@ -119,15 +124,13 @@ describe('GameComponent', () => {
     mockWinnersSelector = mockStore.overrideSelector(selectors.selectHandWinners, []);
     mockDealerSelector = mockStore.overrideSelector(selectors.selectDealer, 2);
     mockSharedCardsSelector = mockStore.overrideSelector(selectors.selectCommunityCards, []);
-    fixture = TestBed.createComponent(GameComponent);
-    fixture.detectChanges();
-  }));
-
-  beforeEach(() => {
+    mockPrivateCardsSelector = mockStore.overrideSelector(selectPrivateCards, samplePlayer.cards);
+    mockHiddenCardsSelector = mockStore.overrideSelector(selectHiddenCards, mockNoHiddenCards);
     fixture = TestBed.createComponent(GameComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  });
+    fixture.detectChanges();
+  }));
 
   it('should create', () => {
     expect(component).toBeTruthy();

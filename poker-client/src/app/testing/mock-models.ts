@@ -5,11 +5,19 @@ import {Lobby} from '../api/models/lobby';
 import {ChatMessage} from '../api/models/chat-message';
 import {PokerTable} from '../api/models/poker-table';
 import {HandSummary} from '../api/models/hand-summary';
-import {GamePlayer} from '../api/models';
+import {CurrentGame, Deal, GamePlayer, Timer} from '../api/models';
 import {CardSuit, CardValue} from '../shared/models/card.enum';
 
 export const mockUser: ClientUser = {
   id: 'abc123'
+};
+
+export const mockClientUser: ClientUser = {
+  id: '24800f75-0353-4c83-b13c-af388bd9a9ac',
+  firstName: 'Jackson',
+  lastName: 'McGee',
+  email: 'jon@domain.com',
+  group: 'Administrator'
 };
 
 export const mockGameData: DrawGameData[] = [];
@@ -39,3 +47,13 @@ export const mockHandSummaryModel: HandSummary = {
 };
 
 export const mockPlayerModel: GamePlayer = {id: 'jim', firstName: 'jim', lastName: 'bob'};
+
+export const mockCurrentGame: CurrentGame = {id: 'mockId', inGame: false};
+
+export const mockNoHiddenCards: boolean[][] = Array(10).fill(Array(2).fill(false));
+
+export const mockAllHiddenCards: boolean[][] = Array(10).fill(Array(2).fill(true));
+
+export const mockTimer: Timer = {id: 'test-id', duration: 10};
+
+export const mockDeal: Deal = {id: 'test-id', numCards: 2};

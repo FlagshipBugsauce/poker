@@ -1,11 +1,10 @@
-<div *ngIf="displayHandSummary$ | async" class="hand-summary-container">
-  <div class="hand-summary-caption">
-    <div *ngFor="let winner of winners">
-      <p>
-        {{getWinnerMessage(winner)}}
-      </p>
+<div *ngIf="displayHandSummary$ | async" class="hand-summary-container" id="handSummaryContainer">
+  <div class="hand-summary-caption" id="internalHandSummaryContainer">
+    <div *ngFor="let winner of winners" id="winner">
+      <p id="winningText">{{getWinnerMessage(winner)}}</p>
       <div class="winning-cards">
         <pkr-card
+          id="winningCard"
           *ngFor="let card of winner.cards"
           [card]="card"
           [ngStyle]="{'padding': '5px'}"

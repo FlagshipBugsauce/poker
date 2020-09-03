@@ -1,23 +1,5 @@
-<!-- TODO: Re-visit this at some point, may want some info in the top-bar -->
-<!--<div *ngIf="lobbyInfo" class="info-box text-right mr-3">-->
-<!--  <div>-->
-<!--    Currently in Game Lobby-->
-<!--  </div>-->
-<!--  <div>-->
-<!--    Name: {{lobbyInfo.name}}-->
-<!--  </div>-->
-<!--  <div>-->
-<!--    Host: {{lobbyInfo.host.firstName}} {{lobbyInfo.host.lastName}}-->
-<!--  </div>-->
-<!--</div>-->
 <div class="info-box text-right mr-3 mt-3">
   <div>
-    <button
-      (click)="rejoinLobby()"
-      *ngIf="lastLobbyInfo"
-      class="btn btn-light btn-sm"
-      ngbTooltip="Rejoin lobby you just left.">&rarr;
-    </button>
     <button
       (click)="rejoinGame()"
       *ngIf="!onGamePage && currentGame && currentGame.inGame"

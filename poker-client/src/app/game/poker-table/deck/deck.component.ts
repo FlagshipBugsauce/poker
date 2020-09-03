@@ -1,19 +1,12 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {
-  GameStateContainer,
   MiscEventsStateContainer,
   PokerTableStateContainer
 } from '../../../shared/models/app-state.model';
 import {Subject} from 'rxjs';
-import {
-  selectDeal,
-  selectDealer,
-  selectGamePhase,
-  selectPlayers
-} from '../../../state/app.selector';
+import {selectDeal, selectDealer, selectPlayers} from '../../../state/app.selector';
 import {takeUntil} from 'rxjs/operators';
-import {GamePhase} from '../../../shared/models/game-phase.enum';
 import {Deal} from '../../../api/models/deal';
 import {GamePlayer} from '../../../api/models/game-player';
 import {showCard} from '../../../state/app.actions';
@@ -43,11 +36,6 @@ export class DeckComponent implements OnInit, OnDestroy {
    * Used to ensure we're not maintaining multiple subscriptions.
    */
   public ngDestroyed$ = new Subject<any>();
-
-  /**
-   * The current phase of the game. TODO: Investigate whether this is actually needed.
-   */
-  public phase: GamePhase = GamePhase.Over;
 
   /**
    * Animated cards will only be visible when this is set to true. TODO: Investigate if necessary.
@@ -95,19 +83,18 @@ export class DeckComponent implements OnInit, OnDestroy {
 
   constructor(
     private pokerTableStore: Store<PokerTableStateContainer>,
-    private gameStore: Store<GameStateContainer>,
     private miscEventStore: Store<MiscEventsStateContainer>
   ) {
   }
 
   ngOnInit(): void {
-    this.gameStore.select(selectGamePhase)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((phase: GamePhase) => this.phase = phase);
-
     this.miscEventStore.select(selectDeal)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((deal: Deal) => this.dealCards());
+    .subscribe((deal: Deal) => {
+      if (deal.numCards !== -1) {
+        this.dealCards().then();
+      }
+    });
 
     this.pokerTableStore.select(selectPlayers)
     .pipe(takeUntil(this.ngDestroyed$))

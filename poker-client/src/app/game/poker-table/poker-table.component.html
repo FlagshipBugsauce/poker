@@ -1,27 +1,31 @@
 <div [ngStyle]="{
     'width': width + 'px',
     'height': height + 'px'
-  }" class="poker-table-container">
+  }" class="poker-table-container" id="pokerTableContainer">
   <div [ngStyle]="{
     'width': tableWidth + 'px',
     'height': tableHeight + 'px',
     'border-radius': tableBorderRadius + 'px',
     'left': leftTableOffset + 'px',
     'top': topTableOffset + 'px'
-  }" class="poker-table">
+  }" class="poker-table" id="pokerTable">
     <div [ngStyle]="{
       'top': logoPosition.top + 'px',
       'left': logoPosition.left + 'px'
-    }" class="table-logo">
-      <img [ngStyle]="{'width': logoPosition.logoWidth + 'px'}" [src]="'assets/icons/aces.svg'"
-           alt="">
+    }" class="table-logo" id="tableLogoContainer">
+      <img
+        [ngStyle]="{'width': logoPosition.logoWidth + 'px'}"
+        [src]="'assets/icons/aces.svg'"
+        alt=""
+        id="tableLogo">
     </div>
     <pkr-deck [ngStyle]="{
       'position': 'absolute',
       'top': deckPosition.top + 'px',
       'left': deckPosition.left + 'px'
-    }" [width]="deckPosition.width"></pkr-deck>
+    }" [width]="deckPosition.width" id="deck"></pkr-deck>
     <pkr-community-cards
+      id="communityCards"
       [ngStyle]="{
         'position': 'absolute',
         'top': communityCardsPosition.top + 'px',
@@ -31,6 +35,7 @@
     ></pkr-community-cards>
     <pkr-player-box
       *ngFor="let playerBox of playerBoxes"
+      id="playerBox"
       [ngStyle]="{
       'position': 'absolute',
       'top': playerBox.top + 'px',
@@ -44,17 +49,32 @@
         'top': '100px',
         'left': width / 2 - 300 + 'px'
     }"
-    [width]="deckPosition.width"></pkr-hand-summary>
-  <div class="button-box">
-    <button (click)="setStatusToAway()" [disabled]="away" class="btn btn-light">Away</button>
-    <span class="turn-timer">{{timerValue[timerIndex]}}</span>
-    <!--    <button (click)="draw()" [disabled]="!acting" class="btn btn-success">Draw</button>-->
+    id="handSummary"></pkr-hand-summary>
+  <div class="away-button-box" id="awayButtonBox">
+    <button
+      (click)="setStatusToAway()"
+      [disabled]="away"
+      class="btn btn-light"
+      id="awayButton">Away
+    </button>
+    <span class="turn-timer" id="turnTimer">{{timerValue[timerIndex]}}</span>
   </div>
   <pkr-table-controls [ngStyle]="{
     'position': 'absolute',
     'width': '840px',
     'left': width / 2 - 280 + 'px',
     'bottom': 10 + 'px'
-  }"></pkr-table-controls>
+  }" id="tableControls"></pkr-table-controls>
+  <div class="refresh-button-box" id="refreshButtonBox">
+    <!-- TODO: Use a refresh icon instead of text for this button. -->
+    <button
+      (click)="refreshTable()"
+      class="btn btn-light"
+      id="refreshButton"
+      ngbTooltip="Manually refresh the state of the poker table."
+      placement="left">
+      Refresh
+    </button>
+  </div>
 </div>
-<pkr-popup-afk #afkPopup></pkr-popup-afk>
+<pkr-popup-afk #afkPopup id="afkPopup"></pkr-popup-afk>

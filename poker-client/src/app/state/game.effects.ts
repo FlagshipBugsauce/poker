@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {exhaustMap, map, mergeMap, tap} from 'rxjs/operators';
+import {exhaustMap, first, map, mergeMap, switchMap, tap} from 'rxjs/operators';
 import {GameService} from '../api/services/game.service';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {
@@ -12,10 +12,12 @@ import {
   leaveLobby,
   performGameAction,
   readyUp,
+  refreshTable,
   rejoinGame,
   requestGameModelUpdate,
   requestPokerTableUpdate,
   setAwayStatus,
+  showAllCards,
   startGame,
   unsubscribeFromGameTopics
 } from './app.actions';
@@ -160,22 +162,35 @@ export class GameEffects {
    * 'Play' phase can be rejoined.
    */
   rejoinGame$ = createEffect(() => this.actions$.pipe(
-    ofType(rejoinGame),
-    tap((action: RejoinModel) => {
-      this.webSocketService.send('/topic/game/rejoin', {jwt: this.jwt});
-      this.subscribeToGameTopics(action.gameId);
-      this.requestGameTopicUpdatesInPlayPhase();
-      this.router.navigate([`${APP_ROUTES.GAME_PREFIX.path}/${action.gameId}`]).then();
-    })
-  ), {dispatch: false});
+      ofType(rejoinGame),
+      exhaustMap((action: RejoinModel) =>
+          this.webSocketService.connect().pipe(first())
+          .pipe(
+              switchMap(client => {
+                client.send('/topic/game/rejoin', {}, JSON.stringify({jwt: this.jwt}));
+                this.subscribeToGameTopics(action.gameId);
+                this.requestGameTopicUpdatesInPlayPhase();
+                this.router.navigate([`${APP_ROUTES.GAME_PREFIX.path}/${action.gameId}`]).then();
+                return [refreshTable(), showAllCards()];
+              })
+          )
+      )
+  ));
 
+  /**
+   * Manually requests an update from the backend, ensuring table data is accurate.
+   */
+  refreshTable$ = createEffect(() => this.actions$.pipe(
+      ofType(refreshTable),
+      tap(() => this.webSocketService.send('/topic/game/refresh-table', {jwt: this.jwt}))
+  ), {dispatch: false});
   /**
    * Performs a game action (Fold, Check, Call or Raise).
    */
   performGameAction$ = createEffect(() => this.actions$.pipe(
-    ofType(performGameAction),
-    tap((action: GameActionData) =>
-      this.webSocketService.send('/topic/game/act', {jwt: this.jwt, data: action}))
+      ofType(performGameAction),
+      tap((action: GameActionData) =>
+          this.webSocketService.send('/topic/game/act', {jwt: this.jwt, data: action}))
   ), {dispatch: false});
 
   constructor(

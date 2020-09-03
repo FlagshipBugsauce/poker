@@ -62,6 +62,7 @@ export const performGameAction = createAction('performGameAction', props<GameAct
 export const gamePlayerUpdated = createAction('gamePlayerUpdated', props<GamePlayer>());
 export const pokerTableUpdate = createAction('pokerTableUpdate', props<PokerTable>());
 export const requestPokerTableUpdate = createAction('requestPokerTableUpdate');
+export const refreshTable = createAction('refreshTable');
 
 // Game Actions:
 export const gamePhaseChanged = createAction('gamePhaseChanged', props<{ phase: GamePhase }>());
@@ -87,6 +88,7 @@ export const startTimer = createAction('startTimer', props<Timer>());
 export const dealCards = createAction('dealCards', props<Deal>());
 export const hideCards = createAction('hideCards', props<HideCards>());
 export const showCard = createAction('showCard', props<{ player: number, card: number }>());
+export const showAllCards = createAction('showAllCards');
 
 // Private Player Data:
 export const privatePlayerDataUpdated = createAction(

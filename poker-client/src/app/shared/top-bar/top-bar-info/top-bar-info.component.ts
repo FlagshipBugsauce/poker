@@ -1,50 +1,53 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {AppStateContainer} from '../../models/app-state.model';
 import {Store} from '@ngrx/store';
-import {TopBarLobbyModel} from '../../models/top-bar-lobby.model';
-import {
-  selectCurrentGame,
-  selectJwt,
-  selectLastLobbyInfo,
-  selectLobbyInfo
-} from '../../../state/app.selector';
-import {joinLobby, rejoinGame} from '../../../state/app.actions';
+import {selectCurrentGame} from '../../../state/app.selector';
+import {rejoinGame} from '../../../state/app.actions';
 import {CurrentGame} from '../../../api/models/current-game';
 import {Router} from '@angular/router';
 import {APP_ROUTES} from '../../../app-routes';
+import {Subject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
 
 @Component({
   selector: 'pkr-top-bar-info',
   templateUrl: './top-bar-info.component.html',
   styleUrls: ['./top-bar-info.component.scss']
 })
-export class TopBarInfoComponent implements OnInit {
-  public lobbyInfo: TopBarLobbyModel;
-  public lastLobbyInfo: TopBarLobbyModel;
+export class TopBarInfoComponent implements OnInit, OnDestroy {
+  /**
+   * Contains information needed to rejoin an active game, if the player is currently in a game,
+   * but is not viewing the game interface.
+   */
+
   public currentGame: CurrentGame;
-  private jwt: string;
+  /**
+   * Used to ensure we're not maintaining multiple subscriptions.
+   */
+  public ngDestroyed$ = new Subject<any>();
 
   constructor(
     private store: Store<AppStateContainer>,
     private router: Router) {
   }
 
+  /**
+   * Flag used to determine if the user is viewing the game interface, which is used to determine
+   * whether the rejoin button should be displayed.
+   */
   get onGamePage(): boolean {
     return this.router.url.includes(APP_ROUTES.GAME_PREFIX.path);
   }
 
-  ngOnInit(): void {
-    // TODO: This needs work - will have back arrow when game doesn't exist + doesn't show when hosting.
-    this.store.select(selectLobbyInfo).subscribe(lobbyInfo => this.lobbyInfo = lobbyInfo);
-    this.store.select(selectLastLobbyInfo)
-    .subscribe(lobbyInfo => this.lastLobbyInfo = lobbyInfo);
+  public ngOnInit(): void {
     this.store.select(selectCurrentGame)
+    .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((currentGame: CurrentGame) => this.currentGame = currentGame);
-    this.store.select(selectJwt).subscribe(jwt => this.jwt = jwt);
   }
 
-  public rejoinLobby(): void {
-    this.store.dispatch(joinLobby(this.lastLobbyInfo));
+  public ngOnDestroy() {
+    this.ngDestroyed$.next();
+    this.ngDestroyed$.complete();
   }
 
   public rejoinGame(): void {

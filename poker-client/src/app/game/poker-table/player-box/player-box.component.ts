@@ -1,7 +1,5 @@
-/* tslint:disable:no-bitwise */
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {Card, GamePlayer, PokerTable, User} from '../../../api/models';
-import {CardSuit, CardValue} from '../../../shared/models/card.enum';
+import {Card, ClientUser, GamePlayer, PokerTable} from '../../../api/models';
 import {Store} from '@ngrx/store';
 import {
   AppStateContainer,
@@ -19,10 +17,8 @@ import {
 } from '../../../state/app.selector';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
-import {PlayerBoxPositionModel} from '../../../shared/models/css-position.model';
+import {PlayerBoxPosition} from '../../../shared/models/css-position.model';
 import {PositionHelperUtil} from './position-helper.util';
-
-// TODO: Add some kind of async process that will wait until it receives all needed info.
 
 @Component({
   selector: 'pkr-player-box',
@@ -37,28 +33,83 @@ export class PlayerBoxComponent implements OnInit, OnDestroy {
         2                   8
             1     0     9      */
 
+  /**
+   * The position on the table. This field is used to determine where the player box should be
+   * positioned and which player model to use to display the correct information in the UI.
+   */
   @Input() player: number;
-  public publicCards: Card[] = [
-    {value: CardValue.Ace, suit: CardSuit.Spades},
-    {value: CardValue.Ace, suit: CardSuit.Spades}
-  ];
-  public privateCards: Card[] = [
-    {value: CardValue.Ace, suit: CardSuit.Spades},
-    {value: CardValue.Ace, suit: CardSuit.Spades}
-  ];
 
-  public hideCards: boolean = false;
-  public hiddenCards: boolean[] = [false, false];
-  public loggedInUser: User;
+  /**
+   * Cards that all players on the table can see.
+   */
+  public publicCards: Card[];
+
+  /**
+   * Cards that only the player using this client can see.
+   */
+  public privateCards: Card[];
+
+  /**
+   * Boolean array used to help with the card dealing animation. When the first item in this array
+   * is true, the first card will be hidden, when it's false, the first card will be displayed. The
+   * same is true for the second item in the array w.r.t. the second card.
+   */
+  public hiddenCards: boolean[];
+
+  /**
+   * Model of the user who is using this client. This is used to determine if this particular player
+   * box should display private cards.
+   */
+  public loggedInUser: ClientUser;
+
+  /**
+   * Model of the poker table.
+   */
   public table: PokerTable;
-  public playerModel: GamePlayer = {} as GamePlayer;
+
+  /**
+   * Model of the player whose information is being displayed with this player box.
+   */
+  public playerModel: GamePlayer;
+
+  /**
+   * Path to the dealer button icon.
+   */
   public dealerButtonPath: string = 'assets/icons/game/dealer.svg';
+
+  /**
+   * Path to the away icon.
+   */
   public awayIconPath: string = 'assets/icons/afk.svg';
-  public initials: string = 'AB';
-  public name: string = 'Jackson McGillicutty';
-  public bankRoll: number = 420.69;
-  public away: boolean = false;
+
+  /**
+   * Initials of the player whose information is being displayed with this player box.
+   */
+  public initials: string;
+
+  /**
+   * Name of the player whose information is being displayed with this player box.
+   */
+  public name: string;
+
+  /**
+   * Bank roll of the player whose information is being displayed with this player box.
+   */
+  public bankRoll: number;
+
+  /**
+   * Away status of the player whose information is being displayed with this player box.
+   */
+  public away: boolean;
+
+  /**
+   * Subject which is completed when this component is destroyed. Prevents multiple subscriptions.
+   */
   public ngDestroyed$: Subject<any> = new Subject<any>();
+
+  /**
+   * List of players in the game.
+   */
   public players: GamePlayer[];
 
   constructor(
@@ -69,6 +120,9 @@ export class PlayerBoxComponent implements OnInit, OnDestroy {
     private miscEventStore: Store<MiscEventsStateContainer>) {
   }
 
+  /**
+   * Helper to avoid null pointer errors.
+   */
   public get safe(): boolean {
     return this.loggedInUser &&
       this.playerModel &&
@@ -78,20 +132,33 @@ export class PlayerBoxComponent implements OnInit, OnDestroy {
       this.publicCards != null;
   }
 
+  /**
+   * Null safe getter for a player's current bet.
+   */
   public get currentBet(): number {
     return this.safe ? this.playerModel.controls.currentBet : 0;
   }
 
+  /**
+   * Null safe getter for a player's cards.
+   */
   public get cards(): Card[] {
-    return !this.safe ? [{value: CardValue.Ace, suit: CardSuit.Spades}] :
+    return !this.safe ? [] :
       this.loggedInUser.id === this.playerModel.id ? this.privateCards : this.publicCards;
   }
 
+  /**
+   * Null safe getter to determine if the dealer icon should be displayed.
+   */
   public get dealer(): boolean {
     return this.safe ? this.table.dealer === this.player : false;
   }
 
-  public get positions(): PlayerBoxPositionModel {
+  /**
+   * Getter for the positioning information of the various elements of the player box. Positions
+   * vary based on the position at the poker table.
+   */
+  public get positions(): PlayerBoxPosition {
     return {
       iconBox: PositionHelperUtil.getIconBoxPosition(this.player),
       awayIcon: PositionHelperUtil.getAwayIconPosition(this.player),
@@ -99,7 +166,7 @@ export class PlayerBoxComponent implements OnInit, OnDestroy {
     };
   }
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.pokerTableStore.select(selectPokerTable)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((table: PokerTable) => this.table = table);
@@ -121,21 +188,18 @@ export class PlayerBoxComponent implements OnInit, OnDestroy {
 
     this.appStore.select(selectLoggedInUser)
     .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((user: User) => this.loggedInUser = user);
+    .subscribe((user: ClientUser) => this.loggedInUser = user);
 
     this.privatePlayerDataStore.select(selectPrivateCards)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((cards: Card[]) => this.privateCards = cards);
 
-    // this.miscEventStore.select(selectHiddenCards)
-    // .pipe(takeUntil(this.ngDestroyed$))
-    // .subscribe((hiddenCards: boolean[]) => this.hideCards = hiddenCards[this.player]);
     this.miscEventStore.select(selectHiddenCards)
     .pipe(takeUntil(this.ngDestroyed$))
     .subscribe((hiddenCards: boolean[][]) => this.hiddenCards = hiddenCards[this.player]);
   }
 
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.ngDestroyed$.next();
     this.ngDestroyed$.complete();
   }
