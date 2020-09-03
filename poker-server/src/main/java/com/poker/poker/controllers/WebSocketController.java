@@ -148,11 +148,12 @@ public class WebSocketController {
     final GamePlayer player = table.getPlayer(user.getId());
 
     if (table.isBetting() || numInHand(table) == 1) {
-      publisher.publishEvent(new PrivateMessageEvent<>(
-          this, MessageType.PokerTable, user.getId(), hideCards(table)));
+      publisher.publishEvent(
+          new PrivateMessageEvent<>(this, MessageType.PokerTable, user.getId(), hideCards(table)));
     } else {
-      publisher.publishEvent(new PrivateMessageEvent<>(
-          this, MessageType.PokerTable, user.getId(), hideFoldedCards(table)));
+      publisher.publishEvent(
+          new PrivateMessageEvent<>(
+              this, MessageType.PokerTable, user.getId(), hideFoldedCards(table)));
     }
     publisher.publishEvent(new PrivateMessageEvent<>(this, PlayerData, player.getId(), player));
     if (!table.isBetting()) {
@@ -164,15 +165,13 @@ public class WebSocketController {
   @MessageMapping("/game/leave")
   public void leaveGame(final ClientMessage<Void> message) {
     userService.validate(message.getJwt(), appConfig.getGeneralGroups());
-    publisher.publishEvent(
-        new LeaveGameEvent(this, jwtService.getUserDocument(message.getJwt())));
+    publisher.publishEvent(new LeaveGameEvent(this, jwtService.getUserDocument(message.getJwt())));
   }
 
   @MessageMapping("/game/rejoin")
   public void rejoinGame(final ClientMessage<Void> message) {
     userService.validate(message.getJwt(), appConfig.getGeneralGroups());
-    publisher.publishEvent(
-        new RejoinGameEvent(this, jwtService.getUserDocument(message.getJwt())));
+    publisher.publishEvent(new RejoinGameEvent(this, jwtService.getUserDocument(message.getJwt())));
   }
 
   @MessageMapping("/game/current/update")

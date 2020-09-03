@@ -371,7 +371,7 @@ public class GameService {
    * to investigate edge cases where hands are displayed in some order, and in some cases, the
    * losing player is not obligated to show their cards.
    *
-   * @param id      Game ID.
+   * @param id Game ID.
    * @param hideAll Flag that determine whether all cards are hidden or not.
    * @return Runnable which will broadcast the poker table.
    */
