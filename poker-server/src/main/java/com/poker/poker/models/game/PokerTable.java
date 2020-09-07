@@ -21,59 +21,43 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PokerTable {
 
-  /**
-   * List of players at the table. Contains player names, bank roll, score, etc...
-   */
+  /** List of players at the table. Contains player names, bank roll, score, etc... */
   @ArraySchema(schema = @Schema(implementation = GamePlayer.class))
   private List<GamePlayer> players;
 
-  /**
-   * Amount of time (in seconds) players have to act when it is their turn.
-   */
+  /** Amount of time (in seconds) players have to act when it is their turn. */
   @Min(value = 0)
   @Schema(
       description = "Amount of time (in seconds) players have to act when it is their turn.",
       example = "25")
   private int turnDuration;
 
-  /**
-   * Position of the player who is acting.
-   */
+  /** Position of the player who is acting. */
   @Schema(description = "Position of the player who is acting.", example = "3")
   private int actingPlayer = 0;
 
   @Schema(description = "Position of the player that acted.", example = "3")
   private int playerThatActed = -1;
 
-  /**
-   * Position of the dealer.
-   */
+  /** Position of the dealer. */
   @Schema(description = "Position of the dealer.", example = "3")
   private int dealer = 0;
 
-  /**
-   * Flag to determine whether the summary of winning hand should be displayed.
-   */
+  /** Flag to determine whether the summary of winning hand should be displayed. */
   @Schema(
       description = "Flag to determine whether the summary of winning hand should be displayed.",
       example = "true")
   private boolean displayHandSummary = false;
 
-  /**
-   * Hand summary.
-   */
+  /** Hand summary. */
   @Schema(implementation = HandSummary.class)
   private HandSummary summary = null;
 
-  /**
-   * Winners of the hand.
-   */
+  /** Winners of the hand. */
   @ArraySchema(schema = @Schema(implementation = Winner.class))
   private List<Winner> winners = new ArrayList<>();
 
-  /**
-   * This is incremented whenever some action is performed.
-   */
+  /** This is incremented whenever some action is performed. */
   @Schema(description = "This is incremented whenever some action is performed.", example = "69")
   private int eventTracker = 0;
 

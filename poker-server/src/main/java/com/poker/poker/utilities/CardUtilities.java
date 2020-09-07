@@ -120,9 +120,7 @@ public final class CardUtilities {
           .put(HighCard, 0)
           .build();
 
-  /**
-   * Mapping of hand types to numbers, used to generate hand ranks.
-   */
+  /** Mapping of hand types to numbers, used to generate hand ranks. */
   public static final Map<HandType, String> handTypeStrings =
       ImmutableMap.<HandType, String>builder()
           .put(StraightFlush, "a Straight Flush")

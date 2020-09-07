@@ -188,16 +188,17 @@ public class GameDataService {
     assert summaries.get(gameId) == null;
     assert userIdToGameIdMap.get(user.getId()) == null;
 
-    final int turnDuration = params.getTurnDuration() == 0 ?
-        appConfig.getTimeToActInMs() / 1000 : params.getTurnDuration();
+    final int turnDuration =
+        params.getTurnDuration() == 0
+            ? appConfig.getTimeToActInMs() / 1000
+            : params.getTurnDuration();
     final BigDecimal blinds =
-        params.getStartingBlinds() == null || is(params.getStartingBlinds()).eq(ZERO) ?
-            params.getBuyIn().divide(new BigDecimal(appConfig.getNumSmallBlinds()), CEILING) :
-            params.getStartingBlinds();
+        params.getStartingBlinds() == null || is(params.getStartingBlinds()).eq(ZERO)
+            ? params.getBuyIn().divide(new BigDecimal(appConfig.getNumSmallBlinds()), CEILING)
+            : params.getStartingBlinds();
 
     // TODO: Don't need turnDuration here.
-    final Game game =
-        new Game(gameId, GamePhase.Lobby, new ArrayList<>(), turnDuration);
+    final Game game = new Game(gameId, GamePhase.Lobby, new ArrayList<>(), turnDuration);
 
     final LobbyPlayer host = new LobbyPlayer(user, false, true);
     final List<LobbyPlayer> players = Collections.synchronizedList(new ArrayList<>());
@@ -208,7 +209,7 @@ public class GameDataService {
     decks.put(gameId, new Deck());
     tables.put(gameId, new PokerTable());
     tables.get(gameId).setTurnDuration(turnDuration); // Set turn duration
-    tables.get(gameId).setBlind(blinds);              // Set blinds
+    tables.get(gameId).setBlind(blinds); // Set blinds
     summaries.put(gameId, new DrawGameDataContainer(new ArrayList<>()));
     userIdToGameIdMap.put(host.getId(), gameId);
 

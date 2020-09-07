@@ -434,13 +434,18 @@ public class GameService {
 
   private void publishPlayerWonHandChatMessage(final UUID id) {
     final PokerTable table = data.getPokerTable(id);
-    table.getWinners().forEach(w -> publishSystemChatMessageEvent(
-        id, String.format(
-            "%s %s won %s with %s.",
-            table.getPlayer(w.getId()).getFirstName(),
-            table.getPlayer(w.getId()).getLastName(),
-            w.getWinnings(),
-            handTypeStrings.get(w.getType()))));
+    table
+        .getWinners()
+        .forEach(
+            w ->
+                publishSystemChatMessageEvent(
+                    id,
+                    String.format(
+                        "%s %s won %s with %s.",
+                        table.getPlayer(w.getId()).getFirstName(),
+                        table.getPlayer(w.getId()).getLastName(),
+                        w.getWinnings(),
+                        handTypeStrings.get(w.getType()))));
   }
 
   // TODO: Should probably refactor this to another service.
