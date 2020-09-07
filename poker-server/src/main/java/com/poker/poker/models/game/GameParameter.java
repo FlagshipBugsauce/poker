@@ -38,4 +38,16 @@ public class GameParameter {
   @Schema(description = "Buy-in required to play in the game.", example = "25")
   @JsonProperty(required = true)
   private BigDecimal buyIn;
+
+  /** The value of the small blind when the game starts. */
+  @Min(value = 0)
+  @Schema(description = "The value of the small blind when the game starts.", example = "50")
+  private BigDecimal startingBlinds;
+
+  /** Amount of time (in seconds) players have to act when it is their turn. */
+  @Min(value = 0)
+  @Schema(
+      description = "Amount of time (in seconds) players have to act when it is their turn.",
+      example = "25")
+  private int turnDuration;
 }

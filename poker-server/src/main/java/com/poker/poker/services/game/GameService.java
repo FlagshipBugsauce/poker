@@ -10,6 +10,7 @@ import static com.poker.poker.models.enums.MessageType.PlayerJoinedLobby;
 import static com.poker.poker.models.enums.MessageType.PlayerLeftLobby;
 import static com.poker.poker.models.enums.MessageType.ReadyToggled;
 import static com.poker.poker.models.enums.MessageType.Timer;
+import static com.poker.poker.utilities.CardUtilities.handTypeStrings;
 import static com.poker.poker.utilities.PokerTableUtilities.adjustWager;
 import static com.poker.poker.utilities.PokerTableUtilities.defaultAction;
 import static com.poker.poker.utilities.PokerTableUtilities.getSystemChatActionMessage;
@@ -60,7 +61,6 @@ import com.poker.poker.models.game.PokerTable;
 import com.poker.poker.models.game.Timer;
 import com.poker.poker.models.user.User;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -393,17 +393,16 @@ public class GameService {
 
   @Async
   @EventListener
-  public void transitionToNextPhase(final HandPhaseTransitionEvent event)
-      throws InterruptedException {
+  public void transitionToNextPhase(final HandPhaseTransitionEvent event) {
     final Game game = data.getGame(event.getId());
     final PokerTable table = data.getPokerTable(event.getId());
-    final List<GamePlayer> players = table.getPlayers();
 
     // Handle case where all players but one have folded.
     if (numInHand(table) <= 1) {
       log.debug("All players in game {} have folded. Ending hand.", game.getId());
       // Then hand is over
       handleEndOfHand(table, getHandEndBroadcaster(game.getId(), true));
+      publishPlayerWonHandChatMessage(game.getId());
       publisher.publishEvent(
           numNonZeroChips(table) > 1
               ? new StartHandEvent(this, game.getId())
@@ -415,7 +414,9 @@ public class GameService {
     transitionHandPhase(table);
 
     if (table.getPhase() == Over) {
+      log.debug("Hand in game {} has ended, determining winners.", game.getId());
       handleEndOfHand(table, getHandEndBroadcaster(game.getId(), false));
+      publishPlayerWonHandChatMessage(game.getId());
       publisher.publishEvent(
           numNonZeroChips(table) > 1
               ? new StartHandEvent(this, game.getId())
@@ -433,11 +434,18 @@ public class GameService {
 
   private void publishPlayerWonHandChatMessage(final UUID id) {
     final PokerTable table = data.getPokerTable(id);
-    assert table.getSummary() != null;
-    assert table.isDisplayHandSummary();
-    final GamePlayer winner = table.getPlayers().get(table.getSummary().getWinner());
-    publishSystemChatMessageEvent(
-        id, String.format("%s %s won the hand.", winner.getFirstName(), winner.getLastName()));
+    table
+        .getWinners()
+        .forEach(
+            w ->
+                publishSystemChatMessageEvent(
+                    id,
+                    String.format(
+                        "%s %s won %s with %s.",
+                        table.getPlayer(w.getId()).getFirstName(),
+                        table.getPlayer(w.getId()).getLastName(),
+                        w.getWinnings(),
+                        handTypeStrings.get(w.getType()))));
   }
 
   // TODO: Should probably refactor this to another service.
@@ -478,8 +486,8 @@ public class GameService {
       return;
     }
 
-    publishTimerMessage(game.getId(), player.isAway() ? 0 : appConfig.getTimeToActInMs());
-    Thread.sleep(appConfig.getTimeToActInMs());
+    publishTimerMessage(game.getId(), player.isAway() ? 0 : table.getTurnDuration() * 1000);
+    Thread.sleep(table.getTurnDuration() * 1000);
 
     // Check if player acted (event tracker value will not be the same if an action was performed).
     if (table.getEventTracker() != tracker) {

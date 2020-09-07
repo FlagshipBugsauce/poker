@@ -8,7 +8,10 @@ import static com.poker.poker.models.enums.MessageType.GamePhaseChanged;
 import static com.poker.poker.models.enums.MessageType.PokerTable;
 import static com.poker.poker.utilities.PokerTableUtilities.hideCards;
 import static com.poker.poker.utilities.PokerTableUtilities.hideFoldedCards;
-import static java.math.BigDecimal.ROUND_CEILING;
+import static ir.cafebabe.math.utils.BigDecimalUtils.is;
+import static java.math.BigDecimal.ZERO;
+import static java.math.RoundingMode.CEILING;
+import static java.util.stream.Collectors.toList;
 
 import com.poker.poker.config.AppConfig;
 import com.poker.poker.events.GameMessageEvent;
@@ -33,7 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -186,8 +188,17 @@ public class GameDataService {
     assert summaries.get(gameId) == null;
     assert userIdToGameIdMap.get(user.getId()) == null;
 
-    final com.poker.poker.models.game.Game game =
-        new Game(gameId, GamePhase.Lobby, new ArrayList<>(), appConfig.getTimeToActInMs() / 1000);
+    final int turnDuration =
+        params.getTurnDuration() == 0
+            ? appConfig.getTimeToActInMs() / 1000
+            : params.getTurnDuration();
+    final BigDecimal blinds =
+        params.getStartingBlinds() == null || is(params.getStartingBlinds()).eq(ZERO)
+            ? params.getBuyIn().divide(new BigDecimal(appConfig.getNumSmallBlinds()), CEILING)
+            : params.getStartingBlinds();
+
+    // TODO: Don't need turnDuration here.
+    final Game game = new Game(gameId, GamePhase.Lobby, new ArrayList<>(), turnDuration);
 
     final LobbyPlayer host = new LobbyPlayer(user, false, true);
     final List<LobbyPlayer> players = Collections.synchronizedList(new ArrayList<>());
@@ -197,6 +208,8 @@ public class GameDataService {
     lobbys.put(gameId, new Lobby(gameId, host, params, players));
     decks.put(gameId, new Deck());
     tables.put(gameId, new PokerTable());
+    tables.get(gameId).setTurnDuration(turnDuration); // Set turn duration
+    tables.get(gameId).setBlind(blinds); // Set blinds
     summaries.put(gameId, new DrawGameDataContainer(new ArrayList<>()));
     userIdToGameIdMap.put(host.getId(), gameId);
 
@@ -274,8 +287,7 @@ public class GameDataService {
     assert tables.get(id) != null;
     assert summaries.get(id) != null;
     final com.poker.poker.models.game.Game game = games.get(id);
-    game.setPlayers(
-        lobbys.get(id).getPlayers().stream().map(GamePlayer::new).collect(Collectors.toList()));
+    game.setPlayers(lobbys.get(id).getPlayers().stream().map(GamePlayer::new).collect(toList()));
     Collections.shuffle(game.getPlayers());
 
     game.getPlayers()
@@ -286,17 +298,10 @@ public class GameDataService {
         .setGameData(
             game.getPlayers().stream()
                 .map(p -> new DrawGameData(p, false, new ArrayList<>()))
-                .collect(Collectors.toList()));
+                .collect(toList()));
 
     final Lobby lobby = lobbys.remove(id);
     tables.get(id).setPlayers(game.getPlayers());
-    tables
-        .get(id)
-        .setBlind(
-            lobby
-                .getParameters()
-                .getBuyIn()
-                .divide(new BigDecimal(appConfig.getNumBigBlinds() * 2), ROUND_CEILING));
 
     cachedGameListIsOutdated();
     broadcastObfuscatedPokerTable(id);

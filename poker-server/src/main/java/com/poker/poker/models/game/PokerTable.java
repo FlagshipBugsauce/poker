@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,6 +24,13 @@ public class PokerTable {
   /** List of players at the table. Contains player names, bank roll, score, etc... */
   @ArraySchema(schema = @Schema(implementation = GamePlayer.class))
   private List<GamePlayer> players;
+
+  /** Amount of time (in seconds) players have to act when it is their turn. */
+  @Min(value = 0)
+  @Schema(
+      description = "Amount of time (in seconds) players have to act when it is their turn.",
+      example = "25")
+  private int turnDuration;
 
   /** Position of the player who is acting. */
   @Schema(description = "Position of the player who is acting.", example = "3")

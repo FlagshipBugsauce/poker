@@ -28,6 +28,8 @@ export class CreateComponent implements OnInit, OnDestroy {
       name: ['', [Validators.required]],
       maxPlayers: [2, [Validators.required]],
       buyIn: ['', [Validators.required]],
+      turnDuration: ['', [Validators.min(0)]],
+      startingSmallBlind: ['', [Validators.min(0)]]
       // roundTime: ['', [Validators.required]],
     });
 
@@ -49,7 +51,9 @@ export class CreateComponent implements OnInit, OnDestroy {
     this.appStore.dispatch(createGame({
       buyIn: values.buyIn,
       maxPlayers: values.maxPlayers,
-      name: values.name
+      name: values.name,
+      turnDuration: values.turnDuration,
+      startingBlinds: values.startingSmallBlind
     } as GameParameter));
   }
 }

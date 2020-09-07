@@ -76,7 +76,13 @@ export class GameEffects {
       this.webSocketService.send(
         this.createGameService.createGameTopic,
         this.createGameService.createGamePayload(
-          {buyIn: action.buyIn, maxPlayers: action.maxPlayers, name: action.name}));
+          {
+            buyIn: action.buyIn,
+            maxPlayers: action.maxPlayers,
+            name: action.name,
+            turnDuration: action.turnDuration,
+            startingBlinds: action.startingBlinds
+          }));
     })
   ), {dispatch: false});
   /**

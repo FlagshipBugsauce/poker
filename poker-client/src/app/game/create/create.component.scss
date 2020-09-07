@@ -1,5 +1,11 @@
 @import '../../../styles.scss';
+:host {
+  .numbers::-webkit-outer-spin-button, .numbers::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
 
-.button {
-  width: $button-width;
+  .button {
+    width: $button-width;
+  }
 }

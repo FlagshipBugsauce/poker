@@ -19,4 +19,14 @@ export interface GameParameter {
    * The name of the game to be created
    */
   name: string;
+
+  /**
+   * The value of the small blind when the game starts.
+   */
+  startingBlinds?: number;
+
+  /**
+   * Amount of time (in seconds) players have to act when it is their turn.
+   */
+  turnDuration?: number;
 }

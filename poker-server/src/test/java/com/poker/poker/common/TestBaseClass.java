@@ -61,7 +61,7 @@ public class TestBaseClass {
   private final int sampleMaxPlayers = 7;
   private final BigDecimal sampleBuyIn = new BigDecimal("69");
   private final GameParameter sampleGameParameter =
-      new GameParameter(sampleGameName, sampleMaxPlayers, sampleBuyIn);
+      new GameParameter(sampleGameName, sampleMaxPlayers, sampleBuyIn, new BigDecimal(10), 10);
 
   //  @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
   //  private final Lobby sampleLobbyModel =

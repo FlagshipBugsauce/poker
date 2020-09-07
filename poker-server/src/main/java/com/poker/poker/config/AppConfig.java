@@ -47,8 +47,8 @@ public class AppConfig {
   @Value("${web-socket.private-socket-timeout-hours}")
   private int privateSocketTimeoutHours;
 
-  @Value("${num-big-blinds}")
-  private int numBigBlinds;
+  @Value("${num-small-blinds}")
+  private int numSmallBlinds;
 
   @Value("${web-socket.topics.toast}")
   private String toastTopic;
