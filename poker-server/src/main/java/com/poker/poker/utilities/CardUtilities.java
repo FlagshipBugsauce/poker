@@ -121,6 +121,22 @@ public final class CardUtilities {
           .build();
 
   /**
+   * Mapping of hand types to numbers, used to generate hand ranks.
+   */
+  public static final Map<HandType, String> handTypeStrings =
+      ImmutableMap.<HandType, String>builder()
+          .put(StraightFlush, "a Straight Flush")
+          .put(FourOfAKind, "Four-of-a-Kind")
+          .put(FullHouse, "a Full House")
+          .put(Flush, "a Flush")
+          .put(Straight, "a Straight")
+          .put(Set, "Three-of-a-Kind")
+          .put(TwoPair, "Two Pairs")
+          .put(Pair, "a Pair")
+          .put(HighCard, "a High Card")
+          .build();
+
+  /**
    * Ordered list of hand evaluators, which helps to easily rank hands by iterating over this list.
    * Accurate and predictable results are only guaranteed if each evaluator is executed in the order
    * of the list.

@@ -70,5 +70,10 @@ export interface PokerTable {
   round?: number;
   sharedCards?: Array<Card>;
   summary?: HandSummary;
+
+  /**
+   * Amount of time (in seconds) players have to act when it is their turn.
+   */
+  turnDuration?: number;
   winners?: Array<Winner>;
 }

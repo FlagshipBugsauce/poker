@@ -1,3 +1,4 @@
+<!--suppress HtmlFormInputWithoutLabel -->
 <div class="container-fluid mx-0 px-0">
   <div class="card m-3">
     <h3 class="card-header bg-success text-light">
@@ -37,32 +38,66 @@
       <form (ngSubmit)="createGame(createGameForm.value)" [formGroup]="createGameForm">
         <div class="row">
           <div class="col-sm-6 mt-3">
-            <label for="name">Game Name</label>
+            <label>Game Name</label>
             <input class="form-control" formControlName="name" type="text">
           </div>
           <div class="col-sm-6 px-0">
             <div class="container">
               <div class="row px-0">
                 <div class="col-sm-6 mt-3">
-                  <label for="name">Max Players</label>
+                  <label>Max Players</label>
                   <select class="form-control" formControlName="maxPlayers">
                     <option *ngFor="let i of fillNumbers()">{{ i }}</option>
                   </select>
                 </div>
                 <div class="col-sm-6 mt-3">
-                  <label for="name">Buy-In</label>
+                  <label>Buy-In</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <div class="input-group-text">$</div>
                     </div>
-                    <input class="form-control" formControlName="buyIn" type="number">
+                    <input class="form-control numbers" formControlName="buyIn" type="number">
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="row">
+
+        <div class="row mt-3">
+          <div class="col-sm-6"></div>
+          <div class="col-sm-3">
+            <label>Starting Small Blind</label>
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <div class="input-group-text">$</div>
+              </div>
+              <input
+                class="form-control numbers"
+                formControlName="startingSmallBlind"
+                min="0"
+                type="number">
+            </div>
+          </div>
+
+          <div class="col-sm-3">
+            <label>Turn Duration</label>
+            <div class="input-group">
+              <input
+                class="form-control numbers"
+                formControlName="turnDuration"
+                min="0"
+                step="1"
+                type="number">
+              <div class="input-group-append">
+                <div class="input-group-text">seconds</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="row mt-3">
           <div class="col-sm-12 text-right">
             <button
               class="btn btn-secondary button mt-3"

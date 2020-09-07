@@ -36,64 +36,17 @@ export class UsersService extends BaseService {
   static readonly RegisterPath = '/user/register';
 
   /**
-   * Path part for operation authorizeWithJwt
-   */
-  static readonly AuthorizeWithJwtPath = '/user/auth-with-jwt';
-
-  /**
-   * Register.
-   *
-   * Create an account.
-   *
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `register()` instead.
-   *
-   * This method sends `application/json` and handles request body of type `application/json`.
-   */
-  register$Response(params: {
-    body: NewAccount
-  }): Observable<StrictHttpResponse<ApiSuccess>> {
-
-    const rb = new RequestBuilder(this.rootUrl, UsersService.RegisterPath, 'post');
-    if (params) {
-
-
-      rb.body(params.body, 'application/json');
-    }
-    return this.http.request(rb.build({
-      responseType: 'json',
-      accept: 'application/json'
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<ApiSuccess>;
-      })
-    );
-  }
-
-  /**
    * Path part for operation getUserInfo
    */
   static readonly GetUserInfoPath = '/user/getUserInfo/{userId}';
-
   /**
-   * Register.
-   *
-   * Create an account.
-   *
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `register$Response()` instead.
-   *
-   * This method sends `application/json` and handles request body of type `application/json`.
+   * Path part for operation authorize
    */
-  register(params: {
-    body: NewAccount
-  }): Observable<ApiSuccess> {
-
-    return this.register$Response(params).pipe(
-      map((r: StrictHttpResponse<ApiSuccess>) => r.body as ApiSuccess)
-    );
-  }
+  static readonly AuthorizePath = '/user/auth';
+  /**
+   * Path part for operation authorizeWithJwt
+   */
+  static readonly AuthorizeWithJwtPath = '/user/auth-with-jwt';
 
   /**
    * Get User Info.
@@ -128,11 +81,6 @@ export class UsersService extends BaseService {
   }
 
   /**
-   * Path part for operation authorize
-   */
-  static readonly AuthorizePath = '/user/auth';
-
-  /**
    * Get User Info.
    *
    * Retrieve user information for user with provided ID.
@@ -148,7 +96,57 @@ export class UsersService extends BaseService {
   }): Observable<ClientUser> {
 
     return this.getUserInfo$Response(params).pipe(
-      map((r: StrictHttpResponse<ClientUser>) => r.body as ClientUser)
+        map((r: StrictHttpResponse<ClientUser>) => r.body as ClientUser)
+    );
+  }
+
+  /**
+   * Register.
+   *
+   * Create an account.
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `register()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  register$Response(params: {
+    body: NewAccount
+  }): Observable<StrictHttpResponse<ApiSuccess>> {
+
+    const rb = new RequestBuilder(this.rootUrl, UsersService.RegisterPath, 'post');
+    if (params) {
+
+
+      rb.body(params.body, 'application/json');
+    }
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json'
+    })).pipe(
+        filter((r: any) => r instanceof HttpResponse),
+        map((r: HttpResponse<any>) => {
+          return r as StrictHttpResponse<ApiSuccess>;
+        })
+    );
+  }
+
+  /**
+   * Register.
+   *
+   * Create an account.
+   *
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `register$Response()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  register(params: {
+    body: NewAccount
+  }): Observable<ApiSuccess> {
+
+    return this.register$Response(params).pipe(
+        map((r: StrictHttpResponse<ApiSuccess>) => r.body as ApiSuccess)
     );
   }
 
