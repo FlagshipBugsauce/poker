@@ -11,10 +11,11 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@OpenAPIDefinition(servers = {
-    @Server(url = "http://poker-testing.ngrok.io"),
-    @Server(url = "http://bugsauce-poker.eba-cbxu2gew.us-east-1.elasticbeanstalk.com/")
-})
+@OpenAPIDefinition(
+    servers = {
+      @Server(url = "http://poker-testing.ngrok.io"),
+      @Server(url = "http://bugsauce-poker.eba-cbxu2gew.us-east-1.elasticbeanstalk.com/")
+    })
 @Configuration
 @AllArgsConstructor
 public class OpenApiConfig {
