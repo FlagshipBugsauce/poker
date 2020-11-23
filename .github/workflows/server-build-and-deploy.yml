@@ -52,4 +52,4 @@ jobs:
       # Deploy Poker Server
       - name: Deploy Poker Server
         #        if: github.event_name == 'push'
-        run: npm deploy
+        run: npm run deploy
