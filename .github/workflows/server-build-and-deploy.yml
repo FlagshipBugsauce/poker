@@ -35,7 +35,15 @@ jobs:
 
       - name: Build
         working-directory: ./poker-server
-        run: mvn -B package --file pom.xml
+        run: mvn -B package --file pom.xml'
+
+      # Configure AWS Credentials.
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
       # Setup NodeJS
       - name: Use Node 12.x
