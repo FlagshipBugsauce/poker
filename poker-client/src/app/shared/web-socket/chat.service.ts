@@ -30,14 +30,14 @@ export class ChatService implements OnDestroy {
     this.chatTopicUnsubscribe$ = new Subject<any>();
     const topic = gameId ? `${this.chatTopicBase}/${gameId}` : `${this.chatTopicBase}/general`;
     this.webSocketService.onMessage(topic)
-    .pipe(takeUntil(this.chatTopicUnsubscribe$))
-    .subscribe(data => {
-      if (!gameId) {
-        this.chatStore.dispatch(generalChatMsgReceived(data));
-      } else {
-        this.chatStore.dispatch(gameChatMsgReceived(data));
-      }
-    });
+      .pipe(takeUntil(this.chatTopicUnsubscribe$))
+      .subscribe(data => {
+        if (!gameId) {
+          this.chatStore.dispatch(generalChatMsgReceived(data));
+        } else {
+          this.chatStore.dispatch(gameChatMsgReceived(data));
+        }
+      });
   }
 
   public unsubscribeFromChatTopic() {

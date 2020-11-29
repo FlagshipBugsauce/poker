@@ -10,7 +10,7 @@ describe('PopupComponent', () => {
     TestBed.configureTestingModule({
       declarations: [PopupComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

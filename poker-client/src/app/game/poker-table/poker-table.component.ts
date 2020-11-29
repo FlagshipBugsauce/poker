@@ -147,42 +147,42 @@ export class PokerTableComponent implements OnInit, OnDestroy {
       this.numPlayersSet = true;
       this.width = window.innerWidth - 50;
       this.playerBoxes = Array(num)
-      .fill({number: 1, top: 0, left: 0})
-      .map((v, i) => ({number: i, top: 0, left: 0}));
+        .fill({number: 1, top: 0, left: 0})
+        .map((v, i) => ({number: i, top: 0, left: 0}));
       this.updatePositions();
     }
   }
 
   ngOnInit(): void {
     this.appStore.select(selectLoggedInUser)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((user: ClientUser) => this.user = user);
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((user: ClientUser) => this.user = user);
 
     this.pokerTableStore.select(selectPlayers)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((players: GamePlayer[]) => {
-      this.players = players;
-      if (players) {
-        this.initializePlayerBoxes(players.length);
-      }
-    });
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((players: GamePlayer[]) => {
+        this.players = players;
+        if (players) {
+          this.initializePlayerBoxes(players.length);
+        }
+      });
 
     this.playerDataStore.select(selectAwayStatus)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((status: boolean) => {
-      if (status && this.afkPopup) {
-        this.afkPopup.open();
-      }
-    });
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((status: boolean) => {
+        if (status && this.afkPopup) {
+          this.afkPopup.open();
+        }
+      });
 
     this.miscEventsStore.select(selectTimer)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((timer: Timer) => {
-      this.timerIndex++;
-      // tslint:disable-next-line:no-bitwise
-      this.timerValue.push(timer.duration | 0);
-      this.startTimer().then();
-    });
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((timer: Timer) => {
+        this.timerIndex++;
+        // tslint:disable-next-line:no-bitwise
+        this.timerValue.push(timer.duration | 0);
+        this.startTimer().then();
+      });
   }
 
   @HostListener('window:resize', ['$event'])

@@ -32,12 +32,13 @@
             <tbody>
             <tr *ngFor="let player of lobbyModel.players" class="text-center">
               <td>
-                <img *ngIf="player.host" [src]="crownIcon" class="crown" alt="Host">
+                <img *ngIf="player.host" [src]="crownIcon" alt="Host" class="crown">
                 {{ player.firstName }} {{ player.lastName }}
               </td>
               <td>
-                <img *ngIf="player.ready" [src]="readyIcons.ready" class="image" alt="Ready">
-                <img *ngIf="!player.ready" [src]="readyIcons.notReady" class="image" alt="Not Ready">
+                <img *ngIf="player.ready" [src]="readyIcons.ready" alt="Ready" class="image">
+                <img *ngIf="!player.ready" [src]="readyIcons.notReady" alt="Not Ready"
+                     class="image">
               </td>
             </tr>
             </tbody>

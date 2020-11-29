@@ -48,11 +48,11 @@ describe('LobbyComponent', () => {
 
   it('ready button text changes', () => {
     expect(fixture.debugElement.query(By.css('.btn-success')).nativeElement.innerHTML)
-    .toEqual('Ready');
+      .toEqual('Ready');
     mockReadySelector.setResult(true);
     mockStore.refreshState();
     fixture.detectChanges();
     expect(fixture.debugElement.query(By.css('.btn-success')).nativeElement.innerHTML)
-    .toEqual('Un-Ready');
+      .toEqual('Un-Ready');
   });
 });

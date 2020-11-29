@@ -89,20 +89,20 @@ export class DeckComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.miscEventStore.select(selectDeal)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((deal: Deal) => {
-      if (deal.numCards !== -1) {
-        this.dealCards().then();
-      }
-    });
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((deal: Deal) => {
+        if (deal.numCards !== -1) {
+          this.dealCards().then();
+        }
+      });
 
     this.pokerTableStore.select(selectPlayers)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((players: GamePlayer[]) => this.players = players);
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((players: GamePlayer[]) => this.players = players);
 
     this.pokerTableStore.select(selectDealer)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((dealer: number) => this.dealer = dealer);
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((dealer: number) => this.dealer = dealer);
   }
 
   public ngOnDestroy() {

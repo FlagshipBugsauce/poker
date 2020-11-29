@@ -26,18 +26,6 @@ import {WebsocketService} from './services/websocket.service';
   ],
 })
 export class ApiModule {
-  static forRoot(params: ApiConfigurationParams): ModuleWithProviders<ApiModule> {
-    return {
-      ngModule: ApiModule,
-      providers: [
-        {
-          provide: ApiConfiguration,
-          useValue: params
-        }
-      ]
-    }
-  }
-
   constructor(
     @Optional() @SkipSelf() parentModule: ApiModule,
     @Optional() http: HttpClient
@@ -48,6 +36,18 @@ export class ApiModule {
     if (!http) {
       throw new Error('You need to import the HttpClientModule in your AppModule! \n' +
         'See also https://github.com/angular/angular/issues/20575');
+    }
+  }
+
+  static forRoot(params: ApiConfigurationParams): ModuleWithProviders<ApiModule> {
+    return {
+      ngModule: ApiModule,
+      providers: [
+        {
+          provide: ApiConfiguration,
+          useValue: params
+        }
+      ]
     }
   }
 }

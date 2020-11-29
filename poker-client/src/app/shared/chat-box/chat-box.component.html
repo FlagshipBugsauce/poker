@@ -13,9 +13,9 @@
     <div class="input-group input-group-sm">
       <input
         #chatInput
+        (keyup.enter)="sendMessage()"
         [disabled]="!(authenticated$ | async)"
         [placeholder]="(authenticated$ | async) ? 'Enter text...' : 'Sign in to chat...'"
-        (keyup.enter)="sendMessage()"
         class="form-control shadow-none send-input"
         type="text">
       <div class="input-group-append">

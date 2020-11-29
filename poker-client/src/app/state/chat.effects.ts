@@ -12,17 +12,14 @@ import {ChatService} from '../shared/web-socket/chat.service';
 @Injectable()
 export class ChatEffects {
 
-  private jwt;
-
   startChat$ = createEffect(() => this.actions$.pipe(
     ofType(startChat),
     tap((action: ClientMessage) => this.chatService.subscribeToChatTopic(action.gameId))
   ), {dispatch: false});
-
   closeChat$ = createEffect(() => this.actions$.pipe(
     ofType(closeChat), tap(() => this.chatService.unsubscribeFromChatTopic())
   ), {dispatch: false});
-
+  private jwt;
   sendChatMessage$ = createEffect(() => this.actions$.pipe(
     ofType(sendChatMessage),
     tap((action: ClientMessage) =>

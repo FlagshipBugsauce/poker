@@ -27,8 +27,8 @@ export class PopupAfkComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.gameStore.select(selectGameModel)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((data: Game) => this.gameModel = data);
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((data: Game) => this.gameModel = data);
   }
 
   public ngOnDestroy() {

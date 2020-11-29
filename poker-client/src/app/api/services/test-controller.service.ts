@@ -14,18 +14,10 @@ import {Models} from '../models/models';
   providedIn: 'root',
 })
 export class TestControllerService extends BaseService {
-  constructor(
-    config: ApiConfiguration,
-    http: HttpClient
-  ) {
-    super(config, http);
-  }
-
   /**
    * Path part for operation models
    */
   static readonly ModelsPath = '/test/models';
-
   /**
    * Path part for operation dealCards
    */
@@ -34,6 +26,13 @@ export class TestControllerService extends BaseService {
    * Path part for operation sendPrivateMessage
    */
   static readonly SendPrivateMessagePath = '/test/send-private-message';
+
+  constructor(
+    config: ApiConfiguration,
+    http: HttpClient
+  ) {
+    super(config, http);
+  }
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.

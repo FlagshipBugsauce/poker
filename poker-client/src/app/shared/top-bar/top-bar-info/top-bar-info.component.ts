@@ -41,8 +41,8 @@ export class TopBarInfoComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.store.select(selectCurrentGame)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((currentGame: CurrentGame) => this.currentGame = currentGame);
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((currentGame: CurrentGame) => this.currentGame = currentGame);
   }
 
   public ngOnDestroy() {

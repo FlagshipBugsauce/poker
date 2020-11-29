@@ -1,4 +1,4 @@
-import {AWSError, EC2, ElasticBeanstalk, ELB, S3} from "aws-sdk";
+import {ACM, AWSError, EC2, ElasticBeanstalk, ELB, S3} from "aws-sdk";
 import {join} from 'path';
 import {copyFileSync, existsSync, readFileSync, writeFileSync} from "fs";
 import {execSync} from "child_process";
@@ -10,6 +10,7 @@ import {
 } from "aws-sdk/clients/elasticbeanstalk";
 import {DescribeInstancesResult} from "aws-sdk/clients/ec2";
 import {DescribeAccessPointsOutput} from "aws-sdk/clients/elb";
+import {ListCertificatesResponse} from "aws-sdk/clients/acm";
 
 /*
     TODO: So I don't forget...
@@ -34,6 +35,7 @@ const s3: S3 = new S3({region});
 const elasticBeanstalk = new ElasticBeanstalk({region});
 const ec2: EC2 = new EC2({region});
 const elb: ELB = new ELB({region});
+const acm: ACM = new ACM({region});
 
 let version: string = process.env.BASE_APP_VERSION || '0.0.1';
 const deploymentBucket: string = 'flagship-bugsauce-poker-bucket';
@@ -42,8 +44,9 @@ const appName: string = "flagship-bugsauce-poker";
 const description: string = 'Online multiplayer poker application.';
 const envName: string = 'bugsauce-poker';
 const templateName: string = 'spring-template';
-const cloudfrontConfigPath: string = join('miscellaneous', 'cloudfront', 'configs', 'elb.yml');
+const cloudfrontConfigPath: string = join('miscellaneous', 'cloudfront', 'configs', 'test-env.yml');
 const cloudfrontPath: string = join('miscellaneous', 'cloudfront');
+const acmDomainName: string = 'jonsthings';
 
 /**
  * Find the most recent version, increment it by 1 and assign the result to the version variable.
@@ -199,11 +202,29 @@ function getElbDomain(): Promise<string> {
                           .find(i => i.InstanceId === id)).DNSName));
 }
 
-
-function createCloudfrontConfig(domain: string) {
-  writeFileSync(cloudfrontConfigPath, `domainName: ${domain}`);
+/**
+ * Retrieves the ACM ARN used for the serverless lambda@edge configuration.
+ */
+function getAcmCertificateArn(): Promise<string> {
+  return acm.listCertificates().promise()
+      .then((response: PromiseResult<ListCertificatesResponse, AWSError>) => response
+          .CertificateSummaryList
+          .find(cert => cert.DomainName.includes(acmDomainName)).CertificateArn);
 }
 
+/**
+ * Generates the environment specific configuration file used by serverless lambda@edge.
+ */
+function createCloudfrontConfig(): Promise<void> {
+  return getElbDomain().then(domain => getAcmCertificateArn().then(arn =>
+      writeFileSync(
+          cloudfrontConfigPath,
+          `# Generated automatically.\ndomainName: ${domain}\nacmArn: ${arn}`)));
+}
+
+/**
+ * Deploys serverless lambda@edge project.
+ */
 function deployCloudfront() {
   run('npx serverless deploy', cloudfrontPath)
 }
@@ -234,7 +255,6 @@ function deploy(): Promise<any> {
       .then(uploadArtifact)
       .then(applicationExists)
       .then(exists => exists ? deployNewVersion() : deployNewApplication())
-      .then(getElbDomain)
       .then(createCloudfrontConfig)
       .then(deployCloudfront);
 }
@@ -249,7 +269,13 @@ function buildPokerServer(): void {
   copyFileSync(jarPath, artifactPath());
 }
 
-(async () => await deploy().then(getElbDomain).then(createCloudfrontConfig).catch(e => {
-  console.error(e);
-  throw e;
-}))();
+(async () => {
+  await createCloudfrontConfig();
+  if (Math.random() <= 1) throw new Error('hello');
+  await deploy().then(getElbDomain).then(createCloudfrontConfig);
+})();
+
+// (async () => await deploy().then(getElbDomain).then(createCloudfrontConfig).catch(e => {
+//   console.error(e);
+//   throw e;
+// }))();

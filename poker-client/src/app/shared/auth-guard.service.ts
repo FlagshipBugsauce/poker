@@ -63,7 +63,7 @@ export class AuthGuardService implements CanActivate {
       return this.router.createUrlTree([`/${APP_ROUTES.LOGIN.path}`]);
     }
 
-
+    // TODO: Leaving this in for now.
     // return this.auth$.pipe(switchMap(auth => {
     //   if (!auth && this.cookieService.check('jwt')) {
     //     this.appStore.dispatch(signInWithJwt({jwt: this.cookieService.get('jwt')}));

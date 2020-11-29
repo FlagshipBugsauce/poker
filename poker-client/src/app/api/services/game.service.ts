@@ -20,18 +20,10 @@ import {GameParameter} from '../models/game-parameter';
   providedIn: 'root',
 })
 export class GameService extends BaseService {
-  constructor(
-    config: ApiConfiguration,
-    http: HttpClient
-  ) {
-    super(config, http);
-  }
-
   /**
    * Path part for operation ready
    */
   static readonly ReadyPath = '/game/ready';
-
   /**
    * Path part for operation leaveLobby
    */
@@ -52,6 +44,13 @@ export class GameService extends BaseService {
    * Path part for operation joinGame
    */
   static readonly JoinGamePath = '/game/join/{gameId}';
+
+  constructor(
+    config: ApiConfiguration,
+    http: HttpClient
+  ) {
+    super(config, http);
+  }
 
   /**
    * Ready to Start.

@@ -1,7 +1,7 @@
 /* tslint:disable */
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { ApiConfiguration } from './api-configuration';
+import {Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {ApiConfiguration} from './api-configuration';
 
 /**
  * Base class for services

@@ -36,9 +36,9 @@ export class EndComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.gameStore.select(selectGameModel)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((gameModel: Game) => {
-      this.gameModel = gameModel;
-    });
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((gameModel: Game) => {
+        this.gameModel = gameModel;
+      });
   }
 }

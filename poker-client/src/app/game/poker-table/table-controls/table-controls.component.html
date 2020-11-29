@@ -31,10 +31,10 @@
       <input
         #raiseInput
         (input)="raiseChanged($event)"
+        [disabled]="true"
         [max]="bankRoll"
         [min]="minRaise"
         [value]="raise"
-        [disabled]="true"
         class="form-control raise-input"
         type="number">
     </div>

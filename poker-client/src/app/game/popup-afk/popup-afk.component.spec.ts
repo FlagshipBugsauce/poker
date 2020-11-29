@@ -14,7 +14,7 @@ describe('PopupAfkComponent', () => {
         provideMockStore()
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

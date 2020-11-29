@@ -24,7 +24,7 @@ describe('HeaderComponent', () => {
         provideMockStore(),
       ]
     })
-    .compileComponents();
+      .compileComponents();
     store = TestBed.inject(MockStore);
   }));
 

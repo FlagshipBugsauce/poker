@@ -20,7 +20,7 @@ describe('CommunityCardsComponent', () => {
         SharedModule
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -23,18 +23,10 @@ import {NewAccount} from '../models/new-account';
   providedIn: 'root',
 })
 export class UsersService extends BaseService {
-  constructor(
-    config: ApiConfiguration,
-    http: HttpClient
-  ) {
-    super(config, http);
-  }
-
   /**
    * Path part for operation register
    */
   static readonly RegisterPath = '/user/register';
-
   /**
    * Path part for operation getUserInfo
    */
@@ -47,6 +39,13 @@ export class UsersService extends BaseService {
    * Path part for operation authorize
    */
   static readonly AuthorizePath = '/user/auth';
+
+  constructor(
+    config: ApiConfiguration,
+    http: HttpClient
+  ) {
+    super(config, http);
+  }
 
   /**
    * Get User Info.

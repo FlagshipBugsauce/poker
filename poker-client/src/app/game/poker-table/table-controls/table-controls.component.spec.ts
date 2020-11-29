@@ -14,7 +14,7 @@ describe('TableControlsComponent', () => {
         provideMockStore()
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

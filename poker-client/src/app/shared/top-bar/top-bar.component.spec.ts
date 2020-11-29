@@ -63,17 +63,17 @@ describe('TopBarComponent', () => {
     mockAuthenticatedSelector.setResult(false);
     mockStore.refreshState();
     expect(component
-    .topBarService
-    .topBarMenuItems
-    .filter(item => item.text === TopBarService.GAME_ITEM_TEXT))
-    .toEqual([]);
+      .topBarService
+      .topBarMenuItems
+      .filter(item => item.text === TopBarService.GAME_ITEM_TEXT))
+      .toEqual([]);
   });
 
   it('should have game dropdown when authenticated', () => {
     mockAuthenticatedSelector.setResult(true);
     mockStore.refreshState();
     const gameDropDown: DropDownMenuItem[] = component.topBarService.topBarMenuItems
-    .filter(item => item.text === TopBarService.GAME_ITEM_TEXT);
+      .filter(item => item.text === TopBarService.GAME_ITEM_TEXT);
     expect(gameDropDown.length).toBe(1);
     expect(gameDropDown[0].dropDown.length).toBe(2);
   });
@@ -82,7 +82,7 @@ describe('TopBarComponent', () => {
     mockAuthenticatedSelector.setResult(false);
     mockStore.refreshState();
     const accountDropDown: DropDownMenuItem = component.topBarService.topBarMenuItems
-    .filter(item => item.text === TopBarService.ACCOUNT_ITEM_TEXT)[0];
+      .filter(item => item.text === TopBarService.ACCOUNT_ITEM_TEXT)[0];
     expect(accountDropDown.dropDown.length).toBe(2);
     expect(accountDropDown.dropDown[0].text).toBe(TopBarService.REGISTER_ITEM_TEXT);
     expect(accountDropDown.dropDown[1].text).toBe(TopBarService.LOGIN_ITEM_TEXT);
@@ -94,7 +94,7 @@ describe('TopBarComponent', () => {
     mockAuthenticatedSelector.setResult(true);
     mockStore.refreshState();
     const accountDropDown: DropDownMenuItem = component.topBarService.topBarMenuItems
-    .filter(item => item.text === TopBarService.ACCOUNT_ITEM_TEXT)[0];
+      .filter(item => item.text === TopBarService.ACCOUNT_ITEM_TEXT)[0];
     expect(accountDropDown.dropDown.length).toBe(3);
     expect(accountDropDown.dropDown[0].text).toBe(TopBarService.EDIT_PROFILE_ITEM_TEXT);
     expect(accountDropDown.dropDown[1].text).toBe(TopBarService.VIEW_STATS_ITEM_TEXT);

@@ -116,11 +116,11 @@ resources:
               DomainName: ${self:custom.variables.clientBucket.name}.s3.amazonaws.com
               S3OriginConfig: { }
             - Id: PokerServerOrigin
-              DomainName: ${file(configs/elb.yml):domainName}
+              DomainName: ${file(configs/test-env.yml):domainName}
               CustomOriginConfig:
                 OriginProtocolPolicy: match-viewer
           ViewerCertificate:
-            AcmCertificateArn: arn:aws:acm:#{AWS::Region}:#{AWS::AccountId}:certificate/4cdc9f6c-81fa-4abf-b8aa-12b93e0efcc0
+            AcmCertificateArn: ${file(configs/test-env.yml):acmArn}
             SslSupportMethod: sni-only
             MinimumProtocolVersion: 'TLSv1.2_2018'
           # TODO: Add Logging

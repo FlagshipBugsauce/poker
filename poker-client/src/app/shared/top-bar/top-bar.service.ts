@@ -11,21 +11,6 @@ import {selectAuthenticated} from '../../state/app.selector';
 })
 export class TopBarService {
 
-  constructor(private store: Store<AppStateContainer>) {
-    this.updateMenuItems();
-    store.select(selectAuthenticated).subscribe((authenticated: boolean) => {
-      this.authenticated = authenticated;
-      this.updateMenuItems();
-    });
-  }
-
-  /**
-   * Getter for the path to the icon on the top bar.
-   */
-  public get topBarIcon(): string {
-    return 'assets/icons/aces.svg';
-  }
-
   public static HOME_ITEM_TEXT: string = APP_ROUTES.HOME.label;
   public static ACCOUNT_ITEM_TEXT: string = 'Account';
   public static REGISTER_ITEM_TEXT: string = APP_ROUTES.REGISTER.label;
@@ -45,6 +30,21 @@ export class TopBarService {
    * Flag selected from the application state which indicates whether a user is logged in.
    */
   private authenticated = initialState.authenticated;
+
+  constructor(private store: Store<AppStateContainer>) {
+    this.updateMenuItems();
+    store.select(selectAuthenticated).subscribe((authenticated: boolean) => {
+      this.authenticated = authenticated;
+      this.updateMenuItems();
+    });
+  }
+
+  /**
+   * Getter for the path to the icon on the top bar.
+   */
+  public get topBarIcon(): string {
+    return 'assets/icons/aces.svg';
+  }
 
   /**
    * Getter for the home menu item.

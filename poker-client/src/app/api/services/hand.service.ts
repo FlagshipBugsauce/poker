@@ -18,17 +18,17 @@ import {ApiSuccess} from '../models/api-success';
   providedIn: 'root',
 })
 export class HandService extends BaseService {
+  /**
+   * Path part for operation draw
+   */
+  static readonly DrawPath = '/game/hand/draw';
+
   constructor(
     config: ApiConfiguration,
     http: HttpClient
   ) {
     super(config, http);
   }
-
-  /**
-   * Path part for operation draw
-   */
-  static readonly DrawPath = '/game/hand/draw';
 
   /**
    * Draws a card.

@@ -4,11 +4,11 @@
       <p id="winningText">{{getWinnerMessage(winner)}}</p>
       <div class="winning-cards">
         <pkr-card
-          id="winningCard"
           *ngFor="let card of winner.cards"
           [card]="card"
           [ngStyle]="{'padding': '5px'}"
-          [pxSize]="60"></pkr-card>
+          [pxSize]="60"
+          id="winningCard"></pkr-card>
       </div>
     </div>
   </div>

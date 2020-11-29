@@ -69,7 +69,7 @@ describe('HandSummaryComponent', () => {
     const winningCards = fixture.debugElement.queryAll(By.css('#winningCard'));
     expect(winningCards).toBeTruthy();
     const cards = table2.winners[0].cards.map(c => ({...c}))
-    .concat(table2.winners[1].cards.map(c => ({...c})));
+      .concat(table2.winners[1].cards.map(c => ({...c})));
     for (let i = 0; i < 10; i++) {
       expect(winningCards[i].componentInstance.card).toEqual(cards[i]);
     }

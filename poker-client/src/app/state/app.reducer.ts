@@ -127,12 +127,12 @@ const gameModelReducerInternal = createReducer<Game>(
     ({...state, phase: phase.phase})),
   on(playerAwayToggled, (state: Game, player: GamePlayer) => {
     const players: GamePlayer[] = state
-    .players.map(p => p.id === player.id ? player : ({...p}));
+      .players.map(p => p.id === player.id ? player : ({...p}));
     return ({...state, players});
   }),
   on(gamePlayerUpdated, (state: Game, player: GamePlayer) => {
     const players: GamePlayer[] = state
-    .players.map(p => p.id === player.id ? player : ({...p}));
+      .players.map(p => p.id === player.id ? player : ({...p}));
     return ({...state, players});
   })
 );
@@ -261,7 +261,7 @@ const pokerTableReducerInternal = createReducer<PokerTable>(
     (state: PokerTable, table: PokerTable) => table),
   on(playerAwayToggled, (state: PokerTable, player: GamePlayer) => {
     const players: GamePlayer[] = state
-    .players.map(p => p.id === player.id ? player : ({...p}));
+      .players.map(p => p.id === player.id ? player : ({...p}));
     return ({...state, players});
   })
 );
@@ -278,19 +278,19 @@ export const timerInitialState: MiscEventsState = {
 };
 
 const miscEventsReducerInternal = createReducer<MiscEventsState>(
-    timerInitialState,
-    on(startTimer, (state: MiscEventsState, timer: Timer) => ({...state, timer})),
-    on(dealCards, (state: MiscEventsState, deal: Deal) => ({...state, deal})),
-    on(hideCards, (state: MiscEventsState, hide: HideCards) =>
-        ({...state, hide, hiddenCards: Array(10).fill(Array(2).fill(true))})),
-    on(showCard, (state: MiscEventsState, cards: { player: number; card: number }) => ({
-      ...state,
-      hiddenCards: state.hiddenCards.map((c: boolean[], i: number) =>
-          i === cards.player ? state.hiddenCards[cards.player].map((hide: boolean, j: number) =>
-              j === cards.card ? false : hide) : c)
-    })),
-    on(showAllCards, (state: MiscEventsState) =>
-        ({...state, hiddenCards: Array(10).fill(Array(2).fill(false))}))
+  timerInitialState,
+  on(startTimer, (state: MiscEventsState, timer: Timer) => ({...state, timer})),
+  on(dealCards, (state: MiscEventsState, deal: Deal) => ({...state, deal})),
+  on(hideCards, (state: MiscEventsState, hide: HideCards) =>
+    ({...state, hide, hiddenCards: Array(10).fill(Array(2).fill(true))})),
+  on(showCard, (state: MiscEventsState, cards: { player: number; card: number }) => ({
+    ...state,
+    hiddenCards: state.hiddenCards.map((c: boolean[], i: number) =>
+      i === cards.player ? state.hiddenCards[cards.player].map((hide: boolean, j: number) =>
+        j === cards.card ? false : hide) : c)
+  })),
+  on(showAllCards, (state: MiscEventsState) =>
+    ({...state, hiddenCards: Array(10).fill(Array(2).fill(false))}))
 );
 
 export function miscEventsReducer(state, action) {

@@ -168,35 +168,35 @@ export class PlayerBoxComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.pokerTableStore.select(selectPokerTable)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((table: PokerTable) => this.table = table);
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((table: PokerTable) => this.table = table);
 
     this.pokerTableStore.select(selectPlayers)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((players: GamePlayer[]) => {
-      this.players = players;
-      this.playerModel = players ? players[this.player] : null;
-      if (this.playerModel) {
-        this.initials =
-          `${this.playerModel.firstName.substring(0, 1)}${this.playerModel.lastName.substring(0, 1)}`;
-        this.name = `${this.playerModel.firstName} ${this.playerModel.lastName}`;
-        this.bankRoll = this.playerModel.controls.bankRoll;
-        this.publicCards = this.playerModel.cards;
-        this.away = this.playerModel.away;
-      }
-    });
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((players: GamePlayer[]) => {
+        this.players = players;
+        this.playerModel = players ? players[this.player] : null;
+        if (this.playerModel) {
+          this.initials =
+            `${this.playerModel.firstName.substring(0, 1)}${this.playerModel.lastName.substring(0, 1)}`;
+          this.name = `${this.playerModel.firstName} ${this.playerModel.lastName}`;
+          this.bankRoll = this.playerModel.controls.bankRoll;
+          this.publicCards = this.playerModel.cards;
+          this.away = this.playerModel.away;
+        }
+      });
 
     this.appStore.select(selectLoggedInUser)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((user: ClientUser) => this.loggedInUser = user);
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((user: ClientUser) => this.loggedInUser = user);
 
     this.privatePlayerDataStore.select(selectPrivateCards)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((cards: Card[]) => this.privateCards = cards);
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((cards: Card[]) => this.privateCards = cards);
 
     this.miscEventStore.select(selectHiddenCards)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((hiddenCards: boolean[][]) => this.hiddenCards = hiddenCards[this.player]);
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((hiddenCards: boolean[][]) => this.hiddenCards = hiddenCards[this.player]);
   }
 
   public ngOnDestroy(): void {

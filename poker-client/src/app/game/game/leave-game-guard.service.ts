@@ -35,7 +35,7 @@ export class LeaveGameGuardService implements CanDeactivate<GameComponent> {
     private appStore: Store<AppStateContainer>,
     private gameStore: Store<GameStateContainer>) {
     this.gameStore.select(selectGameModel)
-    .subscribe((gameModel: Game) => this.gameModel = gameModel);
+      .subscribe((gameModel: Game) => this.gameModel = gameModel);
     this.appStore.select(selectJwt).subscribe(jwt => this.jwt = jwt);
   }
 

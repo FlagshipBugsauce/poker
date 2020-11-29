@@ -77,8 +77,8 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
       (game: Game) => this.gameModel = game);
 
     this.gameStore.select(selectGamePhase)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((phase: GamePhase) => this.phase = phase);
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((phase: GamePhase) => this.phase = phase);
 
     this.gameDataStore.select(selectGameData).pipe(takeUntil(this.ngDestroyed$)).subscribe(
       (data: DrawGameData[]) => this.gameData = data ? data : this.gameData);

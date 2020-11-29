@@ -39,7 +39,7 @@ describe('MainComponent', () => {
         provideMockStore({initialState})
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
