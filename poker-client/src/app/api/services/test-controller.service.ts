@@ -73,6 +73,22 @@ export class TestControllerService extends BaseService {
   }
 
   /**
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `dealCards$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  dealCards(params: {
+    gameId: string;
+
+  }): Observable<void> {
+
+    return this.dealCards$Response(params).pipe(
+      map((r: StrictHttpResponse<void>) => r.body as void)
+    );
+  }
+
+  /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
    * To access only the response body, use `dealCards()` instead.
    *
@@ -97,22 +113,6 @@ export class TestControllerService extends BaseService {
       map((r: HttpResponse<any>) => {
         return (r as HttpResponse<any>).clone({body: undefined}) as StrictHttpResponse<void>;
       })
-    );
-  }
-
-  /**
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `dealCards$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  dealCards(params: {
-    gameId: string;
-
-  }): Observable<void> {
-
-    return this.dealCards$Response(params).pipe(
-      map((r: StrictHttpResponse<void>) => r.body as void)
     );
   }
 

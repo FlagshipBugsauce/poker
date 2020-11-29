@@ -15,9 +15,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    #    defaults:
-    #      run:
-    #        working-directory: ./poker-server
 
     steps:
       - uses: actions/checkout@v2
@@ -28,14 +25,9 @@ jobs:
         with:
           java-version: 1.8
 
-      #    - name: Start MongoDB As Docker
-      #      uses: wbari/start-mongoDB@v0.2
-      #      with:
-      #        mongoDBVersion: 3.6
-
-      - name: Build
-        working-directory: ./poker-server
-        run: mvn -B package --file pom.xml
+      #      - name: Build
+      #        working-directory: ./poker-server
+      #        run: mvn -B package --file pom.xml
 
       # Configure AWS Credentials.
       - name: Configure AWS Credentials
@@ -54,6 +46,12 @@ jobs:
 
       # Install npm Dependencies
       - name: Install npm Dependencies
+        if: github.event_name == 'push'
+        run: npm ci
+
+      # Install npm Dependencies
+      - name: Install npm Dependencies
+        working-directory: miscellaneous/cloudfront
         #        if: github.event_name == 'push'
         run: npm ci
 

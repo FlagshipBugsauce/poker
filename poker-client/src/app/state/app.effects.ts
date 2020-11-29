@@ -38,7 +38,7 @@ export class AppEffects {
       .pipe(
         switchMap((response: AuthResponse) => {
           this.webSocketService.subscribeToCurrentGameTopic(response.userDetails.id);
-          this.router.navigate([`/${APP_ROUTES.HOME.path}`]).then();
+          // this.router.navigate([`/${APP_ROUTES.HOME.path}`]).then();
           return [
             signInSuccess(response),
             requestCurrentGameUpdate({userId: response.userDetails.id}),

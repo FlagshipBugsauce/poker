@@ -32,7 +32,7 @@ export class TopBarService {
   public static LOGIN_ITEM_TEXT: string = APP_ROUTES.LOGIN.label;
   public static EDIT_PROFILE_ITEM_TEXT: string = 'Edit Profile';
   public static VIEW_STATS_ITEM_TEXT: string = 'View Statistics';
-  public static LOGOUT_ITEM_TEXT: string = 'APP_ROUTES.LOGOUT.label';
+  public static LOGOUT_ITEM_TEXT: string = APP_ROUTES.LOGOUT.label;
   public static GAME_ITEM_TEXT: string = APP_ROUTES.GAME_PREFIX.label;
   public static CREATE_GAME_ITEM_TEXT: string = APP_ROUTES.CREATE_GAME.label;
   public static JOIN_GAME_ITEM_TEXT: string = APP_ROUTES.JOIN_GAME.label;

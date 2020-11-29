@@ -13,8 +13,7 @@ import org.springframework.context.annotation.Configuration;
 
 @OpenAPIDefinition(
     servers = {
-      @Server(url = "http://poker-testing.ngrok.io"),
-      @Server(url = "http://bugsauce-poker.eba-cbxu2gew.us-east-1.elasticbeanstalk.com/")
+      @Server(url = "https://www.jonsthings.com/server")
     })
 @Configuration
 @AllArgsConstructor
