@@ -46,7 +46,7 @@ jobs:
 
       # Install npm Dependencies
       - name: Install npm Dependencies
-        if: github.event_name == 'push'
+#        if: github.event_name == 'push'
         run: npm ci
 
       # Install npm Dependencies
