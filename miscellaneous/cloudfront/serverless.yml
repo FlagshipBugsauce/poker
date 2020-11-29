@@ -34,6 +34,16 @@ functions:
     lambdaAtEdge:
       distribution: PokerDistribution
       eventType: origin-request
+  # Duplicating this for ws support. A Lambda seems to be required for this to work.
+  originRequestForWebsocket:
+    name: poker-ws-origin-request
+    handler: src/origin-request.handler
+    memorySize: 128
+    timeout: 10
+    lambdaAtEdge:
+      distribution: PokerDistribution
+      eventType: origin-request
+      pathPattern: 'server/live/*websocket*'
   originResponse:
     name: poker-origin-response
     handler: src/origin-response.handler
@@ -51,6 +61,33 @@ resources:
         DistributionConfig:
           Aliases:
             - www.jonsthings.com
+          CacheBehaviors:
+            - AllowedMethods:
+                - GET
+                - HEAD
+                - OPTIONS
+                - PUT
+                - PATCH
+                - POST
+                - DELETE
+              ForwardedValues:
+                QueryString: true
+                Cookies:
+                  Forward: all
+                Headers:
+                  - Authorization
+                  - Sec-WebSocket-Extensions
+                  - Sec-WebSocket-Key
+                  - Sec-WebSocket-Protocol
+                  - Sec-WebSocket-Version
+                  - Host
+                  - Origin
+              DefaultTTL: 0
+              MaxTTL: 0
+              Compress: true
+              TargetOriginId: PokerServerOrigin
+              PathPattern: 'server/live/*websocket*'
+              ViewerProtocolPolicy: allow-all
           DefaultCacheBehavior:
             AllowedMethods:
               - GET
