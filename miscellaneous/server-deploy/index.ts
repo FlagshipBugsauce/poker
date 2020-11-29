@@ -269,13 +269,7 @@ function buildPokerServer(): void {
   copyFileSync(jarPath, artifactPath());
 }
 
-(async () => {
-  await createCloudfrontConfig();
-  if (Math.random() <= 1) throw new Error('hello');
-  await deploy().then(getElbDomain).then(createCloudfrontConfig);
-})();
-
-// (async () => await deploy().then(getElbDomain).then(createCloudfrontConfig).catch(e => {
-//   console.error(e);
-//   throw e;
-// }))();
+(async () => await deploy().then(getElbDomain).then(createCloudfrontConfig).catch(e => {
+  console.error(e);
+  throw e;
+}))();
