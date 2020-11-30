@@ -28,7 +28,7 @@ jobs:
           java-version: 1.8
 
       - name: Build
-        if: githuub.event_name == 'pull_request'
+        if: github.event_name == 'pull_request'
         working-directory: ./poker-server
         run: mvn -B package --file pom.xml
 

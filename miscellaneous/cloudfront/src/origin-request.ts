@@ -8,6 +8,7 @@ export const handler = async (event: CloudFrontRequestEvent): Promise<CloudFront
     request.origin = {
       custom: {
         customHeaders: {},
+        // TODO: Add "environment variable" for domainName.
         domainName: 'awseb-e-k-AWSEBLoa-1PG335JLLT141-848839344.us-east-1.elb.amazonaws.com',
         keepaliveTimeout: 60,
         path: '',
