@@ -1,7 +1,7 @@
 name: Client Test and Build
 
 on:
-  push:
+  pull_request:
     paths:
       - 'poker-client**'
       - '.github/workflows/client-test-and-build.yml'
