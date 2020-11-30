@@ -25,23 +25,23 @@
       'left': deckPosition.left + 'px'
     }" [width]="deckPosition.width" id="deck"></pkr-deck>
     <pkr-community-cards
-      id="communityCards"
       [ngStyle]="{
         'position': 'absolute',
         'top': communityCardsPosition.top + 'px',
         'left': communityCardsPosition.left + 'px'
       }"
       [width]="communityCardsPosition.width"
+      id="communityCards"
     ></pkr-community-cards>
     <pkr-player-box
       *ngFor="let playerBox of playerBoxes"
-      id="playerBox"
       [ngStyle]="{
       'position': 'absolute',
       'top': playerBox.top + 'px',
       'left': playerBox.left + 'px'
     }"
-      [player]="playerBox.number"></pkr-player-box>
+      [player]="playerBox.number"
+      id="playerBox"></pkr-player-box>
   </div>
   <pkr-hand-summary
     [ngStyle]="{

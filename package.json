@@ -1,0 +1,32 @@
+{
+  "name": "poker",
+  "version": "1.0.0",
+  "description": "Online multiplayer poker application.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "ts-node miscellaneous/server-deploy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FlagshipBugsauce/poker.git"
+  },
+  "keywords": [
+    "poker"
+  ],
+  "author": "Jon Gourley",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FlagshipBugsauce/poker/issues"
+  },
+  "homepage": "https://github.com/FlagshipBugsauce/poker#readme",
+  "devDependencies": {
+    "ts-node": "^9.0.0",
+    "typescript": "^4.1.2",
+    "ts-loader": "^8.0.11"
+  },
+  "dependencies": {
+    "@types/node": "^14.14.9",
+    "aws-sdk": "^2.797.0",
+    "maven": "^5.0.0"
+  }
+}

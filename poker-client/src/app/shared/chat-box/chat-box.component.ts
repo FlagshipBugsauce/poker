@@ -54,16 +54,16 @@ export class ChatBoxComponent implements OnInit, OnDestroy {
     this.authenticated$ =
       this.appStore.select(selectAuthenticated).pipe(takeUntil(this.ngDestroyed$));
     this.chatStore.select(this.gameId ? selectGameChat : selectGeneralChat)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((message: ChatMessage) => {
-      if (message.timestamp) {
-        this.messages.push(message);
-      }
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((message: ChatMessage) => {
+        if (message.timestamp) {
+          this.messages.push(message);
+        }
 
-      if (this.chatBox) {
-        this.scrollDown().then();
-      }
-    });
+        if (this.chatBox) {
+          this.scrollDown().then();
+        }
+      });
     this.chatStore.dispatch(startChat({gameId: this.gameId}));
   }
 

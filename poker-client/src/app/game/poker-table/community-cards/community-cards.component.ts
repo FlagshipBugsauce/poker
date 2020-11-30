@@ -25,8 +25,8 @@ export class CommunityCardsComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.pokerTableStore.select(selectCommunityCards)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((cards: Card[]) => this.cards = cards);
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((cards: Card[]) => this.cards = cards);
   }
 
   public ngOnDestroy(): void {

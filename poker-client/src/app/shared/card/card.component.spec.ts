@@ -13,7 +13,7 @@ describe('CardComponent', () => {
         NgbModule
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

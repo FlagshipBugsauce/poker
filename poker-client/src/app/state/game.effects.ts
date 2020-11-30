@@ -42,7 +42,7 @@ export class GameEffects {
   leaveLobby$ = createEffect(() => this.actions$.pipe(
     ofType(leaveLobby().type),
     mergeMap(() => this.gameService.leaveLobby()
-    .pipe(map(() => this.unsubscribeFromGameTopics())))), {dispatch: false});
+      .pipe(map(() => this.unsubscribeFromGameTopics())))), {dispatch: false});
   /**
    * Toggles a players ready status in a game lobby.
    */
@@ -162,35 +162,35 @@ export class GameEffects {
    * 'Play' phase can be rejoined.
    */
   rejoinGame$ = createEffect(() => this.actions$.pipe(
-      ofType(rejoinGame),
-      exhaustMap((action: RejoinModel) =>
-          this.webSocketService.connect().pipe(first())
-          .pipe(
-              switchMap(client => {
-                client.send('/topic/game/rejoin', {}, JSON.stringify({jwt: this.jwt}));
-                this.subscribeToGameTopics(action.gameId);
-                this.requestGameTopicUpdatesInPlayPhase();
-                this.router.navigate([`${APP_ROUTES.GAME_PREFIX.path}/${action.gameId}`]).then();
-                return [refreshTable(), showAllCards()];
-              })
-          )
-      )
+    ofType(rejoinGame),
+    exhaustMap((action: RejoinModel) =>
+      this.webSocketService.connect().pipe(first())
+        .pipe(
+          switchMap(client => {
+            client.send('/topic/game/rejoin', {}, JSON.stringify({jwt: this.jwt}));
+            this.subscribeToGameTopics(action.gameId);
+            this.requestGameTopicUpdatesInPlayPhase();
+            this.router.navigate([`${APP_ROUTES.GAME_PREFIX.path}/${action.gameId}`]).then();
+            return [refreshTable(), showAllCards()];
+          })
+        )
+    )
   ));
 
   /**
    * Manually requests an update from the backend, ensuring table data is accurate.
    */
   refreshTable$ = createEffect(() => this.actions$.pipe(
-      ofType(refreshTable),
-      tap(() => this.webSocketService.send('/topic/game/refresh-table', {jwt: this.jwt}))
+    ofType(refreshTable),
+    tap(() => this.webSocketService.send('/topic/game/refresh-table', {jwt: this.jwt}))
   ), {dispatch: false});
   /**
    * Performs a game action (Fold, Check, Call or Raise).
    */
   performGameAction$ = createEffect(() => this.actions$.pipe(
-      ofType(performGameAction),
-      tap((action: GameActionData) =>
-          this.webSocketService.send('/topic/game/act', {jwt: this.jwt, data: action}))
+    ofType(performGameAction),
+    tap((action: GameActionData) =>
+      this.webSocketService.send('/topic/game/act', {jwt: this.jwt, data: action}))
   ), {dispatch: false});
 
   constructor(

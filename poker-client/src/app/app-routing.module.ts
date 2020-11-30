@@ -41,7 +41,7 @@ const routes: Routes = [
     pathMatch: 'full',
     canActivate: [OpenRouteGuardService]
   },
-  {path: '**', redirectTo: APP_ROUTES.HOME.path, canActivate: [OpenRouteGuardService]}
+  {path: '**', component: HomeComponent, canActivate: [OpenRouteGuardService]}
 ];
 
 @NgModule({

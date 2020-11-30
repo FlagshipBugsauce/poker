@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  api: 'http://poker-testing.ngrok.io/live'
+  api: 'https://www.jonsthings.com/server/live'
 };

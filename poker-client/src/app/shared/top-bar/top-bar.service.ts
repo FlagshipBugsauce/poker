@@ -11,6 +11,26 @@ import {selectAuthenticated} from '../../state/app.selector';
 })
 export class TopBarService {
 
+  public static HOME_ITEM_TEXT: string = APP_ROUTES.HOME.label;
+  public static ACCOUNT_ITEM_TEXT: string = 'Account';
+  public static REGISTER_ITEM_TEXT: string = APP_ROUTES.REGISTER.label;
+  public static LOGIN_ITEM_TEXT: string = APP_ROUTES.LOGIN.label;
+  public static EDIT_PROFILE_ITEM_TEXT: string = 'Edit Profile';
+  public static VIEW_STATS_ITEM_TEXT: string = 'View Statistics';
+  public static LOGOUT_ITEM_TEXT: string = APP_ROUTES.LOGOUT.label;
+  public static GAME_ITEM_TEXT: string = APP_ROUTES.GAME_PREFIX.label;
+  public static CREATE_GAME_ITEM_TEXT: string = APP_ROUTES.CREATE_GAME.label;
+  public static JOIN_GAME_ITEM_TEXT: string = APP_ROUTES.JOIN_GAME.label;
+  public static ABOUT_ITEM_TEXT: string = APP_ROUTES.ABOUT.label;
+  /**
+   * Top bar menu items that is generated anew each time the application state changes.
+   */
+  public topBarMenuItems: DropDownMenuItem[] = [];
+  /**
+   * Flag selected from the application state which indicates whether a user is logged in.
+   */
+  private authenticated = initialState.authenticated;
+
   constructor(private store: Store<AppStateContainer>) {
     this.updateMenuItems();
     store.select(selectAuthenticated).subscribe((authenticated: boolean) => {
@@ -25,26 +45,6 @@ export class TopBarService {
   public get topBarIcon(): string {
     return 'assets/icons/aces.svg';
   }
-
-  public static HOME_ITEM_TEXT: string = APP_ROUTES.HOME.label;
-  public static ACCOUNT_ITEM_TEXT: string = 'Account';
-  public static REGISTER_ITEM_TEXT: string = APP_ROUTES.REGISTER.label;
-  public static LOGIN_ITEM_TEXT: string = APP_ROUTES.LOGIN.label;
-  public static EDIT_PROFILE_ITEM_TEXT: string = 'Edit Profile';
-  public static VIEW_STATS_ITEM_TEXT: string = 'View Statistics';
-  public static LOGOUT_ITEM_TEXT: string = 'APP_ROUTES.LOGOUT.label';
-  public static GAME_ITEM_TEXT: string = APP_ROUTES.GAME_PREFIX.label;
-  public static CREATE_GAME_ITEM_TEXT: string = APP_ROUTES.CREATE_GAME.label;
-  public static JOIN_GAME_ITEM_TEXT: string = APP_ROUTES.JOIN_GAME.label;
-  public static ABOUT_ITEM_TEXT: string = APP_ROUTES.ABOUT.label;
-  /**
-   * Top bar menu items that is generated anew each time the application state changes.
-   */
-  public topBarMenuItems: DropDownMenuItem[] = [];
-  /**
-   * Flag selected from the application state which indicates whether a user is logged in.
-   */
-  private authenticated = initialState.authenticated;
 
   /**
    * Getter for the home menu item.

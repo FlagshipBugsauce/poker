@@ -1,5 +1,5 @@
 /* tslint:disable */
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 
 /**
  * Global configuration
@@ -8,7 +8,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class ApiConfiguration {
-  rootUrl: string = 'http://poker-testing.ngrok.io';
+  rootUrl: string = 'https://www.jonsthings.com/server';
 }
 
 /**

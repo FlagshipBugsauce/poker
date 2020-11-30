@@ -13,7 +13,7 @@ describe('DeckComponent', () => {
       imports: [],
       providers: [provideMockStore()]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

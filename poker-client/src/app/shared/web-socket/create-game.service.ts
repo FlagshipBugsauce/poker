@@ -26,11 +26,11 @@ export class CreateGameService implements OnDestroy {
     private appStore: Store<AppStateContainer>
   ) {
     this.appStore.select(selectJwt)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe(jwt => this.jwt = jwt);
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe(jwt => this.jwt = jwt);
     this.appStore.select(selectLoggedInUser)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((user: ClientUser) => this.user = user);
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((user: ClientUser) => this.user = user);
   }
 
   public ngOnDestroy(): void {
@@ -41,8 +41,8 @@ export class CreateGameService implements OnDestroy {
   public subscribeToCreateGameTopic(): void {
     this.createGameTopicUnsubscribe$ = new Subject<any>();
     this.webSocketService.onMessage(`${this.createGameTopic}/${this.user.id}`)
-    .pipe(takeUntil(this.createGameTopicUnsubscribe$))
-    .subscribe(data => this.appStore.dispatch(gameCreated(data)));
+      .pipe(takeUntil(this.createGameTopicUnsubscribe$))
+      .subscribe(data => this.appStore.dispatch(gameCreated(data)));
   }
 
   public unsubscribeFromCreateGameTopic(): void {

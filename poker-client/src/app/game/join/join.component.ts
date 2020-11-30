@@ -50,8 +50,8 @@ export class JoinComponent implements OnInit, OnDestroy {
   /** Returns a slice of the list of games for pagination. */
   public get games(): GameList[] {
     return this.gamesInternal ? this.gamesInternal
-      .map((game: GameList) => ({...game}))
-      .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize) :
+        .map((game: GameList) => ({...game}))
+        .slice((this.page - 1) * this.pageSize, (this.page - 1) * this.pageSize + this.pageSize) :
       [];
   }
 
@@ -61,8 +61,8 @@ export class JoinComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.gameListStore.select(selectGameList)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((games: GameList[]) => this.gamesInternal = games);
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((games: GameList[]) => this.gamesInternal = games);
 
     // Subscribe to game list topic.
     this.webSocketService.subscribeToGameListTopic();

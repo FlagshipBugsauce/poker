@@ -11,7 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@OpenAPIDefinition(servers = @Server(url = "http://poker-testing.ngrok.io"))
+@OpenAPIDefinition(servers = {@Server(url = "https://www.jonsthings.com/server")})
 @Configuration
 @AllArgsConstructor
 public class OpenApiConfig {

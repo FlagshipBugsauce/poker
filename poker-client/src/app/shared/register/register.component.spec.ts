@@ -20,7 +20,7 @@ describe('RegisterComponent', () => {
         HttpClientTestingModule
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

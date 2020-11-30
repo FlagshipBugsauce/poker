@@ -1,0 +1,159 @@
+service: cloudfront
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includedModules: true
+
+  variables:
+    clientBucket:
+      name: fsb-poker-client-bucket
+      arn:
+        Fn::GetAtt: [ 'PokerClientBucket', 'Arn' ]
+
+plugins:
+  - serverless-webpack
+  - '@silvermine/serverless-plugin-cloudfront-lambda-edge'
+  - serverless-pseudo-parameters
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-1
+  apiGateway:
+    minimumCompressionSize: 1024
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+
+functions:
+  originRequest:
+    name: poker-origin-request
+    handler: src/origin-request.handler
+    memorySize: 128
+    timeout: 10
+    lambdaAtEdge:
+      distribution: PokerDistribution
+      eventType: origin-request
+  # Duplicating this for ws support. A Lambda seems to be required for this to work.
+  originRequestForWebsocket:
+    name: poker-ws-origin-request
+    handler: src/origin-request.handler
+    memorySize: 128
+    timeout: 10
+    lambdaAtEdge:
+      distribution: PokerDistribution
+      eventType: origin-request
+      pathPattern: 'server/live/*websocket*'
+  originResponse:
+    name: poker-origin-response
+    handler: src/origin-response.handler
+    memorySize: 128
+    timeout: 10
+    lambdaAtEdge:
+      distribution: PokerDistribution
+      eventType: origin-response
+
+resources:
+  Resources:
+    PokerDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Aliases:
+            - www.jonsthings.com
+          CacheBehaviors:
+            - AllowedMethods:
+                - GET
+                - HEAD
+                - OPTIONS
+                - PUT
+                - PATCH
+                - POST
+                - DELETE
+              ForwardedValues:
+                QueryString: true
+                Cookies:
+                  Forward: all
+                Headers:
+                  - Authorization
+                  - Sec-WebSocket-Extensions
+                  - Sec-WebSocket-Key
+                  - Sec-WebSocket-Protocol
+                  - Sec-WebSocket-Version
+                  - Host
+                  - Origin
+              DefaultTTL: 0
+              MaxTTL: 0
+              Compress: true
+              TargetOriginId: PokerServerOrigin
+              PathPattern: 'server/live/*websocket*'
+              ViewerProtocolPolicy: allow-all
+          DefaultCacheBehavior:
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+              - PUT
+              - PATCH
+              - POST
+              - DELETE
+            TargetOriginId: ClientBucketOrigin
+            DefaultTTL: 0
+            MaxTTL: 0
+            Compress: true
+            ForwardedValues:
+              QueryString: true
+              Cookies:
+                Forward: all
+              Headers:
+                - Authorization
+            ViewerProtocolPolicy: redirect-to-https
+          DefaultRootObject: index.html
+          Enabled: true
+          PriceClass: PriceClass_100
+          Origins:
+            - Id: ClientBucketOrigin
+              DomainName: ${self:custom.variables.clientBucket.name}.s3.amazonaws.com
+              S3OriginConfig: { }
+            - Id: PokerServerOrigin
+              DomainName: ${file(configs/test-env.yml):domainName}
+              CustomOriginConfig:
+                OriginProtocolPolicy: match-viewer
+          ViewerCertificate:
+            AcmCertificateArn: ${file(configs/test-env.yml):acmArn}
+            SslSupportMethod: sni-only
+            MinimumProtocolVersion: 'TLSv1.2_2018'
+          # TODO: Add Logging
+          # TODO: Look into HttpVersion (is it needed?)
+
+    PokerClientBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.variables.clientBucket.name}
+        WebsiteConfiguration:
+          IndexDocument: index.html
+          ErrorDocument: index.html
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+                - PUT
+                - GET
+                - POST
+                - DELETE
+              AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+    PokerClientBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: ${self:custom.variables.clientBucket.name}
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Sid: PublicReadGetObject
+              Effect: Allow
+              Principal: '*'
+              Action:
+                - s3:GetObject
+              Resource: arn:aws:s3:::${self:custom.variables.clientBucket.name}/*

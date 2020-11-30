@@ -53,13 +53,13 @@ export class HandSummaryComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.displayHandSummary$ = this.pokerTableStore.select(selectDisplayHandSummary)
-    .pipe(takeUntil(this.ngDestroyed$));
+      .pipe(takeUntil(this.ngDestroyed$));
     this.pokerTableStore.select(selectHandWinners)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((winners: Winner[]) => this.winners = winners);
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((winners: Winner[]) => this.winners = winners);
     this.pokerTableStore.select(selectPlayers)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((players: GamePlayer[]) => this.players = players);
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((players: GamePlayer[]) => this.players = players);
   }
 
   public ngOnDestroy() {

@@ -110,8 +110,8 @@ describe('PokerTableComponent', () => {
 
   it('should assign correct position to player boxes', () => {
     const playerBoxes = fixture.debugElement.queryAll(By.css('#playerBox'))
-    .map(b => b.componentInstance)
-    .forEach((b, i) => expect(b.player).toBe(i));
+      .map(b => b.componentInstance)
+      .forEach((b, i) => expect(b.player).toBe(i));
   });
 
   it('should change width when window:resize event occurs', () => {

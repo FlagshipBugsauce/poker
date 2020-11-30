@@ -8,8 +8,8 @@ const fs = require('fs');
 
 const options = {
   'method': 'GET',
-  'hostname': 'poker-testing.ngrok.io',
-  'path': '/v3/api-docs.yaml',
+  'hostname': 'www.jonsthings.com',
+  'path': '/server/v3/api-docs.yaml',
   'headers': {},
   'maxRedirects': 20
 };
@@ -21,7 +21,7 @@ const req = http.request(options, function (res) {
     chunks.push(chunk);
   });
 
-  res.on("end", function (chunk) {
+  res.on("end", function () {
     const body = Buffer.concat(chunks);
     console.log('Updating api-docs.yaml');
     fs.writeFile('./api-docs.yaml', body.toString(), (err) => {

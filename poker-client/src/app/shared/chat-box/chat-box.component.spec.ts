@@ -22,7 +22,7 @@ describe('ChatBoxComponent', () => {
       ],
       imports: []
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

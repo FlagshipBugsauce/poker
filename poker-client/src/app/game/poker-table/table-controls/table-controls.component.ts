@@ -84,27 +84,27 @@ export class TableControlsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.appStore.select(selectLoggedInUser)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((user: ClientUser) => this.user = user);
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((user: ClientUser) => this.user = user);
 
     this.pokerTableStore.select(selectPlayers)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((players: GamePlayer[]) => {
-      // TODO: Should replace this with request for one players data.
-      this.players = players;
-      if (players && players.length > 0) {
-        this.player = players.find(p => p.id === this.user.id);
-      }
-    });
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((players: GamePlayer[]) => {
+        // TODO: Should replace this with request for one players data.
+        this.players = players;
+        if (players && players.length > 0) {
+          this.player = players.find(p => p.id === this.user.id);
+        }
+      });
 
     this.pokerTableStore.select(selectPokerTable)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((table: PokerTable) => {
-      this.table = table;
-      if (this.safe && this.table.players[this.table.actingPlayer].id === this.user.id) {
-        this.raise = this.minRaise;
-      }
-    });
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((table: PokerTable) => {
+        this.table = table;
+        if (this.safe && this.table.players[this.table.actingPlayer].id === this.user.id) {
+          this.raise = this.minRaise;
+        }
+      });
   }
 
   public ngOnDestroy() {

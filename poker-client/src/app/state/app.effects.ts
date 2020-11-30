@@ -35,17 +35,17 @@ export class AppEffects {
     ofType(signInWithJwt),
     exhaustMap((action: { jwt: string }) =>
       this.usersService.authorizeWithJwt({body: {jwt: action.jwt}})
-      .pipe(
-        switchMap((response: AuthResponse) => {
-          this.webSocketService.subscribeToCurrentGameTopic(response.userDetails.id);
-          this.router.navigate([`/${APP_ROUTES.HOME.path}`]).then();
-          return [
-            signInSuccess(response),
-            requestCurrentGameUpdate({userId: response.userDetails.id}),
-            requestPrivateTopic()
-          ];
-        }), catchError(() => of({type: signInFail().type}))
-      )
+        .pipe(
+          switchMap((response: AuthResponse) => {
+            this.webSocketService.subscribeToCurrentGameTopic(response.userDetails.id);
+            // this.router.navigate([`/${APP_ROUTES.HOME.path}`]).then();
+            return [
+              signInSuccess(response),
+              requestCurrentGameUpdate({userId: response.userDetails.id}),
+              requestPrivateTopic()
+            ];
+          }), catchError(() => of({type: signInFail().type}))
+        )
     )
   ));
   /**
@@ -63,6 +63,12 @@ export class AppEffects {
     tap((messageModel: ClientMessage) => this.webSocketService.send(
       '/topic/game/current/update', {userId: messageModel.userId}))
   ), {dispatch: false});
+  requestPrivateTopic$ = createEffect(() => this.actions$.pipe(
+    ofType(requestPrivateTopic),
+    exhaustMap(() => this.websocketService.getPrivateTopic()
+      .pipe(tap((response: PrivateTopic) =>
+        this.webSocketService.subscribeToPrivateTopic(response.id))))
+  ), {dispatch: false})
   /**
    * 2 weeks.
    */
@@ -74,33 +80,26 @@ export class AppEffects {
     ofType(signIn),
     exhaustMap((action: AuthRequest) =>
       this.usersService.authorize({body: action})
-      .pipe(
-        switchMap((response: AuthResponse) => {
-          this.toastService.show(
-            'Login Successful!',
-            {classname: 'bg-light toast-md', delay: 5000}
-          );
-          // Subscribe to current game topic
-          this.webSocketService.subscribeToCurrentGameTopic(response.userDetails.id);
-          this.router.navigate([`/${APP_ROUTES.HOME}`]).then();
-          this.cookieService.deleteAll();
-          this.cookieService.set('jwt', response.jwt, new Date(Date.now() + this.twoWeeks));
-          return [
-            signInSuccess(response),
-            requestCurrentGameUpdate({userId: response.userDetails.id}),
-            requestPrivateTopic()
-          ];
-        }), catchError(() => of({type: signInFail().type}))
-      )
+        .pipe(
+          switchMap((response: AuthResponse) => {
+            this.toastService.show(
+              'Login Successful!',
+              {classname: 'bg-light toast-md', delay: 5000}
+            );
+            // Subscribe to current game topic
+            this.webSocketService.subscribeToCurrentGameTopic(response.userDetails.id);
+            this.router.navigate([`/${APP_ROUTES.HOME}`]).then();
+            this.cookieService.deleteAll();
+            this.cookieService.set('jwt', response.jwt, new Date(Date.now() + this.twoWeeks));
+            return [
+              signInSuccess(response),
+              requestCurrentGameUpdate({userId: response.userDetails.id}),
+              requestPrivateTopic()
+            ];
+          }), catchError(() => of({type: signInFail().type}))
+        )
     ))
   );
-
-  requestPrivateTopic$ = createEffect(() => this.actions$.pipe(
-    ofType(requestPrivateTopic),
-    exhaustMap(() => this.websocketService.getPrivateTopic()
-    .pipe(tap((response: PrivateTopic) =>
-      this.webSocketService.subscribeToPrivateTopic(response.id))))
-  ), {dispatch: false})
 
   constructor(
     private actions$: Actions,

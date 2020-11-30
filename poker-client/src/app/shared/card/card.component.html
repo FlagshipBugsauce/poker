@@ -1,9 +1,9 @@
 <img
+  [alt]="cardText"
   [ngStyle]="{
         'width': (pxSize !== -1 ? pxSize : cardService.cardSizeToPxSize(size)) + 'px',
         'height': 'auto'
       }"
-  [alt]="cardText"
-  [src]="cardService.getCardImagePath(card)"
   [ngbTooltip]="cardText"
+  [src]="cardService.getCardImagePath(card)"
   class="back">

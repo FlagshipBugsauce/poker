@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  api: 'http://poker-testing.ngrok.io/live'
+  api: 'http://awseb-e-k-AWSEBLoa-1PG335JLLT141-848839344.us-east-1.elb.amazonaws.com/live'
 };
 
 /*

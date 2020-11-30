@@ -57,8 +57,8 @@ export class LobbyComponent implements OnInit, OnDestroy {
   public get canStart(): boolean {
     if (this.lobbyModel.players !== undefined) {
       const canStart: boolean = this.lobbyModel.players
-      .find((player: LobbyPlayer) =>
-        !player.ready) === undefined && this.lobbyModel.players.length > 1;
+        .find((player: LobbyPlayer) =>
+          !player.ready) === undefined && this.lobbyModel.players.length > 1;
       if (!this.lastCanStart && canStart) {
         this.displayCanStartAlert = true;
       }
@@ -82,8 +82,8 @@ export class LobbyComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.ready$ = this.appStore.select(selectReadyStatus);
     this.lobbyStore.select(selectLobbyModel)
-    .pipe(takeUntil(this.ngDestroyed$))
-    .subscribe((lobbyModel: Lobby) => this.lobbyModel = lobbyModel);
+      .pipe(takeUntil(this.ngDestroyed$))
+      .subscribe((lobbyModel: Lobby) => this.lobbyModel = lobbyModel);
     this.userModel$ = this.appStore.select(selectLoggedInUser);
   }
 
