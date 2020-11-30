@@ -5,12 +5,14 @@ on:
     paths:
       - 'poker-server**'
       - '.github/workflows/server-build-and-deploy.yml'
+      - 'miscellaneous/**'
     branches:
       - 'develop'
   pull_request:
     paths:
       - 'poker-server**'
       - '.github/workflows/server-build-and-deploy.yml'
+      - 'miscellaneous/**'
 
 jobs:
   build:
@@ -25,9 +27,10 @@ jobs:
         with:
           java-version: 1.8
 
-      #      - name: Build
-      #        working-directory: ./poker-server
-      #        run: mvn -B package --file pom.xml
+      - name: Build
+        if: githuub.event_name == 'pull_request'
+        working-directory: ./poker-server
+        run: mvn -B package --file pom.xml
 
       # Configure AWS Credentials.
       - name: Configure AWS Credentials
@@ -39,23 +42,23 @@ jobs:
 
       # Setup NodeJS
       - name: Use Node 12.x
-        #        if: github.event_name == 'push'
+        if: github.event_name == 'push'
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
 
       # Install npm Dependencies
       - name: Install npm Dependencies
-#        if: github.event_name == 'push'
+        if: github.event_name == 'push'
         run: npm ci
 
       # Install npm Dependencies
       - name: Install npm Dependencies
         working-directory: miscellaneous/cloudfront
-        #        if: github.event_name == 'push'
+        if: github.event_name == 'push'
         run: npm ci
 
       # Deploy Poker Server
       - name: Deploy Poker Server
-        #        if: github.event_name == 'push'
+        if: github.event_name == 'push'
         run: npm run deploy
